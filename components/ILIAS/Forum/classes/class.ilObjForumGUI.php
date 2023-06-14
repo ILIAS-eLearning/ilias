@@ -919,7 +919,6 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
             $translationKeys[$url] = $this->lng->txt($sortation->languageId());
         }
         $this->ctrl->clearParameters($this);
-
         return $this->factory->viewControl()->sortation(
             $translationKeys,
             current(array_keys($translationKeys))

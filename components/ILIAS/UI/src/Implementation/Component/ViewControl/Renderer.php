@@ -143,9 +143,6 @@ class Renderer extends AbstractComponentRenderer
             $signal = $triggeredSignals[0]->getSignal();
             $component = $component
                 ->withAdditionalOnLoadCode(
-                    fn($id) => "il.UI.viewcontrol.sortation.init('$id');"
-                )
-                ->withAdditionalOnLoadCode(
                     fn($id) => "$(document).on('$internal_signal', function(event, signalData) {
                         il.UI.viewcontrol.sortation.get('$id').onInternalSelect(event, signalData, '$signal');
                         return false;
@@ -153,12 +150,23 @@ class Renderer extends AbstractComponentRenderer
                 );
         }
 
+        $component = $component
+            ->withAdditionalOnLoadCode(
+                fn($id) => "il.UI.viewcontrol.sortation.init('$id');"
+            )
+            ->withAdditionalOnLoadCode(
+                fn($id) =>
+                "il.UI.dropdown.init(document.getElementById('{$id}'));"
+            );
+
         $id = $this->bindJavaScript($component);
+        if (!$id) {
+            $id = $this->createId();
+        }
         $tpl->setVariable("ID", $id);
-        $tpl->setVariable("ID_MENU", $id . '_ctrl');
 
         $options = $component->getOptions();
-        $items = array();
+        $items = [];
 
         $selected = $component->getSelected();
         foreach ($options as $val => $label) {

@@ -38,7 +38,6 @@ class Sortation implements C\ViewControl\Sortation
     protected ?string $target_url = null;
     protected string $parameter_name = "sortation";
     protected ?string $active = null;
-    protected bool $hidden_label = false;
 
     /**
      * @param array<string,string> $options

@@ -457,6 +457,7 @@ EOT;
             'a' => 'A',
             'b' => 'B'
         ];
+
         $sortation = $this->getUIFactory()->viewControl()->sortation($sort_options, 'b');
 
         $f = $this->getPanelFactory();
