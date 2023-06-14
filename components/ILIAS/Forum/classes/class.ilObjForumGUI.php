@@ -920,10 +920,11 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
         }
         $this->ctrl->clearParameters($this);
 
-        return $this->factory
-            ->viewControl()
-            ->sortation($translationKeys)
-            ->withTargetURL($base_url, 'thread_sortation');
+        return $this->factory->viewControl()->sortation(
+            $translationKeys,
+            current(array_keys($translationKeys))
+        )
+        ->withTargetURL($base_url, 'thread_sortation');
     }
 
     /**
@@ -3653,8 +3654,7 @@ EOD
 
         $sortingDirectionViewControl = $this->uiFactory
             ->viewControl()
-            ->sortation($translatedSortationOptions)
-            ->withLabel($this->lng->txt($this->sortationOptions[$currentSorting]))
+            ->sortation($translatedSortationOptions, $currentSorting)
             ->withTargetURL($target, 'viewmode');
         $this->toolbar->addComponent($sortingDirectionViewControl);
     }
