@@ -121,15 +121,15 @@ class ilTestParticipantsGUI
         $filter_closure = $this->participant_access_filter->getManageParticipantsUserFilter($this->test_obj->getRefId());
         $filtered_user_ids = $filter_closure($user_ids);
 
-        $countusers = 0;
+        $users_count = 0;
+        $client_ips = $this->testrequest->retrieveArrayOfStrings('client_ip');
         foreach ($filtered_user_ids as $user_id) {
-            $client_ip = $this->testrequest->raw('client_ip')[$countusers] ?? '';
-            $this->test_obj->inviteUser($user_id, $client_ip);
-            $countusers++;
+            $this->test_obj->inviteUser($user_id, $client_ips[$users_count] ?? '');
+            $users_count++;
         }
 
         $message = '';
-        if ($countusers) {
+        if ($users_count) {
             $message = $this->lng->txt('tst_invited_selected_users');
         }
         if (strlen($message)) {
