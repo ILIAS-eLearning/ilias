@@ -44,11 +44,15 @@ class ilMembershipRegistrationCodeUtils
             $link_target = ilLink::_getLink($a_ref_id);
             $message = sprintf($lng->txt($a_type . "_admission_link_success_registration"), $title);
             $message_type = ilGlobalTemplateInterface::MESSAGE_TYPE_SUCCESS;
-            $crs = new ilObjCourse($a_ref_id, true);
+            $is_online = true;
+            if ($a_type === 'crs') {
+                $crs = new ilObjCourse($a_ref_id, true);
+                $is_online = $crs->isActivated();
+            }
             $parent_id = $tree->getParentId($a_ref_id);
             $is_valid_type = $a_type === 'crs' || $a_type === 'grp';
             $is_course_available =
-                $crs->isActivated() &&
+                $is_online &&
                 $access->checkAccess("visible", "", $a_ref_id);
             $is_parent_available =
                 $access->checkAccess("read", "", $parent_id) &&
