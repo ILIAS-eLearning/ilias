@@ -24,35 +24,27 @@ use ILIAS\Test\Logging\TestLogger;
 use ILIAS\TestQuestionPool\Questions\GeneralQuestionPropertiesRepository;
 use ILIAS\HTTP\GlobalHttpState;
 use ILIAS\Refinery\Factory as Refinery;
+use ILIAS\Taxonomy\DomainService as TaxonomyService;
+use ILIAS\Test\Questions\QuestionsBrowserFilter;
+use ILIAS\Test\Questions\QuestionsBrowserTable;
+use ILIAS\Data\Factory as DataFactory;
 use ILIAS\UI\Factory as UIFactory;
 use ILIAS\UI\Renderer as UIRenderer;
 use ILIAS\UI\Component\Link\Standard as StandardLink;
 
 /**
- * @author Helmut Schottmüller <ilias@aurealis.de>
  * @ilCtrl_Calls ilTestQuestionBrowserTableGUI: ilFormPropertyDispatchGUI
  */
-class ilTestQuestionBrowserTableGUI extends ilTable2GUI
+class ilTestQuestionBrowserTableGUI
 {
-    private const REPOSITORY_ROOT_NODE_ID = 1;
-
-    public const CONTEXT_PARAMETER = 'question_browse_context';
-    public const CONTEXT_PAGE_VIEW = 'contextPageView';
-    public const CONTEXT_LIST_VIEW = 'contextListView';
+    public const REPOSITORY_ROOT_NODE_ID = 1;
 
     public const MODE_PARAMETER = 'question_browse_mode';
     public const MODE_BROWSE_POOLS = 'modeBrowsePools';
     public const MODE_BROWSE_TESTS = 'modeBrowseTests';
 
     public const CMD_BROWSE_QUESTIONS = 'browseQuestions';
-    public const CMD_APPLY_FILTER = 'applyFilter';
-    public const CMD_RESET_FILTER = 'resetFilter';
     public const CMD_INSERT_QUESTIONS = 'insertQuestions';
-
-    private bool $writeAccess = false;
-
-    /** @var array<string, mixed> */
-    private array $filter = [];
 
     public function __construct(
         private readonly ilTabsGUI $tabs,
@@ -67,109 +59,93 @@ class ilTestQuestionBrowserTableGUI extends ilTable2GUI
         private readonly UIFactory $ui_factory,
         private readonly UIRenderer $ui_renderer,
         private readonly RequestDataCollector $testrequest,
+        private readonly GeneralQuestionPropertiesRepository $questionrepository,
+        private readonly ilLanguage $lng,
+        private readonly ilCtrl $ctrl,
+        private readonly ilGlobalTemplateInterface $main_tpl,
+        private readonly ilUIService $ui_service,
+        private readonly DataFactory $data_factory,
+        private readonly TaxonomyService $taxonomy,
         private readonly TitleColumnsBuilder $title_builder,
-        private readonly GeneralQuestionPropertiesRepository $questionrepository
     ) {
-        $this->setId('qpl_brows_tabl_' . $this->test_obj->getId());
-
-        parent::__construct($this, self::CMD_BROWSE_QUESTIONS);
-        $this->setFilterCommand(self::CMD_APPLY_FILTER);
-        $this->setResetCommand(self::CMD_RESET_FILTER);
-
-        $this->setFormName('questionbrowser');
-        $this->setStyle('table', 'fullwidth');
-        $this->addColumn('', '', '1%', true);
-        $this->addColumn($this->lng->txt("tst_question_title"), 'title', '');
-        $this->addColumn($this->lng->txt("description"), 'description', '');
-        $this->addColumn($this->lng->txt("tst_question_type"), 'ttype', '');
-        $this->addColumn($this->lng->txt("author"), 'author', '');
-        $this->addColumn($this->lng->txt('qst_lifecycle'), 'lifecycle', '');
-        $this->addColumn($this->lng->txt("create_date"), 'created', '');
-        $this->addColumn(
-            $this->lng->txt("last_update"),
-            'tstamp',
-            ''
-        );  // name of col is proper "updated" but in data array the key is "tstamp"
-        $this->addColumn($this->getParentObjectLabel(), 'parent_title', '');
-        $this->setSelectAllCheckbox('q_id');
-        $this->setRowTemplate("tpl.il_as_tst_question_browser_row.html", "components/ILIAS/Test");
-
-        $this->setFormAction($this->ctrl->getFormAction($this->getParentObject(), $this->getParentCmd()));
-        $this->setDefaultOrderField("title");
-        $this->setDefaultOrderDirection("asc");
-
-        $this->enable('sort');
-        $this->enable('select_all');
-        $this->initFilter();
-        $this->setDisableFilterHiding(true);
-    }
-
-    public function setWriteAccess(bool $value): void
-    {
-        $this->writeAccess = $value;
-    }
-
-    public function hasWriteAccess(): bool
-    {
-        return $this->writeAccess;
-    }
-
-    public function init(): void
-    {
-        if ($this->hasWriteAccess()) {
-            $this->addMultiCommand(self::CMD_INSERT_QUESTIONS, $this->lng->txt('insert'));
-        }
     }
 
     public function executeCommand(): bool
     {
-        $this->handleParameters();
+        $this->handleWriteAccess();
         $this->handleTabs();
 
         switch (strtolower((string) $this->ctrl->getNextClass($this))) {
-            case strtolower(__CLASS__):
+            case strtolower(self::class):
             case '':
                 $cmd = $this->ctrl->getCmd() . 'Cmd';
                 return $this->$cmd();
 
             default:
-                $this->ctrl->setReturn($this, self::CMD_BROWSE_QUESTIONS);
-                return parent::executeCommand();
+                return $this->browseQuestionsCmd();
+        }
+    }
+
+    /**
+     * @throws ilCtrlException
+     */
+    private function handleWriteAccess(): void
+    {
+        if (!$this->access->checkAccess('write', '', $this->test_obj->getRefId())) {
+            $this->ctrl->redirectByClass(ilObjTestGUI::class, ilObjTestGUI::SHOW_QUESTIONS_CMD);
         }
     }
 
     private function browseQuestionsCmd(): bool
     {
-        $this->setData($this->getQuestionsData());
+        $this->ctrl->setParameter($this, self::MODE_PARAMETER, $this->testrequest->raw(self::MODE_PARAMETER));
+        $action = $this->ctrl->getLinkTarget($this, self::CMD_BROWSE_QUESTIONS);
 
-        $this->main_tpl->setContent($this->ctrl->getHTML($this));
+        $filter = (new QuestionsBrowserFilter(
+            $this->ui_service,
+            $this->lng,
+            $this->ui_factory,
+            'question_browser_filter'
+        ))->getComponent($action, $this->http_state->request());
+
+        $this->main_tpl->setContent(
+            $this->ui_renderer->render([
+                $filter,
+                (new QuestionsBrowserTable(
+                    (string) $this->test_obj->getId(),
+                    $this->ui_factory,
+                    $this->ui_renderer,
+                    $this->lng,
+                    $this->ctrl,
+                    $this->data_factory,
+                    new ilAssQuestionList($this->db, $this->lng, $this->refinery, $this->component_repository),
+                    $this->test_obj,
+                    $this->tree,
+                    $this->testrequest,
+                    $this->taxonomy,
+                    $this->questionPoolLinkBuilder
+                ))->getComponent(
+                    $this->http_state->request(),
+                    $this->ui_service->filter()->getData($filter)
+                )
+            ])
+        );
+
         return true;
-    }
-
-    private function applyFilterCmd(): void
-    {
-        $this->writeFilterToSession();
-        $this->ctrl->redirect($this, self::CMD_BROWSE_QUESTIONS);
-    }
-
-    private function resetFilterCmd(): void
-    {
-        $this->resetFilter();
-        $this->ctrl->redirect($this, self::CMD_BROWSE_QUESTIONS);
     }
 
     private function insertQuestionsCmd(): void
     {
-        $selected_array = [];
-        if ($this->http_state->wrapper()->post()->has('q_id')) {
-            $selected_array = $this->http_state->wrapper()->post()->retrieve(
-                'q_id',
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int())
-            );
-        }
+        $selected_array = $this->http_state->wrapper()->query()->retrieve(
+            'qlist_q_id',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->always([])
+            ])
+        );
 
         if ($selected_array === []) {
-            $this->main_tpl->setOnScreenMessage('info', $this->lng->txt("tst_insert_missing_question"), true);
+            $this->main_tpl->setOnScreenMessage('info', $this->lng->txt('tst_insert_missing_question'), true);
             $this->ctrl->redirect($this, self::CMD_BROWSE_QUESTIONS);
         }
 
@@ -207,44 +183,26 @@ class ilTestQuestionBrowserTableGUI extends ilTable2GUI
         }
     }
 
-    /**
-     * @return mixed|null
-     */
-    private function fetchContextParameter()
-    {
-        if ($this->testrequest->isset(self::CONTEXT_PARAMETER)) {
-            return $this->testrequest->raw(self::CONTEXT_PARAMETER);
-        }
-
-        return null;
-    }
-
-    /**
-     * @return mixed|null
-     */
-    private function fetchModeParameter()
-    {
-        if ($this->testrequest->isset(self::MODE_PARAMETER)) {
-            return $this->testrequest->raw(self::MODE_PARAMETER);
-        }
-
-        return null;
-    }
-
     private function handleTabs(): void
     {
         $this->tabs->clearTargets();
         $this->tabs->clearSubTabs();
 
         $this->tabs->setBackTarget(
-            $this->getBackTargetLabel(),
-            $this->getBackTargetUrl()
+            $this->lng->txt('backtocallingtest'),
+            $this->ctrl->getLinkTargetByClass(ilObjTestGUI::class, ilObjTestGUI::SHOW_QUESTIONS_CMD)
         );
 
+        $browseQuestionsTabLabel = match ($this->testrequest->raw(self::MODE_PARAMETER)) {
+            self::MODE_BROWSE_POOLS => $this->lng->txt('tst_browse_for_qpl_questions'),
+            self::MODE_BROWSE_TESTS => $this->lng->txt('tst_browse_for_tst_questions'),
+            default => ''
+        };
+
         $this->tabs->addTab(
-            'browseQuestions',
-            $this->getBrowseQuestionsTabLabel(),
-            $this->getBrowseQuestionsTabUrl()
+            self::CMD_BROWSE_QUESTIONS,
+            $browseQuestionsTabLabel,
+            $this->ctrl->getLinkTarget($this, self::CMD_BROWSE_QUESTIONS)
         );
         $this->tabs->activateTab('browseQuestions');
     }
@@ -448,7 +406,7 @@ class ilTestQuestionBrowserTableGUI extends ilTable2GUI
 
     private function buildTestQuestionSetConfig(): ilTestQuestionSetConfig
     {
-        $testQuestionSetConfigFactory = new ilTestQuestionSetConfigFactory(
+        return (new ilTestQuestionSetConfigFactory(
             $this->tree,
             $this->db,
             $this->lng,
@@ -456,107 +414,6 @@ class ilTestQuestionBrowserTableGUI extends ilTable2GUI
             $this->component_repository,
             $this->test_obj,
             $this->questionrepository
-        );
-
-        return $testQuestionSetConfigFactory->getQuestionSetConfig();
-    }
-
-    private function getQuestionsData(): array
-    {
-        $question_list = new ilAssQuestionList($this->db, $this->lng, $this->refinery, $this->component_repository);
-        $question_list->setQuestionInstanceTypeFilter($this->getQuestionInstanceTypeFilter());
-        $question_list->setExcludeQuestionIdsFilter($this->test_obj->getExistingQuestions());
-
-        $repository_root_node = self::REPOSITORY_ROOT_NODE_ID;
-
-        foreach ($this->getFilterItems() as $item) {
-            if (!in_array($item->getValue(), [false, null, ''], true)) {
-                switch ($item->getPostVar()) {
-                    case 'title':
-                    case 'description':
-                    case 'author':
-                    case 'lifecycle':
-                    case 'type':
-                    case 'parent_title':
-                        $question_list->addFieldFilter($item->getPostVar(), $item->getValue());
-                        break;
-
-                    case 'repository_root_node':
-                        $repository_root_node = (int) $item->getValue();
-                }
-            }
-        }
-        if ($repository_root_node < 1) {
-            $repository_root_node = self::REPOSITORY_ROOT_NODE_ID;
-        }
-
-        $parent_object_ids = $this->getQuestionParentObjIds($repository_root_node);
-        if ($parent_object_ids === []) {
-            return [];
-        }
-
-        $question_list->setParentObjIdsFilter($parent_object_ids);
-        $question_list->setParentObjectType($this->getQuestionParentObjectType());
-
-        $question_list->load();
-
-        return $question_list->getQuestionDataArray();
-    }
-
-    private function getQuestionInstanceTypeFilter(): string
-    {
-        if ($this->fetchModeParameter() === self::MODE_BROWSE_TESTS) {
-            return ilAssQuestionList::QUESTION_INSTANCE_TYPE_ALL;
-        }
-
-        return ilAssQuestionList::QUESTION_INSTANCE_TYPE_ORIGINALS;
-    }
-
-    /**
-     * @param int $repositoryRootNode
-     * @return int[]
-     */
-    private function getQuestionParentObjIds(int $repositoryRootNode): array
-    {
-        $parents = $this->tree->getSubTree(
-            $this->tree->getNodeData($repositoryRootNode),
-            true,
-            [$this->getQuestionParentObjectType()]
-        );
-
-        $parentIds = [];
-
-        foreach ($parents as $nodeData) {
-            if ((int) $nodeData['obj_id'] === $this->test_obj->getId()) {
-                continue;
-            }
-
-            $parentIds[$nodeData['obj_id']] = $nodeData['obj_id'];
-        }
-
-        $parentIds = array_map('intval', array_values($parentIds));
-
-        if ($this->fetchModeParameter() === self::MODE_BROWSE_POOLS) {
-            $available_pools = array_map('intval', array_keys(ilObjQuestionPool::_getAvailableQuestionpools(true)));
-            return array_intersect($parentIds, $available_pools);
-        } elseif ($this->fetchModeParameter() === self::MODE_BROWSE_TESTS) {
-            return array_filter($parentIds, function ($obj_id): bool {
-                $refIds = ilObject::_getAllReferences($obj_id);
-                $refId = current($refIds);
-                return $this->access->checkAccess('write', '', $refId);
-            });
-        }
-
-        // Return no parent ids if the user wants to hack...
-        return [];
-    }
-
-    private function getQuestionParentObjectType(): string
-    {
-        if ($this->fetchModeParameter() === self::MODE_BROWSE_TESTS) {
-            return 'tst';
-        }
-
-        return 'qpl';
+        ))->getQuestionSetConfig();
     }
 }

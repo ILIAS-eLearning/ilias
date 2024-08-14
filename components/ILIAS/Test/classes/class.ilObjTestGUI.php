@@ -62,6 +62,7 @@ use ILIAS\Filesystem\Stream\Streams;
 use ILIAS\Filesystem\Util\Archive\Archives;
 use ILIAS\Skill\Service\SkillService;
 use ILIAS\ResourceStorage\Services as IRSS;
+use ILIAS\Taxonomy\DomainService as TaxonomyService;
 
 /**
  * Class ilObjTestGUI
@@ -153,6 +154,7 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
     protected ?QuestionsTableQuery $table_query = null;
     protected ?QuestionsTableActions $table_actions = null;
     protected DataFactory $data_factory;
+    protected TaxonomyService $taxonomy;
 
     protected bool $create_question_mode;
 
@@ -182,7 +184,7 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
         $this->archives = $DIC->archives();
         $this->type = 'tst';
         $this->data_factory = new DataFactory();
-        $this->ui_service = $DIC->uiService();
+        $this->taxonomy = $DIC->taxonomy()->domain();
 
         $local_dic = TestDIC::dic();
         $this->questionrepository = $local_dic['question.general_properties.repository'];
@@ -680,11 +682,15 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
                     $this->ui_factory,
                     $this->ui_renderer,
                     $this->testrequest,
+                    $this->questionrepository,
+                    $this->lng,
+                    $this->ctrl,
+                    $this->tpl,
+                    $this->ui_service,
+                    $this->data_factory,
+                    $this->taxonomy,
                     $this->title_builder,
-                    $this->questionrepository
                 );
-                $gui->setWriteAccess($this->access->checkAccess("write", "", $this->ref_id));
-                $gui->init();
                 $this->ctrl->forwardCommand($gui);
                 break;
 
@@ -1842,16 +1848,24 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
 
         $this->toolbar->addButton($this->lng->txt('ass_create_question'), $this->ctrl->getLinkTarget($this, 'createQuestionForm'));
         $this->toolbar->addSeparator();
-        $this->populateQuestionBrowserToolbarButtons($this->toolbar, ilTestQuestionBrowserTableGUI::CONTEXT_LIST_VIEW);
+        $this->populateQuestionBrowserToolbarButtons($this->toolbar);
+
+        $this->tpl->setCurrentBlock("adm_content");
+        $this->tpl->setVariable("ACTION_QUESTION_FORM", $this->ctrl->getFormAction($this));
+        $this->tpl->setVariable(
+            'QUESTIONBROWSER',
+            $this->ui_renderer->render(
+                $this->getTable()
+                ->withQuestionEditing(!$has_started_test_runs)
+                ->getTableComponent($this->object->getTestQuestions())
+                ->withOrderingDisabled($has_started_test_runs)
+            )
+        );
+        $this->tpl->parseCurrentBlock();
     }
 
-    private function populateQuestionBrowserToolbarButtons(ilToolbarGUI $toolbar, string $context): void
+    private function populateQuestionBrowserToolbarButtons(ilToolbarGUI $toolbar): void
     {
-        $this->ctrl->setParameterByClass(
-            ilTestQuestionBrowserTableGUI::class,
-            ilTestQuestionBrowserTableGUI::CONTEXT_PARAMETER,
-            $context
-        );
         $this->ctrl->setParameterByClass(
             ilTestQuestionBrowserTableGUI::class,
             ilTestQuestionBrowserTableGUI::MODE_PARAMETER,
@@ -1859,7 +1873,7 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
         );
 
         $toolbar->addButton(
-            $this->lng->txt("tst_browse_for_qpl_questions"),
+            $this->lng->txt('tst_browse_for_qpl_questions'),
             $this->ctrl->getLinkTargetByClass(
                 ilTestQuestionBrowserTableGUI::class,
                 ilTestQuestionBrowserTableGUI::CMD_BROWSE_QUESTIONS
@@ -1873,7 +1887,7 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
         );
 
         $toolbar->addButton(
-            $this->lng->txt("tst_browse_for_tst_questions"),
+            $this->lng->txt('tst_browse_for_tst_questions'),
             $this->ctrl->getLinkTargetByClass(
                 ilTestQuestionBrowserTableGUI::class,
                 ilTestQuestionBrowserTableGUI::CMD_BROWSE_QUESTIONS
