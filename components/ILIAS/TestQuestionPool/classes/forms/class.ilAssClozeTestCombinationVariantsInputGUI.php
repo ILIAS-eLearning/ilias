@@ -28,62 +28,71 @@ class ilAssClozeTestCombinationVariantsInputGUI extends ilAnswerWizardInputGUI
 {
     public function setValue($a_value): void
     {
-        foreach ($this->values as $index => $value) {
-            $this->values[$index]['points'] = $a_value['points'][$index];
+        if (is_array($a_value) && is_array($a_value['points'])) {
+            foreach ($a_value['points'] as $idx => $term) {
+                $this->values[$idx]['points'] = $a_value['points'][$idx];
+            }
         }
     }
 
     public function checkInput(): bool
     {
-        global $DIC; /* @var ILIAS\DI\Container $DIC */
+        global $DIC;
         $lng = $DIC->language();
 
-        $values = $_POST[$this->getPostVar()];
+        $values = $this->http->wrapper()->post()->retrieve(
+            $this->getPostVar(),
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->float()),
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->always(null)
+            ])
+        );
 
         $max = 0;
-        if (is_array($values['points'])) {
-            foreach ($values['points'] as $points) {
-                if ($points > $max) {
-                    $max = $points;
-                }
-                if (((strlen($points)) == 0) || (!is_numeric($points))) {
-                    $this->setAlert($lng->txt("form_msg_numeric_value_required"));
+        foreach ($values['points'] ?? [] as $points) {
+            $max = max($max, $points);
+            if ($points === '' || !is_numeric($points)) {
+                $this->setAlert($lng->txt('form_msg_numeric_value_required'));
+                return false;
+            }
+
+            if ($this->minvalueShouldBeGreater()) {
+                if (
+                    trim($points) !== ''
+                    && $this->getMinValue() !== false
+                    && $points <= $this->getMinValue()
+                ) {
+                    $this->setAlert($lng->txt('form_msg_value_too_low'));
                     return false;
                 }
-                if ($this->minvalueShouldBeGreater()) {
-                    if (trim($points) != "" &&
-                        $this->getMinValue() !== false &&
-                        $points <= $this->getMinValue()) {
-                        $this->setAlert($lng->txt("form_msg_value_too_low"));
-
-                        return false;
-                    }
-                } else {
-                    if (trim($points) != "" &&
-                        $this->getMinValue() !== false &&
-                        $points < $this->getMinValue()) {
-                        $this->setAlert($lng->txt("form_msg_value_too_low"));
-
-                        return false;
-                    }
-                }
+            } elseif (
+                trim($points) !== ''
+                && $this->getMinValue() !== false
+                && $points < $this->getMinValue()
+            ) {
+                $this->setAlert($lng->txt('form_msg_value_too_low'));
+                return false;
             }
         }
-        if ($max == 0) {
-            $this->setAlert($lng->txt("enter_enough_positive_points"));
+
+        if ($max === 0) {
+            $this->setAlert($lng->txt('enter_enough_positive_points'));
             return false;
         }
 
         return true;
     }
 
+    /**
+     * @throws ilTemplateException
+     */
     public function insert(ilTemplate $a_tpl): void
     {
         $tpl = new ilTemplate('tpl.prop_gap_combi_answers_input.html', true, true, 'components/ILIAS/TestQuestionPool');
-
         $gaps = [];
 
-        foreach ($this->values as $varId => $variant) {
+        foreach ($this->values as $variant) {
             foreach ($variant['gaps'] as $gapIndex => $answer) {
                 $gaps[$gapIndex] = $gapIndex;
 
@@ -106,8 +115,8 @@ class ilAssClozeTestCombinationVariantsInputGUI extends ilAnswerWizardInputGUI
 
         $tpl->setVariable('POINTS_HEADER', 'Points');
 
-        $a_tpl->setCurrentBlock("prop_generic");
-        $a_tpl->setVariable("PROP_GENERIC", $tpl->get());
+        $a_tpl->setCurrentBlock('prop_generic');
+        $a_tpl->setVariable('PROP_GENERIC', $tpl->get());
         $a_tpl->parseCurrentBlock();
     }
 }

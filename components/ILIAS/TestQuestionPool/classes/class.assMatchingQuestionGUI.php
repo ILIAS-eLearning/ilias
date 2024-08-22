@@ -209,8 +209,15 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $position = key($_POST['cmd']['removeimageterms']);
-        $this->object->removeTermImage($position);
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always([])
+            ])
+        );
+        $this->object->removeTermImage(key($cmd['removeimageterms'] ?? []));
         $this->editQuestion();
     }
 
@@ -225,8 +232,15 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $position = key($_POST['cmd']['removeimagedefinitions']);
-        $this->object->removeDefinitionImage($position);
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always([])
+            ])
+        );
+        $this->object->removeDefinitionImage(key($cmd['removeimagedefinitions'] ?? []));
         $this->editQuestion();
     }
 
@@ -234,8 +248,16 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $position = key($_POST["cmd"]["addterms"]);
-        $this->object->insertTerm($position + 1);
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always([])
+            ])
+        );
+        $this->writePostData(true);
+        $this->object->insertTerm(key($cmd['addterms'] ?? []) + 1);
         $this->editQuestion();
     }
 
@@ -243,8 +265,16 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $position = key($_POST["cmd"]["removeterms"]);
-        $this->object->deleteTerm($position);
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always([]),
+            ])
+        );
+        $this->writePostData(true);
+        $this->object->deleteTerm(key($cmd['removeterms'] ?? []));
         $this->editQuestion();
     }
 
@@ -252,8 +282,15 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $position = key($_POST["cmd"]["adddefinitions"]);
-        $this->object->insertDefinition($position + 1);
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always([]),
+            ])
+        );
+        $this->object->insertDefinition(key($cmd['adddefinitions'] ?? []) + 1);
         $this->editQuestion();
     }
 
@@ -261,8 +298,15 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $position = key($_POST["cmd"]["removedefinitions"]);
-        $this->object->deleteDefinition($position);
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always([]),
+            ])
+        );
+        $this->object->deleteDefinition(key($cmd['removedefinitions'] ?? []));
         $this->editQuestion();
     }
 
@@ -270,8 +314,15 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $position = key($_POST["cmd"]["addpairs"]);
-        $this->object->insertMatchingPair($position + 1);
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always([]),
+            ])
+        );
+        $this->object->insertMatchingPair(key($cmd['addpairs'] ?? []) + 1);
         $this->editQuestion();
     }
 
@@ -279,8 +330,15 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $position = key($_POST["cmd"]["removepairs"]);
-        $this->object->deleteMatchingPair($position);
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always([]),
+            ])
+        );
+        $this->object->deleteMatchingPair(key($cmd['removepairs'] ?? []));
         $this->editQuestion();
     }
 
@@ -935,12 +993,30 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     */
     public function checkInput(): bool
     {
-        if ($this->request->string('title') === ''
-            || $this->request->string('title') === ''
-            || $this->request->string('title') === 'question') {
-            return false;
-        }
-        return true;
+        $post = $this->http->wrapper()->post();
+        $title = $post->retrieve(
+            'title',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('')
+            ])
+        );
+        $author = $post->retrieve(
+            'author',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('')
+            ])
+        );
+        $question = $post->retrieve(
+            'question',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('')
+            ])
+        );
+
+        return !(!$title || !$author || !$question);
     }
 
     public function getSpecificFeedbackOutput(array $userSolution): string

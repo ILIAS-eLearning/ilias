@@ -521,16 +521,23 @@ class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringA
     {
         $this->setAdditionalContentEditingModeFromPost();
         ilSession::set('subquestion_index', 0);
-        if ($_POST['cmd']['addSuggestedSolution']) {
-            if ($this->writePostData()) {
-                $this->tpl->setOnScreenMessage('info', $this->getErrorMessage());
-                $this->editQuestion();
-                return;
-            }
+
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->bool()),
+                $this->refinery->always([])
+            ])
+        );
+
+        if (($cmd['addSuggestedSolution'] ?? false) && $this->writePostData()) {
+            $this->tpl->setOnScreenMessage('info', $this->getErrorMessage());
+            $this->editQuestion();
+            return;
         }
         $this->object->saveToDb();
-        $this->ctrl->setParameter($this, "q_id", $this->object->getId());
-        $this->tpl->setVariable("HEADER", $this->object->getTitle());
+        $this->ctrl->setParameter($this, 'q_id', $this->object->getId());
+        $this->tpl->setVariable('HEADER', $this->object->getTitle());
         $this->getQuestionTemplate();
     }
 
@@ -541,10 +548,43 @@ class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringA
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $this->object->setWordCounterEnabled(isset($_POST['wordcounter']) && $_POST['wordcounter']);
-        $this->object->setMaxNumOfChars((int) ($_POST["maxchars"] ?? 0));
-        $this->object->setTextRating($_POST["text_rating"]);
-        $this->object->setKeywordRelation($_POST['scoring_mode']);
+        $post = $this->http->wrapper()->post();
+
+        $word_counter = $post->retrieve(
+            'wordcounter',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->bool(),
+                $this->refinery->always(false)
+            ])
+        );
+        $this->object->setWordCounterEnabled($word_counter);
+
+        $max_chars = $post->retrieve(
+            'maxchars',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(0)
+            ])
+        );
+        $this->object->setMaxNumOfChars($max_chars);
+
+        $text_rating = $post->retrieve(
+            'text_rating',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('')
+            ])
+        );
+        $this->object->setTextRating($text_rating);
+
+        $scoring_mode = $post->retrieve(
+            'scoring_mode',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always(null)
+            ])
+        );
+        $this->object->setKeywordRelation($scoring_mode);
     }
 
     public function writeAnswerSpecificPostData(ilPropertyFormGUI $form): void

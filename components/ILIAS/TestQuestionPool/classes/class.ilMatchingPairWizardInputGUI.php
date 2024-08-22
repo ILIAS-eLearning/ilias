@@ -136,35 +136,39 @@ class ilMatchingPairWizardInputGUI extends ilTextInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        if (is_array($_POST[$this->getPostVar()])) {
-            $foundvalues = ilArrayUtil::stripSlashesRecursive($_POST[$this->getPostVar()]);
-        } else {
-            $foundvalues = $_POST[$this->getPostVar()];
-        }
-        if (is_array($foundvalues)) {
+        $post_var = $this->http->wrapper()->post()->retrieve(
+            $this->getPostVar(),
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always(null)
+            ])
+        );
+        $found_values = is_array($post_var) ? ilArrayUtil::stripSlashesRecursive($post_var) : $post_var;
+
+        if (is_array($found_values)) {
             // check answers
-            if (isset($foundvalues['term']) && is_array($foundvalues['term'])) {
-                foreach ($foundvalues['term'] as $val) {
-                    if ($this->getRequired() && $val < 1) {
-                        $this->setAlert($lng->txt("msg_input_is_required"));
+            if (isset($found_values['term']) && is_array($found_values['term'])) {
+                foreach ($found_values['term'] as $val) {
+                    if ($val < 1 && $this->getRequired()) {
+                        $this->setAlert($lng->txt('msg_input_is_required'));
                         return false;
                     }
                 }
-                foreach ($foundvalues['definition'] as $val) {
-                    if ($this->getRequired() && $val < 1) {
-                        $this->setAlert($lng->txt("msg_input_is_required"));
+                foreach ($found_values['definition'] as $val) {
+                    if ($val < 1 && $this->getRequired()) {
+                        $this->setAlert($lng->txt('msg_input_is_required'));
                         return false;
                     }
                 }
                 $max = 0;
-                foreach ($foundvalues['points'] as $val) {
-                    if ($this->getRequired() && (strlen($val)) === 0) {
-                        $this->setAlert($lng->txt("msg_input_is_required"));
+                foreach ($found_values['points'] as $val) {
+                    if ($val === '' && $this->getRequired()) {
+                        $this->setAlert($lng->txt('msg_input_is_required'));
                         return false;
                     }
-                    $val = str_replace(",", ".", $val);
+                    $val = str_replace(',', '.', $val);
                     if (!is_numeric($val)) {
-                        $this->setAlert($lng->txt("form_msg_numeric_value_required"));
+                        $this->setAlert($lng->txt('form_msg_numeric_value_required'));
                         return false;
                     }
 
@@ -174,21 +178,18 @@ class ilMatchingPairWizardInputGUI extends ilTextInputGUI
                     }
                 }
                 if ($max <= 0) {
-                    $this->setAlert($lng->txt("enter_enough_positive_points"));
+                    $this->setAlert($lng->txt('enter_enough_positive_points'));
                     return false;
                 }
-            } else {
-                if ($this->getRequired()) {
-                    $this->setAlert($lng->txt("msg_input_is_required"));
-                    return false;
-                }
-            }
-        } else {
-            if ($this->getRequired()) {
-                $this->setAlert($lng->txt("msg_input_is_required"));
+            } elseif ($this->getRequired()) {
+                $this->setAlert($lng->txt('msg_input_is_required'));
                 return false;
             }
+        } elseif ($this->getRequired()) {
+            $this->setAlert($lng->txt('msg_input_is_required'));
+            return false;
         }
+
         return $this->checkSubItemsInput();
     }
 

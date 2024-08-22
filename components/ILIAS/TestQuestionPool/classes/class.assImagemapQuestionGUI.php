@@ -42,7 +42,7 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
      *
      * @param integer $id The database id of a image map question object.
      */
-    public function __construct($id = -1)
+    public function __construct(int $id = -1)
     {
         parent::__construct();
         $this->object = new assImagemapQuestion();
@@ -84,52 +84,83 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
 
     public function writeAnswerSpecificPostData(ilPropertyFormGUI $form): void
     {
-        if ($this->ctrl->getCmd() != 'deleteImage') {
+        if ($this->ctrl->getCmd() !== 'deleteImage') {
             $this->object->flushAnswers();
-            if (isset($_POST['image']) && is_array($_POST['image']) && is_array($_POST['image']['coords']['name'])) {
-                foreach ($_POST['image']['coords']['name'] as $idx => $name) {
-                    if ($this->object->getIsMultipleChoice() && isset($_POST['image']['coords']['points_unchecked'])) {
-                        $pointsUnchecked = $_POST['image']['coords']['points_unchecked'][$idx];
+
+            $image = $this->http->wrapper()->post()->retrieve(
+                'image',
+                $this->refinery->byTrying([
+                    $this->refinery->kindlyTo()->listOf(
+                        $this->refinery->kindlyTo()->listOf(
+                            $this->refinery->kindlyTo()->listOf(
+                                $this->refinery->kindlyTo()->string()
+                            )
+                        )
+                    ),
+                    $this->refinery->always(null)
+                ])
+            );
+
+            if (isset($image['coords']['name'])) {
+                foreach ($image['coords']['name'] as $idx => $name) {
+                    if ($this->object->getIsMultipleChoice() && isset($image['coords']['points_unchecked'])) {
+                        $pointsUnchecked = $image['coords']['points_unchecked'][$idx];
                     } else {
                         $pointsUnchecked = 0.0;
                     }
 
                     $this->object->addAnswer(
                         $name,
-                        $_POST['image']['coords']['points'][$idx],
+                        $image['coords']['points'][$idx],
                         $idx,
-                        $_POST['image']['coords']['coords'][$idx],
-                        $_POST['image']['coords']['shape'][$idx],
+                        $image['coords']['coords'][$idx],
+                        $image['coords']['shape'][$idx],
                         $pointsUnchecked
                     );
                 }
             }
 
-            if (strlen($_FILES['imagemapfile']['tmp_name'])) {
+            if ($_FILES['imagemapfile']['tmp_name'] !== '') {
                 if ($this->object->getSelfAssessmentEditingMode() && $this->object->getId() < 1) {
                     $this->object->createNewQuestion();
                 }
 
-                $this->object->uploadImagemap($form->getItemByPostVar('imagemapfile')->getShapes());
+                $this->object->uploadImagemap($form->getItemByPostVar('imagemapfile')?->getShapes());
             }
         }
     }
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        if ($this->ctrl->getCmd() != 'deleteImage') {
-            if (strlen($_FILES['image']['tmp_name']) == 0) {
-                $this->object->setImageFilename($_POST["image_name"]);
-            }
+        $post = $this->http->wrapper()->post();
+
+        if ($this->ctrl->getCmd() !== 'deleteImage' && $_FILES['image']['tmp_name'] === '') {
+            $image_name = $post->retrieve(
+                'image_name',
+                $this->refinery->byTrying([
+                    $this->refinery->kindlyTo()->string(),
+                    $this->refinery->always('')
+                ])
+            );
+
+            $this->object->setImageFilename($image_name);
         }
-        if (strlen($_FILES['image']['tmp_name'])) {
+        if ($_FILES['image']['tmp_name'] !== '') {
             if ($this->object->getSelfAssessmentEditingMode() && $this->object->getId() < 1) {
                 $this->object->createNewQuestion();
             }
             $this->object->setImageFilename($_FILES['image']['name'], $_FILES['image']['tmp_name']);
         }
 
-        $this->object->setIsMultipleChoice($_POST['is_multiple_choice'] == assImagemapQuestion::MODE_MULTIPLE_CHOICE);
+        $is_multiple_choice = $post->retrieve(
+            'is_multiple_choice',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(assImagemapQuestion::MODE_SINGLE_CHOICE)
+            ])
+        );
+
+        $this->object->setIsMultipleChoice($is_multiple_choice === assImagemapQuestion::MODE_MULTIPLE_CHOICE);
     }
 
     /**
@@ -223,35 +254,77 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     }
 
     /**
-    * Saves a shape of the area editor
-    */
+     * Saves a shape of the area editor
+     * @throws ilCtrlException
+     */
     public function saveShape(): void
     {
-        $coords = "";
-        switch ($_POST["shape"]) {
+        $post = $this->http->wrapper()->post();
+        $coords = '';
+
+        $shape = $post->retrieve(
+            'shape',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('')
+            ])
+        );
+
+        $image = $post->retrieve(
+            'image',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
+                $this->refinery->always([])
+            ])
+        );
+
+        switch ($shape) {
             case assImagemapQuestion::AVAILABLE_SHAPES['RECT']:
-                $coords = join(",", $_POST['image']['mapcoords']);
+                $coords = implode(',', $image['mapcoords']);
                 $this->tpl->setOnScreenMessage('success', $this->lng->txt('msg_rect_added'), true);
                 break;
             case assImagemapQuestion::AVAILABLE_SHAPES['CIRCLE']:
-                if (preg_match("/(\d+)\s*,\s*(\d+)\s+(\d+)\s*,\s*(\d+)/", $_POST['image']['mapcoords'][0] . " " . $_POST['image']['mapcoords'][1], $matches)) {
+                if (preg_match("/(\d+)\s*,\s*(\d+)\s+(\d+)\s*,\s*(\d+)/", $image['mapcoords'][0] . ' ' . $image['mapcoords'][1], $matches)) {
                     $coords = "$matches[1],$matches[2]," . (int) sqrt((($matches[3] - $matches[1]) * ($matches[3] - $matches[1])) + (($matches[4] - $matches[2]) * ($matches[4] - $matches[2])));
                 }
                 $this->tpl->setOnScreenMessage('success', $this->lng->txt('msg_circle_added'), true);
                 break;
             case assImagemapQuestion::AVAILABLE_SHAPES['POLY']:
-                $coords = join(",", $_POST['image']['mapcoords']);
+                $coords = implode(',', $image['mapcoords']);
                 $this->tpl->setOnScreenMessage('success', $this->lng->txt('msg_poly_added'), true);
                 break;
         }
-        $this->object->addAnswer($_POST["shapetitle"], 0, count($this->object->getAnswers()), $coords, $_POST["shape"]);
+
+        $shape_title = $post->retrieve(
+            'shapetitle',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('')
+            ])
+        );
+
+        $this->object->addAnswer($shape_title, 0, count($this->object->getAnswers()), $coords, $shape);
         $this->object->saveToDb();
         $this->ctrl->redirect($this, 'editQuestion');
     }
 
-    public function areaEditor($shape = ''): void
+    /**
+     * @throws ilTemplateException
+     * @throws ilCtrlException
+     */
+    public function areaEditor(string $shape = ''): void
     {
-        $shape = (strlen($shape)) ? $shape : $_POST['shape'];
+        $post = $this->http->wrapper()->post();
+
+        if ($shape === '') {
+            $shape = $post->retrieve(
+                'shape',
+                $this->refinery->byTrying([
+                    $this->refinery->kindlyTo()->string(),
+                    $this->refinery->always('')
+                ])
+            );
+        }
 
         $this->getQuestionTemplate();
 
@@ -259,117 +332,133 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
 
         $coords = [];
         $mapcoords = $this->request->raw('image');
-        if ($mapcoords != null && isset($mapcoords['mapcoords']) && is_array($mapcoords['mapcoords'])) {
+        if ($mapcoords !== null && isset($mapcoords['mapcoords']) && is_array($mapcoords['mapcoords'])) {
             foreach ($mapcoords['mapcoords'] as $value) {
-                array_push($coords, $value);
+                $coords[] = $value;
             }
         }
         $cmd = $this->request->raw('cmd');
-        if ($cmd != null && array_key_exists('areaEditor', $cmd) && is_array($cmd['areaEditor']['image'])) {
-            array_push($coords, $cmd['areaEditor']['image'][0] . "," . $cmd['areaEditor']['image'][1]);
+        if ($cmd !== null && array_key_exists('areaEditor', $cmd) && is_array($cmd['areaEditor']['image'])) {
+            $coords[] = $cmd['areaEditor']['image'][0] . ',' . $cmd['areaEditor']['image'][1];
         }
         foreach ($coords as $value) {
-            $editorTpl->setCurrentBlock("hidden");
-            $editorTpl->setVariable("HIDDEN_NAME", 'image[mapcoords][]');
-            $editorTpl->setVariable("HIDDEN_VALUE", $value);
+            $editorTpl->setCurrentBlock('hidden');
+            $editorTpl->setVariable('HIDDEN_NAME', 'image[mapcoords][]');
+            $editorTpl->setVariable('HIDDEN_VALUE', $value);
             $editorTpl->parseCurrentBlock();
         }
 
-        $editorTpl->setCurrentBlock("hidden");
-        $editorTpl->setVariable("HIDDEN_NAME", 'shape');
-        $editorTpl->setVariable("HIDDEN_VALUE", $shape);
+        $editorTpl->setCurrentBlock('hidden');
+        $editorTpl->setVariable('HIDDEN_NAME', 'shape');
+        $editorTpl->setVariable('HIDDEN_VALUE', $shape);
         $editorTpl->parseCurrentBlock();
 
         $preview = new ilImagemapPreview($this->object->getImagePath() . $this->object->getImageFilename());
         foreach ($this->object->answers as $index => $answer) {
-            $preview->addArea($index, $answer->getArea(), $answer->getCoords(), $answer->getAnswertext(), "", "", true, $this->linecolor);
+            $preview->addArea($index, $answer->getArea(), $answer->getCoords(), $answer->getAnswertext(), '', '', true, $this->linecolor);
         }
         $hidearea = false;
-        $disabled_save = " disabled=\"disabled\"";
-        $c = "";
+        $disabled_save = ' disabled=\"disabled\"';
+        $c = '';
+        $coords_count = count($coords);
         switch ($shape) {
-            case "rect":
-                if (count($coords) == 0) {
-                    $this->tpl->setOnScreenMessage('info', $this->lng->txt("rectangle_click_tl_corner"));
-                } elseif (count($coords) == 1) {
-                    $this->tpl->setOnScreenMessage('info', $this->lng->txt("rectangle_click_br_corner"));
-                    $preview->addPoint($preview->getAreaCount(), join(",", $coords), true, "blue");
-                } elseif (count($coords) == 2) {
-                    $c = join(",", $coords);
-                    $hidearea = true;
-                    $disabled_save = "";
+            case assImagemapQuestion::AVAILABLE_SHAPES['RECT']:
+                switch ($coords_count) {
+                    case 0:
+                        $this->tpl->setOnScreenMessage('info', $this->lng->txt('rectangle_click_tl_corner'));
+                        break;
+                    case 1:
+                        $this->tpl->setOnScreenMessage('info', $this->lng->txt('rectangle_click_br_corner'));
+                        $preview->addPoint($preview->getAreaCount(), implode(',', $coords), true, 'blue');
+                        break;
+                    case 2:
+                        $c = implode(',', $coords);
+                        $hidearea = true;
+                        $disabled_save = '';
+                        break;
                 }
                 break;
-            case "circle":
-                if (count($coords) == 0) {
-                    $this->tpl->setOnScreenMessage('info', $this->lng->txt("circle_click_center"));
-                } elseif (count($coords) == 1) {
-                    $this->tpl->setOnScreenMessage('info', $this->lng->txt("circle_click_circle"));
-                    $preview->addPoint($preview->getAreaCount(), join(",", $coords), true, "blue");
-                } elseif (count($coords) == 2) {
-                    if (preg_match("/(\d+)\s*,\s*(\d+)\s+(\d+)\s*,\s*(\d+)/", $coords[0] . " " . $coords[1], $matches)) {
-                        $c = "$matches[1],$matches[2]," . (int) sqrt((($matches[3] - $matches[1]) * ($matches[3] - $matches[1])) + (($matches[4] - $matches[2]) * ($matches[4] - $matches[2])));
-                    }
-                    $hidearea = true;
-                    $disabled_save = "";
+            case assImagemapQuestion::AVAILABLE_SHAPES['CIRCLE']:
+                switch ($coords_count) {
+                    case 0:
+                        $this->tpl->setOnScreenMessage('info', $this->lng->txt('circle_click_center'));
+                        break;
+                    case 1:
+                        $this->tpl->setOnScreenMessage('info', $this->lng->txt('circle_click_circle'));
+                        $preview->addPoint($preview->getAreaCount(), implode(',', $coords), true, 'blue');
+                        break;
+                    case 2:
+                        if (preg_match("/(\d+)\s*,\s*(\d+)\s+(\d+)\s*,\s*(\d+)/", $coords[0] . ' ' . $coords[1], $matches)) {
+                            $c = "$matches[1],$matches[2]," . (int) sqrt((($matches[3] - $matches[1]) * ($matches[3] - $matches[1])) + (($matches[4] - $matches[2]) * ($matches[4] - $matches[2])));
+                        }
+                        $hidearea = true;
+                        $disabled_save = '';
+                        break;
                 }
                 break;
-            case "poly":
-                if (count($coords) == 0) {
-                    $this->tpl->setOnScreenMessage('info', $this->lng->txt("polygon_click_starting_point"));
-                } elseif (count($coords) == 1) {
-                    $this->tpl->setOnScreenMessage('info', $this->lng->txt("polygon_click_next_point"));
-                    $preview->addPoint($preview->getAreaCount(), implode(",", $coords), true, "blue");
-                } elseif (count($coords) > 1) {
-                    $this->tpl->setOnScreenMessage('info', $this->lng->txt("polygon_click_next_or_save"));
-                    $disabled_save = "";
-                    $c = implode(",", $coords);
+            case assImagemapQuestion::AVAILABLE_SHAPES['POLY']:
+                switch ($coords_count) {
+                    case 0:
+                        $this->tpl->setOnScreenMessage('info', $this->lng->txt('polygon_click_starting_point'));
+                        break;
+                    case 1:
+                        $this->tpl->setOnScreenMessage('info', $this->lng->txt('polygon_click_next_point'));
+                        $preview->addPoint($preview->getAreaCount(), implode(',', $coords), true, 'blue');
+                        break;
+                    default:
+                        $this->tpl->setOnScreenMessage('info', $this->lng->txt('polygon_click_next_or_save'));
+                        $disabled_save = '';
+                        $c = implode(',', $coords);
+                        break;
                 }
                 break;
         }
-        if (strlen($c)) {
-            $preview->addArea($preview->getAreaCount(), $shape, $c, $_POST["shapetitle"] ?? '', "", "", true, "blue");
+
+        $shape_title = $post->retrieve(
+            'shapetitle',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('')
+            ])
+        );
+
+        if ($c !== '') {
+            $preview->addArea($preview->getAreaCount(), $shape, $c, $shape_title, '', '', true, 'blue');
         }
         $preview->createPreview();
-        $imagepath = $this->object->getImagePathWeb() . $preview->getPreviewFilename($this->object->getImagePath(), $this->object->getImageFilename()) . "?img=" . time();
+        $image_path = $this->object->getImagePathWeb() . $preview->getPreviewFilename($this->object->getImagePath(), $this->object->getImageFilename()) . '?img=' . time();
         if (!$hidearea) {
-            $editorTpl->setCurrentBlock("maparea");
-            $editorTpl->setVariable("IMAGE_SOURCE", "$imagepath");
-            $editorTpl->setVariable("IMAGEMAP_NAME", "image");
-            $editorTpl->parseCurrentBlock();
+            $editorTpl->setCurrentBlock('maparea');
+            $editorTpl->setVariable('IMAGEMAP_NAME', 'image');
         } else {
-            $editorTpl->setCurrentBlock("imagearea");
-            $editorTpl->setVariable("IMAGE_SOURCE", "$imagepath");
-            $editorTpl->setVariable("ALT_IMAGE", $this->lng->txt("imagemap"));
+            $editorTpl->setCurrentBlock('imagearea');
+            $editorTpl->setVariable('ALT_IMAGE', $this->lng->txt('imagemap'));
+        }
+        $editorTpl->setVariable('IMAGE_SOURCE', $image_path);
+        $editorTpl->parseCurrentBlock();
+
+        if ($shape_title !== '') {
+            $editorTpl->setCurrentBlock('shapetitle');
+            $editorTpl->setVariable('VALUE_SHAPETITLE', $shape_title);
             $editorTpl->parseCurrentBlock();
         }
 
-        if (isset($_POST['shapetitle']) && $_POST['shapetitle'] != '') {
-            $editorTpl->setCurrentBlock("shapetitle");
-            $editorTpl->setVariable("VALUE_SHAPETITLE", $_POST["shapetitle"]);
-            $editorTpl->parseCurrentBlock();
-        }
+        $editorTpl->setVariable('TEXT_IMAGEMAP', $this->lng->txt('imagemap'));
+        $editorTpl->setVariable('TEXT_SHAPETITLE', $this->lng->txt('ass_imap_hint'));
+        $editorTpl->setVariable('CANCEL', $this->lng->txt('cancel'));
+        $editorTpl->setVariable('SAVE', $this->lng->txt('save'));
+        $editorTpl->setVariable('DISABLED_SAVE', $disabled_save);
 
-        $editorTpl->setVariable("TEXT_IMAGEMAP", $this->lng->txt("imagemap"));
-        $editorTpl->setVariable("TEXT_SHAPETITLE", $this->lng->txt("ass_imap_hint"));
-        $editorTpl->setVariable("CANCEL", $this->lng->txt("cancel"));
-        $editorTpl->setVariable("SAVE", $this->lng->txt("save"));
-        $editorTpl->setVariable("DISABLED_SAVE", $disabled_save);
-        switch ($shape) {
-            case "rect":
-                $editorTpl->setVariable("FORMACTION", $this->ctrl->getFormaction($this, 'addRect'));
-                break;
-            case 'circle':
-                $editorTpl->setVariable("FORMACTION", $this->ctrl->getFormaction($this, 'addCircle'));
-                break;
-            case 'poly':
-                $editorTpl->setVariable("FORMACTION", $this->ctrl->getFormaction($this, 'addPoly'));
-                break;
+        if (in_array($shape, assImagemapQuestion::AVAILABLE_SHAPES, true)) {
+            $editorTpl->setVariable('FORMACTION', $this->ctrl->getFormaction($this, 'add' . ucfirst($shape)));
         }
 
         $this->tpl->setVariable('QUESTION_DATA', $editorTpl->get());
     }
 
+    /**
+     * @throws ilCtrlException
+     */
     public function back(): void
     {
         $this->tpl->setOnScreenMessage('info', $this->lng->txt('msg_cancel'), true);
@@ -382,14 +471,7 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
         int $pass
     ): string {
         $info = $this->object->getTestOutputSolutions($active_id, $pass);
-
-        if ($info !== []) {
-            if ($info[0]['value1'] !== '') {
-                $form_action .= '&selImage=' . $info[0]['value1'];
-            }
-        }
-
-        return $form_action;
+        return $form_action . (($info !== [] && $info[0]['value1'] !== '') ? '&selImage=' . $info[0]['value1'] : '');
     }
 
     public function getSolutionOutput(

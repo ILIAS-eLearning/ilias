@@ -24,6 +24,7 @@ use ILIAS\TestQuestionPool\Questions\QuestionAutosaveable;
 use ILIAS\TestQuestionPool\Questions\SuggestedSolution\SuggestedSolution;
 use ILIAS\TestQuestionPool\Questions\SuggestedSolution\SuggestedSolutionsDatabaseRepository;
 use ILIAS\TestQuestionPool\Questions\GeneralQuestionPropertiesRepository;
+use ILIAS\HTTP\Services as Http;
 use ILIAS\Refinery\Factory as Refinery;
 use ILIAS\Notes\GUIService;
 
@@ -120,6 +121,7 @@ abstract class assQuestionGUI
     protected ilGlobalPageTemplate $tpl;
     protected ilLanguage $lng;
     protected Refinery $refinery;
+    protected Http $http;
 
     protected $error;
     protected string $errormessage;
@@ -177,6 +179,7 @@ abstract class assQuestionGUI
         $this->logger = $DIC['ilLog'];
         $this->component_repository = $DIC['component.repository'];
         $this->refinery = $DIC['refinery'];
+        $this->http = $DIC->http();
 
         $local_dic = QuestionPoolDIC::dic();
         $this->request = $local_dic['request_data_collector'];
@@ -1203,7 +1206,15 @@ abstract class assQuestionGUI
             if ($save) {
                 if ($form->checkInput()) {
                     if ($solution->isOfTypeFile()) {
-                        $solution = $solution->withTitle($_POST["filename"]);
+                        $filename = $this->http->wrapper()->post()->retrieve(
+                            'filename',
+                            $this->refinery->byTrying([
+                                $this->refinery->kindlyTo()->string(),
+                                $this->refinery->always('')
+                            ])
+                        );
+
+                        $solution = $solution->withTitle($filename);
                     }
 
                     if (!$solution->isOfTypeLink()) {
@@ -1286,35 +1297,44 @@ abstract class assQuestionGUI
 
     public function saveSuggestedSolutionType(): void
     {
-        switch ($_POST["solutiontype"]) {
-            case "lm":
-                $type = "lm";
-                $search = "lm";
+        $solution_type = $this->http->wrapper()->post()->retrieve(
+            'solutiontype',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always(null)
+            ])
+        );
+
+        switch ($solution_type) {
+            case 'lm':
+                $type = 'lm';
+                $search = 'lm';
                 break;
-            case "git":
-                $type = "glo";
-                $search = "glo";
+            case 'git':
+                $type = 'glo';
+                $search = 'glo';
                 break;
-            case "st":
-                $type = "lm";
-                $search = "st";
+            case 'st':
+                $type = 'lm';
+                $search = 'st';
                 break;
-            case "pg":
-                $type = "lm";
-                $search = "pg";
+            case 'pg':
+                $type = 'lm';
+                $search = 'pg';
                 break;
-            case "file":
-            case "text":
+            case 'file':
+            case 'text':
             default:
                 $this->suggestedsolution();
                 return;
         }
-        if (isset($_POST['solutiontype'])) {
+
+        if (isset($solution_type)) {
             $this->ctrl->setParameter($this, 'expandCurrentPath', 1);
         }
-        $this->ctrl->setParameter($this, "link_new_type", $type);
-        $this->ctrl->setParameter($this, "search_link_type", $search);
-        $this->ctrl->redirect($this, "outSolutionExplorer");
+        $this->ctrl->setParameter($this, 'link_new_type', $type);
+        $this->ctrl->setParameter($this, 'search_link_type', $search);
+        $this->ctrl->redirect($this, 'outSolutionExplorer');
     }
 
     public function cancelExplorer(): void

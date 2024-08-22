@@ -162,13 +162,19 @@ class ilSuggestedSolutionSelectorGUI extends ilSubEnabledFormPropertyGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        $_POST[$this->getPostVar()] =
-            ilUtil::stripSlashes($_POST[$this->getPostVar()]);
-        if ($this->getRequired() && trim($_POST[$this->getPostVar()]) == "") {
-            $this->setAlert($lng->txt("msg_input_is_required"));
+        $post_var = $this->http->wrapper()->post()->retrieve(
+            $this->getPostVar(),
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('')
+            ])
+        );
 
+        if ($this->getRequired() && trim(ilUtil::stripSlashes($post_var)) === '') {
+            $this->setAlert($lng->txt('msg_input_is_required'));
             return false;
         }
+
         return $this->checkSubItemsInput();
     }
 

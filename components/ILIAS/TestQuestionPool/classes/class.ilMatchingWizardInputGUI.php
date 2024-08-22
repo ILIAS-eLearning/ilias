@@ -165,25 +165,32 @@ class ilMatchingWizardInputGUI extends ilTextInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        if (is_array($_POST[$this->getPostVar()])) {
-            $foundvalues = ilArrayUtil::stripSlashesRecursive(
-                $_POST[$this->getPostVar()],
+        $post_var = $this->http->wrapper()->post()->retrieve(
+            $this->getPostVar(),
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always(null)
+            ])
+        );
+        $found_values = is_array($post_var)
+            ? ilArrayUtil::stripSlashesRecursive(
+                $post_var,
                 true,
-                ilObjAdvancedEditing::_getUsedHTMLTagsAsString("assessment")
-            );
-        } else {
-            $foundvalues = $_POST[$this->getPostVar()];
-        }
-        if (is_array($foundvalues)) {
+                ilObjAdvancedEditing::_getUsedHTMLTagsAsString('assessment')
+            )
+            : $post_var;
+
+        if (is_array($found_values)) {
             // check answers
-            if (is_array($foundvalues['answer'])) {
-                foreach ($foundvalues['answer'] as $aidx => $answervalue) {
-                    if ($answervalue === '' && (
-                        (!isset($foundvalues['imagename'][$aidx]) || $foundvalues['imagename'][$aidx] === '') &&
-                        !isset($_FILES[$this->getPostVar()]['tmp_name']['image'][$aidx])
-                    )) {
+            if (is_array($found_values['answer'])) {
+                foreach ($found_values['answer'] as $aidx => $answervalue) {
+                    if (
+                        $answervalue === ''
+                        && (!isset($found_values['imagename'][$aidx]) || $found_values['imagename'][$aidx] === '')
+                        && !isset($_FILES[$this->getPostVar()]['tmp_name']['image'][$aidx])
+                    ) {
                         // If there is to text answer, no already staged image, and no uploaded image ...
-                        $this->setAlert($lng->txt("msg_input_is_required"));
+                        $this->setAlert($lng->txt('msg_input_is_required'));
                         return false;
                     }
                 }
@@ -197,37 +204,38 @@ class ilMatchingWizardInputGUI extends ilTextInputGUI
                             switch ($error) {
                                 case UPLOAD_ERR_FORM_SIZE:
                                 case UPLOAD_ERR_INI_SIZE:
-                                    $this->setAlert($lng->txt("form_msg_file_size_exceeds"));
+                                    $this->setAlert($lng->txt('form_msg_file_size_exceeds'));
                                     return false;
                                     break;
 
                                 case UPLOAD_ERR_PARTIAL:
-                                    $this->setAlert($lng->txt("form_msg_file_partially_uploaded"));
+                                    $this->setAlert($lng->txt('form_msg_file_partially_uploaded'));
                                     return false;
                                     break;
 
                                 case UPLOAD_ERR_NO_FILE:
-                                    if ($this->getRequired()) {
-                                        if ((!isset($foundvalues['imagename'][$index]) || $foundvalues['imagename'][$index] === '') &&
-                                            (!isset($foundvalues['answer'][$index]) && $foundvalues['answer'][$index] === '')) {
-                                            $this->setAlert($lng->txt("form_msg_file_no_upload"));
-                                            return false;
-                                        }
+                                    if (
+                                        (!isset($found_values['imagename'][$index]) || $found_values['imagename'][$index] === '')
+                                        && !isset($found_values['answer'][$index])
+                                        && $this->getRequired()
+                                    ) {
+                                        $this->setAlert($lng->txt('form_msg_file_no_upload'));
+                                        return false;
                                     }
                                     break;
 
                                 case UPLOAD_ERR_NO_TMP_DIR:
-                                    $this->setAlert($lng->txt("form_msg_file_missing_tmp_dir"));
+                                    $this->setAlert($lng->txt('form_msg_file_missing_tmp_dir'));
                                     return false;
                                     break;
 
                                 case UPLOAD_ERR_CANT_WRITE:
-                                    $this->setAlert($lng->txt("form_msg_file_cannot_write_to_disk"));
+                                    $this->setAlert($lng->txt('form_msg_file_cannot_write_to_disk'));
                                     return false;
                                     break;
 
                                 case UPLOAD_ERR_EXTENSION:
-                                    $this->setAlert($lng->txt("form_msg_file_upload_stopped_ext"));
+                                    $this->setAlert($lng->txt('form_msg_file_upload_stopped_ext'));
                                     return false;
                                     break;
                             }
@@ -239,21 +247,18 @@ class ilMatchingWizardInputGUI extends ilTextInputGUI
                     foreach ($_FILES[$this->getPostVar()]['tmp_name']['image'] as $index => $tmpname) {
                         $filename = $_FILES[$this->getPostVar()]['name']['image'][$index];
                         $filename_arr = pathinfo($filename);
-                        $suffix = '';
-                        if (isset($filename_arr['extension'])) {
-                            $suffix = $filename_arr["extension"];
-                        }
+                        $suffix = $filename_arr['extension'] ?? '';
 
                         // check suffixes
-                        if ($tmpname != '' && is_array($this->getSuffixes())) {
+                        if ($tmpname !== '' && is_array($this->getSuffixes())) {
                             $vir = ilVirusScanner::virusHandling($tmpname, $filename);
                             if ($vir[0] == false) {
-                                $this->setAlert($lng->txt("form_msg_file_virus_found") . "<br />" . $vir[1]);
+                                $this->setAlert($lng->txt('form_msg_file_virus_found') . '<br />' . $vir[1]);
                                 return false;
                             }
 
-                            if (!in_array(strtolower($suffix), $this->getSuffixes())) {
-                                $this->setAlert($lng->txt("form_msg_file_wrong_file_type"));
+                            if (!in_array(strtolower($suffix), $this->getSuffixes(), true)) {
+                                $this->setAlert($lng->txt('form_msg_file_wrong_file_type'));
                                 return false;
                             }
                         }

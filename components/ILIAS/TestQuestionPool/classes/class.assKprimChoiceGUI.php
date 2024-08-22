@@ -72,9 +72,8 @@ class assKprimChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAd
     protected function uploadImage(): void
     {
         $this->setAdditionalContentEditingModeFromPost();
-        $result = $this->writePostData(true);
 
-        if ($result == 0) {
+        if ($this->writePostData(true) === 0) {
             $this->object->saveToDb();
             $this->editQuestion();
         }
@@ -82,8 +81,14 @@ class assKprimChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAd
 
     public function removeImage(): void
     {
-        $position = key($_POST['cmd']['removeImage']);
-        $this->object->removeAnswerImage($position);
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
+                $this->refinery->always([])
+            ])
+        );
+        $this->object->removeAnswerImage(key($cmd['removeImage'] ?? []));
 
         $this->object->saveToDb();
         $this->editQuestion();
@@ -91,8 +96,16 @@ class assKprimChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAd
 
     public function downkprimanswers(): void
     {
-        if (isset($_POST['cmd'][__FUNCTION__]) && count($_POST['cmd'][__FUNCTION__])) {
-            $this->object->moveAnswerDown(key($_POST['cmd'][__FUNCTION__]));
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
+                $this->refinery->always([])
+            ])
+        );
+
+        if (isset($cmd[__FUNCTION__]) && count($cmd[__FUNCTION__])) {
+            $this->object->moveAnswerDown(key($cmd[__FUNCTION__]));
             $this->object->saveToDb();
         }
 
@@ -101,8 +114,16 @@ class assKprimChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAd
 
     public function upkprimanswers(): void
     {
-        if (isset($_POST['cmd'][__FUNCTION__]) && count($_POST['cmd'][__FUNCTION__])) {
-            $this->object->moveAnswerUp(key($_POST['cmd'][__FUNCTION__]));
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
+                $this->refinery->always([])
+            ])
+        );
+
+        if (isset($cmd[__FUNCTION__]) && count($cmd[__FUNCTION__])) {
+            $this->object->moveAnswerUp(key($cmd[__FUNCTION__]));
             $this->object->saveToDb();
         }
 
@@ -116,19 +137,27 @@ class assKprimChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAd
     {
         $form = $this->buildEditForm();
         $form->setValuesByPost();
+        $answers_input = $form->getItemByPostVar('kprimanswers');
 
-        if ($always) {
-            $answersInput = $form->getItemByPostVar('kprimanswers');
-            $answersInput->setIgnoreMissingUploadsEnabled(true);
+        if ($always && $answers_input instanceof ilFormPropertyGUI) {
+            $answers_input->setIgnoreMissingUploadsEnabled(true);
 
-            if (!$answersInput->checkUploads($_POST[$answersInput->getPostVar()])) {
-                $this->tpl->setOnScreenMessage('failure', $this->lng->txt("form_input_not_valid"));
+            $answer_input_postvar = $this->http->wrapper()->post()->retrieve(
+                $answers_input->getPostVar(),
+                $this->refinery->byTrying([
+                    $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
+                    $this->refinery->always([])
+                ])
+            );
+
+            if (!$answers_input->checkUploads($answer_input_postvar)) {
+                $this->tpl->setOnScreenMessage('failure', $this->lng->txt('form_input_not_valid'));
                 $this->edit_form = $form;
                 $this->editQuestion();
                 return 1;
             }
 
-            $answersInput->collectValidFiles();
+            $answers_input->collectValidFiles();
         } elseif (!$form->checkInput()) {
             $this->edit_form = $form;
             $this->editQuestion();

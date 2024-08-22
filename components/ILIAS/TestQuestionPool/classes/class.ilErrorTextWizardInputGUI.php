@@ -205,48 +205,49 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        if (isset($_POST[$this->getPostVar()]) && is_array($_POST[$this->getPostVar()])) {
-            $foundvalues = ilArrayUtil::stripSlashesRecursive($_POST[$this->getPostVar()]);
-        } else {
-            $foundvalues = $_POST[$this->getPostVar()] ?? null;
-        }
-        $max_points = 0;
+        $post_var = $this->http->wrapper()->post()->retrieve(
+            $this->getPostVar(),
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always(null)
+            ])
+        );
 
-        if (is_array($foundvalues) && count($foundvalues) > 0) {
+        $found_values = is_array($post_var) ? ilArrayUtil::stripSlashesRecursive($post_var) : null;
+
+        if (count($found_values ?? []) > 0) {
             // check answers
-            if (is_array($foundvalues['key']) && is_array($foundvalues['value'])) {
-                foreach ($foundvalues['key'] as $val) {
-                    if ($this->getRequired() && (strlen($val)) == 0) {
-                        $this->setAlert($lng->txt("msg_input_is_required"));
+            if (is_array($found_values['key']) && is_array($found_values['value'])) {
+                foreach ($found_values['key'] as $val) {
+                    if ($val === '' && $this->getRequired()) {
+                        $this->setAlert($lng->txt('msg_input_is_required'));
                         return false;
                     }
                 }
-                foreach ($foundvalues['value'] as $val) {
-                    if ($this->getRequired() && (strlen($val)) == 0) {
-                        $this->setAlert($lng->txt("msg_input_is_required"));
+                foreach ($found_values['value'] as $val) {
+                    if ($val === '' && $this->getRequired()) {
+                        $this->setAlert($lng->txt('msg_input_is_required'));
                         return false;
                     }
                 }
-                foreach ($foundvalues['points'] as $val) {
-                    $val_num = str_replace(",", ".", $val);
-                    if ($this->getRequired() && (strlen($val)) == 0) {
-                        $this->setAlert($lng->txt("msg_input_is_required"));
+                foreach ($found_values['points'] as $val) {
+                    $val_num = str_replace(',', '.', $val);
+                    if ($val === '' && $this->getRequired()) {
+                        $this->setAlert($lng->txt('msg_input_is_required'));
                         return false;
                     }
                     if (!is_numeric($val_num)) {
-                        $this->setAlert($lng->txt("form_msg_numeric_value_required"));
+                        $this->setAlert($lng->txt('form_msg_numeric_value_required'));
                         return false;
                     }
                     if ($val_num <= 0) {
-                        $this->setAlert($lng->txt("positive_numbers_required"));
+                        $this->setAlert($lng->txt('positive_numbers_required'));
                         return false;
                     }
                 }
-            } else {
-                if ($this->getRequired()) {
-                    $this->setAlert($lng->txt("msg_input_is_required"));
-                    return false;
-                }
+            } elseif ($this->getRequired()) {
+                $this->setAlert($lng->txt('msg_input_is_required'));
+                return false;
             }
         } else {
             $this->setAlert($lng->txt('errortext_info'));

@@ -35,7 +35,7 @@ class ilImagemapCorrectionsInputGUI extends ilImagemapFileInputGUI
     {
         if (is_array($a_areas['points'])) {
             foreach ($this->areas as $idx => $name) {
-                if ($this->getPointsUncheckedFieldEnabled() && isset($a_areas['points_unchecked'])) {
+                if (isset($a_areas['points_unchecked']) && $this->getPointsUncheckedFieldEnabled()) {
                     $this->areas[$idx]->setPointsUnchecked($a_areas['points_unchecked'][$idx]);
                 } else {
                     $this->areas[$idx]->setPointsUnchecked(0);
@@ -51,69 +51,80 @@ class ilImagemapCorrectionsInputGUI extends ilImagemapFileInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        if (is_array($_POST[$this->getPostVar()])) {
-            $_POST[$this->getPostVar()] = ilArrayUtil::stripSlashesRecursive($_POST[$this->getPostVar()]);
-        }
+        $post_var = $this->http->wrapper()->post()->retrieve(
+            $this->getPostVar(),
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
+                $this->refinery->always(null)
+            ])
+        );
+        $post_var = is_array($post_var) ? ilArrayUtil::stripSlashesRecursive($post_var) : $post_var;
 
         $max = 0;
-        if (is_array($_POST[$this->getPostVar()]['coords']['points'])) {
-            foreach ($_POST[$this->getPostVar()]['coords']['points'] as $idx => $name) {
-                if ((!strlen($_POST[$this->getPostVar()]['coords']['points'][$idx])) && ($this->getRequired())) {
+        if (is_array($post_var['coords']['points'])) {
+            foreach ($post_var['coords']['points'] as $idx => $name) {
+                if ($post_var['coords']['points'][$idx] === '' && $this->getRequired()) {
                     $this->setAlert($lng->txt('form_msg_area_missing_points'));
                     return false;
                 }
-                if ((!is_numeric($_POST[$this->getPostVar()]['coords']['points'][$idx]))) {
+
+                if (!is_numeric($post_var['coords']['points'][$idx])) {
                     $this->setAlert($lng->txt('form_msg_numeric_value_required'));
                     return false;
                 }
-                if ($_POST[$this->getPostVar()]['coords']['points'][$idx] > 0) {
-                    $max = $_POST[$this->getPostVar()]['coords']['points'][$idx];
+
+                if ($post_var['coords']['points'][$idx] > 0) {
+                    $max = (int) $post_var['coords']['points'][$idx];
                 }
             }
         }
 
-        if ($max == 0) {
-            $this->setAlert($lng->txt("enter_enough_positive_points"));
+        if ($max === 0) {
+            $this->setAlert($lng->txt('enter_enough_positive_points'));
             return false;
         }
+
         return true;
     }
 
+    /**
+     * @throws ilTemplateException
+     */
     public function insert(ilTemplate $a_tpl): void
     {
         global $DIC;
         $lng = $DIC['lng'];
 
-        $template = new ilTemplate("tpl.prop_imagemapquestioncorrection_input.html", true, true, "components/ILIAS/TestQuestionPool");
+        $template = new ilTemplate('tpl.prop_imagemapquestioncorrection_input.html', true, true, 'components/ILIAS/TestQuestionPool');
 
-        if ($this->getImage() != "") {
-            $template->setCurrentBlock("image");
+        if ($this->getImage() !== '') {
+            $template->setCurrentBlock('image');
             if (count($this->getAreas())) {
                 $preview = new ilImagemapPreview($this->getImagePath() . $this->getValue());
                 foreach ($this->getAreas() as $index => $area) {
-                    $preview->addArea($index, $area->getArea(), $area->getCoords(), $area->getAnswertext(), "", "", true, $this->getLineColor());
+                    $preview->addArea($index, $area->getArea(), $area->getCoords(), $area->getAnswertext(), '', '', true, $this->getLineColor());
                 }
                 $preview->createPreview();
-                $imagepath = $this->getImagePathWeb() . $preview->getPreviewFilename($this->getImagePath(), $this->getValue()) . "?img=" . time();
-                $template->setVariable("SRC_IMAGE", $imagepath);
+                $imagepath = $this->getImagePathWeb() . $preview->getPreviewFilename($this->getImagePath(), $this->getValue()) . '?img=' . time();
+                $template->setVariable('SRC_IMAGE', $imagepath);
             } else {
-                $template->setVariable("SRC_IMAGE", $this->getImage());
+                $template->setVariable('SRC_IMAGE', $this->getImage());
             }
-            $template->setVariable("ALT_IMAGE", $this->getAlt());
-            $template->setVariable("POST_VAR_D", $this->getPostVar());
+            $template->setVariable('ALT_IMAGE', $this->getAlt());
+            $template->setVariable('POST_VAR_D', $this->getPostVar());
             $template->parseCurrentBlock();
         }
 
         if (is_array($this->getAreas()) && $this->getAreas()) {
             $counter = 0;
             foreach ($this->getAreas() as $area) {
-                if (strlen($area->getPoints())) {
+                if ($area->getPoints() !== '') {
                     $template->setCurrentBlock('area_points_value');
                     $template->setVariable('VALUE_POINTS', $area->getPoints());
                     $template->parseCurrentBlock();
                 }
                 if ($this->getPointsUncheckedFieldEnabled()) {
-                    if (strlen($area->getPointsUnchecked())) {
+                    if ($area->getPointsUnchecked() !== '') {
                         $template->setCurrentBlock('area_points_unchecked_value');
                         $template->setVariable('VALUE_POINTS_UNCHECKED', $area->getPointsUnchecked());
                         $template->parseCurrentBlock();
@@ -123,7 +134,7 @@ class ilImagemapCorrectionsInputGUI extends ilImagemapFileInputGUI
                     $template->parseCurrentBlock();
                 }
                 $template->setCurrentBlock('row');
-                if (strlen($area->getAnswertext())) {
+                if ($area->getAnswertext() !== '') {
                     $template->setVariable('ANSWER_AREA', $area->getAnswertext());
                 }
                 $template->setVariable('POST_VAR_R', $this->getPostVar());
@@ -136,36 +147,36 @@ class ilImagemapCorrectionsInputGUI extends ilImagemapFileInputGUI
                 $template->parseCurrentBlock();
                 $counter++;
             }
-            $template->setCurrentBlock("areas");
-            $template->setVariable("TEXT_NAME", $lng->txt("ass_imap_hint"));
+            $template->setCurrentBlock('areas');
+            $template->setVariable('TEXT_NAME', $lng->txt('ass_imap_hint'));
             if ($this->getPointsUncheckedFieldEnabled()) {
-                $template->setVariable("TEXT_POINTS", $lng->txt("points_checked"));
+                $template->setVariable('TEXT_POINTS', $lng->txt('points_checked'));
 
                 $template->setCurrentBlock('area_points_unchecked_head');
-                $template->setVariable("TEXT_POINTS_UNCHECKED", $lng->txt("points_unchecked"));
+                $template->setVariable('TEXT_POINTS_UNCHECKED', $lng->txt('points_unchecked'));
                 $template->parseCurrentBlock();
             } else {
-                $template->setVariable("TEXT_POINTS", $lng->txt("points"));
+                $template->setVariable('TEXT_POINTS', $lng->txt('points'));
             }
-            $template->setVariable("TEXT_SHAPE", $lng->txt("shape"));
-            $template->setVariable("TEXT_COORDINATES", $lng->txt("coordinates"));
-            $template->setVariable("TEXT_COMMANDS", $lng->txt("actions"));
+            $template->setVariable('TEXT_SHAPE', $lng->txt('shape'));
+            $template->setVariable('TEXT_COORDINATES', $lng->txt('coordinates'));
+            $template->setVariable('TEXT_COMMANDS', $lng->txt('actions'));
             $template->parseCurrentBlock();
         }
 
-        $template->setVariable("POST_VAR", $this->getPostVar());
-        $template->setVariable("ID", $this->getFieldId());
-        $template->setVariable("TXT_BROWSE", $lng->txt("select_file"));
-        $template->setVariable("TXT_MAX_SIZE", $lng->txt("file_notice") . " " .
+        $template->setVariable('POST_VAR', $this->getPostVar());
+        $template->setVariable('ID', $this->getFieldId());
+        $template->setVariable('TXT_BROWSE', $lng->txt('select_file'));
+        $template->setVariable('TXT_MAX_SIZE', $lng->txt('file_notice') . ' ' .
             $this->getMaxFileSizeString());
 
-        $a_tpl->setCurrentBlock("prop_generic");
-        $a_tpl->setVariable("PROP_GENERIC", $template->get());
+        $a_tpl->setCurrentBlock('prop_generic');
+        $a_tpl->setVariable('PROP_GENERIC', $template->get());
         $a_tpl->parseCurrentBlock();
 
-        global $DIC;
-        $tpl = $DIC['tpl'];
-        #$tpl->addJavascript("assets/js/ServiceFormWizardInput.js");
-        #$tpl->addJavascript(assets/js/imagemap.js");
+        #global $DIC;
+        #$tpl = $DIC['tpl'];
+        #$tpl->addJavascript('assets/js/ServiceFormWizardInput.js');
+        #$tpl->addJavascript(assets/js/imagemap.js');
     }
 }

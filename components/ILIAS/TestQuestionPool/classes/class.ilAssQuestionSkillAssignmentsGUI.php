@@ -19,6 +19,8 @@
 use ILIAS\TestQuestionPool\QuestionPoolDIC;
 use ILIAS\TestQuestionPool\RequestDataCollector;
 use ILIAS\Skill\Service\SkillUsageService;
+use ILIAS\HTTP\Services as Http;
+use ILIAS\Refinery\Factory as Refinery;
 
 /**
  * User interface for assignment of questions from a test question pool (or
@@ -62,6 +64,9 @@ class ilAssQuestionSkillAssignmentsGUI
 
     private SkillUsageService $skillUsageService;
 
+    private Http $http;
+    private Refinery $refinery;
+
     /**
      * @param ilCtrl $ctrl
      * @param ilAccessHandler $access
@@ -82,6 +87,8 @@ class ilAssQuestionSkillAssignmentsGUI
 
         global $DIC;
         $this->skillUsageService = $DIC->skills()->usage();
+        $this->http = $DIC->http();
+        $this->refinery = $DIC->refinery();
     }
 
     public function getQuestionOrderSequence(): ?array
@@ -195,13 +202,23 @@ class ilAssQuestionSkillAssignmentsGUI
         return false;
     }
 
+    /**
+     * @throws ilCtrlException
+     */
     private function saveSkillPointsCmd(): void
     {
         $success = true;
+        $skill_points = $this->http->wrapper()->post()->retrieve(
+            'skill_points',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->float()),
+                $this->refinery->always(null),
+            ])
+        );
 
-        if (is_array($_POST['skill_points'])) {
+        if (is_array($skill_points)) {
             for ($i = 0; $i < 2; $i++) {
-                foreach ($_POST['skill_points'] as $assignmentKey => $skillPoints) {
+                foreach ($skill_points as $assignmentKey => $skillPoints) {
                     $assignmentKey = explode(':', $assignmentKey);
                     $skillBaseId = (int) $assignmentKey[0];
                     $skillTrefId = (int) $assignmentKey[1];
@@ -210,7 +227,7 @@ class ilAssQuestionSkillAssignmentsGUI
                     if ($this->isTestQuestion($questionId)) {
                         $assignment = new ilAssQuestionSkillAssignment($this->db);
 
-                        if ($i == 0) {
+                        if ($i === 0) {
                             if (!$assignment->isValidSkillPoint($skillPoints)) {
                                 $success = false;
                                 break 2;
@@ -242,10 +259,11 @@ class ilAssQuestionSkillAssignmentsGUI
         if ($success) {
             $this->tpl->setOnScreenMessage('success', $this->lng->txt('tst_msg_skl_qst_assign_points_saved'), true);
             $this->ctrl->redirect($this, self::CMD_SHOW_SKILL_QUEST_ASSIGNS);
-        } else {
-            $this->tpl->setOnScreenMessage('failure', $this->lng->txt('tst_msg_skl_qst_assign_points_not_saved'));
-            $this->showSkillQuestionAssignmentsCmd(true);
+            return;
         }
+
+        $this->tpl->setOnScreenMessage('failure', $this->lng->txt('tst_msg_skl_qst_assign_points_not_saved'));
+        $this->showSkillQuestionAssignmentsCmd(true);
     }
 
     private function updateSkillQuestionAssignmentsCmd(): void
@@ -515,9 +533,18 @@ class ilAssQuestionSkillAssignmentsGUI
         $this->tpl->setContent($this->ctrl->getHTML($confirmation));
     }
 
+    /**
+     * @throws ilCtrlException
+     */
     private function syncOriginalCmd(): void
     {
-        $questionId = (int) $_POST['question_id'];
+        $questionId = $this->http->wrapper()->post()->retrieve(
+            'question_id',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(0)
+            ])
+        );
 
         if ($this->isTestQuestion($questionId) && $this->isSyncOriginalPossibleAndAllowed($questionId)) {
             $question = assQuestion::instantiateQuestion($questionId);

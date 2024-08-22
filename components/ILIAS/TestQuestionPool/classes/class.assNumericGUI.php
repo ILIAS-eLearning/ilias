@@ -284,14 +284,45 @@ class assNumericGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjust
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $this->object->setMaxChars($_POST["maxchars"]);
+        $this->object->setMaxChars($this->http->wrapper()->post()->retrieve(
+            'maxchars',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(6)
+            ])
+        ));
     }
 
     public function writeAnswerSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $this->object->setLowerLimit($_POST['lowerlimit']);
-        $this->object->setUpperLimit($_POST['upperlimit']);
-        $this->object->setPoints((float) str_replace(',', '.', $_POST['points']));
+        $post = $this->http->wrapper()->post();
+
+        $lowerlimit = $post->retrieve(
+            'lowerlimit',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->float(),
+                $this->refinery->always(0.0)
+            ])
+        );
+        $this->object->setLowerLimit($lowerlimit);
+
+        $upperlimit = $post->retrieve(
+            'upperlimit',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->float(),
+                $this->refinery->always(0.0)
+            ])
+        );
+        $this->object->setUpperLimit($upperlimit);
+
+        $points = $post->retrieve(
+            'points',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('0.0')
+            ])
+        );
+        $this->object->setPoints((float) str_replace(',', '.', $points));
     }
 
     public function populateQuestionSpecificFormPart(\ilPropertyFormGUI $form): ilPropertyFormGUI

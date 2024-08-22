@@ -40,46 +40,52 @@ class ilAssMatchingPairCorrectionsInputGUI extends ilMatchingPairWizardInputGUI
 
     public function setValue($a_value): void
     {
-        if (is_array($a_value)) {
-            if (is_array($a_value['points'])) {
-                foreach ($a_value['points'] as $idx => $term) {
-                    $this->pairs[$idx]->withPoints($a_value['points'][$idx]);
-                }
+        if (is_array($a_value) && is_array($a_value['points'])) {
+            foreach ($a_value['points'] as $idx => $term) {
+                $this->pairs[$idx]->withPoints($a_value['points'][$idx]);
             }
         }
     }
 
     public function checkInput(): bool
     {
-        $foundvalues = $_POST[$this->getPostVar()];
-        if (is_array($foundvalues)) {
+        $found_values = $this->http->wrapper()->post()->retrieve(
+            $this->getPostVar(),
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always(null)
+            ])
+        );
+
+        if (is_array($found_values)) {
             $max = 0;
-            foreach ($foundvalues['points'] as $val) {
+            foreach ($found_values['points'] as $val) {
                 if ($val > 0) {
                     $max += $val;
                 }
-                if ($this->getRequired() && (strlen($val)) == 0) {
-                    $this->setAlert($this->lng->txt("msg_input_is_required"));
+                if ($val === '' && $this->getRequired()) {
+                    $this->setAlert($this->lng->txt('msg_input_is_required'));
                     return false;
                 }
             }
             if ($max <= 0) {
-                $this->setAlert($this->lng->txt("enter_enough_positive_points"));
+                $this->setAlert($this->lng->txt('enter_enough_positive_points'));
                 return false;
             }
-        } else {
-            if ($this->getRequired()) {
-                $this->setAlert($this->lng->txt("msg_input_is_required"));
-                return false;
-            }
+        } elseif ($this->getRequired()) {
+            $this->setAlert($this->lng->txt('msg_input_is_required'));
+            return false;
         }
 
         return $this->checkSubItemsInput();
     }
 
+    /**
+     * @throws ilTemplateException
+     */
     public function insert(ilTemplate $a_tpl): void
     {
-        $tpl = new ilTemplate("tpl.prop_matchingpaircorrection_input.html", true, true, "components/ILIAS/TestQuestionPool");
+        $tpl = new ilTemplate('tpl.prop_matchingpaircorrection_input.html', true, true, 'components/ILIAS/TestQuestionPool');
         $i = 0;
         $term_ids = [];
         $definition_ids = [];

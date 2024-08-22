@@ -29,7 +29,7 @@ class ilAssAnswerCorrectionsInputGUI extends ilAnswerWizardInputGUI
     /**
      * @var bool
      */
-    protected $hidePointsEnabled = false;
+    protected bool $hidePointsEnabled = false;
 
     /**
      * @return bool
@@ -49,11 +49,9 @@ class ilAssAnswerCorrectionsInputGUI extends ilAnswerWizardInputGUI
 
     public function setValue($a_value): void
     {
-        if (is_array($a_value)) {
-            if (is_array($a_value['points'])) {
-                foreach ($a_value['points'] as $index => $value) {
-                    $this->values[$index]->setPoints($a_value['points'][$index]);
-                }
+        if (is_array($a_value) && is_array($a_value['points'])) {
+            foreach ($a_value['points'] as $index => $value) {
+                $this->values[$index]->setPoints($a_value['points'][$index]);
             }
         }
     }
@@ -62,88 +60,96 @@ class ilAssAnswerCorrectionsInputGUI extends ilAnswerWizardInputGUI
     {
         global $DIC;
         $lng = $DIC['lng'];
-        $foundvalues = $_POST[$this->getPostVar()];
+
+        $found_values = $this->http->wrapper()->post()->retrieve(
+            $this->getPostVar(),
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always(null)
+            ])
+        );
 
         if ($this->isHidePointsEnabled()) {
             return true;
         }
 
-        if (is_array($foundvalues)) {
+        if (is_array($found_values)) {
             // check points
             $max = 0;
-            if (is_array($foundvalues['points'])) {
-                foreach ($foundvalues['points'] as $points) {
-                    $points = str_replace(',', '.', $points);
-                    if ($points > $max) {
-                        $max = $points;
-                    }
-                    if (((strlen($points)) == 0) || (!is_numeric($points))) {
-                        $this->setAlert($lng->txt("form_msg_numeric_value_required"));
+            foreach ($found_values['points'] ?? [] as $points) {
+                $points = str_replace(',', '.', $points);
+                $max = max($max, $points);
+                if ($points === '' || !is_numeric($points)) {
+                    $this->setAlert($lng->txt('form_msg_numeric_value_required'));
+                    return false;
+                }
+
+                if ($this->minvalueShouldBeGreater()) {
+                    if (
+                        trim($points) !== ''
+                        && $this->getMinValue() !== false
+                        && $points <= $this->getMinValue()
+                    ) {
+                        $this->setAlert($lng->txt('form_msg_value_too_low'));
                         return false;
                     }
-                    if ($this->minvalueShouldBeGreater()) {
-                        if (trim($points) != "" &&
-                            $this->getMinValue() !== false &&
-                            $points <= $this->getMinValue()) {
-                            $this->setAlert($lng->txt("form_msg_value_too_low"));
-
-                            return false;
-                        }
-                    } else {
-                        if (trim($points) != "" &&
-                            $this->getMinValue() !== false &&
-                            $points < $this->getMinValue()) {
-                            $this->setAlert($lng->txt("form_msg_value_too_low"));
-
-                            return false;
-                        }
-                    }
+                } elseif (
+                    trim($points) !== ''
+                    && $this->getMinValue() !== false
+                    && $points < $this->getMinValue()
+                ) {
+                    $this->setAlert($lng->txt('form_msg_value_too_low'));
+                    return false;
                 }
             }
-            if ($max == 0) {
-                $this->setAlert($lng->txt("enter_enough_positive_points"));
+
+            if ($max === 0) {
+                $this->setAlert($lng->txt('enter_enough_positive_points'));
                 return false;
             }
         } else {
-            $this->setAlert($lng->txt("msg_input_is_required"));
+            $this->setAlert($lng->txt('msg_input_is_required'));
             return false;
         }
 
         return $this->checkSubItemsInput();
     }
 
+    /**
+     * @throws ilTemplateException
+     */
     public function insert(ilTemplate $a_tpl): void
     {
         global $DIC;
         $lng = $DIC['lng'];
 
-        $tpl = new ilTemplate("tpl.prop_textsubsetcorrection_input.html", true, true, "components/ILIAS/TestQuestionPool");
+        $tpl = new ilTemplate('tpl.prop_textsubsetcorrection_input.html', true, true, 'components/ILIAS/TestQuestionPool');
         $i = 0;
         foreach ($this->values as $value) {
             if (!$this->isHidePointsEnabled()) {
-                $tpl->setCurrentBlock("points");
-                $tpl->setVariable("POST_VAR", $this->getPostVar());
-                $tpl->setVariable("ROW_NUMBER", $i);
-                $tpl->setVariable("POINTS_ID", $this->getPostVar() . "[points][$i]");
-                $tpl->setVariable("POINTS", ilLegacyFormElementsUtil::prepareFormOutput($value->getPoints()));
+                $tpl->setCurrentBlock('points');
+                $tpl->setVariable('POST_VAR', $this->getPostVar());
+                $tpl->setVariable('ROW_NUMBER', $i);
+                $tpl->setVariable('POINTS_ID', $this->getPostVar() . "[points][$i]");
+                $tpl->setVariable('POINTS', ilLegacyFormElementsUtil::prepareFormOutput($value->getPoints()));
                 $tpl->parseCurrentBlock();
             }
 
-            $tpl->setCurrentBlock("row");
-            $tpl->setVariable("ANSWER", ilLegacyFormElementsUtil::prepareFormOutput($value->getAnswertext()));
+            $tpl->setCurrentBlock('row');
+            $tpl->setVariable('ANSWER', ilLegacyFormElementsUtil::prepareFormOutput($value->getAnswertext()));
             $tpl->parseCurrentBlock();
             $i++;
         }
 
-        $tpl->setVariable("ELEMENT_ID", $this->getPostVar());
-        $tpl->setVariable("ANSWER_TEXT", $this->getTextInputLabel($lng));
+        $tpl->setVariable('ELEMENT_ID', $this->getPostVar());
+        $tpl->setVariable('ANSWER_TEXT', $this->getTextInputLabel($lng));
 
         if (!$this->isHidePointsEnabled()) {
-            $tpl->setVariable("POINTS_TEXT", $this->getPointsInputLabel($lng));
+            $tpl->setVariable('POINTS_TEXT', $this->getPointsInputLabel($lng));
         }
 
-        $a_tpl->setCurrentBlock("prop_generic");
-        $a_tpl->setVariable("PROP_GENERIC", $tpl->get());
+        $a_tpl->setCurrentBlock('prop_generic');
+        $a_tpl->setVariable('PROP_GENERIC', $tpl->get());
         $a_tpl->parseCurrentBlock();
     }
 }

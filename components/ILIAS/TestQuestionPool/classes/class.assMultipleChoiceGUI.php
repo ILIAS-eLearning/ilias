@@ -631,28 +631,75 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
         return ilLegacyFormElementsUtil::prepareTextareaOutput($output, true);
     }
 
+    /**
+     * @throws ilException
+     */
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $this->object->setShuffle($_POST["shuffle"] ?? '0');
+        $post = $this->http->wrapper()->post();
+        $shuffle = $post->retrieve(
+            'shuffle',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('0')
+            ])
+        );
+        $this->object->setShuffle((bool) $shuffle);
 
-        $selectionLimit = (int) $form->getItemByPostVar('selection_limit')->getValue();
+        $selectionLimit = (int) $form->getItemByPostVar('selection_limit')?->getValue();
         $this->object->setSelectionLimit($selectionLimit > 0 ? $selectionLimit : null);
 
-        if (isset($_POST['feedback_setting'])) {
-            $this->object->setSpecificFeedbackSetting($_POST['feedback_setting']);
+        $feedback_setting = $post->retrieve(
+            'feedback_setting',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(null)
+            ])
+        );
+
+        if (is_int($feedback_setting)) {
+            $this->object->setSpecificFeedbackSetting($feedback_setting);
         }
 
-        $types = (int) ($_POST['types'] ?? '0');
+        $types = $post->retrieve(
+            'types',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(0)
+            ])
+        );
+
         $this->object->setMultilineAnswerSetting($types);
-        if (isset($_POST['choice']['imagename']) && is_array($_POST['choice']['imagename']) && $types === 1) {
+
+        $choice = $post->retrieve(
+            'choice',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf(
+                    $this->refinery->kindlyTo()->listOf(
+                        $this->refinery->kindlyTo()->string()
+                    )
+                ),
+                $this->refinery->always([])
+            ])
+        );
+
+        if (isset($choice['imagename']) && is_array($choice['imagename']) && $types === 1) {
             $this->object->setIsSingleline(true);
             $this->tpl->setOnScreenMessage('info', $this->lng->txt('info_answer_type_change'), true);
         } else {
-            $this->object->setIsSingleline(($types === 0) ? true : false);
+            $this->object->setIsSingleline($types === 0);
         }
-        if (isset($_POST["thumb_size"])
-            && (int) $_POST["thumb_size"] !== $this->object->getThumbSize()) {
-            $this->object->setThumbSize((int) $_POST["thumb_size"]);
+
+        $thumb_size = $post->retrieve(
+            'thumb_size',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(null)
+            ])
+        );
+
+        if (is_int($thumb_size) && $thumb_size !== $this->object->getThumbSize()) {
+            $this->object->setThumbSize($thumb_size);
             $this->rebuild_thumbnails = true;
         }
     }
@@ -661,7 +708,20 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
     {
         // Delete all existing answers and create new answers from the form data
         $this->object->flushAnswers();
-        $choice = $this->cleanupAnswerText($_POST['choice'], $this->object->isSingleline() === false);
+
+        $choice = $this->http->wrapper()->post()->retrieve(
+            'choice',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf(
+                    $this->refinery->kindlyTo()->listOf(
+                        $this->refinery->kindlyTo()->string()
+                    )
+                ),
+                $this->refinery->always([])
+            ])
+        );
+
+        $choice = $this->cleanupAnswerText($choice, !$this->object->isSingleline());
         if (!$this->object->isSingleline()) {
             foreach ($choice['answer'] as $index => $answer) {
                 $answertext = $answer;
@@ -685,12 +745,12 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
 
             if ($file_temp_name !== '') {
                 // check suffix
-                $parts = explode(".", $file_org_name);
+                $parts = explode('.', $file_org_name);
                 $suffix = strtolower(array_pop($parts));
-                if (in_array($suffix, ["jpg", "jpeg", "png", "gif"])) {
+                if (in_array($suffix, ['jpg', 'jpeg', 'png', 'gif'])) {
                     // upload image
                     $filename = $this->object->buildHashedImageFilename($file_org_name);
-                    if ($this->object->setImageFile($filename, $file_temp_name) == 0) {
+                    if ($this->object->setImageFile($filename, $file_temp_name) === 0) {
                         $picturefile = $filename;
                     }
                 }

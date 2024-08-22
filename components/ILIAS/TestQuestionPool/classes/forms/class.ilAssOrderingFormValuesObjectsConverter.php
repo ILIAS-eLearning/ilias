@@ -16,6 +16,9 @@
  *
  *********************************************************************/
 
+use ILIAS\HTTP\Services as Http;
+use ILIAS\Refinery\Factory as Refinery;
+
 /**
  * @author        Björn Heyser <bheyser@databay.de>
  * @version        $Id$
@@ -60,6 +63,18 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
      * @var string
      */
     protected $thumbnailPrefix;
+
+    private readonly Http $http;
+
+    private readonly Refinery $refinery;
+
+    public function __construct()
+    {
+        global $DIC;
+
+        $this->http = $DIC->http();
+        $this->refinery = $DIC->refinery();
+    }
 
     /**
      * @return string
@@ -303,24 +318,14 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
         return $this->fetchSubmittedFileUploadProperty($fileUpload, 'tmp_name');
     }
 
-    protected function fetchSubmittedFileUploadProperty($fileUpload, $property)
+    protected function fetchSubmittedFileUploadProperty(mixed $fileUpload, string $property)
     {
-        if (!array_key_exists($property, $fileUpload)) {
-            return null;
-        }
-
-        return $fileUpload[$property];
+        return $fileUpload[$property] ?? null;
     }
 
     protected function fetchElementFileUpload($identifier)
     {
-        $uploadFiles = $this->fetchSubmittedUploadFiles();
-
-        if (!isset($uploadFiles[$identifier])) {
-            return [];
-        }
-
-        return $uploadFiles[$identifier];
+        return $this->fetchSubmittedUploadFiles()[$identifier] ?? [];
     }
 
     protected function fetchSubmittedUploadFiles(): array
@@ -330,7 +335,7 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
         return $submittedUploadFiles;
     }
 
-    protected function getFileSubmitsHavingActualUpload($submittedUploadFiles)
+    protected function getFileSubmitsHavingActualUpload(array $submittedUploadFiles): array
     {
         foreach ($submittedUploadFiles as $identifier => $uploadProperties) {
             if (!isset($uploadProperties['tmp_name'])) {
@@ -338,14 +343,13 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
                 continue;
             }
 
-            if (!strlen($uploadProperties['tmp_name'])) {
+            if ($uploadProperties['tmp_name'] === '') {
                 unset($submittedUploadFiles[$identifier]);
                 continue;
             }
 
             if (!is_uploaded_file($uploadProperties['tmp_name'])) {
                 unset($submittedUploadFiles[$identifier]);
-                continue;
             }
         }
 
@@ -372,13 +376,9 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
         return $submittedUploadFiles;
     }
 
-    protected function getFileSubmitData()
+    protected function getFileSubmitData(): array
     {
-        if (!isset($_FILES[$this->getPostVar()])) {
-            return [];
-        }
-
-        return $_FILES[$this->getPostVar()];
+        return $_FILES[$this->getPostVar()] ?? [];
     }
 
     /**
@@ -392,30 +392,28 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
             return false;
         }
 
-        if (!isset($_POST['cmd']) || !is_array($_POST['cmd'])) {
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()))),
+                $this->refinery->always(null)
+            ])
+        );
+
+        if (!isset($cmd[$this->getImageRemovalCommand()])) {
             return false;
         }
 
-        $cmdArr = $_POST['cmd'];
-
-        if (!isset($cmdArr[$this->getImageRemovalCommand()])) {
-            return false;
-        }
-
-        $fieldArr = $cmdArr[$this->getImageRemovalCommand()];
+        $fieldArr = $cmd[$this->getImageRemovalCommand()];
 
         if (!isset($fieldArr[$this->getPostVar()])) {
             return false;
         }
 
-        $identifierArr = $fieldArr[$this->getPostVar()];
-
-        $requested_identfier = key($identifierArr);
-
         return (string) str_replace(
             ilIdentifiedMultiValuesJsPositionIndexRemover::IDENTIFIER_INDICATOR_PREFIX,
             '',
-            (string) $requested_identfier
+            (string) key($fieldArr[$this->getPostVar()])
         ) === (string) $identifier;
     }
 }

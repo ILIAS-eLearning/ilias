@@ -16,6 +16,9 @@
  *
  *********************************************************************/
 
+use ILIAS\HTTP\Services as Http;
+use ILIAS\Refinery\Factory as Refinery;
+
 /**
  * @author		Björn Heyser <bheyser@databay.de>
  * @version		$Id$
@@ -24,46 +27,45 @@
  */
 class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
 {
-    /**
-     * @var ilAssQuestionSkillAssignmentList
-     */
-    private $skillQuestionAssignmentList;
+    private readonly Http $http;
+    private readonly Refinery $refinery;
 
-    /**
-     * @var bool
-     */
-    private $loadSkillPointsFromRequest = false;
+    private ilAssQuestionSkillAssignmentList $skillQuestionAssignmentList;
 
-    /**
-     * @var bool
-     */
-    private $manipulationsEnabled;
+    private bool $loadSkillPointsFromRequest = false;
+
+    private bool $manipulationsEnabled;
 
     public function setSkillQuestionAssignmentList(ilAssQuestionSkillAssignmentList $assignmentList): void
     {
         $this->skillQuestionAssignmentList = $assignmentList;
     }
 
-    /**
-     * @return boolean
-     */
     public function areManipulationsEnabled(): bool
     {
         return $this->manipulationsEnabled;
     }
 
-    /**
-     * @param boolean $manipulationsEnabled
-     */
-    public function setManipulationsEnabled($manipulationsEnabled): void
+    public function setManipulationsEnabled(bool $manipulationsEnabled): void
     {
         $this->manipulationsEnabled = $manipulationsEnabled;
     }
 
-    public function __construct($parentOBJ, $parentCmd, ilCtrl $ctrl, ilLanguage $lng)
-    {
+    /**
+     * @throws ilException
+     */
+    public function __construct(
+        $parentOBJ,
+        $parentCmd,
+        ilCtrl $ctrl,
+        ilLanguage $lng,
+        $http,
+        $refinery
+    ) {
         $this->lng = $lng;
         $this->ctrl = $ctrl;
+        $this->http = $http;
+        $this->refinery = $refinery;
 
         $this->setId('assQstSkl');
         $this->setPrefix('assQstSkl');
@@ -72,13 +74,16 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
 
         $this->setStyle('table', 'fullwidth');
 
-        $this->setRowTemplate("tpl.tst_skl_qst_assignment_row.html", "components/ILIAS/Test");
+        $this->setRowTemplate('tpl.tst_skl_qst_assignment_row.html', 'components/ILIAS/Test');
 
         $this->enable('header');
         $this->disable('sort');
         $this->disable('select_all');
     }
 
+    /**
+     * @throws ilCtrlException
+     */
     public function init(): void
     {
         $this->initColumns();
@@ -93,10 +98,7 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         }
     }
 
-    /**
-     * @param bool $loadSkillPointsFromRequest
-     */
-    public function loadSkillPointsFromRequest($loadSkillPointsFromRequest): void
+    public function loadSkillPointsFromRequest(bool $loadSkillPointsFromRequest): void
     {
         $this->loadSkillPointsFromRequest = $loadSkillPointsFromRequest;
     }
@@ -110,6 +112,9 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         $this->addColumn($this->lng->txt('actions'), 'actions', '20%');
     }
 
+    /**
+     * @throws ilTemplateException|ilCtrlException
+     */
     public function fillRow(array $a_set): void
     {
         $assignments = $this->skillQuestionAssignmentList->getAssignmentsByQuestionId($a_set['question_id']);
@@ -124,10 +129,9 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
 
         $this->tpl->setCurrentBlock('tbl_content');
 
-        for ($i = 0, $numAssigns = count($assignments); $i < $numAssigns; $i++) {
-            /* @var ilAssQuestionSkillAssignment $assignment */
-            $assignment = $assignments[$i];
-
+        $num_assigns = count($assignments);
+        /* @var ilAssQuestionSkillAssignment $assignment */
+        foreach ($assignments as $key => $assignment) {
             $this->tpl->setCurrentBlock('actions_col');
             $this->tpl->setVariable('ACTION', $this->getCompetenceAssignPropertiesFormLink($assignment));
             $this->tpl->parseCurrentBlock();
@@ -144,11 +148,11 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
                 $this->tpl->setVariable('SKILL_POINTS', $assignment->getMaxSkillPoints());
             }
 
-            if ($this->areManipulationsEnabled() || ($i + 1) < $numAssigns) {
+            if (($key + 1) < $num_assigns || $this->areManipulationsEnabled()) {
                 $this->tpl->parseCurrentBlock();
 
                 $this->tpl->setCurrentBlock('tbl_content');
-                $this->tpl->setVariable("CSS_ROW", $this->css_row);
+                $this->tpl->setVariable('CSS_ROW', $this->css_row);
             }
         }
 
@@ -158,7 +162,10 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
             $this->tpl->parseCurrentBlock();
 
             $this->tpl->setCurrentBlock('tbl_content');
-        } elseif (!$numAssigns) {
+            return;
+        }
+
+        if (!$num_assigns) {
             $this->tpl->setCurrentBlock('actions_col');
             $this->tpl->setVariable('ACTION', '&nbsp;');
             $this->tpl->parseCurrentBlock();
@@ -167,21 +174,20 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         }
     }
 
-    private function getRowspan($assignments): int
+    private function getRowspan(array $assignments): int
     {
         $cnt = count($assignments);
 
-        if ($cnt == 0) {
+        if ($cnt === 0) {
             return 1;
         }
 
-        if ($this->areManipulationsEnabled()) {
-            $cnt++;
-        }
-
-        return $cnt;
+        return $this->areManipulationsEnabled() ? $cnt + 1 : $cnt;
     }
 
+    /**
+     * @throws ilCtrlException
+     */
     private function getManageCompetenceAssignsActionLink(): string
     {
         $href = $this->ctrl->getLinkTarget(
@@ -189,11 +195,12 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
             ilAssQuestionSkillAssignmentsGUI::CMD_SHOW_SKILL_SELECT
         );
 
-        $label = $this->lng->txt('tst_manage_competence_assigns');
-
-        return $this->buildActionLink($href, $label);
+        return $this->buildActionLink($href, $this->lng->txt('tst_manage_competence_assigns'));
     }
 
+    /**
+     * @throws ilCtrlException
+     */
     private function getCompetenceAssignPropertiesFormLink(ilAssQuestionSkillAssignment $assignment): string
     {
         $this->ctrl->setParameter($this->parent_obj, 'skill_base_id', $assignment->getSkillBaseId());
@@ -204,23 +211,24 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
             ilAssQuestionSkillAssignmentsGUI::CMD_SHOW_SKILL_QUEST_ASSIGN_PROPERTIES_FORM
         );
 
-        if ($this->areManipulationsEnabled()) {
-            $label = $this->lng->txt('tst_edit_competence_assign');
-        } else {
-            $label = $this->lng->txt('tst_view_competence_assign');
-        }
-
         $this->ctrl->setParameter($this->parent_obj, 'skill_base_id', null);
         $this->ctrl->setParameter($this->parent_obj, 'skill_tref_id', null);
 
-        return $this->buildActionLink($href, $label);
+        return $this->buildActionLink($href, $this->lng->txt(
+            $this->areManipulationsEnabled()
+                ? 'tst_edit_competence_assign'
+                : 'tst_view_competence_assign'
+        ));
     }
 
-    private function buildActionLink($href, $label): string
+    private function buildActionLink(string $href, string $label): string
     {
         return "<a href=\"{$href}\" title=\"{$label}\">{$label}</a>";
     }
 
+    /**
+     * @throws ilCtrlException
+     */
     private function buildActionColumnHTML($assignments): string
     {
         $actions = [];
@@ -248,29 +256,38 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
             ilAssQuestionSkillAssignmentsGUI::CMD_SHOW_SKILL_SELECT
         );
 
-        $label = $this->lng->txt('tst_assign_competence');
-        $actions[] = $this->buildActionLink($href, $label);
+        $actions[] = $this->buildActionLink($href, $this->lng->txt('tst_assign_competence'));
 
         return implode('<br />', $actions);
     }
 
     private function getEvalModeLabel(ilAssQuestionSkillAssignment $assignment): string
     {
-        if ($assignment->hasEvalModeBySolution()) {
-            return $this->lng->txt('qpl_skill_point_eval_mode_solution_compare');
-        }
-
-        return $this->lng->txt('qpl_skill_point_eval_mode_quest_result');
+        return $this->lng->txt(
+            $assignment->hasEvalModeBySolution()
+                ? 'qpl_skill_point_eval_mode_solution_compare'
+                : 'qpl_skill_point_eval_mode_quest_result'
+        );
     }
 
     private function buildSkillPointsInput(ilAssQuestionSkillAssignment $assignment): string
     {
         $assignmentKey = implode(':', [
-            $assignment->getSkillBaseId(), $assignment->getSkillTrefId(), $assignment->getQuestionId()
+            $assignment->getSkillBaseId(),
+            $assignment->getSkillTrefId(),
+            $assignment->getQuestionId()
         ]);
 
         if ($this->loadSkillPointsFromRequest) {
-            $points = isset($_POST['skill_points'][$assignmentKey]) ? ilUtil::stripSlashes($_POST['skill_points'][$assignmentKey]) : '';
+            $skill_points = $this->http->wrapper()->post()->retrieve(
+                'skill_points',
+                $this->refinery->byTrying([
+                    $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                    $this->refinery->always([])
+                ])
+            );
+
+            $points = ilUtil::stripSlashes($skill_points[$assignmentKey] ?? '');
         } else {
             $points = $assignment->getSkillPoints();
         }
@@ -280,14 +297,6 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
 
     private function isSkillPointInputRequired(ilAssQuestionSkillAssignment $assignment): bool
     {
-        if (!$this->areManipulationsEnabled()) {
-            return false;
-        }
-
-        if ($assignment->hasEvalModeBySolution()) {
-            return false;
-        }
-
-        return true;
+        return !(!$this->areManipulationsEnabled() || $assignment->hasEvalModeBySolution());
     }
 }

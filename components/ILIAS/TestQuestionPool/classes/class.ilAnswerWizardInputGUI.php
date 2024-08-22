@@ -216,54 +216,60 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        $foundvalues = $_POST[$this->getPostVar()];
-        if (is_array($foundvalues)) {
-            $foundvalues = ilArrayUtil::stripSlashesRecursive($foundvalues);
+        $found_values = $this->http->wrapper()->post()->retrieve(
+            $this->getPostVar(),
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always(null)
+            ])
+        );
+
+        if (is_array($found_values)) {
+            $found_values = ilArrayUtil::stripSlashesRecursive($found_values);
             // check answers
-            if (is_array($foundvalues['answer'])) {
-                foreach ($foundvalues['answer'] as $aidx => $answervalue) {
-                    if ((strlen($answervalue)) == 0) {
-                        $this->setAlert($lng->txt("msg_input_is_required"));
+            if (is_array($found_values['answer'])) {
+                foreach ($found_values['answer'] as $answervalue) {
+                    if ($answervalue === '') {
+                        $this->setAlert($lng->txt('msg_input_is_required'));
                         return false;
                     }
                 }
             }
             // check points
             $max = 0;
-            if (is_array($foundvalues['points'])) {
-                foreach ($foundvalues['points'] as $points) {
-                    if ($points > $max) {
-                        $max = $points;
-                    }
-                    if (((strlen($points)) == 0) || (!is_numeric($points))) {
-                        $this->setAlert($lng->txt("form_msg_numeric_value_required"));
+            if (is_array($found_values['points'])) {
+                foreach ($found_values['points'] as $points) {
+                    $max = max($max, $points);
+                    if ($points === '' || (!is_numeric($points))) {
+                        $this->setAlert($lng->txt('form_msg_numeric_value_required'));
                         return false;
                     }
+
                     if ($this->minvalueShouldBeGreater()) {
-                        if (trim($points) != "" &&
-                            $this->getMinValue() !== false &&
-                            $points <= $this->getMinValue()) {
-                            $this->setAlert($lng->txt("form_msg_value_too_low"));
-
+                        if (
+                            trim($points) !== ''
+                            && $this->getMinValue() !== false
+                            && $points <= $this->getMinValue()
+                        ) {
+                            $this->setAlert($lng->txt('form_msg_value_too_low'));
                             return false;
                         }
-                    } else {
-                        if (trim($points) != "" &&
-                            $this->getMinValue() !== false &&
-                            $points < $this->getMinValue()) {
-                            $this->setAlert($lng->txt("form_msg_value_too_low"));
-
-                            return false;
-                        }
+                    } elseif (
+                        trim($points) !== ''
+                        && $this->getMinValue() !== false
+                        && $points < $this->getMinValue()
+                    ) {
+                        $this->setAlert($lng->txt('form_msg_value_too_low'));
+                        return false;
                     }
                 }
             }
-            if ($max == 0) {
-                $this->setAlert($lng->txt("enter_enough_positive_points"));
+            if ($max === 0) {
+                $this->setAlert($lng->txt('enter_enough_positive_points'));
                 return false;
             }
         } else {
-            $this->setAlert($lng->txt("msg_input_is_required"));
+            $this->setAlert($lng->txt('msg_input_is_required'));
             return false;
         }
 

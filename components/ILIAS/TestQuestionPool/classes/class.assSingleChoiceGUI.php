@@ -525,22 +525,57 @@ class assSingleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringA
         return ilLegacyFormElementsUtil::prepareTextareaOutput($output, true);
     }
 
+    /**
+     * @throws ilException
+     */
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $types = $_POST["types"] ?? '0';
+        $post = $this->http->wrapper()->post();
 
-        $this->object->setShuffle($_POST["shuffle"] ?? '0');
+        $types = $post->retrieve(
+            'types',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('0')
+            ])
+        );
         $this->object->setMultilineAnswerSetting($types);
 
-        if (isset($_POST['choice']) && isset($_POST['choice']['imagename']) && is_array($_POST['choice']['imagename']) && $types === '1') {
+        $shuffle = $post->retrieve(
+            'shuffle',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->bool(),
+                $this->refinery->always('0')
+            ])
+        );
+        $this->object->setShuffle($shuffle);
+
+        $choice = $post->retrieve(
+            'choice',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
+                $this->refinery->always(null)
+            ])
+        );
+
+        if (isset($choice['imagename']) && is_array($choice['imagename']) && $types === '1') {
             $this->object->setIsSingleline(true);
             $this->tpl->setOnScreenMessage('info', $this->lng->txt('info_answer_type_change'), true);
         } else {
-            $this->object->setIsSingleline($types === '0' ? true : false);
+            $this->object->setIsSingleline($types === '0');
         }
-        if (isset($_POST["thumb_size"])
-            && (int) $_POST["thumb_size"] !== $this->object->getThumbSize()) {
-            $this->object->setThumbSize((int) $_POST["thumb_size"]);
+
+        $object_thumb_size = $this->object->getThumbSize();
+        $thumb_size = $post->retrieve(
+            'thumb_size',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always($object_thumb_size)
+            ])
+        );
+
+        if ($thumb_size !== $object_thumb_size) {
+            $this->object->setThumbSize($thumb_size);
             $this->rebuild_thumbnails = true;
         }
     }

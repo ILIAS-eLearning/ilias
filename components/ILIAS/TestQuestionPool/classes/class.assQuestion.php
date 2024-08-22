@@ -221,32 +221,34 @@ abstract class assQuestion implements Question
 
     protected function getQuestionAction(): string
     {
-        if (!isset($_POST['cmd']) || !isset($_POST['cmd'][$this->questionActionCmd])) {
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always(null)
+            ])
+        );
+
+        if (
+            !isset($cmd[$this->questionActionCmd])
+            || !is_array($cmd[$this->questionActionCmd])
+            || empty($cmd[$this->questionActionCmd])
+        ) {
             return '';
         }
 
-        if (!is_array($_POST['cmd'][$this->questionActionCmd]) || $_POST['cmd'][$this->questionActionCmd] === []) {
-            return '';
-        }
-
-        return key($_POST['cmd'][$this->questionActionCmd]);
+        return key($cmd[$this->questionActionCmd]);
     }
 
-    protected function isNonEmptyItemListPostSubmission(string $postSubmissionFieldname): bool
+    protected function isNonEmptyItemListPostSubmission(string $post_submission_field_name): bool
     {
-        if (!isset($_POST[$postSubmissionFieldname])) {
-            return false;
-        }
-
-        if (!is_array($_POST[$postSubmissionFieldname])) {
-            return false;
-        }
-
-        if (!count($_POST[$postSubmissionFieldname])) {
-            return false;
-        }
-
-        return true;
+        return !empty($this->http->wrapper()->post()->retrieve(
+            $post_submission_field_name,
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always([])
+            ])
+        ));
     }
 
     public function getCurrentUser(): ilObjUser

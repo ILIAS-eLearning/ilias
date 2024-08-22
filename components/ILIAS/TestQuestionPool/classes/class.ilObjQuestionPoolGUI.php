@@ -1566,7 +1566,16 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
                 }
             }
         }
-        if (isset($_POST['imagemap_x'])) {
+
+        $image_map_x = $this->http->wrapper()->post()->retrieve(
+            'imagemap_x',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always(null)
+            ])
+        );
+
+        if (isset($image_map_x)) {
             $force_active = true;
         }
         if (!$force_active) {

@@ -64,23 +64,22 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
     public function setValue($a_value): void
     {
         $this->values = [];
+
         if (is_array($a_value)) {
-            if (is_array($a_value['answer'])) {
-                foreach ($a_value['answer'] as $index => $value) {
-                    $points = (float) str_replace(",", ".", $a_value['points'][$index]);
-                    $answer = new ASS_AnswerBinaryStateImage(
-                        (string) $value,
-                        $points,
-                        (int) $index,
-                        true,
-                        null,
-                        (int) $a_value['answer_id'][$index]
-                    );
-                    if (isset($a_value['imagename'][$index])) {
-                        $answer->setImage($a_value['imagename'][$index]);
-                    }
-                    $this->values[] = $answer;
+            foreach ($a_value['answer'] ?? [] as $index => $value) {
+                $points = (float) str_replace(',', '.', $a_value['points'][$index]);
+                $answer = new ASS_AnswerBinaryStateImage(
+                    (string) $value,
+                    $points,
+                    (int) $index,
+                    true,
+                    null,
+                    (int) $a_value['answer_id'][$index]
+                );
+                if (isset($a_value['imagename'][$index])) {
+                    $answer->setImage($a_value['imagename'][$index]);
                 }
+                $this->values[] = $answer;
             }
         }
     }
@@ -229,19 +228,26 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
     */
     public function checkInput(): bool
     {
-        if (is_array($_POST[$this->getPostVar()])) {
-            $foundvalues = ilArrayUtil::stripSlashesRecursive(
-                $_POST[$this->getPostVar()],
-                true,
-                ilObjAdvancedEditing::_getUsedHTMLTagsAsString("assessment")
-            );
-        }
-        if (is_array($foundvalues)) {
+        $post_var = $this->http->wrapper()->post()->retrieve(
+            $this->getPostVar(),
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always(null)
+            ])
+        );
+
+        $found_values = is_array($post_var) ? ilArrayUtil::stripSlashesRecursive(
+            $post_var,
+            true,
+            ilObjAdvancedEditing::_getUsedHTMLTagsAsString('assessment')
+        ) : null;
+
+        if (is_array($found_values)) {
             // check answers
-            if (is_array($foundvalues['answer'])) {
-                foreach ($foundvalues['answer'] as $aidx => $answervalue) {
-                    if (((strlen($answervalue)) == 0) && (!isset($foundvalues['imagename'][$aidx]) || strlen($foundvalues['imagename'][$aidx]) == 0)) {
-                        $this->setAlert($this->lng->txt("msg_input_is_required"));
+            if (is_array($found_values['answer'])) {
+                foreach ($found_values['answer'] as $aidx => $answervalue) {
+                    if ($answervalue === '' && (!isset($found_values['imagename'][$aidx]) || $found_values['imagename'][$aidx] === '')) {
+                        $this->setAlert($this->lng->txt('msg_input_is_required'));
                         return false;
                     }
 
@@ -253,20 +259,18 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
             }
             // check points
             $max = 0;
-            if (is_array($foundvalues['points'])) {
-                foreach ($foundvalues['points'] as $points) {
+            if (is_array($found_values['points'])) {
+                foreach ($found_values['points'] as $points) {
                     $points = str_replace(',', '.', $points);
-                    if ($points > $max) {
-                        $max = $points;
-                    }
-                    if (((strlen($points)) == 0) || (!is_numeric($points))) {
-                        $this->setAlert($this->lng->txt("form_msg_numeric_value_required"));
+                    $max = max($max, $points);
+                    if ($points === '' || !is_numeric($points)) {
+                        $this->setAlert($this->lng->txt('form_msg_numeric_value_required'));
                         return false;
                     }
                 }
             }
-            if ($max == 0) {
-                $this->setAlert($this->lng->txt("enter_enough_positive_points"));
+            if ($max === 0) {
+                $this->setAlert($this->lng->txt('enter_enough_positive_points'));
                 return false;
             }
 
@@ -278,62 +282,64 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
                             switch ($error) {
                                 case UPLOAD_ERR_FORM_SIZE:
                                 case UPLOAD_ERR_INI_SIZE:
-                                    $this->setAlert($this->lng->txt("form_msg_file_size_exceeds"));
+                                    $this->setAlert($this->lng->txt('form_msg_file_size_exceeds'));
                                     return false;
                                     break;
 
                                 case UPLOAD_ERR_PARTIAL:
-                                    $this->setAlert($this->lng->txt("form_msg_file_partially_uploaded"));
+                                    $this->setAlert($this->lng->txt('form_msg_file_partially_uploaded'));
                                     return false;
                                     break;
 
                                 case UPLOAD_ERR_NO_FILE:
-                                    if ($this->getRequired()) {
-                                        if ((!isset($foundvalues['imagename'][$index])) && (!strlen($foundvalues['answer'][$index]))) {
-                                            $this->setAlert($this->lng->txt("form_msg_file_no_upload"));
-                                            return false;
-                                        }
+                                    if (
+                                        $this->getRequired()
+                                        && !isset($found_values['imagename'][$index])
+                                        && $found_values['answer'][$index] === ''
+                                    ) {
+                                        $this->setAlert($this->lng->txt('form_msg_file_no_upload'));
+                                        return false;
                                     }
                                     break;
 
                                 case UPLOAD_ERR_NO_TMP_DIR:
-                                    $this->setAlert($this->lng->txt("form_msg_file_missing_tmp_dir"));
+                                    $this->setAlert($this->lng->txt('form_msg_file_missing_tmp_dir'));
                                     return false;
                                     break;
 
                                 case UPLOAD_ERR_CANT_WRITE:
-                                    $this->setAlert($this->lng->txt("form_msg_file_cannot_write_to_disk"));
+                                    $this->setAlert($this->lng->txt('form_msg_file_cannot_write_to_disk'));
                                     return false;
                                     break;
 
                                 case UPLOAD_ERR_EXTENSION:
-                                    $this->setAlert($this->lng->txt("form_msg_file_upload_stopped_ext"));
+                                    $this->setAlert($this->lng->txt('form_msg_file_upload_stopped_ext'));
                                     return false;
                                     break;
                             }
                         }
                     }
-                } else {
-                    if ($this->getRequired()) {
-                        $this->setAlert($this->lng->txt("form_msg_file_no_upload"));
-                        return false;
-                    }
+                } elseif ($this->getRequired()) {
+                    $this->setAlert($this->lng->txt('form_msg_file_no_upload'));
+                    return false;
                 }
 
                 if (is_array($_FILES[$this->getPostVar()]['tmp_name']['image'])) {
                     foreach ($_FILES[$this->getPostVar()]['tmp_name']['image'] as $index => $tmpname) {
                         $filename = $_FILES[$this->getPostVar()]['name']['image'][$index];
-                        if ($filename != '') {
+                        if ($filename !== '') {
                             $filename_arr = pathinfo($filename);
-                            $suffix = $filename_arr["extension"];
+                            $suffix = $filename_arr['extension'];
                             $mimetype = $_FILES[$this->getPostVar()]['type']['image'][$index];
                             $size_bytes = $_FILES[$this->getPostVar()]['size']['image'][$index];
                             // check suffixes
-                            if (strlen($tmpname) && is_array($this->getSuffixes())) {
-                                if (!in_array(strtolower($suffix), $this->getSuffixes())) {
-                                    $this->setAlert($this->lng->txt("form_msg_file_wrong_file_type"));
-                                    return false;
-                                }
+                            if (
+                                $tmpname !== ''
+                                && is_array($this->getSuffixes())
+                                && !in_array(strtolower($suffix), $this->getSuffixes(), true)
+                            ) {
+                                $this->setAlert($this->lng->txt('form_msg_file_wrong_file_type'));
+                                return false;
                             }
                         }
                     }
@@ -342,16 +348,16 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
                 if (is_array($_FILES[$this->getPostVar()]['tmp_name']['image'])) {
                     foreach ($_FILES[$this->getPostVar()]['tmp_name']['image'] as $index => $tmpname) {
                         $filename = $_FILES[$this->getPostVar()]['name']['image'][$index];
-                        if ($filename != '') {
+                        if ($filename !== '') {
                             $filename_arr = pathinfo($filename);
-                            $suffix = $filename_arr["extension"];
+                            $suffix = $filename_arr['extension'];
                             $mimetype = $_FILES[$this->getPostVar()]['type']['image'][$index];
                             $size_bytes = $_FILES[$this->getPostVar()]['size']['image'][$index];
                             // virus handling
-                            if (strlen($tmpname)) {
+                            if ($tmpname !== '') {
                                 $vir = ilVirusScanner::virusHandling($tmpname, $filename);
                                 if ($vir[0] == false) {
-                                    $this->setAlert($this->lng->txt("form_msg_file_virus_found") . "<br />" . $vir[1]);
+                                    $this->setAlert($this->lng->txt('form_msg_file_virus_found') . '<br />' . $vir[1]);
                                     return false;
                                 }
                             }
@@ -360,7 +366,7 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
                 }
             }
         } else {
-            $this->setAlert($this->lng->txt("msg_input_is_required"));
+            $this->setAlert($this->lng->txt('msg_input_is_required'));
             return false;
         }
 
@@ -369,7 +375,7 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
 
     public function insert(ilTemplate $a_tpl): void
     {
-        $tpl = new ilTemplate("tpl.prop_singlechoicewizardinput.html", true, true, "components/ILIAS/TestQuestionPool");
+        $tpl = new ilTemplate('tpl.prop_singlechoicewizardinput.html', true, true, 'components/ILIAS/TestQuestionPool');
         $i = 0;
         foreach ($this->values as $value) {
             if ($this->getSingleline()) {
@@ -388,106 +394,106 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
                             'ALT_IMAGE',
                             ilLegacyFormElementsUtil::prepareFormOutput($value->getAnswertext())
                         );
-                        $tpl->setVariable("TXT_DELETE_EXISTING", $this->lng->txt("delete_existing_file"));
-                        $tpl->setVariable("IMAGE_ROW_NUMBER", $i);
-                        $tpl->setVariable("IMAGE_POST_VAR", $this->getPostVar());
+                        $tpl->setVariable('TXT_DELETE_EXISTING', $this->lng->txt('delete_existing_file'));
+                        $tpl->setVariable('IMAGE_ROW_NUMBER', $i);
+                        $tpl->setVariable('IMAGE_POST_VAR', $this->getPostVar());
                         $tpl->parseCurrentBlock();
                     }
                     $tpl->setCurrentBlock('addimage');
-                    $tpl->setVariable("IMAGE_BROWSE", $this->lng->txt('select_file'));
-                    $tpl->setVariable("IMAGE_ID", $this->getPostVar() . "[image][$i]");
-                    $tpl->setVariable("IMAGE_SUBMIT", $this->lng->txt("upload"));
-                    $tpl->setVariable("IMAGE_ROW_NUMBER", $i);
-                    $tpl->setVariable("IMAGE_POST_VAR", $this->getPostVar());
+                    $tpl->setVariable('IMAGE_BROWSE', $this->lng->txt('select_file'));
+                    $tpl->setVariable('IMAGE_ID', $this->getPostVar() . "[image][$i]");
+                    $tpl->setVariable('IMAGE_SUBMIT', $this->lng->txt('upload'));
+                    $tpl->setVariable('IMAGE_ROW_NUMBER', $i);
+                    $tpl->setVariable('IMAGE_POST_VAR', $this->getPostVar());
                     $tpl->parseCurrentBlock();
                 }
 
                 if (is_object($value)) {
-                    $tpl->setCurrentBlock("prop_text_propval");
+                    $tpl->setCurrentBlock('prop_text_propval');
                     $tpl->setVariable(
-                        "PROPERTY_VALUE",
+                        'PROPERTY_VALUE',
                         ilLegacyFormElementsUtil::prepareFormOutput($value->getAnswertext())
                     );
                     $tpl->parseCurrentBlock();
                     if ($this->getShowPoints()) {
-                        $tpl->setCurrentBlock("prop_points_propval");
+                        $tpl->setCurrentBlock('prop_points_propval');
                         $tpl->setVariable(
-                            "PROPERTY_VALUE",
+                            'PROPERTY_VALUE',
                             ilLegacyFormElementsUtil::prepareFormOutput($value->getPoints())
                         );
                         $tpl->parseCurrentBlock();
                     }
-                    $tpl->setCurrentBlock("prop_answer_id_propval");
-                    $tpl->setVariable("PROPERTY_VALUE", ilLegacyFormElementsUtil::prepareFormOutput($value->getId()));
+                    $tpl->setCurrentBlock('prop_answer_id_propval');
+                    $tpl->setVariable('PROPERTY_VALUE', ilLegacyFormElementsUtil::prepareFormOutput($value->getId()));
                     $tpl->parseCurrentBlock();
                 }
                 $tpl->setCurrentBlock('singleline');
-                $tpl->setVariable("SIZE", $this->getSize());
-                $tpl->setVariable("SINGLELINE_ID", $this->getPostVar() . "[answer][$i]");
-                $tpl->setVariable("SINGLELINE_ROW_NUMBER", $i);
-                $tpl->setVariable("SINGLELINE_POST_VAR", $this->getPostVar());
-                $tpl->setVariable("MAXLENGTH", $this->getMaxLength());
+                $tpl->setVariable('SIZE', $this->getSize());
+                $tpl->setVariable('SINGLELINE_ID', $this->getPostVar() . "[answer][$i]");
+                $tpl->setVariable('SINGLELINE_ROW_NUMBER', $i);
+                $tpl->setVariable('SINGLELINE_POST_VAR', $this->getPostVar());
+                $tpl->setVariable('MAXLENGTH', $this->getMaxLength());
                 if ($this->getDisabled()) {
-                    $tpl->setVariable("DISABLED_SINGLELINE", " disabled=\"disabled\"");
+                    $tpl->setVariable('DISABLED_SINGLELINE', ' disabled="disabled"');
                 }
                 $tpl->parseCurrentBlock();
             } elseif (!$this->getSingleline()) {
                 if (is_object($value)) {
                     if ($this->getShowPoints()) {
-                        $tpl->setCurrentBlock("prop_points_propval");
+                        $tpl->setCurrentBlock('prop_points_propval');
                         $tpl->setVariable(
-                            "PROPERTY_VALUE",
+                            'PROPERTY_VALUE',
                             ilLegacyFormElementsUtil::prepareFormOutput($value->getPoints())
                         );
                         $tpl->parseCurrentBlock();
                     }
-                    $tpl->setCurrentBlock("prop_answer_id_propval");
-                    $tpl->setVariable("PROPERTY_VALUE", ilLegacyFormElementsUtil::prepareFormOutput($value->getId()));
+                    $tpl->setCurrentBlock('prop_answer_id_propval');
+                    $tpl->setVariable('PROPERTY_VALUE', ilLegacyFormElementsUtil::prepareFormOutput($value->getId()));
                     $tpl->parseCurrentBlock();
                 }
                 $tpl->setCurrentBlock('multiline');
                 $tpl->setVariable(
-                    "PROPERTY_VALUE",
+                    'PROPERTY_VALUE',
                     ilLegacyFormElementsUtil::prepareFormOutput($value->getAnswertext())
                 );
-                $tpl->setVariable("MULTILINE_ID", $this->getPostVar() . "[answer][$i]");
-                $tpl->setVariable("MULTILINE_ROW_NUMBER", $i);
-                $tpl->setVariable("MULTILINE_POST_VAR", $this->getPostVar());
+                $tpl->setVariable('MULTILINE_ID', $this->getPostVar() . "[answer][$i]");
+                $tpl->setVariable('MULTILINE_ROW_NUMBER', $i);
+                $tpl->setVariable('MULTILINE_POST_VAR', $this->getPostVar());
                 $tpl->setVariable("MAXLENGTH", $this->getMaxLength());
                 if ($this->getDisabled()) {
-                    $tpl->setVariable("DISABLED_MULTILINE", " disabled=\"disabled\"");
+                    $tpl->setVariable('DISABLED_MULTILINE', ' disabled="disabled"');
                 }
                 $tpl->parseCurrentBlock();
             }
             if ($this->getAllowMove()) {
-                $tpl->setCurrentBlock("move");
-                $tpl->setVariable("ID", $this->getPostVar() . "[$i]");
-                $tpl->setVariable("UP_BUTTON", $this->renderer->render(
+                $tpl->setCurrentBlock('move');
+                $tpl->setVariable('ID', $this->getPostVar() . "[$i]");
+                $tpl->setVariable('UP_BUTTON', $this->renderer->render(
                     $this->glyph_factory->up()->withAction('#')
                 ));
-                $tpl->setVariable("DOWN_BUTTON", $this->renderer->render(
+                $tpl->setVariable('DOWN_BUTTON', $this->renderer->render(
                     $this->glyph_factory->down()->withAction('#')
                 ));
                 $tpl->parseCurrentBlock();
             }
             if ($this->getShowPoints()) {
-                $tpl->setCurrentBlock("points");
-                $tpl->setVariable("POINTS_ID", $this->getPostVar() . "[points][$i]");
-                $tpl->setVariable("POINTS_POST_VAR", $this->getPostVar());
-                $tpl->setVariable("POINTS_ROW_NUMBER", $i);
+                $tpl->setCurrentBlock('points');
+                $tpl->setVariable('POINTS_ID', $this->getPostVar() . "[points][$i]");
+                $tpl->setVariable('POINTS_POST_VAR', $this->getPostVar());
+                $tpl->setVariable('POINTS_ROW_NUMBER', $i);
                 $tpl->parseCurrentBlock();
             }
-            $tpl->setCurrentBlock("row");
-            $tpl->setVariable("POST_VAR", $this->getPostVar());
-            $tpl->setVariable("ROW_NUMBER", $i);
-            $tpl->setVariable("ID", $this->getPostVar() . "[answer][$i]");
+            $tpl->setCurrentBlock('row');
+            $tpl->setVariable('POST_VAR', $this->getPostVar());
+            $tpl->setVariable('ROW_NUMBER', $i);
+            $tpl->setVariable('ID', $this->getPostVar() . "[answer][$i]");
             if ($this->getDisabled()) {
-                $tpl->setVariable("DISABLED_POINTS", " disabled=\"disabled\"");
+                $tpl->setVariable('DISABLED_POINTS', ' disabled="disabled"');
             }
-            $tpl->setVariable("ADD_BUTTON", $this->renderer->render(
+            $tpl->setVariable('ADD_BUTTON', $this->renderer->render(
                 $this->glyph_factory->add()->withAction('#')
             ));
-            $tpl->setVariable("REMOVE_BUTTON", $this->renderer->render(
+            $tpl->setVariable('REMOVE_BUTTON', $this->renderer->render(
                 $this->glyph_factory->remove()->withAction('#')
             ));
             $tpl->parseCurrentBlock();
@@ -497,43 +503,43 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
         if ($this->getSingleline()) {
             if (!$this->hideImages) {
                 if (is_array($this->getSuffixes())) {
-                    $suff_str = $delim = "";
+                    $suff_str = $delim = '';
                     foreach ($this->getSuffixes() as $suffix) {
-                        $suff_str .= $delim . "." . $suffix;
-                        $delim = ", ";
+                        $suff_str .= $delim . '.' . $suffix;
+                        $delim = ', ';
                     }
                     $tpl->setCurrentBlock('allowed_image_suffixes');
-                    $tpl->setVariable("TXT_ALLOWED_SUFFIXES", $this->lng->txt("file_allowed_suffixes") . " " . $suff_str);
+                    $tpl->setVariable('TXT_ALLOWED_SUFFIXES', $this->lng->txt('file_allowed_suffixes') . ' ' . $suff_str);
                     $tpl->parseCurrentBlock();
                 }
-                $tpl->setCurrentBlock("image_heading");
-                $tpl->setVariable("ANSWER_IMAGE", $this->lng->txt('answer_image'));
-                $tpl->setVariable("TXT_MAX_SIZE", ilFileUtils::getFileSizeInfo());
+                $tpl->setCurrentBlock('image_heading');
+                $tpl->setVariable('ANSWER_IMAGE', $this->lng->txt('answer_image'));
+                $tpl->setVariable('TXT_MAX_SIZE', ilFileUtils::getFileSizeInfo());
                 $tpl->parseCurrentBlock();
             }
         }
 
         if ($this->getShowPoints()) {
-            $tpl->setCurrentBlock("points_heading");
-            $tpl->setVariable("POINTS_TEXT", $this->lng->txt('points'));
+            $tpl->setCurrentBlock('points_heading');
+            $tpl->setVariable('POINTS_TEXT', $this->lng->txt('points'));
             $tpl->parseCurrentBlock();
         }
 
-        $tpl->setVariable("ELEMENT_ID", $this->getPostVar());
-        $tpl->setVariable("TEXT_YES", $this->lng->txt('yes'));
-        $tpl->setVariable("TEXT_NO", $this->lng->txt('no'));
-        $tpl->setVariable("DELETE_IMAGE_HEADER", $this->lng->txt('delete_image_header'));
-        $tpl->setVariable("DELETE_IMAGE_QUESTION", $this->lng->txt('delete_image_question'));
-        $tpl->setVariable("ANSWER_TEXT", $this->lng->txt('answer_text'));
-        $tpl->setVariable("COMMANDS_TEXT", $this->lng->txt('actions'));
+        $tpl->setVariable('ELEMENT_ID', $this->getPostVar());
+        $tpl->setVariable('TEXT_YES', $this->lng->txt('yes'));
+        $tpl->setVariable('TEXT_NO', $this->lng->txt('no'));
+        $tpl->setVariable('DELETE_IMAGE_HEADER', $this->lng->txt('delete_image_header'));
+        $tpl->setVariable('DELETE_IMAGE_QUESTION', $this->lng->txt('delete_image_question'));
+        $tpl->setVariable('ANSWER_TEXT', $this->lng->txt('answer_text'));
+        $tpl->setVariable('COMMANDS_TEXT', $this->lng->txt('actions'));
 
-        $a_tpl->setCurrentBlock("prop_generic");
-        $a_tpl->setVariable("PROP_GENERIC", $tpl->get());
+        $a_tpl->setCurrentBlock('prop_generic');
+        $a_tpl->setVariable('PROP_GENERIC', $tpl->get());
         $a_tpl->parseCurrentBlock();
 
         global $DIC;
         $tpl = $DIC['tpl'];
-        $tpl->addJavascript("assets/js/answerwizardinput.js");
-        $tpl->addJavascript("assets/js/singlechoicewizard.js");
+        $tpl->addJavascript('assets/js/answerwizardinput.js');
+        $tpl->addJavascript('assets/js/singlechoicewizard.js');
     }
 }

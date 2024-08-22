@@ -20,9 +20,7 @@ declare(strict_types=1);
 
 use ILIAS\TestQuestionPool\QuestionPoolDIC;
 use ILIAS\Test\Participants\ParticipantRepository;
-
 use ILIAS\Test\Logging\AdditionalInformationGenerator;
-
 use ILIAS\FileDelivery\Delivery\Disposition;
 use ILIAS\FileUpload\Exception\IllegalStateException;
 
@@ -370,7 +368,7 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
 
                 if ($data['value2'] === 'rid') {
                     $rid = $this->irss->manage()->find($data['value1']);
-                    if($rid === null) {
+                    if ($rid === null) {
                         continue;
                     }
                     $revision = $this->irss->manage()->getCurrentRevision($rid);
@@ -568,7 +566,15 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
 
                 if ($this->isFileDeletionAction()) {
                     if ($this->isFileDeletionSubmitAvailable()) {
-                        foreach ($_POST[self::DELETE_FILES_TBL_POSTVAR] as $solution_id) {
+                        $delete_files = $this->http->wrapper()->post()->retrieve(
+                            self::DELETE_FILES_TBL_POSTVAR,
+                            $this->refinery->byTrying([
+                                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                                $this->refinery->always([])
+                            ])
+                        );
+
+                        foreach ($delete_files as $solution_id) {
                             $this->removeSolutionRecordById($solution_id);
                         }
                     } else {
@@ -576,7 +582,15 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
                     }
                 } else {
                     if ($this->isFileReuseHandlingRequired()) {
-                        foreach ($_POST[self::REUSE_FILES_TBL_POSTVAR] as $solutionId) {
+                        $reuse_files = $this->http->wrapper()->post()->retrieve(
+                            self::REUSE_FILES_TBL_POSTVAR,
+                            $this->refinery->byTrying([
+                                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                                $this->refinery->always([])
+                            ])
+                        );
+
+                        foreach ($reuse_files as $solutionId) {
                             $solution = $this->getSolutionRecordById($solutionId);
 
                             $this->saveCurrentSolution(
@@ -629,10 +643,18 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
     {
         $rids_to_delete = [];
         if ($this->isFileDeletionAction() && $this->isFileDeletionSubmitAvailable()) {
+            $delete_files = $this->http->wrapper()->post()->retrieve(
+                self::DELETE_FILES_TBL_POSTVAR,
+                $this->refinery->byTrying([
+                    $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                    $this->refinery->always([])
+                ])
+            );
+
             $res = $this->db->query(
                 "SELECT value1 FROM tst_solutions WHERE value2 = 'rid' AND " . $this->db->in(
                     'solution_id',
-                    $_POST[self::DELETE_FILES_TBL_POSTVAR],
+                    $delete_files,
                     false,
                     'integer'
                 )
@@ -696,7 +718,15 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
             // hey: prevPassSolutions - readability spree - get a chance to understand the code
             if ($this->isFileDeletionSubmitAvailable()) {
                 // hey.
-                $userSolution = $this->deletePreviewFileUploads($previewSession->getUserId(), $userSolution, $_POST['deletefiles']);
+                $delete_files = $this->http->wrapper()->post()->retrieve(
+                    self::DELETE_FILES_TBL_POSTVAR,
+                    $this->refinery->byTrying([
+                        $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                        $this->refinery->always([])
+                    ])
+                );
+
+                $userSolution = $this->deletePreviewFileUploads($previewSession->getUserId(), $userSolution, $delete_files);
             } else {
                 $this->tpl->setOnScreenMessage('info', $this->lng->txt('no_checkbox'), true);
             }

@@ -1025,14 +1025,6 @@ class assOrderingQuestion extends assQuestion implements ilObjQuestionScoringAdj
     }
 
     /**
-     * @return array
-     */
-    public function getSolutionPostSubmit(): array
-    {
-        return $this->fetchSolutionSubmit($_POST);
-    }
-
-    /**
      * @param $user_order
      * @param $nested_solution
      * @return int

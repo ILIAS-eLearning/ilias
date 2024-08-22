@@ -79,11 +79,17 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
     public function setValue($value): void
     {
         $this->values = [];
+        $answer_type = $this->http->wrapper()->post()->retrieve(
+            'answer_type',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always(null)
+            ])
+        );
 
-        $is_rte = isset($_POST["answer_type"]) && $_POST["answer_type"] == "multiLine";
-        $a_value = $this->cleanupAnswerText($value, $is_rte);
+        $a_value = $this->cleanupAnswerText($value, $answer_type === 'multiLine');
 
-        if (is_array($a_value) && is_array($a_value['answer'])) {
+        if (is_array($a_value['answer'])) {
             foreach ($a_value['answer'] as $index => $value) {
                 $answer = new ilAssKprimChoiceAnswer();
 
@@ -93,7 +99,7 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
                     $answer->setImageFile($a_value['imagename'][$index] ?? '');
                 }
 
-                if (isset($a_value['correctness']) && isset($a_value['correctness'][$index]) && strlen($a_value['correctness'][$index])) {
+                if (isset($a_value['correctness'][$index]) && $a_value['correctness'][$index] !== '') {
                     $answer->setCorrectness((bool) $a_value['correctness'][$index]);
                 }
 
@@ -113,23 +119,28 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        if (is_array($_POST[$this->getPostVar()])) {
-            $foundvalues = ilArrayUtil::stripSlashesRecursive(
-                $_POST[$this->getPostVar()],
-                false,
-                ilObjAdvancedEditing::_getUsedHTMLTagsAsString("assessment")
-            );
-        } else {
-            $foundvalues = $_POST[$this->getPostVar()];
-        }
+        $post_var = $this->http->wrapper()->post()->retrieve(
+            $this->getPostVar(),
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always(null)
+            ])
+        );
 
-        if (is_array($foundvalues)) {
+        $found_values = is_array($post_var)
+            ? ilArrayUtil::stripSlashesRecursive(
+                $post_var,
+                false,
+                ilObjAdvancedEditing::_getUsedHTMLTagsAsString('assessment')
+            )
+            : $post_var;
+
+        if (is_array($found_values)) {
             // check answers
-            if (is_array($foundvalues['answer'])) {
-                foreach ($foundvalues['answer'] as $aidx => $answervalue) {
-                    $hasImage = isset($foundvalues['imagename']) ? true : false;
-                    if (((strlen($answervalue)) == 0) && !$hasImage) {
-                        $this->setAlert($lng->txt("msg_input_is_required"));
+            if (is_array($found_values['answer'])) {
+                foreach ($found_values['answer'] as $answer_value) {
+                    if ($answer_value === '' && !isset($found_values['imagename'])) {
+                        $this->setAlert($lng->txt('msg_input_is_required'));
                         return false;
                     }
 
@@ -141,16 +152,16 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
             }
 
             // check correctness
-            if (!isset($foundvalues['correctness']) || count($foundvalues['correctness']) < count($foundvalues['answer'])) {
-                $this->setAlert($lng->txt("msg_input_is_required"));
+            if (!isset($found_values['correctness']) || count($found_values['correctness']) < count($found_values['answer'])) {
+                $this->setAlert($lng->txt('msg_input_is_required'));
                 return false;
             }
 
-            if (!$this->checkUploads($foundvalues)) {
+            if (!$this->checkUploads($found_values)) {
                 return false;
             }
         } else {
-            $this->setAlert($lng->txt("msg_input_is_required"));
+            $this->setAlert($lng->txt('msg_input_is_required'));
             return false;
         }
 

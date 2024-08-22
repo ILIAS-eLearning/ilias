@@ -385,13 +385,17 @@ class assMultipleChoice extends assQuestion implements ilObjQuestionScoringAdjus
         return true;
     }
 
-    protected function isForcedEmptySolution($solutionSubmit): bool
+    protected function isForcedEmptySolution(array $solutionSubmit): bool
     {
-        if (!count($solutionSubmit) && !empty($_POST['tst_force_form_diff_input'])) {
-            return true;
-        }
+        $tst_force_form_diff_input = $this->http->wrapper()->post()->retrieve(
+            'tst_force_form_diff_input',
+            $this->refinery->byTrying([
+              $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+              $this->refinery->always([])
+          ])
+        );
 
-        return false;
+        return !count($solutionSubmit) && !empty($tst_force_form_diff_input);
     }
 
     public function saveWorkingData(
@@ -399,9 +403,7 @@ class assMultipleChoice extends assQuestion implements ilObjQuestionScoringAdjus
         ?int $pass = null,
         bool $authorized = true
     ): bool {
-        if ($pass === null) {
-            $pass = ilObjTest::_getPass($active_id);
-        }
+        $pass = $pass ?? ilObjTest::_getPass($active_id);
 
         $answer = $this->getSolutionSubmit();
         $this->getProcessLocker()->executeUserSolutionUpdateLockOperation(

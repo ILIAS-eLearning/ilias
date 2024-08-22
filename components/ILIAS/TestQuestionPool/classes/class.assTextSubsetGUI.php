@@ -60,15 +60,23 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
          * sk 26.09.22: This is horrific but I don't see a better way right now,
          * without needing to check most questions for side-effects.
          */
-        $this->answers_from_post = $_POST['answers']['answer'];
-        $hasErrors = (!$always) ? $this->editQuestion(true) : false;
-        if (!$hasErrors) {
+        $answers = $this->http->wrapper()->post()->retrieve(
+            'answers',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always([])
+            ])
+        );
+        $this->answers_from_post = $answers['answer'] ?? null;
+
+        if (!(!$always && $this->editQuestion(true))) {
             $this->writeQuestionGenericPostData();
             $this->writeQuestionSpecificPostData(new ilPropertyFormGUI());
             $this->writeAnswerSpecificPostData(new ilPropertyFormGUI());
             $this->saveTaxonomyAssignments();
             return 0;
         }
+
         return 1;
     }
 
@@ -115,8 +123,14 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $position = key($_POST['cmd']['addanswers']);
-        $this->object->addAnswer("", 0, $position + 1);
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always(['addanswers' => []])
+            ])
+        );
+        $this->object->addAnswer('', 0, key($cmd['addanswers']) + 1);
         $this->editQuestion();
     }
 
@@ -124,8 +138,14 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $position = key($_POST['cmd']['removeanswers']);
-        $this->object->deleteAnswer($position);
+        $cmd = $this->http->wrapper()->post()->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always(['removeanswers' => []])
+            ])
+        );
+        $this->object->deleteAnswer(key($cmd['removeanswers']));
         $this->editQuestion();
     }
 
@@ -293,17 +313,42 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $this->object->setCorrectAnswers((int) $_POST["correctanswers"]);
-        $this->object->setTextRating($_POST["text_rating"]);
+        $post = $this->http->wrapper()->post();
+
+        $correct_answers = $post->retrieve(
+            'correctanswers',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(0)
+            ])
+        );
+        $this->object->setCorrectAnswers($correct_answers);
+
+        $text_rating = $post->retrieve(
+            'text_rating',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('')
+            ])
+        );
+        $this->object->setTextRating($text_rating);
     }
 
     public function writeAnswerSpecificPostData(ilPropertyFormGUI $form): void
     {
         // Delete all existing answers and create new answers from the form data
         $this->object->flushAnswers();
+
+        $answers = $this->http->wrapper()->post()->retrieve(
+            'answers',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
+                $this->refinery->always([])
+            ])
+        );
+
         foreach ($this->answers_from_post as $index => $answertext) {
-            $answertext = assQuestion::extendedTrim($answertext);
-            $this->object->addAnswer(htmlentities($answertext), $_POST['answers']['points'][$index], $index);
+            $this->object->addAnswer(htmlentities(assQuestion::extendedTrim($answertext)), $answers['points'][$index], $index);
         }
     }
 

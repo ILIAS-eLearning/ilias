@@ -49,23 +49,28 @@ class ilEssayKeywordWizardInputGUI extends ilSingleChoiceWizardInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        if (is_array($_POST[$this->getPostVar()])) {
-            $foundvalues = ilArrayUtil::stripSlashesRecursive(
-                $_POST[$this->getPostVar()],
+        $post_var = $this->http->wrapper()->post()->retrieve(
+            $this->getPostVar(),
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always(null)
+            ])
+        );
+
+        $found_values = is_array($post_var)
+            ? ilArrayUtil::stripSlashesRecursive(
+                $post_var,
                 false,
-                ilObjAdvancedEditing::_getUsedHTMLTagsAsString(
-                    "assessment"
-                )
-            );
-        } else {
-            $foundvalues = $_POST[$this->getPostVar()];
-        }
-        if (is_array($foundvalues)) {
+                ilObjAdvancedEditing::_getUsedHTMLTagsAsString('assessment')
+            )
+            : $post_var;
+
+        if (is_array($found_values)) {
             // check answers
-            if (is_array($foundvalues['answer'])) {
-                foreach ($foundvalues['answer'] as $aidx => $answervalue) {
-                    if (((strlen($answervalue)) == 0) && (!isset($foundvalues['imagename']) || strlen($foundvalues['imagename'][$aidx]) == 0)) {
-                        $this->setAlert($lng->txt("msg_input_is_required"));
+            if (is_array($found_values['answer'])) {
+                foreach ($found_values['answer'] as $aidx => $answervalue) {
+                    if ($answervalue === '' && (!isset($found_values['imagename']) || $found_values['imagename'][$aidx] === '')) {
+                        $this->setAlert($lng->txt('msg_input_is_required'));
                         return false;
                     }
 
@@ -77,23 +82,21 @@ class ilEssayKeywordWizardInputGUI extends ilSingleChoiceWizardInputGUI
             }
             // check points
             $max = 0;
-            if (is_array($foundvalues['points'])) {
-                foreach ($foundvalues['points'] as $points) {
-                    if ($points > $max) {
-                        $max = $points;
-                    }
-                    if (((strlen($points)) == 0) || (!is_numeric($points))) {
-                        $this->setAlert($lng->txt("form_msg_numeric_value_required"));
+            if (is_array($found_values['points'])) {
+                foreach ($found_values['points'] as $points) {
+                    $max = max($max, $points);
+                    if ($points === '' || (!is_numeric($points))) {
+                        $this->setAlert($lng->txt('form_msg_numeric_value_required'));
                         return false;
                     }
                 }
             }
-            if ($max == 0) {
-                $this->setAlert($lng->txt("enter_enough_positive_points"));
+            if ($max === 0) {
+                $this->setAlert($lng->txt('enter_enough_positive_points'));
                 return false;
             }
         } else {
-            $this->setAlert($lng->txt("msg_input_is_required"));
+            $this->setAlert($lng->txt('msg_input_is_required'));
             return false;
         }
 

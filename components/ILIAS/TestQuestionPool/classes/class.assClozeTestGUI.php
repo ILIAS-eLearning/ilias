@@ -175,9 +175,17 @@ JS;
 
                     $this->object->setGapShuffle($idx, 0);
 
-                    if ($this->ctrl->getCmd() != 'createGaps') {
-                        if (is_array($_POST['gap_' . $idx]['answer'])) {
-                            foreach ($_POST['gap_' . $idx]['answer'] as $order => $value) {
+                    $gap_idx = $this->post->retrieve(
+                        'gap_' . $idx,
+                        $this->refinery->byTrying([
+                            $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
+                            $this->refinery->always(['answer' => null, 'points' => null])
+                        ])
+                    );
+
+                    if ($this->ctrl->getCmd() !== 'createGaps') {
+                        if (is_array($gap_idx['answer'])) {
+                            foreach ($gap_idx as $order => $value) {
                                 $this->object->addGapAnswer($idx, $order, $value);
                             }
                         } else {
@@ -185,25 +193,48 @@ JS;
                         }
                     }
 
-                    if (is_array($_POST['gap_' . $idx]['points'])) {
-                        foreach ($_POST['gap_' . $idx]['points'] as $order => $value) {
+                    if (is_array($gap_idx['points'])) {
+                        foreach ($gap_idx['points'] as $order => $value) {
                             $this->object->setGapAnswerPoints($idx, $order, $value);
                         }
                     }
 
                     $k_gapsize = 'gap_' . $idx . '_gapsize';
-                    if ($this->request->isset($k_gapsize)) {
-                        $this->object->setGapSize($idx, $_POST[$k_gapsize]);
+                    if ($this->post->has($k_gapsize)) {
+                        $gap_size = $this->post->retrieve(
+                            $k_gapsize,
+                            $this->refinery->byTrying([
+                                $this->refinery->kindlyTo()->int(),
+                                $this->refinery->always(0)
+                            ])
+                        );
+
+                        $this->object->setGapSize($idx, $gap_size);
                     }
                     break;
 
                 case assClozeGap::TYPE_SELECT:
+                    $shuffle_idx = $this->post->retrieve(
+                        'shuffle_' . $idx,
+                        $this->refinery->byTrying([
+                            $this->refinery->kindlyTo()->int(),
+                            $this->refinery->always(0)
+                        ])
+                    );
 
-                    $this->object->setGapShuffle($idx, (int) (isset($_POST["shuffle_$idx"]) && $_POST["shuffle_$idx"]));
+                    $this->object->setGapShuffle($idx, $shuffle_idx);
 
-                    if ($this->ctrl->getCmd() != 'createGaps') {
-                        if (is_array($_POST['gap_' . $idx]['answer'])) {
-                            foreach ($_POST['gap_' . $idx]['answer'] as $order => $value) {
+                    $gap_idx = $this->post->retrieve(
+                        'gap_' . $idx,
+                        $this->refinery->byTrying([
+                            $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
+                            $this->refinery->always(['answer' => null, 'points' => null])
+                        ])
+                    );
+
+                    if ($this->ctrl->getCmd() !== 'createGaps') {
+                        if (is_array($gap_idx['answer'])) {
+                            foreach ($gap_idx['answer'] as $order => $value) {
                                 $this->object->addGapAnswer($idx, $order, $value);
                             }
                         } else {
@@ -211,8 +242,8 @@ JS;
                         }
                     }
 
-                    if (is_array($_POST['gap_' . $idx]['points'])) {
-                        foreach ($_POST['gap_' . $idx]['points'] as $order => $value) {
+                    if (is_array($gap_idx['points'])) {
+                        foreach ($gap_idx['points'] as $order => $value) {
                             $this->object->setGapAnswerPoints($idx, $order, $value);
                         }
                     }
@@ -227,70 +258,165 @@ JS;
                         break;
                     }
 
-                    $this->object->getGap($idx)->clearItems();
+                    $this->object->getGap($idx)?->clearItems();
 
-                    if ($this->post->has('gap_' . $idx . '_numeric')) {
+                    $gap_idx_numeric = $this->post->retrieve(
+                        'gap_' . $idx . '_numeric',
+                        $this->refinery->byTrying([
+                            $this->refinery->kindlyTo()->string(),
+                            $this->refinery->always(null)
+                        ])
+                    );
+
+                    if (is_string($gap_idx_numeric)) {
                         if ($this->ctrl->getCmd() !== 'createGaps') {
                             $this->object->addGapAnswer(
                                 $idx,
                                 0,
-                                str_replace(",", ".", $_POST['gap_' . $idx . '_numeric'])
+                                str_replace(',', '.', $gap_idx_numeric)
                             );
                         }
+
+                        $gap_idx_numeric_lower = $this->post->retrieve(
+                            'gap_' . $idx . '_numeric_lower',
+                            $this->refinery->byTrying([
+                                $this->refinery->kindlyTo()->string(),
+                                $this->refinery->always('')
+                            ])
+                        );
 
                         $this->object->setGapAnswerLowerBound(
                             $idx,
                             0,
-                            str_replace(",", ".", $_POST['gap_' . $idx . '_numeric_lower'])
+                            str_replace(',', '.', $gap_idx_numeric_lower)
+                        );
+
+                        $gap_idx_numeric_upper = $this->post->retrieve(
+                            'gap_' . $idx . '_numeric_upper',
+                            $this->refinery->byTrying([
+                                $this->refinery->kindlyTo()->string(),
+                                $this->refinery->always('')
+                            ])
                         );
 
                         $this->object->setGapAnswerUpperBound(
                             $idx,
                             0,
-                            str_replace(",", ".", $_POST['gap_' . $idx . '_numeric_upper'])
+                            str_replace(',', '.', $gap_idx_numeric_upper)
                         );
 
-                        $this->object->setGapAnswerPoints($idx, 0, $_POST['gap_' . $idx . '_numeric_points']);
+                        $gap_idx_numeric_points = $this->post->retrieve(
+                            'gap_' . $idx . '_numeric_points',
+                            $this->refinery->byTrying([
+                                $this->refinery->kindlyTo()->float(),
+                                $this->refinery->always(0.0)
+                            ])
+                        );
+
+                        $this->object->setGapAnswerPoints($idx, 0, $gap_idx_numeric_points);
                     } else {
-                        if ($this->ctrl->getCmd() != 'createGaps') {
+                        if ($this->ctrl->getCmd() !== 'createGaps') {
                             $this->object->addGapAnswer($idx, 0, '');
                         }
 
                         $this->object->setGapAnswerLowerBound($idx, 0, '');
-
                         $this->object->setGapAnswerUpperBound($idx, 0, '');
                     }
 
-                    if ($this->post->has('gap_' . $idx . '_gapsize')) {
-                        $this->object->setGapSize($idx, $_POST['gap_' . $idx . '_gapsize']);
+                    $gap_idx_size = $this->post->retrieve(
+                        'gap_' . $idx . '_gapsize',
+                        $this->refinery->byTrying([
+                            $this->refinery->kindlyTo()->int(),
+                            $this->refinery->always(null)
+                        ])
+                    );
+
+                    if (is_int($gap_idx_size)) {
+                        $this->object->setGapSize($idx, $gap_idx_size);
                     }
                     break;
             }
             $assClozeGapCombinationObject = new assClozeGapCombination();
-            $assClozeGapCombinationObject->clearGapCombinationsFromDb($this->object->getId());
-            if (
-                isset($_POST['gap_combination']) &&
-                is_array($_POST['gap_combination']) &&
-                count($_POST['gap_combination']) > 0
-            ) {
+            $assClozeGapCombinationObject::clearGapCombinationsFromDb($this->object->getId());
+
+            $gap_combination = $this->post->retrieve(
+                'gap_combination',
+                $this->refinery->byTrying([
+                    $this->refinery->kindlyTo()->listOf(
+                        $this->refinery->kindlyTo()->listOf(
+                            $this->refinery->kindlyTo()->listOf(
+                                $this->refinery->kindlyTo()->listOf(
+                                    $this->refinery->kindlyTo()->float()
+                                )
+                            )
+                        )
+                    ),
+                    $this->refinery->always(null)
+                ])
+            );
+
+            if (is_array($gap_combination)) {
+                $gap_combination_values = $this->post->retrieve(
+                    'gap_combination',
+                    $this->refinery->byTrying([
+                        $this->refinery->kindlyTo()->listOf(
+                            $this->refinery->kindlyTo()->listOf(
+                                $this->refinery->kindlyTo()->listOf(
+                                    $this->refinery->kindlyTo()->listOf(
+                                        $this->refinery->kindlyTo()->float()
+                                    )
+                                )
+                            )
+                        ),
+                        $this->refinery->always([])
+                    ])
+                );
+
                 $assClozeGapCombinationObject->saveGapCombinationToDb(
                     $this->object->getId(),
-                    $_POST['gap_combination'],
-                    $_POST['gap_combination_values']
+                    $gap_combination,
+                    $gap_combination_values
                 );
             }
         }
-        if ($this->ctrl->getCmd() != 'createGaps') {
+        if ($this->ctrl->getCmd() !== 'createGaps') {
             $this->object->updateClozeTextFromGaps();
         }
     }
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $this->object->setClozeText($_POST['cloze_text']);
-        $this->object->setTextgapRating($_POST["textgap_rating"]);
-        $this->object->setIdenticalScoring($_POST["identical_scoring"]);
-        $this->object->setFixedTextLength($_POST["fixedTextLength"]);
+        $this->object->setClozeText($this->post->retrieve(
+            'cloze_text',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('')
+            ])
+        ));
+
+        $this->object->setTextgapRating($this->post->retrieve(
+            'textgap_rating',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always('')
+            ])
+        ));
+
+        $this->object->setIdenticalScoring($this->post->retrieve(
+            'identical_scoring',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->bool(),
+                $this->refinery->always(true)
+            ])
+        ));
+
+        $this->object->setFixedTextLength($this->post->retrieve(
+            'fixedTextLength',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(null)
+            ])
+        ));
     }
 
     /**
@@ -745,7 +871,20 @@ JS;
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $this->object->deleteAnswerText($this->gapIndex, key($_POST['cmd']['removegap_' . $this->gapIndex]));
+
+        $cmd = $this->post->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf(
+                    $this->refinery->kindlyTo()->listOf(
+                        $this->refinery->kindlyTo()->int()
+                    )
+                ),
+                $this->refinery->always([])
+            ])
+        );
+
+        $this->object->deleteAnswerText($this->gapIndex, key($cmd['removegap_' . $this->gapIndex]));
         $this->editQuestion();
     }
 
@@ -753,7 +892,20 @@ JS;
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $this->object->addGapAnswer($this->gapIndex, key($_POST['cmd']['addgap_' . $this->gapIndex]) + 1, "");
+
+        $cmd = $this->post->retrieve(
+            'cmd',
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf(
+                    $this->refinery->kindlyTo()->listOf(
+                        $this->refinery->kindlyTo()->int()
+                    )
+                ),
+                $this->refinery->always([])
+            ])
+        );
+
+        $this->object->addGapAnswer($this->gapIndex, key($cmd['addgap_' . $this->gapIndex]) + 1, '');
         $this->editQuestion();
     }
 
@@ -1087,7 +1239,7 @@ JS;
         // get the solution of the user for the active pass or from the last pass if allowed
         $user_solution = [];
         if ($user_post_solutions !== false) {
-            $indexedSolution = $this->object->fetchSolutionSubmit($user_post_solutions);
+            $indexedSolution = $this->object->fetchSolutionSubmit();
             $user_solution = $this->object->fetchValuePairsFromIndexedValues($indexedSolution);
         } elseif ($active_id) {
             $user_solution = $this->object->getTestOutputSolutions($active_id, $pass);
