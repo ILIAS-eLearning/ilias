@@ -16,6 +16,8 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
+
 /**
 * This class represents a selection list property in a property form.
 *
@@ -31,6 +33,8 @@ class ilSuggestedSolutionSelectorGUI extends ilSubEnabledFormPropertyGUI
     protected $intlink;
     protected $intlinktext;
 
+    protected readonly RequestDataCollector $request_data_collector;
+
     /**
     * Constructor
     *
@@ -41,6 +45,9 @@ class ilSuggestedSolutionSelectorGUI extends ilSubEnabledFormPropertyGUI
     {
         parent::__construct($a_title, $a_postvar);
         $this->setType("select");
+
+        global $DIC;
+        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     /**
@@ -162,13 +169,7 @@ class ilSuggestedSolutionSelectorGUI extends ilSubEnabledFormPropertyGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        $post_var = $this->http->wrapper()->post()->retrieve(
-            $this->getPostVar(),
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always('')
-            ])
-        );
+        $post_var = $this->request_data_collector->retrieveStringValueFromPost($this->getPostVar(), '');
 
         if ($this->getRequired() && trim(ilUtil::stripSlashes($post_var)) === '') {
             $this->setAlert($lng->txt('msg_input_is_required'));

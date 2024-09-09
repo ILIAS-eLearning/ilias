@@ -16,6 +16,8 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
+
 /**
  * Multiple choice question GUI representation
  *
@@ -33,6 +35,8 @@
  */
 class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjustable, ilGuiAnswerScoringAdjustable
 {
+    protected readonly RequestDataCollector $request_data_collector;
+
     private $answers_from_post;
 
     /**
@@ -44,11 +48,13 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
      */
     public function __construct($id = -1)
     {
+        global $DIC;
         parent::__construct();
         $this->object = new assTextSubset();
         if ($id >= 0) {
             $this->object->loadFromDb($id);
         }
+        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     /**
@@ -60,13 +66,7 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
          * sk 26.09.22: This is horrific but I don't see a better way right now,
          * without needing to check most questions for side-effects.
          */
-        $answers = $this->http->wrapper()->post()->retrieve(
-            'answers',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
-                $this->refinery->always([])
-            ])
-        );
+        $answers = $this->request_data_collector->retrieveArrayOfStringsFromPost('answers', []);
         $this->answers_from_post = $answers['answer'] ?? null;
 
         if (!(!$always && $this->editQuestion(true))) {
@@ -123,13 +123,7 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->http->wrapper()->post()->retrieve(
-            'cmd',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
-                $this->refinery->always(['addanswers' => []])
-            ])
-        );
+        $cmd = $this->request_data_collector->retrieveArrayOfStringsFromPost('addanswers', ['addanswers' => []]);
         $this->object->addAnswer('', 0, key($cmd['addanswers']) + 1);
         $this->editQuestion();
     }
@@ -138,13 +132,7 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->http->wrapper()->post()->retrieve(
-            'cmd',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
-                $this->refinery->always(['removeanswers' => []])
-            ])
-        );
+        $cmd = $this->request_data_collector->retrieveArrayOfStringsFromPost('removeanswers', ['removeanswers' => []]);
         $this->object->deleteAnswer(key($cmd['removeanswers']));
         $this->editQuestion();
     }
@@ -313,24 +301,10 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $post = $this->http->wrapper()->post();
-
-        $correct_answers = $post->retrieve(
-            'correctanswers',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always(0)
-            ])
-        );
+        $correct_answers = $this->request_data_collector->retrieveIntValueFromPost('correctanswers', 0);
         $this->object->setCorrectAnswers($correct_answers);
 
-        $text_rating = $post->retrieve(
-            'text_rating',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always('')
-            ])
-        );
+        $text_rating = $this->request_data_collector->retrieveStringValueFromPost('text_rating', '');
         $this->object->setTextRating($text_rating);
     }
 
@@ -339,13 +313,7 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
         // Delete all existing answers and create new answers from the form data
         $this->object->flushAnswers();
 
-        $answers = $this->http->wrapper()->post()->retrieve(
-            'answers',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
-                $this->refinery->always([])
-            ])
-        );
+        $answers = $this->request_data_collector->retrieveArrayOfArraysOfStringsFromPost('answers');
 
         foreach ($this->answers_from_post as $index => $answertext) {
             $this->object->addAnswer(htmlentities(assQuestion::extendedTrim($answertext)), $answers['points'][$index], $index);

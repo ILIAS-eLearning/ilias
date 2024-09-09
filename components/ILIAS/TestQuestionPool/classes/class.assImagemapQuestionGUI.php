@@ -22,11 +22,11 @@
  * The assImagemapQuestionGUI class encapsulates the GUI representation
  * for image map questions.
  *
- * @author		Helmut Schottmüller <helmut.schottmueller@mac.com>
- * @author		Björn Heyser <bheyser@databay.de>
- * @author		Maximilian Becker <mbecker@databay.de>
+ * @author        Helmut Schottmüller <helmut.schottmueller@mac.com>
+ * @author        Björn Heyser <bheyser@databay.de>
+ * @author        Maximilian Becker <mbecker@databay.de>
  *
- * @version	$Id$
+ * @version    $Id$
  * @ingroup components\ILIASTestQuestionPool
  * @ilCtrl_Calls assImagemapQuestionGUI: ilPropertyFormGUI, ilFormPropertyDispatchGUI
  */
@@ -87,19 +87,7 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
         if ($this->ctrl->getCmd() !== 'deleteImage') {
             $this->object->flushAnswers();
 
-            $image = $this->http->wrapper()->post()->retrieve(
-                'image',
-                $this->refinery->byTrying([
-                    $this->refinery->kindlyTo()->listOf(
-                        $this->refinery->kindlyTo()->listOf(
-                            $this->refinery->kindlyTo()->listOf(
-                                $this->refinery->kindlyTo()->string()
-                            )
-                        )
-                    ),
-                    $this->refinery->always(null)
-                ])
-            );
+            $image = $this->request_data_collector->retrieveNestedArraysOfStrings('image', 4);
 
             if (isset($image['coords']['name'])) {
                 foreach ($image['coords']['name'] as $idx => $name) {
@@ -132,16 +120,8 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $post = $this->http->wrapper()->post();
-
         if ($this->ctrl->getCmd() !== 'deleteImage' && $_FILES['image']['tmp_name'] === '') {
-            $image_name = $post->retrieve(
-                'image_name',
-                $this->refinery->byTrying([
-                    $this->refinery->kindlyTo()->string(),
-                    $this->refinery->always('')
-                ])
-            );
+            $image_name = $this->request_data_collector->retrieveStringFromPost('image_name');
 
             $this->object->setImageFilename($image_name);
         }
@@ -152,13 +132,7 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
             $this->object->setImageFilename($_FILES['image']['name'], $_FILES['image']['tmp_name']);
         }
 
-        $is_multiple_choice = $post->retrieve(
-            'is_multiple_choice',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always(assImagemapQuestion::MODE_SINGLE_CHOICE)
-            ])
-        );
+        $is_multiple_choice = $this->request_data_collector->retrieveIntValueFromPost('is_multiple_choice') ?? assImagemapQuestion::MODE_SINGLE_CHOICE;
 
         $this->object->setIsMultipleChoice($is_multiple_choice === assImagemapQuestion::MODE_MULTIPLE_CHOICE);
     }
@@ -259,24 +233,10 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
      */
     public function saveShape(): void
     {
-        $post = $this->http->wrapper()->post();
         $coords = '';
 
-        $shape = $post->retrieve(
-            'shape',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always('')
-            ])
-        );
-
-        $image = $post->retrieve(
-            'image',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
-                $this->refinery->always([])
-            ])
-        );
+        $shape = $this->request_data_collector->retrieveStringFromPost('shape');
+        $image = $this->request_data_collector->retrieveNestedArraysOfStrings('image', 2, []);
 
         switch ($shape) {
             case assImagemapQuestion::AVAILABLE_SHAPES['RECT']:
@@ -295,13 +255,7 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
                 break;
         }
 
-        $shape_title = $post->retrieve(
-            'shapetitle',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always('')
-            ])
-        );
+        $shape_title = $this->request_data_collector->retrieveStringFromPost('shapetitle');
 
         $this->object->addAnswer($shape_title, 0, count($this->object->getAnswers()), $coords, $shape);
         $this->object->saveToDb();
@@ -309,21 +263,12 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     }
 
     /**
-     * @throws ilTemplateException
-     * @throws ilCtrlException
+     * @throws ilTemplateException|ilCtrlException
      */
     public function areaEditor(string $shape = ''): void
     {
-        $post = $this->http->wrapper()->post();
-
         if ($shape === '') {
-            $shape = $post->retrieve(
-                'shape',
-                $this->refinery->byTrying([
-                    $this->refinery->kindlyTo()->string(),
-                    $this->refinery->always('')
-                ])
-            );
+            $shape = $this->request_data_collector->retrieveStringFromPost('shape');
         }
 
         $this->getQuestionTemplate();
@@ -331,13 +276,13 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
         $editorTpl = new ilTemplate('tpl.il_as_qpl_imagemap_question.html', true, true, 'components/ILIAS/TestQuestionPool');
 
         $coords = [];
-        $mapcoords = $this->request->raw('image');
+        $mapcoords = $this->request_data_collector->raw('image');
         if ($mapcoords !== null && isset($mapcoords['mapcoords']) && is_array($mapcoords['mapcoords'])) {
             foreach ($mapcoords['mapcoords'] as $value) {
                 $coords[] = $value;
             }
         }
-        $cmd = $this->request->raw('cmd');
+        $cmd = $this->request_data_collector->raw('cmd');
         if ($cmd !== null && array_key_exists('areaEditor', $cmd) && is_array($cmd['areaEditor']['image'])) {
             $coords[] = $cmd['areaEditor']['image'][0] . ',' . $cmd['areaEditor']['image'][1];
         }
@@ -414,13 +359,7 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
                 break;
         }
 
-        $shape_title = $post->retrieve(
-            'shapetitle',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always('')
-            ])
-        );
+        $shape_title = $this->request_data_collector->retrieveStringFromPost('shapetitle');
 
         if ($c !== '') {
             $preview->addArea($preview->getAreaCount(), $shape, $c, $shape_title, '', '', true, 'blue');

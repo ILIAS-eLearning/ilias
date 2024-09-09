@@ -89,6 +89,8 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
     protected GeneralQuestionPropertiesRepository $questionrepository;
     protected GlobalTestSettings $global_test_settings;
 
+    protected readonly RequestDataCollector $request_data_collector;
+
     public function __construct()
     {
         /** @var ILIAS\DI\Container $DIC */
@@ -142,6 +144,8 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
         $this->row_id_token = $row_id_token;
 
         $this->notes_service->gui()->initJavascript();
+
+        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     protected function getQueryParamString(string $param): ?string
@@ -1567,13 +1571,7 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
             }
         }
 
-        $image_map_x = $this->http->wrapper()->post()->retrieve(
-            'imagemap_x',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always(null)
-            ])
-        );
+        $image_map_x = $this->request_data_collector->retrieveStringValueFromPost('imagemap_x');
 
         if (isset($image_map_x)) {
             $force_active = true;

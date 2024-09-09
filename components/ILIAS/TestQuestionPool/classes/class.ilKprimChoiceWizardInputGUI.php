@@ -16,6 +16,8 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
+
 /**
  * @author		Björn Heyser <bheyser@databay.de>
  * @version		$Id$
@@ -36,6 +38,8 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
      */
     protected $qstObject;
 
+    protected readonly RequestDataCollector $request_data_collector;
+
     private $files;
 
     private $ignoreMissingUploadsEnabled;
@@ -54,6 +58,8 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
         $this->files = [];
 
         $this->ignoreMissingUploadsEnabled = false;
+
+        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function setFiles($files): void
@@ -79,13 +85,7 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
     public function setValue($value): void
     {
         $this->values = [];
-        $answer_type = $this->http->wrapper()->post()->retrieve(
-            'answer_type',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always(null)
-            ])
-        );
+        $answer_type = $this->request_data_collector->retrieveStringValueFromPost('answer_type');
 
         $a_value = $this->cleanupAnswerText($value, $answer_type === 'multiLine');
 
@@ -119,13 +119,7 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        $post_var = $this->http->wrapper()->post()->retrieve(
-            $this->getPostVar(),
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
-                $this->refinery->always(null)
-            ])
-        );
+        $post_var = $this->request_data_collector->retrieveArrayOfStringsFromPost($this->getPostVar());
 
         $found_values = is_array($post_var)
             ? ilArrayUtil::stripSlashesRecursive(
@@ -144,7 +138,7 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
                         return false;
                     }
 
-                    if (mb_strlen($answervalue) > $this->getMaxLength()) {
+                    if (mb_strlen($answer_value) > $this->getMaxLength()) {
                         $this->setAlert($lng->txt("msg_input_char_limit_max"));
                         return false;
                     }

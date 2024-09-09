@@ -16,6 +16,8 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
+
 /**
  * Multiple choice question GUI representation
  *
@@ -33,6 +35,7 @@
 class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjustable, ilGuiAnswerScoringAdjustable
 {
     private bool $rebuild_thumbnails = false;
+    protected RequestDataCollector $testrequest;
 
     /**
     * assMultipleChoiceGUI constructor
@@ -44,11 +47,13 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
     */
     public function __construct($id = -1)
     {
+        global $DIC;
         parent::__construct();
         $this->object = new assMultipleChoice();
         if ($id >= 0) {
             $this->object->loadFromDb($id);
         }
+        $this->testrequest = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     /**
@@ -92,11 +97,11 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
         }
 
         if ($checkonly) {
-            return $this->request->int('types') === 0;
+            return $this->request_data_collector->int('types') === 0;
         }
 
         if (empty($this->object->getLastChange())
-            && !$this->request->isset('types')) {
+            && !$this->request_data_collector->isset('types')) {
             // a new question is edited
             return $this->object->getMultilineAnswerSetting() === 0;
         }
@@ -123,7 +128,7 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
         $errors = false;
 
         if ($save) {
-            $form->getItemByPostVar('selection_limit')->setMaxValue(count($this->request->raw('choice')['answer'] ?? []));
+            $form->getItemByPostVar('selection_limit')->setMaxValue(count($this->request_data_collector->raw('choice')['answer'] ?? []));
 
             $form->setValuesByPost();
             $errors = !$form->checkInput();
@@ -155,7 +160,7 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $position = key($this->request->raw('cmd')['removeimagechoice']);
+        $position = key($this->request_data_collector->raw('cmd')['removeimagechoice']);
         $this->object->removeAnswerImage($position);
         $this->editQuestion();
     }
@@ -636,52 +641,22 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
      */
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $post = $this->http->wrapper()->post();
-        $shuffle = $post->retrieve(
-            'shuffle',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always('0')
-            ])
-        );
+        $shuffle = $this->testrequest->retrieveStringValueFromPost('shuffle') ?? '0';
         $this->object->setShuffle((bool) $shuffle);
 
         $selectionLimit = (int) $form->getItemByPostVar('selection_limit')?->getValue();
         $this->object->setSelectionLimit($selectionLimit > 0 ? $selectionLimit : null);
 
-        $feedback_setting = $post->retrieve(
-            'feedback_setting',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always(null)
-            ])
-        );
-
+        $feedback_setting = $this->testrequest->retrieveIntValueFromPost('feedback_setting');
         if (is_int($feedback_setting)) {
             $this->object->setSpecificFeedbackSetting($feedback_setting);
         }
 
-        $types = $post->retrieve(
-            'types',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always(0)
-            ])
-        );
+        $types = $this->testrequest->retrieveIntValueFromPost('types') ?? 0;
 
         $this->object->setMultilineAnswerSetting($types);
 
-        $choice = $post->retrieve(
-            'choice',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf(
-                    $this->refinery->kindlyTo()->listOf(
-                        $this->refinery->kindlyTo()->string()
-                    )
-                ),
-                $this->refinery->always([])
-            ])
-        );
+        $choice = $this->testrequest->retrieveArrayOfArraysOfStringsFromPost('choice');
 
         if (isset($choice['imagename']) && is_array($choice['imagename']) && $types === 1) {
             $this->object->setIsSingleline(true);
@@ -690,13 +665,7 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
             $this->object->setIsSingleline($types === 0);
         }
 
-        $thumb_size = $post->retrieve(
-            'thumb_size',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always(null)
-            ])
-        );
+        $thumb_size = $this->testrequest->retrieveIntValueFromPost('thumb_size');
 
         if (is_int($thumb_size) && $thumb_size !== $this->object->getThumbSize()) {
             $this->object->setThumbSize($thumb_size);
@@ -709,17 +678,7 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
         // Delete all existing answers and create new answers from the form data
         $this->object->flushAnswers();
 
-        $choice = $this->http->wrapper()->post()->retrieve(
-            'choice',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf(
-                    $this->refinery->kindlyTo()->listOf(
-                        $this->refinery->kindlyTo()->string()
-                    )
-                ),
-                $this->refinery->always([])
-            ])
-        );
+        $choice = $this->testrequest->retrieveArrayOfArraysOfStringsFromPost('choice');
 
         $choice = $this->cleanupAnswerText($choice, !$this->object->isSingleline());
         if (!$this->object->isSingleline()) {

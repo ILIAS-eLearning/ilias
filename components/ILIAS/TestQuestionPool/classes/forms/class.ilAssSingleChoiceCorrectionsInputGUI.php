@@ -15,6 +15,8 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
+
 /**
  * Class ilAssSingleChoiceCorrectionsInputGUI
  *
@@ -30,6 +32,15 @@ class ilAssSingleChoiceCorrectionsInputGUI extends ilSingleChoiceWizardInputGUI
      */
     protected $qstObject;
 
+    private readonly RequestDataCollector $request_data_collector;
+
+    public function __construct(string $a_title = '', string $a_postvar = '')
+    {
+        parent::__construct($a_title, $a_postvar);
+        global $DIC;
+        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
+    }
+
     public function setValue($a_value): void
     {
         if (is_array($a_value) && is_array($a_value['points'])) {
@@ -44,13 +55,7 @@ class ilAssSingleChoiceCorrectionsInputGUI extends ilSingleChoiceWizardInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        $found_values = $this->http->wrapper()->post()->retrieve(
-            $this->getPostVar(),
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
-                $this->refinery->always(null)
-            ])
-        );
+        $found_values = $this->request_data_collector->retrieveNestedArraysOfStrings($this->getPostVar(), 2);
 
         if (is_array($found_values)) {
             // check points

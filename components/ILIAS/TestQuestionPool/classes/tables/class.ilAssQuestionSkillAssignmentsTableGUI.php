@@ -16,8 +16,7 @@
  *
  *********************************************************************/
 
-use ILIAS\HTTP\Services as Http;
-use ILIAS\Refinery\Factory as Refinery;
+use ILIAS\TestQuestionPool\RequestDataCollector;
 
 /**
  * @author		Björn Heyser <bheyser@databay.de>
@@ -27,13 +26,10 @@ use ILIAS\Refinery\Factory as Refinery;
  */
 class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
 {
-    private readonly Http $http;
-    private readonly Refinery $refinery;
-
     private ilAssQuestionSkillAssignmentList $skillQuestionAssignmentList;
+    private RequestDataCollector $requestDataCollector;
 
     private bool $loadSkillPointsFromRequest = false;
-
     private bool $manipulationsEnabled;
 
     public function setSkillQuestionAssignmentList(ilAssQuestionSkillAssignmentList $assignmentList): void
@@ -58,14 +54,10 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         $parentOBJ,
         $parentCmd,
         ilCtrl $ctrl,
-        ilLanguage $lng,
-        $http,
-        $refinery
+        ilLanguage $lng
     ) {
         $this->lng = $lng;
         $this->ctrl = $ctrl;
-        $this->http = $http;
-        $this->refinery = $refinery;
 
         $this->setId('assQstSkl');
         $this->setPrefix('assQstSkl');
@@ -79,6 +71,8 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         $this->enable('header');
         $this->disable('sort');
         $this->disable('select_all');
+        global $DIC;
+        $this->requestDataCollector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
     }
 
     /**
@@ -279,13 +273,7 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         ]);
 
         if ($this->loadSkillPointsFromRequest) {
-            $skill_points = $this->http->wrapper()->post()->retrieve(
-                'skill_points',
-                $this->refinery->byTrying([
-                    $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
-                    $this->refinery->always([])
-                ])
-            );
+            $skill_points = $this->requestDataCollector->retrieveNestedArraysOfStrings('skill_points', 2) ?? [];
 
             $points = ilUtil::stripSlashes($skill_points[$assignmentKey] ?? '');
         } else {

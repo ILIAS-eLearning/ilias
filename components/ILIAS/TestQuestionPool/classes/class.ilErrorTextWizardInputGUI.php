@@ -16,6 +16,8 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
+
 /**
 * This class represents a key value pair wizard property in a property form.
 *
@@ -32,6 +34,7 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
     protected $value_maxlength = 150;
     protected $key_name = "";
     protected $value_name = "";
+    protected readonly RequestDataCollector $requestDataCollector;
 
     /**
     * Constructor
@@ -41,7 +44,10 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
     */
     public function __construct($a_title = "", $a_postvar = "")
     {
+        global $DIC;
         parent::__construct($a_title, $a_postvar);
+
+        $this->requestDataCollector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function setValue($a_value): void
@@ -205,13 +211,7 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        $post_var = $this->http->wrapper()->post()->retrieve(
-            $this->getPostVar(),
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
-                $this->refinery->always(null)
-            ])
-        );
+        $post_var = $this->requestDataCollector->retrieveArrayOfStringsFromPost($this->getPostVar());
 
         $found_values = is_array($post_var) ? ilArrayUtil::stripSlashesRecursive($post_var) : null;
 

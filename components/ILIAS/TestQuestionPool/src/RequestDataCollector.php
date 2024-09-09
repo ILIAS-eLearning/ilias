@@ -18,6 +18,11 @@
 
 namespace ILIAS\TestQuestionPool;
 
+use Closure;
+use GuzzleHttp\Psr7\UploadedFile;
+use ILIAS\FileUpload\DTO\UploadResult;
+use ILIAS\FileUpload\Exception\IllegalStateException;
+use ILIAS\Refinery\ByTrying;
 use ILIAS\Repository\BaseGUIRequest;
 use ILIAS\Refinery\ConstraintViolationException;
 use ILIAS\HTTP\Services;
@@ -28,27 +33,22 @@ class RequestDataCollector
 {
     use BaseGUIRequest;
 
-    protected Services $http;
-    protected FileUpload $upload;
-
     public function __construct(
         Services $http,
         Factory $refinery,
-        FileUpload $upload
+        protected readonly FileUpload $upload
     ) {
-        $this->initRequest(
-            $http,
-            $refinery
-        );
-        $this->upload = $upload;
+        $this->initRequest($http, $refinery);
     }
 
     /**
-     * @return \ILIAS\FileUpload\DTO\UploadResult[]
+     * @return UploadResult[]
+     * @throws IllegalStateException
      */
     public function getProcessedUploads(): array
     {
         $uploads = [];
+
         if ($this->upload->hasUploads()) {
             if (!$this->upload->hasBeenProcessed()) {
                 $this->upload->process();
@@ -76,9 +76,9 @@ class RequestDataCollector
             $uploaded_files = $uploaded_files[$current_key];
 
             if (isset($uploaded_files[$index]) && $http_names === []) {
-                /** @var \GuzzleHttp\Psr7\UploadedFile $file */
+                /** @var UploadedFile $file */
                 $file = $uploaded_files[$index];
-                $c = \Closure::bind(static function (\GuzzleHttp\Psr7\UploadedFile $file): ?string {
+                $c = Closure::bind(static function (UploadedFile $file): ?string {
                     return $file->file ?? null;
                 }, null, $file);
 
@@ -89,7 +89,7 @@ class RequestDataCollector
         return null;
     }
 
-    public function upload(): \ILIAS\FileUpload\FileUpload
+    public function upload(): FileUpload
     {
         return $this->upload;
     }
@@ -98,6 +98,7 @@ class RequestDataCollector
     {
         return $this->raw($key) !== null;
     }
+
     public function hasRefId(): int
     {
         return $this->raw('ref_id') !== null;
@@ -105,7 +106,7 @@ class RequestDataCollector
 
     public function getRefId(): int
     {
-        return $this->int("ref_id");
+        return $this->int('ref_id');
     }
 
     public function hasQuestionId(): bool
@@ -118,26 +119,26 @@ class RequestDataCollector
         return $this->int('q_id');
     }
 
-    /** @return string[] */
+    /**
+     * @return string[]
+     */
     public function getIds(): array
     {
-        return $this->strArray("id");
+        return $this->strArray('id');
     }
 
     /**
      * @return mixed|null
      */
-    public function raw(string $key)
+    public function raw(string $key): mixed
     {
-        $no_transform = $this->refinery->identity();
-        return $this->get($key, $no_transform);
+        return $this->get($key, $this->refinery->identity());
     }
 
     public function float(string $key): float
     {
-        $t = $this->refinery->kindlyTo()->float();
         try {
-            return $this->get($key, $t) ?? 0.0;
+            return $this->get($key, $this->refinery->kindlyTo()->float()) ?? 0.0;
         } catch (ConstraintViolationException $e) {
             return 0.0;
         }
@@ -145,11 +146,10 @@ class RequestDataCollector
 
     public function string(string $key): string
     {
-        $t = $this->refinery->kindlyTo()->string();
-        return $this->get($key, $t) ?? '';
+        return $this->get($key, $this->refinery->kindlyTo()->string()) ?? '';
     }
 
-    public function getParsedBody()
+    public function getParsedBody(): object|array|null
     {
         return $this->http->request()->getParsedBody();
     }
@@ -159,7 +159,7 @@ class RequestDataCollector
      */
     public function getUnitIds(): array
     {
-        return $this->intArray("unit_ids");
+        return $this->intArray('unit_ids');
     }
 
     /**
@@ -167,7 +167,7 @@ class RequestDataCollector
      */
     public function getUnitCategoryIds(): array
     {
-        return $this->intArray("category_ids");
+        return $this->intArray('category_ids');
     }
 
     public function getMatchingPairs(): array
@@ -195,108 +195,284 @@ class RequestDataCollector
         );
     }
 
-    /*"
-     * @return array<int, string>
+    /**
+     * @return ?array<int, string>
      */
-    public function retrieveArrayOfStringsFromPost(string $key): ?array
+    public function retrieveArrayOfStringsFromPost(string $key, ?array $fallback = null): ?array
     {
-        $p = $this->http->wrapper()->post();
-        $r = $this->refinery;
-        if (!$p->has($key)) {
-            return null;
-        }
-
-        return $p->retrieve(
+        return $this->http->wrapper()->post()->retrieve(
             $key,
-            $r->byTrying([
-                $r->container()->mapValues(
-                    $r->in()->series(
+            $this->refinery->byTrying([
+                $this->refinery->container()->mapValues(
+                    $this->refinery->in()->series(
                         [
-                            $r->kindlyTo()->string(),
-                            $r->custom()->transformation(
+                            $this->refinery->kindlyTo()->string(),
+                            $this->refinery->custom()->transformation(
                                 fn($v) => trim($v)
                             )
                         ]
                     )
                 ),
-                $r->always(null)
+                $this->refinery->always($fallback)
             ])
         );
     }
 
-    /*"
-     * @return array<int, string>
+    /**
+     * @return ?array<int, string>
      */
-    public function retrieveArrayOfIntsFromPost(string $key): ?array
+    public function retrieveArrayOfIntsFromPost(string $key, ?array $fallback = null): ?array
     {
-        $p = $this->http->wrapper()->post();
-        $r = $this->refinery;
-        if (!$p->has($key)) {
-            return null;
-        }
-
-        return $p->retrieve(
+        return $this->http->wrapper()->post()->retrieve(
             $key,
-            $r->byTrying([
-                $r->container()->mapValues(
-                    $r->kindlyTo()->int()
+            $this->refinery->byTrying([
+                $this->refinery->container()->mapValues(
+                    $this->refinery->kindlyTo()->int()
                 ),
-                $r->always(null)
+                $this->refinery->always($fallback)
             ])
         );
     }
 
-    public function retrieveStringValueFromPost(string $key): ?string
+    public function retrieveStringValueFromPost(string $key, ?string $fallback = null): ?string
     {
-        $p = $this->http->wrapper()->post();
-        $r = $this->refinery;
-        if (!$p->has($key)) {
-            return null;
-        }
-
-        return $p->retrieve(
+        return $this->http->wrapper()->post()->retrieve(
             $key,
-            $r->in()->series(
+            $this->refinery->in()->series(
                 [
-                    $r->kindlyTo()->string(),
-                    $r->custom()->transformation(
+                    $this->refinery->kindlyTo()->string(),
+                    $this->refinery->custom()->transformation(
                         fn($v) => trim($v)
-                    )
+                    ),
+                    $this->refinery->always($fallback)
                 ]
             )
         );
     }
 
-    public function retrieveIntValueFromPost(string $key): ?int
+    public function retrieveIntValueFromPost(string $key, ?int $fallback = null): ?int
     {
-        $p = $this->http->wrapper()->post();
-        $r = $this->refinery;
-        if (!$p->has($key)) {
-            return null;
-        }
-
-        return $p->retrieve(
+        return $this->http->wrapper()->post()->retrieve(
             $key,
-            $r->byTrying([
-                $r->kindlyTo()->int(),
-                $r->always(null)
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always($fallback)
             ])
         );
     }
 
-    public function retrieveFloatValueFromPost(string $key): ?float
+    public function retrieveFloatValueFromPost(string $key, ?float $fallback = null): ?float
     {
-        $p = $this->http->wrapper()->post();
-        $r = $this->refinery;
-        if (!$p->has($key)) {
-            return null;
+        return $this->http->wrapper()->post()->retrieve(
+            $key,
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->float(),
+                $this->refinery->always($fallback)
+            ])
+        );
+    }
+
+    public function retrieveFloatArrayOrIntArrayFromPost(string $key, ?array $fallback = null): ?array
+    {
+        return $this->http->wrapper()->post()->retrieve(
+            $key,
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->float()),
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->always($fallback)
+            ])
+        );
+    }
+
+    public function retrieveNestedArraysOfStrings(string $key, int $depth = 1, mixed $fallback = null): ?array
+    {
+        $kindly_to_string = $this->refinery->kindlyTo()->string();
+        $kindly_to_list_of = null;
+
+        for ($i = 0; $i < $depth; $i++) {
+            $kindly_to_list_of = $this->refinery->kindlyTo()->listOf($kindly_to_list_of ?? $kindly_to_string);
         }
 
-        return $p->retrieve(
+        return $this->http->wrapper()->post()->retrieve(
             $key,
-            $r->byTrying([
-                $r->kindlyTo()->float(),
-                $r->always(null)
+            $this->refinery->byTrying([
+                $kindly_to_list_of,
+                $this->refinery->always($fallback)
+            ])
+        );
+    }
+
+    public function retrieveNestedArraysOfInts(string $key, int $depth = 1, ?array $fallback = null): ?array
+    {
+        $kindly_to_int = $this->refinery->kindlyTo()->int();
+        $kindly_to_list_of = null;
+
+        for ($i = 0; $i < $depth; $i++) {
+            $kindly_to_list_of = $this->refinery->kindlyTo()->listOf($kindly_to_list_of ?? $kindly_to_int);
+        }
+
+        return $this->http->wrapper()->post()->retrieve(
+            $key,
+            $this->refinery->byTrying([
+                $kindly_to_list_of,
+                $this->refinery->always($fallback)
+            ])
+        );
+    }
+
+    public function retrieveNestedArraysOfFloats(string $key, int $depth = 1, ?array $fallback = null): ?array
+    {
+        $kindly_to_float = $this->refinery->kindlyTo()->float();
+        $kindly_to_list_of = null;
+
+        for ($i = 0; $i < $depth; $i++) {
+            $kindly_to_list_of = $this->refinery->kindlyTo()->listOf($kindly_to_list_of ?? $kindly_to_float);
+        }
+
+        return $this->http->wrapper()->post()->retrieve(
+            $key,
+            $this->refinery->byTrying([
+                $kindly_to_list_of,
+                $this->refinery->always($fallback)
+            ])
+        );
+    }
+
+    public function retrieveArrayOfStringWithFilter(string $key, callable $filter = null, ?array $fallback = null): ?array
+    {
+        $result = $this->http->wrapper()->post()->retrieve(
+            $key,
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always($fallback)
+            ])
+        );
+        return ($result === null) ? null : array_filter($result, $filter);
+    }
+
+    public function retrieveStringFromPost(string $key, ?string $fallback = null): ?string
+    {
+        return $this->http->wrapper()->post()->retrieve(
+            $key,
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->string(),
+                $this->refinery->always($fallback)
+            ])
+        );
+    }
+
+    public function retrieveBoolFromPost(string $key, ?bool $fallback = null): ?bool
+    {
+        return $this->http->wrapper()->post()->retrieve(
+            $key,
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->bool(),
+                $this->refinery->always($fallback)
+            ])
+        );
+    }
+
+    public function retrieveArraysOfInts(string $key, ?array $fallback = null): ?array
+    {
+        return $this->http->wrapper()->post()->retrieve(
+            $key,
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->always($fallback)
+            ])
+        );
+    }
+
+    public function retrieveArrayOfIdentities(string $key, ?array $fallback = null): ?array
+    {
+        return $this->http->wrapper()->post()->retrieve(
+            $key,
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->identity()),
+                $this->refinery->always($fallback)
+            ])
+        );
+    }
+
+    public function retrieveMappedValuesOfStringFromPost(?array $fallback = null): ByTrying
+    {
+        return $this->refinery->byTrying(
+            [
+                $this->refinery->container()->mapValues(
+                    $this->refinery->kindlyTo()->string()
+                ),
+                $this->refinery->always($fallback)
+            ]
+        );
+    }
+
+    public function retrieveMappedValuesOfIntFromPost(?array $fallback = null): ByTrying
+    {
+        return $this->refinery->byTrying(
+            [
+                $this->refinery->container()->mapValues(
+                    $this->refinery->kindlyTo()->int()
+                ),
+                $this->refinery->always($fallback)
+            ]
+        );
+    }
+    public function retrieveMappedValuesOfFloatFromPost(?array $fallback = null): ByTrying
+    {
+        return $this->refinery->byTrying(
+            [
+                $this->refinery->container()->mapValues(
+                    $this->refinery->kindlyTo()->float()
+                ),
+                $this->refinery->always($fallback)
+            ]
+        );
+    }
+
+    public function getQueryKeys(): array
+    {
+        return $this->http->wrapper()->query()->keys();
+    }
+
+    public function getPostKeys(): array
+    {
+        return $this->http->wrapper()->post()->keys();
+    }
+
+    public function retrieveArrayOfIntsOrStringsFromPost(string $key, array $fallback = []): array
+    {
+        return $this->http->wrapper()->post()->retrieve(
+            $key,
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
+                $this->refinery->always($fallback),
+            ])
+        );
+    }
+
+    public function retrieveArrayOfArraysOfStringsFromPost(string $key, ?array $fallback = []): ?array
+    {
+        return $this->http->wrapper()->post()->retrieve(
+            $key,
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf(
+                    $this->refinery->kindlyTo()->listOf(
+                        $this->refinery->kindlyTo()->string()
+                    )
+                ),
+                $this->refinery->always($fallback)
+            ])
+        );
+    }
+
+    public function retrieveArrayOfBoolsFromPost(string $key, ?array $fallback = []): ?array
+    {
+        return $this->http->wrapper()->post()->retrieve(
+            $key,
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->bool()),
+                $this->refinery->always($fallback)
             ])
         );
     }

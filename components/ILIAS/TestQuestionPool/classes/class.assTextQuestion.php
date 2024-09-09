@@ -21,6 +21,7 @@ declare(strict_types=1);
 use ILIAS\TestQuestionPool\Questions\QuestionLMExportable;
 use ILIAS\TestQuestionPool\Questions\QuestionAutosaveable;
 use ILIAS\Test\Logging\AdditionalInformationGenerator;
+use ILIAS\TestQuestionPool\RequestDataCollector;
 
 /**
  * Class for text questions
@@ -38,6 +39,8 @@ use ILIAS\Test\Logging\AdditionalInformationGenerator;
 class assTextQuestion extends assQuestion implements ilObjQuestionScoringAdjustable, ilObjAnswerScoringAdjustable, QuestionLMExportable, QuestionAutosaveable
 {
     protected const HAS_SPECIFIC_FEEDBACK = false;
+
+    protected readonly RequestDataCollector $request_data_collector;
 
     public const SCORING_MODE_KEYWORD_RELATION_NONE = 'non';
     public const SCORING_MODE_KEYWORD_RELATION_ANY = 'any';
@@ -81,8 +84,10 @@ class assTextQuestion extends assQuestion implements ilObjQuestionScoringAdjusta
         int $owner = -1,
         string $question = ""
     ) {
+        global $DIC;
         parent::__construct($title, $comment, $author, $owner, $question);
         $this->points = 1;
+        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function getMatchcondition(): int
@@ -408,13 +413,7 @@ class assTextQuestion extends assQuestion implements ilObjQuestionScoringAdjusta
 
     protected function getSolutionSubmit(): string
     {
-        $text = $this->http->wrapper()->post()->retrieve(
-            'TEXT',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always('')
-            ])
-        );
+        $text = $this->request_data_collector->retrieveStringValueFromPost('TEXT', '');
 
         $text = ilObjAdvancedEditing::_getRichTextEditor() === 'tinymce'
             ? ilUtil::stripSlashes($text, false)

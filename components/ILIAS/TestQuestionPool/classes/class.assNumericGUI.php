@@ -15,6 +15,8 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
+
 /**
  * Numeric question GUI representation
  *
@@ -33,6 +35,8 @@
  */
 class assNumericGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjustable, ilGuiAnswerScoringAdjustable
 {
+    protected RequestDataCollector $testrequest;
+
     /**
      * assNumericGUI constructor
      *
@@ -42,11 +46,13 @@ class assNumericGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjust
      */
     public function __construct($id = -1)
     {
+        global $DIC;
         parent::__construct();
         $this->object = new assNumeric();
         if ($id >= 0) {
             $this->object->loadFromDb($id);
         }
+        $this->testrequest = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function getCommand($cmd)
@@ -284,44 +290,18 @@ class assNumericGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjust
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $this->object->setMaxChars($this->http->wrapper()->post()->retrieve(
-            'maxchars',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always(6)
-            ])
-        ));
+        $this->object->setMaxChars($this->testrequest->retrieveIntValueFromPost('maxchars') ?? 6);
     }
 
     public function writeAnswerSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $post = $this->http->wrapper()->post();
-
-        $lowerlimit = $post->retrieve(
-            'lowerlimit',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->float(),
-                $this->refinery->always(0.0)
-            ])
-        );
+        $lowerlimit = $this->testrequest->retrieveFloatValueFromPost('lowerlimit') ?? 0.0;
         $this->object->setLowerLimit($lowerlimit);
 
-        $upperlimit = $post->retrieve(
-            'upperlimit',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->float(),
-                $this->refinery->always(0.0)
-            ])
-        );
+        $upperlimit = $this->testrequest->retrieveFloatValueFromPost('upperlimit') ?? 0.0;
         $this->object->setUpperLimit($upperlimit);
 
-        $points = $post->retrieve(
-            'points',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always('0.0')
-            ])
-        );
+        $points = $this->testrequest->retrieveStringValueFromPost('points') ?? '0.0';
         $this->object->setPoints((float) str_replace(',', '.', $points));
     }
 

@@ -16,6 +16,8 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
+
 /**
  * Class ilTextSubsetCorrectionsInputGUI
  *
@@ -30,6 +32,16 @@ class ilAssAnswerCorrectionsInputGUI extends ilAnswerWizardInputGUI
      * @var bool
      */
     protected bool $hidePointsEnabled = false;
+
+    private RequestDataCollector $request_data_collector;
+
+    public function __construct(string $a_title = '', string $a_postvar = '')
+    {
+        parent::__construct($a_title, $a_postvar);
+        global $DIC;
+
+        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
+    }
 
     /**
      * @return bool
@@ -61,13 +73,7 @@ class ilAssAnswerCorrectionsInputGUI extends ilAnswerWizardInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        $found_values = $this->http->wrapper()->post()->retrieve(
-            $this->getPostVar(),
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
-                $this->refinery->always(null)
-            ])
-        );
+        $found_values = $this->request_data_collector->retrieveArrayOfStringsFromPost($this->getPostVar());
 
         if ($this->isHidePointsEnabled()) {
             return true;

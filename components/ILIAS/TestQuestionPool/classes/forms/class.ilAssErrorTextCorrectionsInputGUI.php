@@ -16,6 +16,8 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
+
 /**
  * Class ilAssErrorTextCorrections
  *
@@ -26,6 +28,14 @@
  */
 class ilAssErrorTextCorrectionsInputGUI extends ilErrorTextWizardInputGUI
 {
+    private RequestDataCollector $request_data_collector;
+
+    public function __construct(string $a_title = '', string $a_postvar = '')
+    {
+        parent::__construct($a_title, $a_postvar);
+        global $DIC;
+        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
+    }
     public function setValue($a_value): void
     {
         if (is_array($a_value) && is_array($a_value['points'])) {
@@ -39,13 +49,7 @@ class ilAssErrorTextCorrectionsInputGUI extends ilErrorTextWizardInputGUI
 
     public function checkInput(): bool
     {
-        $found_values = $this->http->wrapper()->post()->retrieve(
-            $this->getPostVar(),
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
-                $this->refinery->always(null)
-            ])
-        );
+        $found_values = $this->request_data_collector->retrieveArrayOfStringsFromPost($this->getPostVar());
 
         if (!is_array($found_values['points'])) {
             $this->setAlert($this->lng->txt('msg_input_is_required'));

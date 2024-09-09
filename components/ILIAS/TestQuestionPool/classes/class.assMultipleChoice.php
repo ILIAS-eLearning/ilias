@@ -22,6 +22,7 @@ use ILIAS\TestQuestionPool\Questions\QuestionLMExportable;
 use ILIAS\TestQuestionPool\Questions\QuestionAutosaveable;
 use ILIAS\TestQuestionPool\ManipulateImagesInChoiceQuestionsTrait;
 use ILIAS\Test\Logging\AdditionalInformationGenerator;
+use ILIAS\TestQuestionPool\RequestDataCollector;
 
 /**
  * Class for multiple choice tests.
@@ -49,6 +50,7 @@ class assMultipleChoice extends assQuestion implements ilObjQuestionScoringAdjus
     public bool $is_singleline = true;
     public int $feedback_setting = 0;
     protected ?int $selection_limit = null;
+    protected RequestDataCollector $testrequest;
 
     public function setIsSingleline(bool $is_singleline): void
     {
@@ -77,9 +79,11 @@ class assMultipleChoice extends assQuestion implements ilObjQuestionScoringAdjus
         string $question = "",
         private int $output_type = self::OUTPUT_ORDER
     ) {
+        global $DIC;
         parent::__construct($title, $comment, $author, $owner, $question);
         $this->answers = [];
         $this->shuffle = true;
+        $this->testrequest = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function getSelectionLimit(): ?int
@@ -387,13 +391,7 @@ class assMultipleChoice extends assQuestion implements ilObjQuestionScoringAdjus
 
     protected function isForcedEmptySolution(array $solutionSubmit): bool
     {
-        $tst_force_form_diff_input = $this->http->wrapper()->post()->retrieve(
-            'tst_force_form_diff_input',
-            $this->refinery->byTrying([
-              $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
-              $this->refinery->always([])
-          ])
-        );
+        $tst_force_form_diff_input = $this->testrequest->retrieveArrayOfStringsFromPost('tst_force_form_diff_input') ?? [];
 
         return !count($solutionSubmit) && !empty($tst_force_form_diff_input);
     }

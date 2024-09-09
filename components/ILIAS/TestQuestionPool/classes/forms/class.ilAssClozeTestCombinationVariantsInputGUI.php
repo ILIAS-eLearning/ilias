@@ -16,6 +16,8 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
+
 /**
  * Class ilAssClozeTestCombinationVariantsInputGUI
  *
@@ -26,6 +28,15 @@
  */
 class ilAssClozeTestCombinationVariantsInputGUI extends ilAnswerWizardInputGUI
 {
+    private RequestDataCollector $request_data_collector;
+
+    public function __construct(string $a_title = '', string $a_postvar = '')
+    {
+        parent::__construct($a_title, $a_postvar);
+        global $DIC;
+        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
+    }
+
     public function setValue($a_value): void
     {
         if (is_array($a_value) && is_array($a_value['points'])) {
@@ -40,14 +51,7 @@ class ilAssClozeTestCombinationVariantsInputGUI extends ilAnswerWizardInputGUI
         global $DIC;
         $lng = $DIC->language();
 
-        $values = $this->http->wrapper()->post()->retrieve(
-            $this->getPostVar(),
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->float()),
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
-                $this->refinery->always(null)
-            ])
-        );
+        $values = $this->request_data_collector->retrieveFloatArrayOrIntArrayFromPost($this->getPostVar());
 
         $max = 0;
         foreach ($values['points'] ?? [] as $points) {

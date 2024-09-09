@@ -87,11 +87,11 @@ class assSingleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringA
         }
 
         if ($checkonly) {
-            return $this->request->int('types') === 0;
+            return $this->request_data_collector->int('types') === 0;
         }
 
         if (empty($this->object->getLastChange())
-            && !$this->request->isset('types')) {
+            && !$this->request_data_collector->isset('types')) {
             // a new question is edited
             return $this->object->getMultilineAnswerSetting() === 0;
         }
@@ -130,7 +130,7 @@ class assSingleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringA
         $errors = false;
 
         if ($save) {
-            foreach ($this->request->getParsedBody() as $key => $value) {
+            foreach ($this->request_data_collector->getParsedBody() as $key => $value) {
                 $item = $form->getItemByPostVar($key);
                 if ($item !== null) {
                     switch (get_class($item)) {
@@ -146,7 +146,7 @@ class assSingleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringA
             }
 
             $errors = !$form->checkInput();
-            foreach ($this->request->getParsedBody() as $key => $value) {
+            foreach ($this->request_data_collector->getParsedBody() as $key => $value) {
                 $item = $form->getItemByPostVar($key);
                 if ($item !== null) {
                     switch (get_class($item)) {
@@ -183,7 +183,7 @@ class assSingleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringA
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $position = key($this->request->raw('cmd')['removeimagechoice']);
+        $position = key($this->request_data_collector->raw('cmd')['removeimagechoice']);
         $this->object->removeAnswerImage($position);
         $this->editQuestion();
     }
@@ -530,33 +530,13 @@ class assSingleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringA
      */
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $post = $this->http->wrapper()->post();
-
-        $types = $post->retrieve(
-            'types',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always('0')
-            ])
-        );
+        $types = $this->request_data_collector->retrieveStringValueFromPost('types', '0');
         $this->object->setMultilineAnswerSetting($types);
 
-        $shuffle = $post->retrieve(
-            'shuffle',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->bool(),
-                $this->refinery->always('0')
-            ])
-        );
+        $shuffle = $this->request_data_collector->retrieveBoolFromPost('shuffle', false);
         $this->object->setShuffle($shuffle);
 
-        $choice = $post->retrieve(
-            'choice',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
-                $this->refinery->always(null)
-            ])
-        );
+        $choice = $this->request_data_collector->retrieveArrayOfArraysOfStringsFromPost('choice', null);
 
         if (isset($choice['imagename']) && is_array($choice['imagename']) && $types === '1') {
             $this->object->setIsSingleline(true);
@@ -566,13 +546,7 @@ class assSingleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringA
         }
 
         $object_thumb_size = $this->object->getThumbSize();
-        $thumb_size = $post->retrieve(
-            'thumb_size',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always($object_thumb_size)
-            ])
-        );
+        $thumb_size = $this->request_data_collector->retrieveIntValueFromPost('thumb_size', $object_thumb_size);
 
         if ($thumb_size !== $object_thumb_size) {
             $this->object->setThumbSize($thumb_size);
@@ -642,7 +616,7 @@ class assSingleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringA
         // Delete all existing answers and create new answers from the form data
         $this->object->flushAnswers();
         $choice = $this->cleanupAnswerText(
-            $this->request->raw('choice') ?? [],
+            $this->request_data_collector->raw('choice') ?? [],
             $this->object->isSingleline() === false
         );
 

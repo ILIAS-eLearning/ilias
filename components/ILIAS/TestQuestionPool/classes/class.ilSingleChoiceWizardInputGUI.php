@@ -17,6 +17,7 @@
  *********************************************************************/
 
 use ILIAS\HTTP\Wrapper\ArrayBasedRequestWrapper as ArrayBasedRequestWrapper;
+use ILIAS\TestQuestionPool\RequestDataCollector;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\Component\Symbol\Glyph\Factory as GlyphFactory;
 
@@ -41,6 +42,8 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
     protected GlyphFactory $glyph_factory;
     protected Renderer $renderer;
 
+    protected readonly RequestDataCollector $request_data_collector;
+
     /**
     * Constructor
     *
@@ -59,6 +62,8 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
         $this->post_wrapper = $DIC->http()->wrapper()->post();
         $this->glyph_factory = $DIC->ui()->factory()->symbol()->glyph();
         $this->renderer = $DIC->ui()->renderer();
+
+        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function setValue($a_value): void
@@ -228,13 +233,7 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
     */
     public function checkInput(): bool
     {
-        $post_var = $this->http->wrapper()->post()->retrieve(
-            $this->getPostVar(),
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
-                $this->refinery->always(null)
-            ])
-        );
+        $post_var = $this->request_data_collector->retrieveArrayOfStringsFromPost($this->getPostVar());
 
         $found_values = is_array($post_var) ? ilArrayUtil::stripSlashesRecursive(
             $post_var,
@@ -373,6 +372,9 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
         return $this->checkSubItemsInput();
     }
 
+    /**
+     * @throws ilTemplateException
+     */
     public function insert(ilTemplate $a_tpl): void
     {
         $tpl = new ilTemplate('tpl.prop_singlechoicewizardinput.html', true, true, 'components/ILIAS/TestQuestionPool');

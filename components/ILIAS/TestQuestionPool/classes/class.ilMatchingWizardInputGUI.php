@@ -16,6 +16,7 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\Component\Symbol\Glyph\Factory as GlyphFactory;
 
@@ -42,6 +43,8 @@ class ilMatchingWizardInputGUI extends ilTextInputGUI
     protected GlyphFactory $glyph_factory;
     protected Renderer $renderer;
 
+    protected readonly RequestDataCollector $request_data_collector;
+
     public function __construct($a_title = "", $a_postvar = "")
     {
         parent::__construct($a_title, $a_postvar);
@@ -57,6 +60,8 @@ class ilMatchingWizardInputGUI extends ilTextInputGUI
         $lng = $DIC['lng'];
         $this->text_name = $lng->txt('answer_text');
         $this->image_name = $lng->txt('answer_image');
+
+        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     /**
@@ -165,13 +170,7 @@ class ilMatchingWizardInputGUI extends ilTextInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        $post_var = $this->http->wrapper()->post()->retrieve(
-            $this->getPostVar(),
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
-                $this->refinery->always(null)
-            ])
-        );
+        $post_var = $this->request_data_collector->retrieveArrayOfStringsFromPost($this->getPostVar());
         $found_values = is_array($post_var)
             ? ilArrayUtil::stripSlashesRecursive(
                 $post_var,

@@ -612,14 +612,7 @@ class assLongMenu extends assQuestion implements ilObjQuestionScoringAdjustable,
 
     protected function savePreviewData(ilAssQuestionPreviewSession $preview_session): void
     {
-        $answer = $this->http->wrapper()->post()->retrieve(
-            'answer',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
-                $this->refinery->always([])
-            ])
-        );
-
+        $answer = $this->questionpool_request->retrieveArrayOfStringsFromPost('answer', []);
         $preview_session->setParticipantsSolution(array_map(static fn($value) => trim($value), $answer));
     }
 

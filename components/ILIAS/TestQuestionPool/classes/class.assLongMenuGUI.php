@@ -103,26 +103,26 @@ class assLongMenuGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjus
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
         $min_auto_complete = (int) $form->getInput('min_auto_complete');
-        $longmenu_text = $this->request->raw('longmenu_text') ?? '';
-        $hidden_text_files = $this->request->raw('hidden_text_files') ?? '';
-        $hidden_correct_answers = $this->request->raw('hidden_correct_answers') ?? [];
-        $long_menu_type = $this->request->raw('long_menu_type') ?? [];
+        $longmenu_text = $this->request_data_collector->raw('longmenu_text') ?? '';
+        $hidden_text_files = $this->request_data_collector->raw('hidden_text_files') ?? '';
+        $hidden_correct_answers = $this->request_data_collector->raw('hidden_correct_answers') ?? [];
+        $long_menu_type = $this->request_data_collector->raw('long_menu_type') ?? [];
         $this->object->setLongMenuTextValue(ilUtil::stripSlashes($longmenu_text));
         $this->object->setAnswers($this->trimArrayRecursive($this->stripSlashesRecursive(json_decode($hidden_text_files))));
         $this->object->setCorrectAnswers($this->trimArrayRecursive($this->stripSlashesRecursive(json_decode($hidden_correct_answers))));
         $this->object->setAnswerType(ilArrayUtil::stripSlashesRecursive($long_menu_type));
-        $this->object->setQuestion($this->request->raw('question'));
-        $this->object->setLongMenuTextValue($this->request->raw('longmenu_text'));
+        $this->object->setQuestion($this->request_data_collector->raw('question'));
+        $this->object->setLongMenuTextValue($this->request_data_collector->raw('longmenu_text'));
         $this->object->setMinAutoComplete($min_auto_complete);
-        $this->object->setIdenticalScoring($this->request->int('identical_scoring'));
+        $this->object->setIdenticalScoring($this->request_data_collector->int('identical_scoring'));
 
         $this->saveTaxonomyAssignments();
     }
 
     private function verifyAnswerOptions(): bool
     {
-        $longmenu_text = $this->request->raw('longmenu_text') ?? '';
-        $hidden_text_files = $this->request->raw('hidden_text_files') ?? '';
+        $longmenu_text = $this->request_data_collector->raw('longmenu_text') ?? '';
+        $hidden_text_files = $this->request_data_collector->raw('hidden_text_files') ?? '';
         $answer_options_from_text = preg_split(
             "/\\[" . assLongMenu::GAP_PLACEHOLDER . " (\\d+)\\]/",
             $longmenu_text
@@ -134,7 +134,7 @@ class assLongMenuGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjus
             return false;
         }
 
-        $correct_answers = $this->stripSlashesRecursive(json_decode($this->request->raw('hidden_correct_answers')));
+        $correct_answers = $this->stripSlashesRecursive(json_decode($this->request_data_collector->raw('hidden_correct_answers')));
         foreach ($correct_answers as $answer) {
             if (!is_numeric(str_replace(',', '.', $answer[1]))) {
                 $this->tpl->setOnScreenMessage('failure', $this->lng->txt('points_non_numeric_or_negative_msg'));
@@ -277,9 +277,9 @@ class assLongMenuGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjus
         ];
         $answers = $this->object->getAnswersObject();
 
-        if ($this->request->isset('hidden_text_files')) {
-            $question_parts['list'] = json_decode($this->request->raw('hidden_correct_answers')) ?? [];
-            $answers = $this->request->raw('hidden_text_files');
+        if ($this->request_data_collector->isset('hidden_text_files')) {
+            $question_parts['list'] = json_decode($this->request_data_collector->raw('hidden_correct_answers')) ?? [];
+            $answers = $this->request_data_collector->raw('hidden_text_files');
         }
 
         $this->tpl->addJavaScript('assets/js/longMenuQuestionGapBuilder.js');

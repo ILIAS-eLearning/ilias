@@ -16,6 +16,7 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\Component\Symbol\Glyph\Factory as GlyphFactory;
 
@@ -38,6 +39,7 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
 
     protected GlyphFactory $glyph_factory;
     protected Renderer $renderer;
+    protected readonly RequestDataCollector $requestDataCollector;
 
     /**
     * Constructor
@@ -55,6 +57,8 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
 
         $this->setSize('25');
         $this->validationRegexp = "";
+
+        $this->requestDataCollector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function setValue($a_value): void
@@ -216,13 +220,7 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        $found_values = $this->http->wrapper()->post()->retrieve(
-            $this->getPostVar(),
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
-                $this->refinery->always(null)
-            ])
-        );
+        $found_values = $this->requestDataCollector->retrieveArrayOfStringsFromPost($this->getPostVar());
 
         if (is_array($found_values)) {
             $found_values = ilArrayUtil::stripSlashesRecursive($found_values);

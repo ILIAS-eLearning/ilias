@@ -26,6 +26,7 @@ use ILIAS\Refinery\Random\Seed\RandomSeed;
 use ILIAS\Refinery\Random\Seed\GivenSeed;
 use ILIAS\Refinery\Transformation;
 use ILIAS\GlobalScreen\Services as GlobalScreen;
+use ILIAS\TestQuestionPool\RequestDataCollector;
 
 /**
  * @author		Björn Heyser <bheyser@databay.de>
@@ -53,6 +54,8 @@ class ilAssQuestionPreviewGUI
     public const TAB_ID_QUESTION = 'question';
 
     public const FEEDBACK_FOCUS_ANCHOR = 'focus';
+
+    protected readonly RequestDataCollector $request_data_collector;
 
     private ?assQuestionGUI $question_gui = null;
     private ?assQuestion $question_obj = null;
@@ -87,8 +90,11 @@ class ilAssQuestionPreviewGUI
         private readonly Refinery $refinery,
         private readonly int $parent_obj_ref_id
     ) {
+        global $DIC;
         $this->tpl->addCss(ilObjStyleSheet::getContentStylePath(0));
         $this->tpl->addCss(ilObjStyleSheet::getSyntaxStylePath());
+
+        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function setInfoMessage(string $message): void
@@ -227,13 +233,7 @@ class ilAssQuestionPreviewGUI
 
     protected function isCommentingRequired(): bool
     {
-        $ref_id = $this->http->wrapper()->query()->retrieve(
-            'ref_id',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always(0)
-            ])
-        );
+        $ref_id = $this->request_data_collector->retrieveIntValueFromPost('ref_id', 0);
 
         return !$this->preview_settings->isTestRefId() && $this->rbac_system->checkAccess('read', (int) $ref_id);
     }

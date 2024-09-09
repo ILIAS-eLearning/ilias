@@ -23,6 +23,7 @@ use ILIAS\TestQuestionPool\Questions\QuestionAutosaveable;
 use ILIAS\TestQuestionPool\Questions\QuestionPartiallySaveable;
 use ILIAS\Test\Logging\AdditionalInformationGenerator;
 use ILIAS\Refinery\Random\Group as RandomGroup;
+use ILIAS\TestQuestionPool\RequestDataCollector;
 
 /**
  * Class for cloze tests
@@ -78,6 +79,7 @@ class assClozeTest extends assQuestion implements ilObjQuestionScoringAdjustable
     public ilAssQuestionFeedback $feedbackOBJ;
     protected $feedbackMode = ilAssClozeTestFeedback::FB_MODE_GAP_QUESTION;
     private RandomGroup $randomGroup;
+    private readonly RequestDataCollector $request_data_collector;
 
     public function __construct(
         string $title = "",
@@ -91,6 +93,7 @@ class assClozeTest extends assQuestion implements ilObjQuestionScoringAdjustable
         parent::__construct($title, $comment, $author, $owner, $question);
         $this->setQuestion($question); // @TODO: Should this be $question?? See setter for why this is not trivial.
         $this->randomGroup = $DIC->refinery()->random();
+        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
     }
 
     /**
@@ -1070,18 +1073,13 @@ class assClozeTest extends assQuestion implements ilObjQuestionScoringAdjustable
 
     public function getSolutionSubmitValidation(): array
     {
-        $post_wrapper = $this->http->wrapper()->post();
         $solutionSubmit = [];
 
-        foreach ($post_wrapper->keys() as $key) {
+        foreach ($this->request_data_collector->getPostKeys() as $key) {
             if (preg_match("/^gap_(\d+)/", $key, $matches)) {
-                $value = $post_wrapper->retrieve(
-                    $key,
-                    $this->refinery->byTrying([
-                        $this->refinery->kindlyTo()->string(),
-                        $this->refinery->always(null)
-                    ])
-                );
+                $value = $this->request_data_collector->retrieveArrayOfStringWithFilter($key, static function ($key) {
+                    return preg_match("/^gap_(\d+)/", $key);
+                });
 
                 if ($value === null || $value === ''
                     || !preg_match('/^gap_(\d+)/', $key, $matches)) {

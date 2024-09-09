@@ -72,7 +72,6 @@ class assKprimChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAd
     protected function uploadImage(): void
     {
         $this->setAdditionalContentEditingModeFromPost();
-
         if ($this->writePostData(true) === 0) {
             $this->object->saveToDb();
             $this->editQuestion();
@@ -81,13 +80,7 @@ class assKprimChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAd
 
     public function removeImage(): void
     {
-        $cmd = $this->http->wrapper()->post()->retrieve(
-            'cmd',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
-                $this->refinery->always([])
-            ])
-        );
+        $cmd = $this->request_data_collector->retrieveNestedArraysOfStrings('cmd', 2, []);
         $this->object->removeAnswerImage(key($cmd['removeImage'] ?? []));
 
         $this->object->saveToDb();
@@ -96,13 +89,7 @@ class assKprimChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAd
 
     public function downkprimanswers(): void
     {
-        $cmd = $this->http->wrapper()->post()->retrieve(
-            'cmd',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
-                $this->refinery->always([])
-            ])
-        );
+        $cmd = $this->request_data_collector->retrieveNestedArraysOfStrings('cmd', 2, []);
 
         if (isset($cmd[__FUNCTION__]) && count($cmd[__FUNCTION__])) {
             $this->object->moveAnswerDown(key($cmd[__FUNCTION__]));
@@ -114,13 +101,7 @@ class assKprimChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAd
 
     public function upkprimanswers(): void
     {
-        $cmd = $this->http->wrapper()->post()->retrieve(
-            'cmd',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
-                $this->refinery->always([])
-            ])
-        );
+        $cmd = $this->request_data_collector->retrieveNestedArraysOfStrings('cmd', 2, []);
 
         if (isset($cmd[__FUNCTION__]) && count($cmd[__FUNCTION__])) {
             $this->object->moveAnswerUp(key($cmd[__FUNCTION__]));
@@ -142,13 +123,7 @@ class assKprimChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAd
         if ($always && $answers_input instanceof ilFormPropertyGUI) {
             $answers_input->setIgnoreMissingUploadsEnabled(true);
 
-            $answer_input_postvar = $this->http->wrapper()->post()->retrieve(
-                $answers_input->getPostVar(),
-                $this->refinery->byTrying([
-                    $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
-                    $this->refinery->always([])
-                ])
-            );
+            $answer_input_postvar = $this->request_data_collector->retrieveNestedArraysOfStrings($answers_input->getPostVar(), 2, []);
 
             if (!$answers_input->checkUploads($answer_input_postvar)) {
                 $this->tpl->setOnScreenMessage('failure', $this->lng->txt('form_input_not_valid'));

@@ -16,6 +16,8 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
+
 /**
  * Text question GUI representation
  *
@@ -33,6 +35,8 @@
 class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjustable, ilGuiAnswerScoringAdjustable
 {
     protected bool $tiny_mce_enabled;
+
+    protected readonly RequestDataCollector $request_data_collector;
     /**
      * assTextQuestionGUI constructor
      *
@@ -42,6 +46,7 @@ class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringA
      */
     public function __construct($id = -1)
     {
+        global $DIC;
         $this->tiny_mce_enabled = (new ilSetting('advanced_editing'))->get('advanced_editing_javascript_editor')
             === 'tinymce' ? true : false;
         parent::__construct();
@@ -49,6 +54,7 @@ class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringA
         if ($id >= 0) {
             $this->object->loadFromDb($id);
         }
+        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     /**
@@ -521,14 +527,7 @@ class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringA
     {
         $this->setAdditionalContentEditingModeFromPost();
         ilSession::set('subquestion_index', 0);
-
-        $cmd = $this->http->wrapper()->post()->retrieve(
-            'cmd',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->bool()),
-                $this->refinery->always([])
-            ])
-        );
+        $cmd = $this->request_data_collector->retrieveArrayOfBoolsFromPost('cmd');
 
         if (($cmd['addSuggestedSolution'] ?? false) && $this->writePostData()) {
             $this->tpl->setOnScreenMessage('info', $this->getErrorMessage());
@@ -548,42 +547,16 @@ class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringA
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $post = $this->http->wrapper()->post();
-
-        $word_counter = $post->retrieve(
-            'wordcounter',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->bool(),
-                $this->refinery->always(false)
-            ])
-        );
+        $word_counter = $this->request_data_collector->retrieveBoolFromPost('wordcounter', false);
         $this->object->setWordCounterEnabled($word_counter);
 
-        $max_chars = $post->retrieve(
-            'maxchars',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always(0)
-            ])
-        );
+        $max_chars = $this->request_data_collector->retrieveIntValueFromPost('maxchars', 0);
         $this->object->setMaxNumOfChars($max_chars);
 
-        $text_rating = $post->retrieve(
-            'text_rating',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always('')
-            ])
-        );
+        $text_rating = $this->request_data_collector->retrieveStringValueFromPost('text_rating', '');
         $this->object->setTextRating($text_rating);
 
-        $scoring_mode = $post->retrieve(
-            'scoring_mode',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always(null)
-            ])
-        );
+        $scoring_mode = $this->request_data_collector->retrieveStringValueFromPost('scoring_mode');
         $this->object->setKeywordRelation($scoring_mode);
     }
 
@@ -593,19 +566,19 @@ class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringA
         switch ($this->object->getKeywordRelation()) {
             case assTextQuestion::SCORING_MODE_KEYWORD_RELATION_NONE:
                 $this->object->setAnswers([]);
-                $points = str_replace(',', '.', $this->request->raw('non_keyword_points') ?? '');
+                $points = str_replace(',', '.', $this->request_data_collector->raw('non_keyword_points') ?? '');
                 break;
             case assTextQuestion::SCORING_MODE_KEYWORD_RELATION_ANY:
-                $this->object->setAnswers($this->request->raw('any_keyword'));
+                $this->object->setAnswers($this->request_data_collector->raw('any_keyword'));
                 $points = $this->object->getMaximumPoints();
                 break;
             case assTextQuestion::SCORING_MODE_KEYWORD_RELATION_ALL:
-                $this->object->setAnswers($this->request->raw('all_keyword'));
-                $points = str_replace(',', '.', $this->request->raw('all_keyword_points') ?? '');
+                $this->object->setAnswers($this->request_data_collector->raw('all_keyword'));
+                $points = str_replace(',', '.', $this->request_data_collector->raw('all_keyword_points') ?? '');
                 break;
             case assTextQuestion::SCORING_MODE_KEYWORD_RELATION_ONE:
-                $this->object->setAnswers($this->request->raw('one_keyword'));
-                $points = (float) str_replace(',', '.', $this->request->raw('one_keyword_points') ?? '');
+                $this->object->setAnswers($this->request_data_collector->raw('one_keyword'));
+                $points = (float) str_replace(',', '.', $this->request_data_collector->raw('one_keyword_points') ?? '');
                 break;
         }
         $this->object->setPoints((float) $points);

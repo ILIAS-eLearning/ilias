@@ -294,9 +294,9 @@ class assOrderingHorizontalGUI extends assQuestionGUI implements ilGuiQuestionSc
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $this->object->setTextSize((float) str_replace(',', '.', $this->request->raw('textsize') ?? '0.0'));
-        $this->object->setOrderText($this->request->raw('ordertext'));
-        $this->object->setPoints((float) str_replace(',', '.', $this->request->raw('points')));
+        $this->object->setTextSize((float) str_replace(',', '.', $this->request_data_collector->raw('textsize') ?? '0.0'));
+        $this->object->setOrderText($this->request_data_collector->raw('ordertext'));
+        $this->object->setPoints((float) str_replace(',', '.', $this->request_data_collector->raw('points')));
     }
 
     /**

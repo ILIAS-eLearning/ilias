@@ -208,13 +208,7 @@ class ilAssQuestionSkillAssignmentsGUI
     private function saveSkillPointsCmd(): void
     {
         $success = true;
-        $skill_points = $this->http->wrapper()->post()->retrieve(
-            'skill_points',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->float()),
-                $this->refinery->always(null),
-            ])
-        );
+        $skill_points = $this->request->retrieveNestedArraysOfFloats('skill_points');
 
         if (is_array($skill_points)) {
             for ($i = 0; $i < 2; $i++) {
@@ -538,13 +532,7 @@ class ilAssQuestionSkillAssignmentsGUI
      */
     private function syncOriginalCmd(): void
     {
-        $questionId = $this->http->wrapper()->post()->retrieve(
-            'question_id',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always(0)
-            ])
-        );
+        $questionId = $this->request->retrieveIntValueFromPost('question_id', 0);
 
         if ($this->isTestQuestion($questionId) && $this->isSyncOriginalPossibleAndAllowed($questionId)) {
             $question = assQuestion::instantiateQuestion($questionId);

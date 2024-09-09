@@ -74,33 +74,19 @@ class assFileUploadGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $points = $this->http->wrapper()->post()->retrieve(
-            'points',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always('0.0')
-            ])
-        );
+        $points = $this->request_data_collector->retrieveStringFromPost('points', '0.0');
 
         $this->object->setPoints((float) str_replace(',', '.', $points));
-        $this->object->setMaxSize($this->request->int('maxsize') !== 0 ? $this->request->int('maxsize') : null);
-
-        $allowed_extensions = $this->http->wrapper()->post()->retrieve(
-            'allowedextensions',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always('')
-            ])
+        $this->object->setMaxSize(
+            $this->request_data_collector->int('maxsize') !== 0
+                ? $this->request_data_collector->int('maxsize')
+                : null
         );
+
+        $allowed_extensions = $this->request_data_collector->retrieveStringFromPost('allowedextensions');
         $this->object->setAllowedExtensions($allowed_extensions);
 
-        $completion_by_submission = $this->http->wrapper()->post()->retrieve(
-            'completion_by_submission',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always(null)
-            ])
-        );
+        $completion_by_submission = $this->request_data_collector->retrieveIntValueFromPost('completion_by_submission');
         $this->object->setCompletionBySubmission($completion_by_submission === 1);
     }
 

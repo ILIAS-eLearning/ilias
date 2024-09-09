@@ -16,6 +16,8 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestDataCollector;
+
 /**
  * Class ilImagemapCorrectionsInputGUI
  *
@@ -26,6 +28,15 @@
  */
 class ilImagemapCorrectionsInputGUI extends ilImagemapFileInputGUI
 {
+    private readonly RequestDataCollector $request_data_collector;
+
+    public function __construct(string $a_title = '', string $a_postvar = '')
+    {
+        parent::__construct($a_title, $a_postvar);
+        global $DIC;
+        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
+    }
+
     public function setValueByArray(array $a_values): void
     {
         $this->setAreasByArray($a_values[$this->getPostVar()]['coords']);
@@ -51,13 +62,7 @@ class ilImagemapCorrectionsInputGUI extends ilImagemapFileInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        $post_var = $this->http->wrapper()->post()->retrieve(
-            $this->getPostVar(),
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())),
-                $this->refinery->always(null)
-            ])
-        );
+        $post_var = $this->request_data_collector->retrieveNestedArraysOfStrings($this->getPostVar(), 2);
         $post_var = is_array($post_var) ? ilArrayUtil::stripSlashesRecursive($post_var) : $post_var;
 
         $max = 0;

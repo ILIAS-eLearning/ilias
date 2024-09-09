@@ -16,8 +16,7 @@
  *
  *********************************************************************/
 
-use ILIAS\HTTP\Services as Http;
-use ILIAS\Refinery\Factory as Refinery;
+use ILIAS\TestQuestionPool\RequestDataCollector;
 
 /**
  * @author        Björn Heyser <bheyser@databay.de>
@@ -64,16 +63,12 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
      */
     protected $thumbnailPrefix;
 
-    private readonly Http $http;
-
-    private readonly Refinery $refinery;
+    private readonly RequestDataCollector $request_data_collector;
 
     public function __construct()
     {
         global $DIC;
-
-        $this->http = $DIC->http();
-        $this->refinery = $DIC->refinery();
+        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
     }
 
     /**
@@ -392,13 +387,7 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
             return false;
         }
 
-        $cmd = $this->http->wrapper()->post()->retrieve(
-            'cmd',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()))),
-                $this->refinery->always(null)
-            ])
-        );
+        $cmd = $this->request_data_collector->retrieveNestedArraysOfStrings('cmd', 3);
 
         if (!isset($cmd[$this->getImageRemovalCommand()])) {
             return false;

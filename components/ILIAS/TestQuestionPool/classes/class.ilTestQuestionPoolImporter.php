@@ -21,6 +21,7 @@ declare(strict_types=1);
 use ILIAS\HTTP\Services as Http;
 use ILIAS\Refinery\Factory as Refinery;
 use ILIAS\TestQuestionPool\Import\TestQuestionsImportTrait;
+use ILIAS\TestQuestionPool\RequestDataCollector;
 
 /**
  * Importer class for question pools
@@ -33,6 +34,9 @@ use ILIAS\TestQuestionPool\Import\TestQuestionsImportTrait;
 class ilTestQuestionPoolImporter extends ilXmlImporter
 {
     use TestQuestionsImportTrait;
+
+    protected readonly RequestDataCollector $request_data_collector;
+
     /**
      * @var ilObjQuestionPool
      */
@@ -49,6 +53,8 @@ class ilTestQuestionPoolImporter extends ilXmlImporter
 
         $this->http = $DIC->http();
         $this->refinery = $DIC->refinery();
+
+        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     /**
@@ -94,13 +100,7 @@ class ilTestQuestionPoolImporter extends ilXmlImporter
 
         $new_obj?->fromXML($xmlfile);
 
-        $qpl_new = $this->http->wrapper()->post()->retrieve(
-            'qpl_new',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->string(),
-                $this->refinery->always('')
-            ])
-        );
+        $qpl_new = $this->request_data_collector->retrieveStringValueFromPost('qpl_new', '');
 
         // set another question pool name (if possible)
         if ($qpl_new !== '') {
