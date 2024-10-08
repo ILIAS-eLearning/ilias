@@ -31,6 +31,11 @@ class ilTestRandomQuestionSetConfigGUITest extends ilTestBaseTestCase
         global $DIC;
         parent::setUp();
 
+        $this->addGlobal_ilCtrl();
+        $this->addGlobal_http();
+        $this->addGlobal_ilUser();
+        $this->addGlobal_ilTabs();
+        $this->addGlobal_tree();
         $this->addGlobal_ilObjDataCache();
 
         $test_logger = $this->createMock(ILIAS\Test\Logging\TestLogger::class);
@@ -41,18 +46,18 @@ class ilTestRandomQuestionSetConfigGUITest extends ilTestBaseTestCase
             $DIC['ilAccess'],
             $DIC['ui.factory'],
             $DIC['ui.renderer'],
-            $this->createMock(\ILIAS\Test\Presentation\TabsManager::class),
+            $DIC['ilTabs'],
             $DIC['lng'],
             $test_logger,
             $DIC['tpl'],
             $DIC['ilDB'],
             $DIC['tree'],
+            $DIC['http'],
             $DIC['component.repository'],
             $DIC['objDefinition'],
             $DIC['ilObjDataCache'],
             $this->getMockBuilder(ilTestProcessLockerFactory::class)->disableOriginalConstructor()->getMock(),
             $this->createMock(ILIAS\Test\RequestDataCollector::class),
-            $this->createMock(ILIAS\Test\Utilities\TitleColumnsBuilder::class),
             $this->createMock(\ILIAS\TestQuestionPool\Questions\GeneralQuestionPropertiesRepository::class)
         );
     }

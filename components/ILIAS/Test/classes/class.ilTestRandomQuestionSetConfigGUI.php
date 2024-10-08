@@ -18,6 +18,9 @@
 
 declare(strict_types=1);
 
+use ILIAS\Data\Factory as DataFactory;
+use ILIAS\HTTP\Services as HTTPServices;
+use ILIAS\Test\Questions\RandomQuestionSetNonAvailablePoolsTable;
 use ILIAS\Test\RequestDataCollector;
 use ILIAS\Test\Utilities\TitleColumnsBuilder;
 use ILIAS\Test\Presentation\TabsManager;
@@ -36,7 +39,6 @@ use ILIAS\UI\Renderer as UIRenderer;
  * @ilCtrl_Calls ilTestRandomQuestionSetConfigGUI: ilTestRandomQuestionSetGeneralConfigFormGUI
  * @ilCtrl_Calls ilTestRandomQuestionSetConfigGUI: ilTestRandomQuestionSetSourcePoolDefinitionListToolbarGUI
  * @ilCtrl_Calls ilTestRandomQuestionSetConfigGUI: ilTestRandomQuestionSetSourcePoolDefinitionListTableGUI
- * @ilCtrl_Calls ilTestRandomQuestionSetConfigGUI: ilTestRandomQuestionSetNonAvailablePoolsTableGUI
  * @ilCtrl_Calls ilTestRandomQuestionSetConfigGUI: ilRepositorySelectorExplorerGUI
  * @ilCtrl_Calls ilTestRandomQuestionSetConfigGUI: ilTestRandomQuestionSetPoolDefinitionFormGUI
  */
@@ -80,6 +82,7 @@ class ilTestRandomQuestionSetConfigGUI
         private readonly ilGlobalTemplateInterface $tpl,
         private readonly ilDBInterface $db,
         private readonly ilTree $tree,
+        private readonly HTTPServices $http,
         private readonly ilComponentRepository $component_repository,
         private readonly ilObjectDefinition $obj_definition,
         private readonly ilObjectDataCache $obj_cache,
@@ -375,13 +378,13 @@ class ilTestRandomQuestionSetConfigGUI
         }
 
         $table = $this->buildSourcePoolDefinitionListTableGUI($disabled_form);
-        $table->init($this->source_pool_definition_list);
-        $content .= $this->ctrl->getHTML($table);
+        $table->setData($this->source_pool_definition_list);
+        $content .= $table->getHTML();
 
         if (!$this->source_pool_definition_list->areAllUsedPoolsAvailable()) {
             $table = $this->buildNonAvailablePoolsTableGUI();
-            $table->init($this->source_pool_definition_list);
-            $content .= $this->ctrl->getHTML($table);
+            $table->setData($this->source_pool_definition_list);
+            $content .= $this->ui_renderer->render($table->getComponent());
         }
 
         $this->tpl->setContent($content);
@@ -403,7 +406,7 @@ class ilTestRandomQuestionSetConfigGUI
         $this->question_set_config->loadFromDb();
 
         $table = $this->buildSourcePoolDefinitionListTableGUI();
-        $table->applySubmit($this->source_pool_definition_list);
+        $table->applySubmit($this->source_pool_definition_list, $this->testrequest);
 
         $this->source_pool_definition_list->reindexPositions();
         $this->source_pool_definition_list->saveDefinitions();
@@ -434,51 +437,33 @@ class ilTestRandomQuestionSetConfigGUI
     private function buildSourcePoolDefinitionListTableGUI(bool $disabled = false): ilTestRandomQuestionSetSourcePoolDefinitionListTableGUI
     {
         $table = new ilTestRandomQuestionSetSourcePoolDefinitionListTableGUI(
-            $this,
-            self::CMD_SHOW_SRC_POOL_DEF_LIST,
+            $this->access,
+            $this->ctrl,
+            $this->lng,
             $this->ui_factory,
             $this->ui_renderer,
-            $this->title_builder,
-            $this->testrequest->raw('def_order') ?? [],
-            $this->testrequest->raw('quest_amount') ?? []
+            $this->http,
+            $this->title_builder
         );
 
-        if (!$this->isFrozenConfigRequired()) {
-            $table->setDefinitionEditModeEnabled(true);
-        }
-
-        $table->setQuestionAmountColumnEnabled(
-            $this->question_set_config->isQuestionAmountConfigurationModePerPool()
-        );
-
+        $table->setEditable(!$this->isFrozenConfigRequired() && !$disabled);
+        $table->setShowAmount($this->question_set_config->isQuestionAmountConfigurationModePerPool());
         $table->setShowMappedTaxonomyFilter(
             $this->question_set_config->getLastQuestionSyncTimestamp() != 0
         );
 
-        $translater = new ilTestQuestionFilterLabelTranslater($this->db, $this->lng);
-        $translater->loadLabels($this->source_pool_definition_list);
-        $table->setTaxonomyFilterLabelTranslater($translater);
-
-        if ($disabled) {
-            $table->setDefinitionEditModeEnabled(false);
-        }
-        $table->build();
-
         return $table;
     }
 
-    private function buildNonAvailablePoolsTableGUI(): ilTestRandomQuestionSetNonAvailablePoolsTableGUI
+    private function buildNonAvailablePoolsTableGUI(): RandomQuestionSetNonAvailablePoolsTable
     {
-        $table = new ilTestRandomQuestionSetNonAvailablePoolsTableGUI(
+        return new RandomQuestionSetNonAvailablePoolsTable(
             $this->ctrl,
             $this->lng,
-            $this,
-            self::CMD_SHOW_SRC_POOL_DEF_LIST
+            $this->ui_factory,
+            new DataFactory(),
+            $this->http->request()
         );
-
-        $table->build();
-
-        return $table;
     }
 
     private function deleteSingleSourcePoolDefinitionCmd(): void
@@ -723,8 +708,13 @@ class ilTestRandomQuestionSetConfigGUI
 
     private function fetchSingleSourcePoolDefinitionIdParameter(): int
     {
-        if ($this->testrequest->isset('src_pool_def_id') && (int) $this->testrequest->raw('src_pool_def_id')) {
-            return (int) $this->testrequest->raw('src_pool_def_id');
+        if ($this->testrequest->isset('src_pool_def_id')) {
+            $raw = $this->testrequest->raw('src_pool_def_id');
+            if (is_array($raw) && count($raw) === 1) {
+                return (int) $this->testrequest->raw('src_pool_def_id')[0];
+            } elseif (is_scalar($raw)) {
+                return (int) $raw;
+            }
         }
 
         throw new ilTestMissingSourcePoolDefinitionParameterException();
