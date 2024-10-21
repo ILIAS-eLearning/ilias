@@ -1548,6 +1548,7 @@ assessment#:#tst_input_dynamic_question_set_question_ordering_by_date#:#Order Qu
 assessment#:#tst_input_dynamic_question_set_question_ordering_by_tax#:#Order Questions by Taxonomy
 assessment#:#tst_input_dynamic_question_set_source_questionpool#:#Source Question Pool
 assessment#:#tst_input_dynamic_question_set_taxonomie_filter_enabled#:#Provide Taxonomy Filter
+assessment#:#tst_insert_in_test#:#Insert in Test
 assessment#:#tst_insert_missing_question#:#Please select at least one question to insert it into the test!
 assessment#:#tst_insert_questions#:#Are you sure you want to insert the following question(s) to the test?
 assessment#:#tst_instant_feedback#:#Instant Feedback
