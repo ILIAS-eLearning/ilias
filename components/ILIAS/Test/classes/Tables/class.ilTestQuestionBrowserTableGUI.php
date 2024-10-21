@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Data\Range;
 use ILIAS\Test\Utilities\TitleColumnsBuilder;
 use ILIAS\Test\RequestDataCollector;
 use ILIAS\Test\Logging\TestLogger;
@@ -28,6 +29,7 @@ use ILIAS\Taxonomy\DomainService as TaxonomyService;
 use ILIAS\Test\Questions\QuestionsBrowserFilter;
 use ILIAS\Test\Questions\QuestionsBrowserTable;
 use ILIAS\Data\Factory as DataFactory;
+use ILIAS\UI\Component\Input\Container\Filter\Filter;
 use ILIAS\UI\Factory as UIFactory;
 use ILIAS\UI\Renderer as UIRenderer;
 use ILIAS\UI\Component\Link\Standard as StandardLink;
@@ -104,39 +106,47 @@ class ilTestQuestionBrowserTableGUI
         $mode = $this->ctrl->getParameterArrayByClass(self::class)[self::MODE_PARAMETER];
         $parent_title = ($mode === self::MODE_BROWSE_TESTS ? 'test_title' : 'tst_source_question_pool');
 
-        $filter = (new QuestionsBrowserFilter(
+        $filter = $this->getQuestionsBrowserFilterComponent($parent_title, $action);
+        $question_browser_table = $this->getQuestionsBrowserTable($parent_title);
+
+        $this->main_tpl->setContent(
+            $this->ui_renderer->render([
+                $filter,
+                $question_browser_table->getComponent($this->http_state->request(), $this->ui_service->filter()->getData($filter))
+            ])
+        );
+
+        return true;
+    }
+
+    private function getQuestionsBrowserFilterComponent(string $parent_title = '', string $action = ''): Filter
+    {
+        return (new QuestionsBrowserFilter(
             $this->ui_service,
             $this->lng,
             $this->ui_factory,
             'question_browser_filter',
             $parent_title
         ))->getComponent($action, $this->http_state->request());
+    }
 
-        $this->main_tpl->setContent(
-            $this->ui_renderer->render([
-                $filter,
-                (new QuestionsBrowserTable(
-                    (string) $this->test_obj->getId(),
-                    $this->ui_factory,
-                    $this->ui_renderer,
-                    $this->lng,
-                    $this->ctrl,
-                    $this->data_factory,
-                    new ilAssQuestionList($this->db, $this->lng, $this->refinery, $this->component_repository),
-                    $this->test_obj,
-                    $this->tree,
-                    $this->testrequest,
-                    $this->taxonomy,
-                    $this->questionPoolLinkBuilder,
-                    $parent_title
-                ))->getComponent(
-                    $this->http_state->request(),
-                    $this->ui_service->filter()->getData($filter)
-                )
-            ])
+    private function getQuestionsBrowserTable(string $parent_title = ''): QuestionsBrowserTable
+    {
+        return new QuestionsBrowserTable(
+            (string) $this->test_obj->getId(),
+            $this->ui_factory,
+            $this->ui_renderer,
+            $this->lng,
+            $this->ctrl,
+            $this->data_factory,
+            new ilAssQuestionList($this->db, $this->lng, $this->refinery, $this->component_repository),
+            $this->test_obj,
+            $this->tree,
+            $this->testrequest,
+            $this->taxonomy,
+            $this->questionPoolLinkBuilder,
+            $parent_title
         );
-
-        return true;
     }
 
     private function insertQuestionsCmd(): void
@@ -145,6 +155,7 @@ class ilTestQuestionBrowserTableGUI
             'qlist_q_id',
             $this->refinery->byTrying([
                 $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int()),
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string()),
                 $this->refinery->always([])
             ])
         );
@@ -154,11 +165,17 @@ class ilTestQuestionBrowserTableGUI
             $this->ctrl->redirect($this, self::CMD_BROWSE_QUESTIONS);
         }
 
-        $test_question_set_config = $this->buildTestQuestionSetConfig();
-        array_map(
-            fn(int $v): int => $this->test_obj->insertQuestion($v),
-            $selected_array
-        );
+        if (in_array('ALL_OBJECTS', $selected_array, true)) {
+            $selected_array = array_keys(
+                $this->getQuestionsBrowserTable()->loadRecords(
+                    $this->ui_service->filter()->getData($this->getQuestionsBrowserFilterComponent())
+                )
+            );
+        }
+
+        foreach ($selected_array as $value) {
+            $this->test_obj->insertQuestion($value);
+        }
 
         $this->test_obj->saveCompleteStatus($test_question_set_config);
 
