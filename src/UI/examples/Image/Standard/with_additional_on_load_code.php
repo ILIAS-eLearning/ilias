@@ -8,7 +8,7 @@ namespace ILIAS\UI\examples\Image\Standard;
  * ---
  * description: >
  *   Example showing how JS-Code can be attached to images.
- *   In this example, an alert is popping up a soon as the image is clicked.
+ *   In this example, an alert pops up as soon as the image is clicked.
  *
  * expected output: >
  *   ILIAS shows the rendered Component.

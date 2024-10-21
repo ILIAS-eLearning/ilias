@@ -15,7 +15,7 @@ use ilUIMarkdownPreviewGUI;
 /**
  * ---
  * description: >
- *  Example show how to create and render a basic markdown field and attach it to a form.
+ *  The example shows how to create and render a basic markdown field and attach it to a form.
  *
  * expected output: >
  *   ILIAS shows the rendered Component.
