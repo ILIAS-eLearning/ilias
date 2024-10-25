@@ -82,7 +82,6 @@ class ilOpenIdConnectSettingsGUI
         $this->tabs = $DIC->tabs();
         $this->ctrl = $DIC->ctrl();
         $this->logger = $DIC->logger()->auth();
-
         $this->access = $DIC->access();
         $this->review = $DIC->rbac()->review();
         $this->error = $DIC['ilErr'];
@@ -421,6 +420,7 @@ class ilOpenIdConnectSettingsGUI
     private function profile(): void
     {
         $this->checkAccess('read');
+
         $this->redirectToSettingsScreenIfNoURLIsConfigured();
 
         $this->chooseMapping();
@@ -430,6 +430,7 @@ class ilOpenIdConnectSettingsGUI
     private function scopes(): void
     {
         $this->checkAccess('read');
+
         $this->redirectToSettingsScreenIfNoURLIsConfigured();
 
         $this->setSubTabs(self::STAB_SCOPES);
@@ -474,6 +475,7 @@ class ilOpenIdConnectSettingsGUI
                 $this->mainTemplate->setOnScreenMessage('success', $this->lng->txt('auth_oidc_discover_scopes_info'));
             }
         }
+
         $this->scopes();
     }
 
@@ -484,7 +486,8 @@ class ilOpenIdConnectSettingsGUI
     private function buildScopeSelection(array $ui_container): array
     {
         $disabled_input = $this->ui
-            ->input()->field()
+            ->input()
+            ->field()
             ->text($this->lng->txt('auth_oidc_settings_default_scopes'), '')
             ->withValue(ilOpenIdConnectSettings::DEFAULT_SCOPE)
             ->withDedicatedName('default_scope')
@@ -492,25 +495,30 @@ class ilOpenIdConnectSettingsGUI
 
         $scopeValues = $this->settings->getAdditionalScopes();
 
-        $tag_input = $this->ui->input()->field()->tag(
-            $this->lng->txt('auth_oidc_settings_additional_scopes'),
-            $scopeValues
-        )->withValue($scopeValues)
-                              ->withDedicatedName('custom_scope')
-                              ->withByline($this->lng->txt('auth_oidc_settings_additional_scopes_info'));
+        $tag_input = $this->ui
+            ->input()
+            ->field()
+            ->tag(
+                $this->lng->txt('auth_oidc_settings_additional_scopes'),
+                $scopeValues
+            )->withValue($scopeValues)
+            ->withDedicatedName('custom_scope')
+            ->withByline($this->lng->txt('auth_oidc_settings_additional_scopes_info'));
         $group1 = $this->ui->input()->field()->group(
             [],
             $this->lng->txt('auth_oidc_settings_validate_scope_default')
         );
         $group2 = $this->ui->input()->field()->group(
             [
-                $this->lng->txt('auth_oidc_settings_discovery_url') => $this->ui->input()->field()->text(
-                    $this->lng->txt('auth_oidc_settings_discovery_url')
-                )
-                                                                                ->withValue(
-                                                                                    $this->settings->getCustomDiscoveryUrl(
-                                                                                    ) ?? ''
-                                                                                )
+                $this->lng->txt('auth_oidc_settings_discovery_url') => $this->ui
+                    ->input()
+                    ->field()
+                    ->text(
+                        $this->lng->txt('auth_oidc_settings_discovery_url')
+                    )
+                    ->withValue(
+                        $this->settings->getCustomDiscoveryUrl() ?? ''
+                    )
             ],
             $this->lng->txt('auth_oidc_settings_validate_scope_custom')
         );
@@ -709,6 +717,7 @@ class ilOpenIdConnectSettingsGUI
         if (!$form instanceof ilPropertyFormGUI) {
             $form = $this->initRolesForm();
         }
+
         $this->mainTemplate->setContent($form->getHTML());
     }
 
@@ -740,6 +749,7 @@ class ilOpenIdConnectSettingsGUI
         if ($this->checkAccessBool('write')) {
             $form->addCommandButton('saveRoles', $this->lng->txt('save'));
         }
+
         return $form;
     }
 
