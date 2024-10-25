@@ -20,9 +20,6 @@ declare(strict_types=1);
 
 use ILIAS\ResourceStorage\Stakeholder\AbstractResourceStakeholder;
 
-/**
- * @author Fabian Schmid <fabian@sr.solutions>
- */
 class ilBadgeFileStakeholder extends AbstractResourceStakeholder
 {
     private int $default_owner;
@@ -32,8 +29,7 @@ class ilBadgeFileStakeholder extends AbstractResourceStakeholder
         global $DIC;
         $this->default_owner = $DIC->isDependencyAvailable('user') ? $DIC->user()->getId() : 6;
     }
-
-
+    
     public function getId(): string
     {
         return 'badge';

@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
+
+declare(strict_types=1);
+
 namespace ILIAS\Badge;
 
 use ILIAS\UI\Implementation\Component\Image\Image;
@@ -31,10 +49,12 @@ class ModalBuilder
         }
     }
 
+    /**
+     * @param array <string:string> $badge_properties
+     */
     public function constructModal(
         Image $badge_image,
         string $badge_title,
-        string $badge_description = null,
         array $badge_properties = []
     ): Modal {
         $modal_content[] = $badge_image;
@@ -46,7 +66,6 @@ class ModalBuilder
         }
 
         $badge_properties = $this->translateKeysWithValidDataAttribute($badge_properties);
-
         $modal_content[] = $this->ui_factory->listing()->descriptive($badge_properties);
 
         return $this->ui_factory->modal()->roundtrip($badge_title, $modal_content);

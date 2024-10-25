@@ -35,7 +35,7 @@ class ilBadgesFilesMigration implements Migration
 
     public function getDefaultAmountOfStepsPerRun(): int
     {
-        return 10000;
+        return 1000;
     }
 
     public function getPreconditions(Environment $environment): array
@@ -101,15 +101,15 @@ class ilBadgesFilesMigration implements Migration
         bool $a_full_path = true
     ): string {
         if ($id) {
-            $exp = explode(".", $image);
+            $exp = explode('.', $image);
             $suffix = strtolower(array_pop($exp));
             if ($a_full_path) {
-                return $this->getFilePath($id) . "img" . $id . "." . $suffix;
+                return $this->getFilePath($id) . 'img' . $id . '.' . $suffix;
             }
-            return "img" . $id . "." . $suffix;
+            return 'img' . $id . '.' . $suffix;
         }
 
-        return "";
+        return '';
     }
 
     protected function getFilePath(
@@ -118,10 +118,10 @@ class ilBadgesFilesMigration implements Migration
     ): string {
         $storage = new ilFSStorageBadge($a_id);
         $storage->create();
-        $path = $storage->getAbsolutePath() . "/";
+        $path = $storage->getAbsolutePath() . '/';
 
         if ($a_subdir) {
-            $path .= $a_subdir . "/";
+            $path .= $a_subdir . '/';
 
             if (!is_dir($path)) {
                 mkdir($path);

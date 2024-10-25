@@ -19,9 +19,9 @@ declare(strict_types=1);
 
 class ilBadgeDBUpdateSteps implements ilDatabaseUpdateSteps
 {
-    protected \ilDBInterface $db;
+    protected ilDBInterface $db;
 
-    public function prepare(\ilDBInterface $db): void
+    public function prepare(ilDBInterface $db): void
     {
         $this->db = $db;
     }

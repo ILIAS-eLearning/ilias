@@ -132,7 +132,6 @@ class ilBadgeTableGUI
                         $modal = $modal_container->constructModal(
                             $badge_img_large,
                             $badge->getTitle(),
-                            '',
                             $badge_information
                         );
                     }

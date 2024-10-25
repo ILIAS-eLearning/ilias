@@ -180,7 +180,6 @@ class ilObjectBadgeTableGUI
                     $modal = $modal_container->constructModal(
                         $badge_img_large,
                         $badge_item['title'],
-                        '',
                         $badge_information
                     );
 

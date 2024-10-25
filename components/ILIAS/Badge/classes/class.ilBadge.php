@@ -21,13 +21,9 @@ use ILIAS\ResourceStorage\Identification\ResourceIdentification;
 use ILIAS\DI\Container;
 use ILIAS\Services\Badge\BadgeException;
 
-/**
- * @author Jörg Lützenkirchen <luetzenkirchen@leifos.com>
- */
 class ilBadge
 {
     protected ilDBInterface $db;
-
     protected int $id = 0;
     protected int $parent_id = 0;
     protected string $type_id = "";
@@ -40,7 +36,7 @@ class ilBadge
     protected ?array $config = null;
     protected string $criteria = "";
 
-    private ?Services $resource_storage = null;
+    private ?Services $resource_storage;
 
     public function __construct(
         int $a_id = null,
