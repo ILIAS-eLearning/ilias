@@ -547,7 +547,7 @@ class ilOpenIdConnectSettingsGUI
             $request_form = $form->withRequest($this->request);
             $result = $request_form->getData();
             if (is_null($result)) {
-                $this->mainTemplate->setOnScreenMessage('failure', $this->lng->txt('err_cdsfdfheck_input'));
+                $this->mainTemplate->setOnScreenMessage('failure', $this->lng->txt('err_check_input'));
                 $this->scopes();
                 return;
             } else {
