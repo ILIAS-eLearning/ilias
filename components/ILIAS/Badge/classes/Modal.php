@@ -33,7 +33,7 @@ class Modal
 {
     /** @var Closure(string): string */
     private readonly Closure $sign_file;
-    private ilBadgeImage|null $badge_image_service = null;
+    private ?ilBadgeImage $badge_image_service;
 
     public function __construct(
         private readonly Container $container,

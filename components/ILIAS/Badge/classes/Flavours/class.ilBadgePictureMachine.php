@@ -40,7 +40,7 @@ use ILIAS\ResourceStorage\Flavour\Engine\ImagickEngine;
 class ilBadgePictureMachine extends AbstractMachine implements FlavourMachine
 {
     use GdImageToStreamTrait;
-    public const ID = "badge_image_resize_machine";
+    public const ID = 'badge_image_resize_machine';
     private const FULL_QUALITY_SIZE_THRESHOLD = 100;
     private CropSquare $crop;
     private MakeGreyScale $grey;
@@ -53,7 +53,6 @@ class ilBadgePictureMachine extends AbstractMachine implements FlavourMachine
         $this->extract_pages = new ExtractPages();
         $this->crop = new CropSquare();
     }
-
 
     public function getId(): string
     {
