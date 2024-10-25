@@ -34,9 +34,6 @@ use ILIAS\ResourceStorage\Flavour\Machine\DefaultMachines\ExtractPages;
 use ILIAS\ResourceStorage\Flavour\Definition\PagesToExtract;
 use ILIAS\ResourceStorage\Flavour\Engine\ImagickEngine;
 
-/**
- * @author Fabian Schmid <fabian@sr.solutions>
- */
 class ilBadgePictureMachine extends AbstractMachine implements FlavourMachine
 {
     use GdImageToStreamTrait;
