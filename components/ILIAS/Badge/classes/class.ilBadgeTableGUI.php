@@ -1,4 +1,18 @@
 <?php
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *********************************************************************/
+
+declare(strict_types=1);
 
 namespace ILIAS\Badge;
 
@@ -6,7 +20,6 @@ use ILIAS\UI\Factory;
 use ILIAS\UI\URLBuilder;
 use ILIAS\Data\Order;
 use ILIAS\Data\Range;
-use ilBadgeImageTemplate;
 use ilLanguage;
 use ilGlobalTemplateInterface;
 use ILIAS\UI\Renderer;
@@ -18,11 +31,8 @@ use Generator;
 use ILIAS\UI\Component\Table\DataRetrieval;
 use ILIAS\UI\URLBuilderToken;
 use ILIAS\DI\Container;
-use ilBadgeHandler;
 use ilBadge;
 use ilBadgeAuto;
-use ILIAS\UI\Implementation\Component\Table\Column\Boolean;
-use ilBadgeRenderer;
 
 class ilBadgeTableGUI
 {
@@ -107,7 +117,7 @@ class ilBadgeTableGUI
                     $image_html = '';
                     $badge_rid = $badge->getImageRid();
                     $image_src = $this->badge_image_service->getImageFromResourceId($badge, $badge_rid);
-                    $badge_image_large = $this->badge_image_service->getImageFromResourceId($badge, $badge_rid, 0);
+                    $badge_image_large = $this->badge_image_service->getImageFromResourceId($badge, $badge_rid, ilBadgeImage::IMAGE_SIZE_XL);
                     if ($badge_rid != '') {
                         $badge_template_image = $image_src;
                         if ($badge_template_image !== '') {
@@ -198,10 +208,7 @@ class ilBadgeTableGUI
     }
 
     /**
-     * @param URLBuilder      $url_builder
-     * @param URLBuilderToken $action_parameter_token
-     * @param URLBuilderToken $row_id_token
-     * @return array
+     * @return array<string,\ILIAS\UI\Component\Table\Action\Action>
      */
     protected function getActions(
         URLBuilder $url_builder,
@@ -269,10 +276,6 @@ class ilBadgeTableGUI
         if ($query->has($action_parameter_token->getName())) {
             $action = $query->retrieve($action_parameter_token->getName(), $refinery->to()->string());
             $ids = $query->retrieve($row_id_token->getName(), $refinery->custom()->transformation(fn($v) => $v));
-            $listing = $f->listing()->characteristicValue()->text([
-                'table_action' => $action,
-                'id' => print_r($ids, true),
-            ]);
 
             if ($action === 'delete') {
                 $items = [];

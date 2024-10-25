@@ -1,4 +1,21 @@
 <?php
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
+
+declare(strict_types=1);
 
 namespace ILIAS\Badge;
 
@@ -29,6 +46,7 @@ class ilBadgeImageTemplateTableGUI
     private readonly Services $http;
     private readonly ilLanguage $lng;
     private readonly ilGlobalTemplateInterface $tpl;
+
     public function __construct()
     {
         global $DIC;
@@ -44,7 +62,7 @@ class ilBadgeImageTemplateTableGUI
     /**
      * @param Factory  $f
      * @param Renderer $r
-     * @return DataRetrieval|__anonymous@1221
+     * @return DataRetrieval
      */
     protected function buildDataRetrievalObject(Factory $f, Renderer $r)
     {
@@ -58,7 +76,7 @@ class ilBadgeImageTemplateTableGUI
             /**
              * @param Container $DIC
              * @param array $data
-             * @return array
+             * @return array<>
              */
             protected function getBadgeImageTemplates(Container $DIC, array $data): array
             {
@@ -120,11 +138,9 @@ class ilBadgeImageTemplateTableGUI
 
             protected function getRecords(Range $range = null, Order $order = null): array
             {
-
                 global $DIC;
-                $data = array();
 
-                $data = $this->getBadgeImageTemplates($DIC, $data);
+                $data = $this->getBadgeImageTemplates($DIC, []);
 
                 if ($order) {
                     list($order_field, $order_direction) = $order->join(
@@ -146,10 +162,7 @@ class ilBadgeImageTemplateTableGUI
     }
 
     /**
-     * @param URLBuilder      $url_builder
-     * @param URLBuilderToken $action_parameter_token
-     * @param URLBuilderToken $row_id_token
-     * @return array
+     * @return array<string,\ILIAS\UI\Component\Table\Action\Action>
      */
     protected function getActions(
         URLBuilder $url_builder,
@@ -214,8 +227,8 @@ class ilBadgeImageTemplateTableGUI
                 foreach (ilBadgeImageTemplate::getInstances() as $template) {
                     if ($template->getId() !== null) {
                         $items[] = $f->modal()->interruptiveItem()->keyValue(
-                            $template->getId(),
-                            $template->getId(),
+                            (string) $template->getId(),
+                            (string) $template->getId(),
                             $template->getTitle()
                         );
                     }
@@ -224,13 +237,16 @@ class ilBadgeImageTemplateTableGUI
                 if (is_array($query_values)) {
                     foreach ($query_values as $id) {
                         $badge = new ilBadgeImageTemplate($id);
-                        $items[] = $f->modal()->interruptiveItem()->keyValue($id, $badge->getId(), $badge->getTitle());
+                        $items[] = $f->modal()->interruptiveItem()->keyValue(
+                            $id,
+                            (string) $badge->getId(),
+                            $badge->getTitle());
                     }
                 } else {
                     $badge = new ilBadgeImageTemplate($query_values);
                     $items[] = $f->modal()->interruptiveItem()->keyValue(
-                        $badge->getId(),
-                        $badge->getId(),
+                        (string) $badge->getId(),
+                        (string) $badge->getId(),
                         $badge->getTitle()
                     );
                 }

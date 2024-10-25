@@ -1,4 +1,18 @@
 <?php
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *********************************************************************/
+
+declare(strict_types=1);
 
 namespace ILIAS\Badge;
 
@@ -6,7 +20,6 @@ use ILIAS\UI\Factory;
 use ILIAS\UI\URLBuilder;
 use ILIAS\Data\Order;
 use ILIAS\Data\Range;
-use ilBadgeImageTemplate;
 use ilLanguage;
 use ilGlobalTemplateInterface;
 use ILIAS\UI\Renderer;
@@ -30,6 +43,7 @@ class ilBadgeTypesTableGUI
     private readonly Services $http;
     private readonly ilLanguage $lng;
     private readonly ilGlobalTemplateInterface $tpl;
+
     public function __construct()
     {
         global $DIC;
@@ -46,7 +60,7 @@ class ilBadgeTypesTableGUI
     /**
      * @param Factory  $f
      * @param Renderer $r
-     * @return DataRetrieval|__anonymous@1221
+     * @return DataRetrieval
      */
     protected function buildDataRetrievalObject(Factory $f, Renderer $r)
     {
@@ -58,16 +72,14 @@ class ilBadgeTypesTableGUI
             }
 
             /**
-             * @param Container $DIC
-             * @param array $data
-             * @return array
+             * @return array<string, string>
              */
-            protected function getBadgeImageTemplates(Container $DIC, array $data): array
+            protected function getBadgeImageTemplates() : array
             {
-                $data = array();
-
+                $data = [];
                 $handler = ilBadgeHandler::getInstance();
                 $inactive = $handler->getInactiveTypes();
+
                 foreach ($handler->getComponents() as $component) {
                     $provider = $handler->getProviderInstance($component);
                     if ($provider) {
@@ -75,12 +87,12 @@ class ilBadgeTypesTableGUI
                             $id = $handler->getUniqueTypeId($component, $badge_obj);
 
                             $data[] = array(
-                                "id" => $id,
-                                "comp" => $handler->getComponentCaption($component),
-                                "name" => $badge_obj->getCaption(),
-                                "manual" => (!$badge_obj instanceof ilBadgeAuto) ? true : false,
-                                "active" => !in_array($id, $inactive, true) ? true : false,
-                                "activity" => in_array("bdga", $badge_obj->getValidObjectTypes(), true) ? true : false
+                                'id' => $id,
+                                'comp' => $handler->getComponentCaption($component),
+                                'name' => $badge_obj->getCaption(),
+                                'manual' => !$badge_obj instanceof ilBadgeAuto,
+                                'active' => !in_array($id, $inactive, true),
+                                'activity' => in_array('bdga', $badge_obj->getValidObjectTypes(), true)
                             );
                         }
                     }
@@ -96,7 +108,7 @@ class ilBadgeTypesTableGUI
                 Order $order,
                 ?array $filter_data,
                 ?array $additional_parameters
-            ): Generator {
+            ) : Generator {
                 $records = $this->getRecords($range, $order);
                 foreach ($records as $idx => $record) {
                     $row_id = (string) $record['id'];
@@ -107,17 +119,14 @@ class ilBadgeTypesTableGUI
             public function getTotalRowCount(
                 ?array $filter_data,
                 ?array $additional_parameters
-            ): ?int {
+            ) : ?int {
                 return count($this->getRecords());
             }
 
-            protected function getRecords(Range $range = null, Order $order = null): array
+            protected function getRecords(Range $range = null, Order $order = null) : array
             {
 
-                global $DIC;
-                $data = array();
-
-                $data = $this->getBadgeImageTemplates($DIC, $data);
+                $data = $this->getBadgeImageTemplates();
 
                 if ($order) {
                     list($order_field, $order_direction) = $order->join(
@@ -139,33 +148,30 @@ class ilBadgeTypesTableGUI
     }
 
     /**
-     * @param URLBuilder      $url_builder
-     * @param URLBuilderToken $action_parameter_token
-     * @param URLBuilderToken $row_id_token
-     * @return array
+     * @return array<string,\ILIAS\UI\Component\Table\Action\Action>
      */
     protected function getActions(
         URLBuilder $url_builder,
         URLBuilderToken $action_parameter_token,
         URLBuilderToken $row_id_token
-    ): array {
+    ) : array {
         $f = $this->factory;
         return [
             'badge_type_activate' => $f->table()->action()->multi(
-                $this->lng->txt("activate"),
-                $url_builder->withParameter($action_parameter_token, "badge_type_activate"),
+                $this->lng->txt('activate'),
+                $url_builder->withParameter($action_parameter_token, 'badge_type_activate'),
                 $row_id_token
             ),
             'badge_type_deactivate' =>
                 $f->table()->action()->multi(
-                    $this->lng->txt("deactivate"),
-                    $url_builder->withParameter($action_parameter_token, "badge_type_deactivate"),
+                    $this->lng->txt('deactivate'),
+                    $url_builder->withParameter($action_parameter_token, 'badge_type_deactivate'),
                     $row_id_token
                 )
         ];
     }
 
-    public function renderTable(): void
+    public function renderTable() : void
     {
         $f = $this->factory;
         $r = $this->renderer;
@@ -173,38 +179,38 @@ class ilBadgeTypesTableGUI
         $request = $this->request;
         $df = new \ILIAS\Data\Factory();
 
-        $badge_manual_txt = $this->lng->txt("badge_manual") . ': ' ;
-        $badge_activity_txt = $this->lng->txt("badge_activity_badges") . ': ';
-        $active_txt = $this->lng->txt("active") . ': ';
+        $badge_manual_txt = $this->lng->txt('badge_manual') . ': ';
+        $badge_activity_txt = $this->lng->txt('badge_activity_badges') . ': ';
+        $active_txt = $this->lng->txt('active') . ': ';
         $columns = [
-            'name' => $f->table()->column()->text($this->lng->txt("name")),
-            'comp' => $f->table()->column()->text($this->lng->txt("cmps_component")),
+            'name' => $f->table()->column()->text($this->lng->txt('name')),
+            'comp' => $f->table()->column()->text($this->lng->txt('cmps_component')),
             'manual' => $f->table()->column()->boolean(
-                $this->lng->txt("badge_manual"),
-                $this->lng->txt("yes"),
-                $this->lng->txt("no")
+                $this->lng->txt('badge_manual'),
+                $this->lng->txt('yes'),
+                $this->lng->txt('no')
             )
                           ->withOrderingLabels(
-                              $badge_manual_txt . $this->lng->txt("no"),
-                              $badge_manual_txt . $this->lng->txt("yes")
+                              $badge_manual_txt . $this->lng->txt('no'),
+                              $badge_manual_txt . $this->lng->txt('yes')
                           ),
             'activity' => $f->table()->column()->boolean(
-                $this->lng->txt("badge_activity_badges"),
-                $this->lng->txt("yes"),
-                $this->lng->txt("no")
+                $this->lng->txt('badge_activity_badges'),
+                $this->lng->txt('yes'),
+                $this->lng->txt('no')
             )
                             ->withOrderingLabels(
-                                $badge_activity_txt . $this->lng->txt("no"),
-                                $badge_activity_txt . $this->lng->txt("yes")
+                                $badge_activity_txt . $this->lng->txt('no'),
+                                $badge_activity_txt . $this->lng->txt('yes')
                             ),
             'active' => $f->table()->column()->boolean(
-                $this->lng->txt("active"),
-                $this->lng->txt("yes"),
-                $this->lng->txt("no")
+                $this->lng->txt('active'),
+                $this->lng->txt('yes'),
+                $this->lng->txt('no')
             )
                           ->withOrderingLabels(
-                              $active_txt . $this->lng->txt("no"),
-                              $active_txt . $this->lng->txt("yes")
+                              $active_txt . $this->lng->txt('no'),
+                              $active_txt . $this->lng->txt('yes')
                           ),
 
         ];
@@ -216,8 +222,8 @@ class ilBadgeTypesTableGUI
         list($url_builder, $action_parameter_token, $row_id_token) =
             $url_builder->acquireParameters(
                 $query_params_namespace,
-                "table_action",
-                "id",
+                'table_action',
+                'id',
             );
 
         $actions = $this->getActions($url_builder, $action_parameter_token, $row_id_token);

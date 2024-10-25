@@ -28,6 +28,13 @@ use ilGlobalTemplateInterface;
 
 class ilBadgeImage
 {
+    public const IMAGE_SIZE_XS = 4;
+    public const IMAGE_SIZE_S = 3;
+    public const IMAGE_SIZE_M = 2;
+    public const IMAGE_SIZE_L = 1;
+    public const IMAGE_SIZE_XL = 0;
+    public const IMAGE_URL_COUNT = 5;
+
     private ?Services $resource_storage;
     private ?FileUpload $upload_service;
     private ?ilGlobalTemplateInterface $main_template;
@@ -48,7 +55,7 @@ class ilBadgeImage
         return $this->getImageFromResourceId($badge, $image_rid);
     }
 
-    public function getImageFromResourceId(ilBadge|array $badge, ?string $image_rid, $size = 4): string
+    public function getImageFromResourceId(ilBadge|array $badge, ?string $image_rid, $size = self::IMAGE_SIZE_XS): string
     {
         $image_src = '';
 
@@ -57,7 +64,7 @@ class ilBadgeImage
             if ($identification !== null) {
                 $flavour = $this->resource_storage->flavours()->get($identification, new \ilBadgePictureDefinition());
                 $urls = $this->resource_storage->consume()->flavourUrls($flavour)->getURLsAsArray(false);
-                if (sizeof($urls) === 5 && isset($urls[$size])) {
+                if (sizeof($urls) === self::IMAGE_URL_COUNT && isset($urls[$size])) {
                     $image_src = $urls[$size];
                 }
             }

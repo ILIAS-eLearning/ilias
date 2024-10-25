@@ -1,4 +1,21 @@
 <?php
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
+
+declare(strict_types=1);
 
 namespace ILIAS\Badge;
 
@@ -6,7 +23,6 @@ use ILIAS\UI\Factory;
 use ILIAS\UI\URLBuilder;
 use ILIAS\Data\Order;
 use ILIAS\Data\Range;
-use ilBadgeImageTemplate;
 use ilLanguage;
 use ilGlobalTemplateInterface;
 use ILIAS\UI\Renderer;
@@ -17,13 +33,10 @@ use ILIAS\UI\Component\Table\DataRowBuilder;
 use Generator;
 use ILIAS\UI\Component\Table\DataRetrieval;
 use ILIAS\UI\URLBuilderToken;
-use ILIAS\DI\Container;
 use ilBadge;
 use ilBadgeHandler;
-use ILIAS\Data\Link;
 use ILIAS\Data\URI;
 use ILIAS\UI\Implementation\Component\Link\Standard;
-use ILIAS\StaticURL\Init;
 use ilObject;
 use ilLink;
 
@@ -137,7 +150,7 @@ class ilObjectBadgeTableGUI
                             );
                             $image_html = $this->renderer->render($badge_img);
                         }
-                        $image_html_large = $this->badge_image_service->getImageFromResourceId($badge_item, $badge_rid, 0);
+                        $image_html_large = $this->badge_image_service->getImageFromResourceId($badge_item, $badge_rid, ilBadgeImage::IMAGE_SIZE_XL);
                         if ($image_html_large !== '') {
                             $badge_img_large = $this->ui_factory->image()->responsive(
                                 $image_html_large,

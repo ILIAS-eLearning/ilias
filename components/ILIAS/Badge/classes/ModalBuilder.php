@@ -50,7 +50,7 @@ class ModalBuilder
     }
 
     /**
-     * @param array <string:string> $badge_properties
+     * @param array <string,string> $badge_properties
      */
     public function constructModal(
         Image $badge_image,
