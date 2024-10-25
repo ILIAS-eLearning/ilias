@@ -18,9 +18,6 @@
 
 declare(strict_types=1);
 
-/**
- * @author Stefan Meyer <smeyer.ilias@gmx.de>
- */
 class ilOpenIdConnectUserSync
 {
     public const AUTH_MODE = 'oidc';
@@ -33,12 +30,15 @@ class ilOpenIdConnectUserSync
     private int $usr_id = 0;
     private ilUserDefinedFields $udf;
 
-    public function __construct(private readonly ilOpenIdConnectSettings $settings, private readonly stdClass $user_info)
-    {
+    public function __construct(
+        private readonly ilOpenIdConnectSettings $settings,
+        private readonly stdClass $user_info
+    ) {
         global $DIC;
 
         $this->logger = $DIC->logger()->auth();
         $this->writer = new ilXmlWriter();
+        $this->udf = ilUserDefinedFields::_getInstance();
     }
 
     public function setExternalAccount(string $ext_account): void
@@ -64,9 +64,6 @@ class ilOpenIdConnectUserSync
         return $this->int_account === '';
     }
 
-    /**
-     * @throws ilOpenIdConnectSyncForbiddenException
-     */
     public function updateUser(): bool
     {
         if ($this->needsCreation() && !$this->settings->isSyncAllowed()) {
@@ -84,6 +81,7 @@ class ilOpenIdConnectUserSync
         $importParser->setFolderId(USER_FOLDER_ID);
         $importParser->startParsing();
         $debug = $importParser->getProtocol();
+        $this->logger->debug(json_encode($debug, JSON_THROW_ON_ERROR|JSON_PRETTY_PRINT));
 
         $int_account = ilObjUser::_checkExternalAuthAccount(
             self::AUTH_MODE,
@@ -94,7 +92,7 @@ class ilOpenIdConnectUserSync
         return true;
     }
 
-    protected function transformToXml(): void
+    private function transformToXml(): void
     {
         $this->writer->xmlStartTag('Users');
 
@@ -118,7 +116,7 @@ class ilOpenIdConnectUserSync
         $this->parseRoleAssignments();
 
         if ($this->needsCreation()) {
-            $this->writer->xmlElement('Active', [], "true");
+            $this->writer->xmlElement('Active', [], 'true');
             $this->writer->xmlElement('TimeLimitOwner', [], 7);
             $this->writer->xmlElement('TimeLimitUnlimited', [], 1);
             $this->writer->xmlElement('TimeLimitFrom', [], time());
@@ -126,7 +124,6 @@ class ilOpenIdConnectUserSync
         }
 
         $profile_fields = $this->settings->getProfileMappingFields();
-        $this->initUserDefinedFields();
 
         $udf_fields = [];
         foreach ($this->udf->getDefinitions() as $definition) {
@@ -241,7 +238,7 @@ class ilOpenIdConnectUserSync
                     break;
 
                 default:
-                    if (strpos($field, 'udf_') !== 0) {
+                    if (!str_starts_with($field, 'udf_')) {
                         continue 2;
                     }
 
@@ -252,10 +249,12 @@ class ilOpenIdConnectUserSync
 
                     $definition = $this->udf->getDefinition((int) $id_data[1]);
                     if (empty($definition)) {
-                        $this->logger->warning(sprintf(
-                            "Invalid/Orphaned UD field mapping detected: %s",
-                            $field
-                        ));
+                        $this->logger->warning(
+                            sprintf(
+                                'Invalid/Orphaned UD field mapping detected: %s',
+                                $field
+                            )
+                        );
                         break;
                     }
 
@@ -277,8 +276,7 @@ class ilOpenIdConnectUserSync
     }
 
     /**
-     * Parse role assignments
-     * @return array<int, int> array of role assignments
+     * @return array<int, int> Map of role assignments, where the key equals the respetive value
      */
     protected function parseRoleAssignments(): array
     {
@@ -348,7 +346,6 @@ class ilOpenIdConnectUserSync
         if (!$found_role && $this->needsCreation()) {
             $long_role_id = ('il_' . IL_INST_ID . '_role_' . $this->settings->getRole());
 
-            // add default role
             $this->writer->xmlElement(
                 'Role',
                 [
@@ -363,21 +360,17 @@ class ilOpenIdConnectUserSync
         return $roles_assignable;
     }
 
-    protected function valueFrom(string $connect_name): string
+    private function valueFrom(string $connect_name): string
     {
         if (!$connect_name) {
             return '';
         }
+
         if (!property_exists($this->user_info, $connect_name)) {
             $this->logger->debug('Cannot find property ' . $connect_name . ' in user info ');
             return '';
         }
 
         return (string) $this->user_info->{$connect_name};
-    }
-
-    private function initUserDefinedFields(): void
-    {
-        $this->udf = ilUserDefinedFields::_getInstance();
     }
 }

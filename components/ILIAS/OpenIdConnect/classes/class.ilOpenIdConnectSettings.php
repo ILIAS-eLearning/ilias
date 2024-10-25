@@ -40,9 +40,7 @@ class ilOpenIdConnectSettings
     public const VALIDATION_ISSUE_INVALID_SCOPE = 0;
     public const VALIDATION_ISSUE_DISCOVERY_ERROR = 1;
 
-    /**
-     * @var string[]
-     */
+    /** @var list<string> */
     private const IGNORED_USER_FIELDS = [
         'mail_incoming_mail',
         'preferences',
@@ -178,7 +176,6 @@ class ilOpenIdConnectSettings
         $this->login_element_text = $text;
     }
 
-
     public function getLoginElemenText(): string
     {
         return $this->login_element_text;
@@ -263,8 +260,7 @@ class ilOpenIdConnectSettings
     }
 
     /**
-     * @param string[] $additional_scopes
-     * @return void
+     * @param list<string> $additional_scopes
      */
     public function setAdditionalScopes(array $additional_scopes): void
     {
@@ -272,7 +268,7 @@ class ilOpenIdConnectSettings
     }
 
     /**
-     * @return string[]
+     * @return list<string>
      */
     public function getAllScopes(): array
     {
@@ -282,10 +278,6 @@ class ilOpenIdConnectSettings
         return $scopes;
     }
 
-    /**
-     * @throws \ILIAS\Filesystem\Exception\FileNotFoundException
-     * @throws \ILIAS\Filesystem\Exception\IOException
-     */
     public function deleteImageFile(): void
     {
         if ($this->filesystem->has(self::FILE_STORAGE . '/' . $this->getLoginElementImage())) {
@@ -345,6 +337,10 @@ class ilOpenIdConnectSettings
         return false;
     }
 
+    /**
+     * @param list<string> $custom_scopes
+     * @return list<string>
+     */
     public function validateScopes(string $discoveryURL, array $custom_scopes): array
     {
         $result = [];
@@ -462,10 +458,12 @@ class ilOpenIdConnectSettings
         $this->setProvider($this->storage->get('provider', ''));
         $this->setClientId($this->storage->get('client_id', ''));
         $this->setSecret($this->storage->get('secret', ''));
-        $this->setAdditionalScopes((array) unserialize(
-            $this->storage->get('scopes', serialize([])),
-            ['allowed_classes' => false]
-        ));
+        $this->setAdditionalScopes(
+            (array) unserialize(
+                $this->storage->get('scopes', serialize([])),
+                ['allowed_classes' => false]
+            )
+        );
         $this->setLoginElementImage($this->storage->get('le_img', ''));
         $this->setLoginElementText((string) $this->storage->get('le_text'));
         $this->setLoginElementType((int) $this->storage->get('le_type'));
@@ -476,10 +474,12 @@ class ilOpenIdConnectSettings
         $this->allowSync((bool) $this->storage->get('allow_sync', '0'));
         $this->setRole((int) $this->storage->get('role', '0'));
         $this->setUidField((string) $this->storage->get('uid', ''));
-        $this->setRoleMappings((array) unserialize(
-            $this->storage->get('role_mappings', serialize([])),
-            ['allowed_classes' => false]
-        ));
+        $this->setRoleMappings(
+            (array) unserialize(
+                $this->storage->get('role_mappings', serialize([])),
+                ['allowed_classes' => false]
+            )
+        );
         $this->setValidateScopes((int) $this->storage->get('validate_scopes', (string) self::URL_VALIDATION_PROVIDER));
         if (self::URL_VALIDATION_CUSTOM === $this->getValidateScopes()) {
             $this->setCustomDiscoveryUrl($this->storage->get('custom_discovery_url'));
@@ -491,7 +491,7 @@ class ilOpenIdConnectSettings
         return (string) ($this->profile_map[$field] ?? '');
     }
 
-    public function clearProfileMaps()
+    public function clearProfileMaps(): void
     {
         $this->profile_map = [];
         $this->profile_update_map = [];
