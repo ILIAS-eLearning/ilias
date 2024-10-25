@@ -18,13 +18,14 @@
 
 declare(strict_types=1);
 
+use ILIAS\Data\Factory as DataFactory;
 use ILIAS\Test\Access\ParticipantAccess;
 use ILIAS\Test\Logging\TestParticipantInteractionTypes;
 use ILIAS\Test\Presentation\TestScreenGUI;
-
+use ILIAS\Test\Questions\Presentation\QuestionsOfAttemptTable;
+use ILIAS\Test\Results\Data\StatusOfAttempt;
 use ILIAS\TestQuestionPool\Questions\QuestionAutosaveable;
 use ILIAS\TestQuestionPool\Questions\QuestionPartiallySaveable;
-
 use ILIAS\UI\Component\Modal\Interruptive as InterruptiveModal;
 
 /**
@@ -204,7 +205,7 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
 
                     if (!$testPassesSelector->openPassExists()) {
                         $this->tpl->setOnScreenMessage('info', $this->lng->txt('tst_pass_finished'), true);
-                        $this->ctrl->redirectByClass("ilobjtestgui", "infoScreen");
+                        $this->ctrl->redirectByClass([ilRepositoryGUI::class, ilObjTestGUI::class, ilInfoScreenGUI::class]);
                     }
                 }
 
@@ -229,7 +230,10 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
             $this->user->getId()
         );
         if ($participant_access !== ParticipantAccess::ALLOWED) {
-            $this->ilias->raiseError($this->lng->txt('user_wrong_clientip'), $this->ilias->error_obj->MESSAGE);
+            $this->ilias->raiseError(
+                $participant_access->getAccessForbiddenMessage($this->lng),
+                $this->ilias->error_obj->MESSAGE
+            );
         }
     }
 
@@ -239,7 +243,7 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
 
         if (!$executable['executable']) {
             $this->tpl->setOnScreenMessage('info', $executable['errormessage'], true);
-            $this->ctrl->redirectByClass("ilobjtestgui", "infoScreen");
+            $this->ctrl->redirectByClass([ilRepositoryGUI::class, ilObjTestGUI::class, ilInfoScreenGUI::class]);
         }
     }
 
@@ -287,7 +291,7 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
         $tagging_gui = new ilTaggingGUI();
         $tagging_gui->setObject($this->object->getId(), $this->object->getType());
         $tagging_gui->saveInput();
-        $this->ctrl->redirectByClass("ilobjtestgui", "infoScreen");
+        $this->ctrl->redirectByClass([ilRepositoryGUI::class, ilObjTestGUI::class, ilInfoScreenGUI::class]);
     }
 
     /**
@@ -385,7 +389,6 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
         if (!$question_obj->persistWorkingState(
             $active_id,
             $pass,
-            $this->object->areObligationsEnabled(),
             $authorized
         )) {
             return false;
@@ -669,7 +672,7 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
             $this->test_session->setAccessCodeToSession($_POST['anonymous_id']);
         }
 
-        $this->ctrl->redirectByClass("ilobjtestgui", "infoScreen");
+        $this->ctrl->redirectByClass([ilRepositoryGUI::class, ilObjTestGUI::class, ilInfoScreenGUI::class]);
     }
 
     /**
@@ -696,7 +699,7 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
         }
 
         $this->ctrl->setParameterByClass('ilObjTestGUI', 'lock', $testStartLock);
-        $this->ctrl->redirectByClass("ilobjtestgui", "redirectToInfoScreen");
+        $this->ctrl->redirectByClass([ilRepositoryGUI::class, ilObjTestGUI::class, ilInfoScreenGUI::class]);
     }
 
     public function getLockParameter()
@@ -734,7 +737,6 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
         $this->object->updateTestPassResults(
             $active_id,
             $this->test_session->getPass(),
-            $this->object->areObligationsEnabled(),
             null,
             $this->object->getId()
         );
@@ -818,18 +820,20 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
      */
     public function redirectAfterAutosaveCmd(): void
     {
+        $this->performTestPassFinishedTasks(StatusOfAttempt::FINISHED_BY_DURATION);
+
         $this->redirectAfterFinish();
     }
 
     public function redirectAfterDashboardCmd(): void
     {
+        $this->performTestPassFinishedTasks(StatusOfAttempt::FINISHED_BY_PARTICIPANT);
+
         $this->redirectAfterFinish();
     }
 
     protected function redirectAfterFinish(): void
     {
-        $this->performTestPassFinishedTasks();
-
         $url = $this->ctrl->getLinkTarget($this, ilTestPlayerCommands::AFTER_TEST_PASS_FINISHED, '', false, false);
 
         $this->tpl->addBlockFile($this->getContentBlockName(), "adm_content", "tpl.il_as_tst_redirect_autosave.html", "components/ILIAS/Test");
@@ -961,30 +965,6 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
         $this->handleCheckTestPassValid();
         ilSession::clear("tst_next");
 
-        $all_obligations_answered = $this->object->allObligationsAnswered();
-
-        /*
-         * The following "endgames" are possible prior to actually finishing the test:
-         * - Obligations (Ability to finish the test.)
-         *      If not all obligatory questions are answered, the user is presented a list
-         *      showing the deficits.
-         * - Examview (Will to finish the test.)
-         *      With the examview, the participant can review all answers given in ILIAS or a PDF prior to
-         *      commencing to the finished test.
-         * - Last pass allowed (Reassuring the will to finish the test.)
-         *      If passes are limited, on the last pass, an additional confirmation is to be displayed.
-         */
-
-        if ($this->object->areObligationsEnabled() && !$all_obligations_answered) {
-            if ($this->object->getListOfQuestions()) {
-                $this->ctrl->redirect($this, ilTestPlayerCommands::QUESTION_SUMMARY_INC_OBLIGATIONS);
-                return;
-            }
-
-            $this->ctrl->redirect($this, ilTestPlayerCommands::QUESTION_SUMMARY_OBLIGATIONS_ONLY);
-            return;
-        }
-
         if ($this->testrequest->strVal('finalization_confirmed') !== 'confirmed') {
             $this->finish_test_modal = $this->buildFinishTestModal();
             $this->showQuestionCmd();
@@ -1001,7 +981,7 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
             $this->test_session->getPass()
         );
 
-        $this->performTestPassFinishedTasks();
+        $this->performTestPassFinishedTasks(StatusOfAttempt::FINISHED_BY_PARTICIPANT);
 
         if ($this->logger->isLoggingEnabled()
             && !$this->getObject()->getAnonymity()
@@ -1019,13 +999,14 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
         $this->ctrl->redirect($this, ilTestPlayerCommands::AFTER_TEST_PASS_FINISHED);
     }
 
-    protected function performTestPassFinishedTasks(): void
+    protected function performTestPassFinishedTasks(StatusOfAttempt $status_of_attempt): void
     {
         $finishTasks = new ilTestPassFinishTasks(
             $this->test_session,
-            $this->object->getId()
+            $this->object->getId(),
+            $this->test_pass_result_repository
         );
-        $finishTasks->performFinishTasks($this->process_locker);
+        $finishTasks->performFinishTasks($this->process_locker, $status_of_attempt);
     }
 
     protected function sendNewPassFinishedNotificationEmailIfActivated(int $active_id, int $pass)
@@ -1104,7 +1085,7 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
                 $this->ctrl->redirectByClass(['ilTestResultsGUI', 'ilTestEvalObjectiveOrientedGUI']);
             }
 
-            $this->ctrl->redirectByClass(['ilTestResultsGUI', 'ilMyTestResultsGUI', 'ilTestEvaluationGUI']);
+            $this->ctrl->redirectByClass([ilTestResultsGUI::class, ilMyTestResultsGUI::class, ilTestEvaluationGUI::class]);
         }
 
         $this->ctrl->redirectByClass(TestScreenGUI::class, TestScreenGUI::DEFAULT_CMD);
@@ -1423,9 +1404,6 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
         $headerBlockBuilder->setQuestionPosition($this->test_sequence->getPositionOfSequence($sequence_element));
         $headerBlockBuilder->setQuestionCount($this->test_sequence->getUserQuestionCount());
         $headerBlockBuilder->setQuestionPostponed($this->test_sequence->isPostponedQuestion($question_id));
-        $headerBlockBuilder->setQuestionObligatory(
-            $this->object->areObligationsEnabled() && ilObjTest::isQuestionObligatory($question_gui->getObject()->getId())
-        );
         if ($this->test_session->isObjectiveOriented()) {
             $objectivesAdapter = ilLOTestQuestionAdapter::getInstance($this->test_session);
             $objectivesAdapter->buildQuestionRelatedObjectiveList($this->test_sequence, $this->question_related_objectives_list);
@@ -1667,7 +1645,6 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
         $this->object->updateTestPassResults(
             $active_id,
             $this->test_session->getPass(),
-            $this->object->areObligationsEnabled(),
             null,
             $this->object->getId()
         );
@@ -1912,16 +1889,15 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
 
     protected function showSideList($current_sequence_element): void
     {
-        $question_summary_data = $this->service->getQuestionSummaryData($this->test_sequence, false);
+        $question_summary_data = $this->service->getQuestionSummaryData($this->test_sequence);
         $questions = [];
         $active = 0;
 
         foreach ($question_summary_data as $idx => $row) {
             $title = ilLegacyFormElementsUtil::prepareFormOutput($row['title']);
-            if (strlen($row['description'])) {
-                $description = " title=\"" . htmlspecialchars($row['description']) . "\" ";
-            } else {
-                $description = "";
+            $description = '';
+            if ($row['description'] !== '') {
+                $description = ' title="' . htmlspecialchars($row['description']) . '" ';
             }
 
             if (!$row['disabled']) {
@@ -1959,53 +1935,40 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
     /**
      * Output of a summary of all test questions for test participants
      */
-    public function outQuestionSummaryCmd(
-        bool $obligations_info = false,
-        bool $obligations_filter = false
-    ) {
-        $this->help->setScreenIdComponent("tst");
-        $this->help->setScreenId("assessment");
-        $this->help->setSubScreenId("question_summary");
+    public function outQuestionSummaryCmd()
+    {
+        $this->help->setScreenIdComponent('tst');
+        $this->help->setScreenId('assessment');
+        $this->help->setSubScreenId('question_summary');
 
-        $this->tpl->addBlockFile($this->getContentBlockName(), "adm_content", "tpl.il_as_tst_question_summary.html", "components/ILIAS/Test");
+        $this->tpl->addBlockFile(
+            $this->getContentBlockName(),
+            'adm_content',
+            'tpl.il_as_tst_question_summary.html',
+            'components/ILIAS/Test'
+        );
 
         $this->global_screen->tool()->context()->current()->getAdditionalData()->replace(
             ilTestPlayerLayoutProvider::TEST_PLAYER_VIEW_TITLE,
             $this->getObject()->getTitle() . ' - ' . $this->lng->txt('question_summary')
         );
 
-        if ($obligations_info
-            && $this->object->areObligationsEnabled()
-            && !$this->object->allObligationsAnswered()) {
-            $this->tpl->setOnScreenMessage('failure', $this->lng->txt('not_all_obligations_answered'));
-        }
-
         $active_id = $this->test_session->getActiveId();
-        $question_summary_data = $this->service->getQuestionSummaryData($this->test_sequence, $obligations_filter);
+        $question_summary_data = $this->service->getQuestionSummaryData($this->test_sequence);
 
-        $this->ctrl->setParameter($this, "sequence", $this->testrequest->raw("sequence"));
+        $this->ctrl->setParameter($this, 'sequence', $this->testrequest->raw('sequence'));
 
-        $table_gui = new ilListOfQuestionsTableGUI(
-            $this,
-            'showQuestion',
+        $table = new QuestionsOfAttemptTable(
+            $this->lng,
+            $this->ctrl,
             $this->ui_factory,
-            $this->ui_renderer
+            new DataFactory(),
+            $this->http,
+            $this,
+            $this->object,
+            $question_summary_data
         );
-        if (($this->object->getNrOfTries() - 1) === $this->test_session->getPass()) {
-            $table_gui->setUserHasAttemptsLeft(false);
-        }
-        $table_gui->setShowPointsEnabled(!$this->object->getTitleOutput());
-        $table_gui->setShowMarkerEnabled($this->object->getShowMarker());
-        $table_gui->setObligationsNotAnswered(!$this->object->allObligationsAnswered());
-        $table_gui->setShowObligationsEnabled($this->object->areObligationsEnabled());
-        $table_gui->setObligationsFilterEnabled($obligations_filter);
-        $table_gui->setFinishTestButtonEnabled(true);
-
-        $table_gui->init();
-
-        $table_gui->setData($question_summary_data);
-
-        $this->tpl->setVariable('TABLE_LIST_OF_QUESTIONS', $table_gui->getHTML());
+        $this->tpl->setVariable('TABLE_LIST_OF_QUESTIONS', $this->ui_renderer->render($table->buildComponents()));
 
         if ($this->object->getEnableProcessingTime()) {
             $this->outProcessingTime($active_id);
@@ -2021,16 +1984,6 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
             $this->tpl->setVariable('EXAM_ID_TXT', $this->lng->txt('exam_id'));
             $this->tpl->parseCurrentBlock();
         }
-    }
-
-    public function outQuestionSummaryWithObligationsInfoCmd()
-    {
-        $this->outQuestionSummaryCmd(true, false);
-    }
-
-    public function outObligationsOnlySummaryCmd()
-    {
-        $this->outQuestionSummaryCmd(true, true);
     }
 
     public function backFromFinishingCmd()
@@ -2081,7 +2034,7 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
     {
         $this->tpl->addBlockFile($this->getContentBlockName(), "adm_content", "tpl.il_as_tst_finish_list_of_answers.html", "components/ILIAS/Test");
 
-        $result_array = &$this->object->getTestResult(
+        $result_array = $this->object->getTestResult(
             $active_id,
             $pass,
             false,
@@ -2141,11 +2094,11 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
         $this->tpl->setVariable("TITLE", $this->object->getTitle());
         $this->tpl->setVariable("TXT_TEST_PROLOG", $this->lng->txt("tst_your_answers"));
         $invited_user = &$this->object->getInvitedUsers($this->user->getId());
-        $pagetitle = $this->object->getTitle() . " - " . $this->lng->txt("clientip") .
-            ": " . $invited_user[$this->user->getId()]["clientip"] . " - " .
-            $this->lng->txt("matriculation") . ": " .
-            $invited_user[$this->user->getId()]["matriculation"];
-        $this->tpl->setVariable("PAGETITLE", $pagetitle);
+        $pagetitle = $this->object->getTitle() . ' - ' . $this->lng->txt('clientip') .
+            ': ' . $_SERVER['REMOTE_ADDR'] . ' - ' .
+            $this->lng->txt('matriculation') . ': ' .
+            $invited_user[$this->user->getId()]['matriculation'];
+        $this->tpl->setVariable('PAGETITLE', $pagetitle);
         $this->tpl->parseCurrentBlock();
     }
 
@@ -2170,7 +2123,7 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
     public function outUserResultsOverviewCmd()
     {
         $this->ctrl->redirectByClass(
-            ['ilRepositoryGUI', 'ilObjTestGUI', 'ilTestEvaluationGUI'],
+            [ilRepositoryGUI::class, ilObjTestGUI::class, ilTestEvaluationGUI::class],
             "outUserResultsOverview"
         );
     }
@@ -2436,10 +2389,9 @@ JS;
         $skillEvaluation->setActiveId($test_session->getActiveId());
         $skillEvaluation->setPass($test_session->getPass());
 
-        $skillEvaluation->setNumRequiredBookingsForSkillTriggering((int) $this->ass_settings->get(
-            'ass_skl_trig_num_answ_barrier',
-            ilObjTestFolder::DEFAULT_SKL_TRIG_NUM_ANSWERS_BARRIER
-        ));
+        $skillEvaluation->setNumRequiredBookingsForSkillTriggering(
+            $this->object->getGlobalSettings()->getSkillTriggeringNumberOfAnswers()
+        );
 
 
         $skillEvaluation->init($questionList);
@@ -2599,11 +2551,10 @@ JS;
 
             if (count($solved_array) > 0) {
                 $solved = array_pop($solved_array);
-                $solved = $solved["solved"];
+                $solved = $solved['solved'];
             }
 
-            // fau: testNav - change question mark command to link target
-            if ($solved == 1) {
+            if ($solved === 1) {
                 $navigationGUI->setQuestionMarkLinkTarget($this->ctrl->getLinkTarget($this, ilTestPlayerCommands::UNMARK_QUESTION_SAVE));
                 $navigationGUI->setQuestionMarked(true);
             } else {
@@ -2611,22 +2562,13 @@ JS;
                 $navigationGUI->setQuestionMarked(false);
             }
         }
-        // fau.
         return $navigationGUI;
     }
 
-    /**
-     * @return string
-     */
     protected function getFinishTestCommand(): string
     {
         if (!$this->object->getListOfQuestionsEnd()) {
             return ilTestPlayerCommands::FINISH_TEST;
-        }
-
-        if ($this->object->areObligationsEnabled()
-            && !$this->object->allObligationsAnswered()) {
-            return ilTestPlayerCommands::QUESTION_SUMMARY_INC_OBLIGATIONS;
         }
 
         return ilTestPlayerCommands::QUESTION_SUMMARY;
@@ -2894,7 +2836,6 @@ JS;
             $question_gui->setTargetGui($this);
             $question_gui->setPresentationContext(assQuestionGUI::PRESENTATION_CONTEXT_TEST);
             $question = $question_gui->getObject();
-            $question->setObligationsToBeConsidered($this->object->areObligationsEnabled());
             $question->setShuffler($this->shuffler->getAnswerShuffleFor(
                 $question_id,
                 $this->test_session->getActiveId(),
@@ -2925,8 +2866,6 @@ JS;
         $process_locker_factory->setQuestionId($question->getId());
         $process_locker_factory->setUserId($this->user->getId());
         $question->setProcessLocker($process_locker_factory->getLocker());
-
-        $question->setObligationsToBeConsidered($this->object->areObligationsEnabled());
 
         $this->initTestQuestionConfig($question);
 

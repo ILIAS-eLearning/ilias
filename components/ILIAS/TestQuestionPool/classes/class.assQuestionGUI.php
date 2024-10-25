@@ -608,11 +608,11 @@ abstract class assQuestionGUI
         }
     }
 
-    protected function renderEditForm(ilPropertyFormGUI $form, string $additional_content = ''): void
+    protected function renderEditForm(ilPropertyFormGUI $form): void
     {
         $this->addSaveOnEnterOnLoadCode();
         $this->getQuestionTemplate();
-        $this->tpl->setVariable('QUESTION_DATA', $form->getHTML() . $additional_content . $this->question_sync_modal);
+        $this->tpl->setVariable('QUESTION_DATA', $form->getHTML() . $this->question_sync_modal);
     }
 
     /**
@@ -888,9 +888,6 @@ abstract class assQuestionGUI
             if ($this->object->getAdditionalContentEditingMode() !== assQuestion::ADDITIONAL_CONTENT_EDITING_MODE_IPE) {
                 $question->setUseRte(true);
                 $question->setRteTags(ilObjAdvancedEditing::_getUsedHTMLTags("assessment"));
-                $question->addPlugin("latex");
-                $question->addButton("latex");
-                $question->addButton("pastelatex");
                 $question->setRTESupport($this->object->getId(), "qpl", "assessment");
             }
         } else {

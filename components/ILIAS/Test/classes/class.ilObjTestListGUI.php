@@ -76,32 +76,6 @@ class ilObjTestListGUI extends ilObjectListGUI
     }
 
     /**
-    * Get command target frame
-    *
-    * @param	string		$cmd			command
-    *
-    * @return	string		command target frame
-    */
-    public function getCommandFrame(string $cmd): string
-    {
-        $frame = '';
-        switch ($cmd) {
-            case "":
-            case "infoScreen":
-            case "eval_a":
-            case "eval_stat":
-                $frame = ilFrameTargetInfo::_getFrame("MainContent");
-                break;
-
-            default:
-        }
-
-        return $frame;
-    }
-
-
-
-    /**
     * Get item properties
     *
     * @return	array		array of property arrays:
@@ -122,8 +96,8 @@ class ilObjTestListGUI extends ilObjectListGUI
             return $props;
         }
 
-        $props[] = ["alert" => true, "property" => $this->lng->txt("status"),
-            "value" => $this->lng->txt($participant_access->value)];
+        $props[] = ['alert' => true, 'property' => $this->lng->txt('status'),
+            'value' => $participant_access->getAccessForbiddenMessage($this->lng)];
 
         return $props;
     }
@@ -153,31 +127,6 @@ class ilObjTestListGUI extends ilObjectListGUI
         if ($this->access->checkAccess('read', '', $this->ref_id)) {
             $this->insertCommand($this->getCommandLink('testScreen'), $this->lng->txt('tst_start_test'));
         }
-        return $this->handleUserResultsCommand($commands);
-    }
-
-    private function handleUserResultsCommand($commands)
-    {
-        if (!ilLOSettings::isObjectiveTest($this->ref_id)) {
-            return $this->removeUserResultsCommand($commands);
-        }
-
-        if (!ilObjTestAccess::visibleUserResultExists($this->obj_id, $this->user->getId())) {
-            return $this->removeUserResultsCommand($commands);
-        }
-
-        return $commands;
-    }
-
-    private function removeUserResultsCommand($commands)
-    {
-        foreach ($commands as $key => $command) {
-            if ($command['cmd'] == 'userResultsGateway') {
-                unset($commands[$key]);
-                break;
-            }
-        }
-
         return $commands;
     }
 

@@ -76,7 +76,11 @@ class StandardFormTest extends ILIAS_UI_TestBase
 
     protected function buildFactory(): I\Input\Container\Form\Factory
     {
-        return new I\Input\Container\Form\Factory($this->getFieldFactory());
+
+        return new I\Input\Container\Form\Factory(
+            $this->getFieldFactory(),
+            new SignalGenerator()
+        );
     }
 
     protected function buildButtonFactory(): I\Button\Factory
@@ -106,6 +110,7 @@ class StandardFormTest extends ILIAS_UI_TestBase
             '<input id="id_1" type="text" name="form/input_0" class="c-field-text" />',
             'byline',
             'id_1',
+            null,
             'form/input_0'
         );
     }
@@ -241,7 +246,7 @@ class StandardFormTest extends ILIAS_UI_TestBase
 
         $input = $input->withAdditionalTransformation($fail);
 
-        $form = new Form\Standard($if, new InputNameSource(), '', [$input]);
+        $form = new Form\Standard(new SignalGenerator(), $if, new InputNameSource(), '', [$input]);
 
         $request = $this->createMock(ServerRequestInterface::class);
         $request
@@ -256,26 +261,31 @@ class StandardFormTest extends ILIAS_UI_TestBase
 
         $html = $this->brutallyTrimHTML($r->render($form));
         $expected = $this->brutallyTrimHTML('
-            <form role="form" class="c-form c-form--horizontal" enctype="multipart/form-data" method="post" novalidate="novalidate">
-            <div class="c-form__header">
-                <div class="c-form__actions">
-                    <button class="btn btn-default" data-action="">save</button>
-                </div>
-            </div>
-            <div class="c-form__error-msg alert alert-danger" role="alert">testing error message</div>
-            <fieldset class="c-input" data-il-ui-component="text-field-input" data-il-ui-input-name="form_0/input_1"><label
-                    for="id_1">label</label>
-                <div class="c-input__field"><input id="id_1" type="text" name="form_0/input_1" class="c-field-text" /></div>
-                <div class="c-input__error-msg alert alert-danger" aria-describedby="id_1" role="alert">This is invalid...</div>
-                <div class="c-input__help-byline">byline</div>
-            </fieldset>
-            <div class="c-form__footer">
-                <div class="c-form__actions">
-                    <button class="btn btn-default" data-action="">save</button>
-                </div>
-            </div>
-        </form>
-        ');
+<form role="form" class="c-form c-form--horizontal" enctype="multipart/form-data" describedby="id_1" method="post"
+      novalidate="novalidate">
+    <div class="c-form__header">
+        <div class="c-form__actions">
+            <button class="btn btn-default" data-action="">save</button>
+        </div>
+    </div>
+    <div class="c-form__error-msg alert alert-danger" id="id_1"><span class="sr-only">ui_error:</span>testing error
+        message
+    </div>
+    <fieldset class="c-input" data-il-ui-component="text-field-input" data-il-ui-input-name="form_0/input_1"
+              aria-describedby="id_3"><label for="id_2">label</label>
+        <div class="c-input__field"><input id="id_2" type="text" name="form_0/input_1" class="c-field-text" /></div>
+        <div class="c-input__error-msg alert alert-danger" id="id_3"><span class="sr-only">ui_error:</span>This is
+            invalid...
+        </div>
+        <div class="c-input__help-byline">byline</div>
+    </fieldset>
+    <div class="c-form__footer">
+        <div class="c-form__actions">
+            <button class="btn btn-default" data-action="">save</button>
+        </div>
+    </div>
+</form>
+');
         $this->assertEquals($expected, $html);
         $this->assertHTMLEquals($expected, $html);
     }
@@ -301,7 +311,7 @@ class StandardFormTest extends ILIAS_UI_TestBase
         }, "This is a fail on form.");
         $input = $if->text("label", "byline");
 
-        $form = new Form\Standard($if, new InputNameSource(), '', [$input]);
+        $form = new Form\Standard(new SignalGenerator(), $if, new InputNameSource(), '', [$input]);
         $form = $form->withAdditionalTransformation($fail);
 
         $request = $this->createMock(ServerRequestInterface::class);
@@ -319,19 +329,20 @@ class StandardFormTest extends ILIAS_UI_TestBase
         $field_html = $this->getFormWrappedHtml(
             'text-field-input',
             'label',
-            '<input id="id_1" type="text" name="form_0/input_1" class="c-field-text" />',
+            '<input id="id_2" type="text" name="form_0/input_1" class="c-field-text"/>',
             'byline',
-            'id_1',
+            'id_2',
+            null,
             'form_0/input_1'
         );
 
         $html = $this->brutallyTrimHTML($r->render($form));
         $expected = $this->brutallyTrimHTML('
-            <form role="form" class="c-form c-form--horizontal" enctype="multipart/form-data" method="post" novalidate="novalidate">
+            <form role="form" class="c-form c-form--horizontal" enctype="multipart/form-data" describedby="id_1" method="post" novalidate="novalidate">
                 <div class="c-form__header">
                     <div class="c-form__actions"><button class="btn btn-default" data-action="">save</button></div>
                 </div>
-                <div class="c-form__error-msg alert alert-danger" role="alert">This is a fail on form.</div>
+                <div class="c-form__error-msg alert alert-danger" id="id_1"><span class="sr-only">ui_error:</span>This is a fail on form.</div>
                 ' . $field_html . '
                 <div class="c-form__footer">
                     <div class="c-form__actions"><button class="btn btn-default" data-action="">save</button></div>
@@ -354,10 +365,11 @@ class StandardFormTest extends ILIAS_UI_TestBase
 
         $field_html = $this->getFormWrappedHtml(
             'text-field-input',
-            'label<span class="asterisk">*</span>',
+            'label<span class="asterisk" aria-label="required_field">*</span>',
             '<input id="id_1" type="text" name="form/input_0" class="c-field-text" />',
             'byline',
             'id_1',
+            null,
             'form/input_0'
         );
 

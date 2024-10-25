@@ -79,6 +79,8 @@ class InternalDomainService
             $this->data_service,
             $this->repo_service,
             $this,
+            new \ilBookObjectInfoStakeholder(),
+            new \ilBookBookingInfoStakeholder(),
             $pool_id
         );
     }
@@ -134,4 +136,13 @@ class InternalDomainService
             $this
         );
     }
+
+    public function access(): Access\AccessManager
+    {
+        return new Access\AccessManager(
+            $this,
+            $this->DIC->access()
+        );
+    }
+
 }

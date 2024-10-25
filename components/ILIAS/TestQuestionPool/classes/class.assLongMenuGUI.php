@@ -214,9 +214,6 @@ class assLongMenuGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjus
         if (!$this->object->getSelfAssessmentEditingMode()) {
             if ($this->object->getAdditionalContentEditingMode() == assQuestion::ADDITIONAL_CONTENT_EDITING_MODE_RTE) {
                 $long_menu_text->setRteTags(ilObjAdvancedEditing::_getUsedHTMLTags("assessment"));
-                $long_menu_text->addPlugin("latex");
-                $long_menu_text->addButton("latex");
-                $long_menu_text->addButton("pastelatex");
                 $long_menu_text->setRTESupport($this->object->getId(), "qpl", "assessment");
                 $long_menu_text->setUseRte(true);
             }
@@ -265,7 +262,7 @@ class assLongMenuGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjus
             'type' => $this->lng->txt('type'),
             'answers' => $this->lng->txt('answers'),
             'answer_options' => $this->lng->txt('answer_options'),
-            'correct_answers' => $this->lng->txt('correct_answers'),
+            'correct_answers' => $this->lng->txt('correct_answers') . ':',
             'add_answers' => '[' . $this->lng->txt('add_answers') . ']',
             'manual_editing' => $this->lng->txt('manual_editing')
         ];
