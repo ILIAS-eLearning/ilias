@@ -59,19 +59,20 @@ class ilBadgeImageTemplateTableGUI
         $this->http = $DIC->http();
     }
 
-    protected function buildDataRetrievalObject(Factory $f, Renderer $r)
+    private function buildDataRetrievalObject(Factory $f, Renderer $r): DataRetrieval
     {
         return new class ($f, $r) implements DataRetrieval {
             public function __construct(
-                protected Factory $ui_factory,
-                protected Renderer $ui_renderer
+                private Factory $ui_factory,
+                private Renderer $ui_renderer
             ) {
             }
 
             /**
+             * TODO gvollbach: Please provide the exaxct shape of the list of arrays
              * @return array<string,string>
              */
-            protected function getBadgeImageTemplates(Container $DIC): array
+            private function getBadgeImageTemplates(Container $DIC): array
             {
                 $modal_container = new ModalBuilder();
                 $data = [];
@@ -100,16 +101,16 @@ class ilBadgeImageTemplateTableGUI
                             );
 
                             $modal = $modal_container->constructModal($badge_img_large, $template->getTitle());
-                            $data[] =
-                                ['id' => $template->getId(),
-                                 'image_rid' => $modal_container->renderShyButton($image_html, $modal) . ' ' .
-                                     $modal_container->renderModal($modal),
-                                 'title' => $modal_container->renderShyButton($template->getTitle(), $modal),
-                                ];
+                            $data[] = [
+                                'id' => $template->getId(),
+                                'image_rid' => $modal_container->renderShyButton($image_html, $modal) . ' ' .
+                                    $modal_container->renderModal($modal),
+                                'title' => $modal_container->renderShyButton($template->getTitle(), $modal),
+                            ];
                         }
-
                     }
                 }
+
                 return $data;
             }
 
@@ -122,7 +123,7 @@ class ilBadgeImageTemplateTableGUI
                 ?array $additional_parameters
             ): Generator {
                 $records = $this->getRecords($range, $order);
-                foreach ($records as $idx => $record) {
+                foreach ($records as $record) {
                     $row_id = (string) $record['id'];
                     yield $row_builder->buildDataRow($row_id, $record);
                 }
@@ -132,17 +133,20 @@ class ilBadgeImageTemplateTableGUI
                 ?array $filter_data,
                 ?array $additional_parameters
             ): ?int {
-                return count($this->getRecords());
+                return \count($this->getRecords());
             }
 
-            protected function getRecords(Range $range = null, Order $order = null): array
+            /**
+             * TODO gvollbach: Please provide the exaxct shape of the list of arrays
+             */
+            private function getRecords(Range $range = null, Order $order = null): array
             {
                 global $DIC;
 
                 $data = $this->getBadgeImageTemplates($DIC);
 
                 if ($order) {
-                    list($order_field, $order_direction) = $order->join(
+                    [$order_field, $order_direction] = $order->join(
                         [],
                         fn($ret, $key, $value) => [$key, $value]
                     );
@@ -152,7 +156,7 @@ class ilBadgeImageTemplateTableGUI
                     }
                 }
                 if ($range) {
-                    $data = array_slice($data, $range->getStart(), $range->getLength());
+                    $data = \array_slice($data, $range->getStart(), $range->getLength());
                 }
 
                 return $data;
@@ -161,9 +165,9 @@ class ilBadgeImageTemplateTableGUI
     }
 
     /**
-     * @return array<string,\ILIAS\UI\Component\Table\Action\Action>
+     * @return array<string, \ILIAS\UI\Component\Table\Action\Action>
      */
-    protected function getActions(
+    private function getActions(
         URLBuilder $url_builder,
         URLBuilderToken $action_parameter_token,
         URLBuilderToken $row_id_token
@@ -171,14 +175,14 @@ class ilBadgeImageTemplateTableGUI
         $f = $this->factory;
         return [
             'badge_image_template_edit' => $f->table()->action()->single(
-                $this->lng->txt("edit"),
-                $url_builder->withParameter($action_parameter_token, "badge_image_template_editImageTemplate"),
+                $this->lng->txt('edit'),
+                $url_builder->withParameter($action_parameter_token, 'badge_image_template_editImageTemplate'),
                 $row_id_token
             ),
             'badge_image_template_delete' =>
                 $f->table()->action()->standard(
-                    $this->lng->txt("delete"),
-                    $url_builder->withParameter($action_parameter_token, "badge_image_template_delete"),
+                    $this->lng->txt('delete'),
+                    $url_builder->withParameter($action_parameter_token, 'badge_image_template_delete'),
                     $row_id_token
                 )
         ];
@@ -192,19 +196,19 @@ class ilBadgeImageTemplateTableGUI
         $df = new \ILIAS\Data\Factory();
 
         $columns = [
-            'image_rid' => $f->table()->column()->text($this->lng->txt("image")),
-            'title' => $f->table()->column()->text($this->lng->txt("title")),
+            'image_rid' => $f->table()->column()->text($this->lng->txt('image')),
+            'title' => $f->table()->column()->text($this->lng->txt('title')),
         ];
 
         $table_uri = $df->uri($request->getUri()->__toString());
         $url_builder = new URLBuilder($table_uri);
         $query_params_namespace = ['tid'];
 
-        list($url_builder, $action_parameter_token, $row_id_token) =
+        [$url_builder, $action_parameter_token, $row_id_token] =
             $url_builder->acquireParameters(
                 $query_params_namespace,
-                "table_action",
-                "id"
+                'table_action',
+                'id'
             );
 
         $actions = $this->getActions($url_builder, $action_parameter_token, $row_id_token);
@@ -235,34 +239,34 @@ class ilBadgeImageTemplateTableGUI
                         );
                     }
                 }
-            } else {
-                if (is_array($query_values)) {
-                    foreach ($query_values as $id) {
-                        $badge = new ilBadgeImageTemplate($id);
-                        $items[] = $f->modal()->interruptiveItem()->keyValue(
-                            $id,
-                            (string) $badge->getId(),
-                            $badge->getTitle()
-                        );
-                    }
-                } else {
-                    $badge = new ilBadgeImageTemplate($query_values);
+            } elseif (\is_array($query_values)) {
+                foreach ($query_values as $id) {
+                    $badge = new ilBadgeImageTemplate($id);
                     $items[] = $f->modal()->interruptiveItem()->keyValue(
-                        (string) $badge->getId(),
+                        $id,
                         (string) $badge->getId(),
                         $badge->getTitle()
                     );
                 }
-
+            } else {
+                $badge = new ilBadgeImageTemplate($query_values);
+                $items[] = $f->modal()->interruptiveItem()->keyValue(
+                    (string) $badge->getId(),
+                    (string) $badge->getId(),
+                    $badge->getTitle()
+                );
             }
+
             $action = $query->retrieve($action_parameter_token->getName(), $this->refinery->to()->string());
             if ($action === 'badge_image_template_delete') {
+                // TODO gvollbach: Please provide the HTTP service to to send a response and close the connection
                 echo($r->renderAsync([
                     $f->modal()->interruptive(
                         $this->lng->txt('badge_deletion'),
                         $this->lng->txt('badge_deletion_confirmation'),
                         '#'
                     )->withAffectedItems($items)
+                        // TODO gvollbach: Why the console.log?
                       ->withAdditionalOnLoadCode(static fn($id): string => "console.log('ASYNC JS');")
                 ]));
                 exit();

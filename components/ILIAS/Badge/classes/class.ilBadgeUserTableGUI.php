@@ -53,6 +53,7 @@ class ilBadgeUserTableGUI
     public function __construct(int $parent_ref_id, ?ilBadge $award_badge = null)
     {
         global $DIC;
+
         $this->lng = $DIC->language();
         $this->tpl = $DIC->ui()->mainTemplate();
         $this->factory = $DIC->ui()->factory();
@@ -62,7 +63,7 @@ class ilBadgeUserTableGUI
         $this->award_badge = $award_badge;
     }
 
-    protected function buildDataRetrievalObject(
+    private function buildDataRetrievalObject(
         Factory $f,
         Renderer $r,
         int $parent_ref_id,
@@ -70,17 +71,18 @@ class ilBadgeUserTableGUI
     ): DataRetrieval {
         return new class ($f, $r, $parent_ref_id, $award_badge) implements DataRetrieval {
             public function __construct(
-                protected Factory $ui_factory,
-                protected Renderer $ui_renderer,
-                protected int $parent_ref_id,
-                protected ?ilBadge $award_badge = null
+                private Factory $ui_factory,
+                private Renderer $ui_renderer,
+                private int $parent_ref_id,
+                private ?ilBadge $award_badge = null
             ) {
             }
 
             /**
+             * TODO gvollbach: Please provide the exaxct shape of the list of arrays
              * @return array<string,string>
              */
-            protected function getBadgeImageTemplates(Container $DIC): array
+            private function getBadgeImageTemplates(Container $DIC): array
             {
                 $a_parent_obj_id = null;
                 $assignments = null;
@@ -91,7 +93,7 @@ class ilBadgeUserTableGUI
                 $badges = [];
                 $tree = $DIC->repositoryTree();
 
-                if (!$a_parent_obj_id) {
+                if (!$a_parent_obj_id) {// TODO gvollbach: $a_parent_obj_id is always null
                     $a_parent_obj_id = ilObject::_lookupObjId($parent_ref_id);
                 }
 
@@ -102,7 +104,7 @@ class ilBadgeUserTableGUI
                 $obj_ids = [$a_parent_obj_id];
 
                 foreach ($tree->getSubTree($tree->getNodeData($parent_ref_id)) as $node) {
-                    $obj_ids[] = $node['obj_id'];
+                    $obj_ids[] = (int) $node['obj_id'];
                 }
 
                 foreach ($obj_ids as $obj_id) {
@@ -111,8 +113,7 @@ class ilBadgeUserTableGUI
                     }
 
                     foreach (ilBadgeAssignment::getInstancesByParentId($obj_id) as $ass) {
-                        if ($a_restrict_badge_id &&
-                            $a_restrict_badge_id !== $ass->getBadgeId()) {
+                        if ($a_restrict_badge_id !== $ass->getBadgeId()) {
                             continue;
                         }
 
@@ -145,7 +146,7 @@ class ilBadgeUserTableGUI
                             $type = ilBadge::getExtendedTypeCaption($badge->getTypeInstance());
                             $title = $badge->getTitle();
                             $issued = $immutable->setTimestamp($timestamp);
-                            $parent_id = $parent['id'] ?? 0;
+                            $parent_id = $parent['id'] ?? 0; //TODO gvollbach: According to mit SCA the offset "id" always exists
                             $data[$idx] = [
                                 'user_id' => $user_id,
                                 'name' => $name,
@@ -187,7 +188,7 @@ class ilBadgeUserTableGUI
             ): Generator {
                 $records = $this->getRecords($range, $order);
                 foreach ($records as $idx => $record) {
-                    if (isset($idx)) {
+                    if (isset($idx)) {// TODO gvollbach: Why do we have to check the index agains NULL?
                         $row_id = (string) $idx;
                         yield $row_builder->buildDataRow($row_id, $record);
                     }
@@ -201,7 +202,10 @@ class ilBadgeUserTableGUI
                 return count($this->getRecords());
             }
 
-            protected function getRecords(Range $range = null, Order $order = null): array
+            /**
+             * TODO gvollbach: Please provide the exaxct shape of the list of arrays
+             */
+            private function getRecords(Range $range = null, Order $order = null): array
             {
                 global $DIC;
 
@@ -212,7 +216,7 @@ class ilBadgeUserTableGUI
                         [],
                         fn($ret, $key, $value) => [$key, $value]
                     );
-                    usort($data, fn($a, $b) => $a[$order_field] <=> $b[$order_field]);
+                    usort($data, static fn($a, $b) => $a[$order_field] <=> $b[$order_field]);
                     if ($order_direction === 'DESC') {
                         $data = array_reverse($data);
                     }

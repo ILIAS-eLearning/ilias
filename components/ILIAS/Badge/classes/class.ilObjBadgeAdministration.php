@@ -16,6 +16,8 @@
  *
  *********************************************************************/
 
+declare(strict_types=1);
+
 class ilObjBadgeAdministration extends ilObject
 {
     public function __construct(

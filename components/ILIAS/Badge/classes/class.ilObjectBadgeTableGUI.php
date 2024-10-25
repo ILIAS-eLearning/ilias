@@ -41,9 +41,6 @@ use ILIAS\UI\Implementation\Component\Link\Standard;
 use ilObject;
 use ilLink;
 
-/**
- * @ilCtrl_IsCalledBy ilObjBadgeAdministration: ilObjectBadgeTable
- */
 class ilObjectBadgeTableGUI
 {
     private readonly Factory $factory;
@@ -53,11 +50,12 @@ class ilObjectBadgeTableGUI
     private readonly Services $http;
     private readonly ilLanguage $lng;
     private readonly ilGlobalTemplateInterface $tpl;
-    private $parent_obj;
+    private $parent_obj; // TODO gvollbach: Please provide the exaxct shape of the list of arrays
 
-    public function __construct($parentObj)
+    public function __construct($parentObj) // TODO gvollbach: Please provide the type of $parentObj
     {
         global $DIC;
+
         $this->lng = $DIC->language();
         $this->tpl = $DIC->ui()->mainTemplate();
         $this->factory = $DIC->ui()->factory();
@@ -68,8 +66,11 @@ class ilObjectBadgeTableGUI
         $this->parent_obj = $parentObj;
     }
 
-    protected function buildDataRetrievalObject(Factory $f, Renderer $r, $p): DataRetrieval
-    {
+    private function buildDataRetrievalObject(
+        Factory $f,
+        Renderer $r,
+        $p
+    ): DataRetrieval { // TODO gvollbach: Please provide the type of $p
         return new class ($f, $r, $p) implements DataRetrieval {
             private ilBadgeImage $badge_image_service;
             private Factory $factory;
@@ -80,12 +81,17 @@ class ilObjectBadgeTableGUI
             private ?bool $user_has_write_permission = null;
 
             public function __construct(
-                protected Factory $ui_factory,
-                protected Renderer $ui_renderer,
-                protected $parent
+                private Factory $ui_factory,
+                private Renderer $ui_renderer,
+                private $parent // TODO gvollbach: Please provide the type of $parent
             ) {
                 global $DIC;
-                $this->badge_image_service = new ilBadgeImage($DIC->resourceStorage(), $DIC->upload(), $DIC->ui()->mainTemplate());
+
+                $this->badge_image_service = new ilBadgeImage(
+                    $DIC->resourceStorage(),
+                    $DIC->upload(),
+                    $DIC->ui()->mainTemplate()
+                );
                 $this->factory = $this->ui_factory;
                 $this->renderer = $this->ui_renderer;
                 $this->ctrl = $DIC->ctrl();
@@ -93,16 +99,16 @@ class ilObjectBadgeTableGUI
                 $this->access = $DIC->access();
             }
 
-            protected function userHasWritePermission(int $parent_id): bool
+            private function userHasWritePermission(int $parent_id): bool
             {
                 if ($this->user_has_write_permission === null) {
                     $parent_ref_id = ilObject::_getAllReferences($parent_id);
                     if (count($parent_ref_id) > 0) {
                         $parent_ref_id = array_pop($parent_ref_id);
                     }
-                    $this->user_has_write_permission = $this->access->checkAccess("write", "", $parent_ref_id);
-
+                    $this->user_has_write_permission = $this->access->checkAccess('write', '', $parent_ref_id);
                 }
+
                 return $this->user_has_write_permission;
             }
 
@@ -115,7 +121,7 @@ class ilObjectBadgeTableGUI
                 ?array $additional_parameters
             ): Generator {
                 $records = $this->getRecords($range, $order);
-                foreach ($records as $idx => $record) {
+                foreach ($records as $record) {
                     $row_id = (string) $record['id'];
                     yield $row_builder->buildDataRow($row_id, $record);
                 }
@@ -129,9 +135,10 @@ class ilObjectBadgeTableGUI
             }
 
             /**
+             * TODO gvollbach: Please provide the exaxct shape of the list of arrays
              * @return array<string,string>
              */
-            protected function getRecords(Range $range = null, Order $order = null): array
+            private function getRecords(Range $range = null, Order $order = null): array
             {
                 $data = [];
                 $image_html = '';
@@ -139,7 +146,7 @@ class ilObjectBadgeTableGUI
                 $modal_container = new ModalBuilder();
 
                 $types = ilBadgeHandler::getInstance()->getAvailableTypes(false);
-                $filter = ['type' => '' , 'title' => '', 'object' => ''];
+                $filter = ['type' => '', 'title' => '', 'object' => ''];
                 foreach (ilBadge::getObjectInstances($filter) as $badge_item) {
                     $type_caption = ilBadge::getExtendedTypeCaption($types[$badge_item['type_id']]);
                     $badge_rid = $badge_item['image_rid'];
@@ -153,38 +160,51 @@ class ilObjectBadgeTableGUI
                             );
                             $image_html = $this->renderer->render($badge_img);
                         }
-                        $image_html_large = $this->badge_image_service->getImageFromResourceId($badge_item, $badge_rid, ilBadgeImage::IMAGE_SIZE_XL);
+                        $image_html_large = $this->badge_image_service->getImageFromResourceId(
+                            $badge_item,
+                            $badge_rid,
+                            ilBadgeImage::IMAGE_SIZE_XL
+                        );
                         if ($image_html_large !== '') {
                             $badge_img_large = $this->ui_factory->image()->responsive(
                                 $image_html_large,
                                 $badge_item['title']
                             );
-
                         }
                     }
 
                     $ref_ids = ilObject::_getAllReferences($badge_item['parent_id']);
                     $ref_id = array_shift($ref_ids);
-                    $this->userHasWritePermission($badge_item['parent_id']);
+                    // TODO gvollbach: Don't call this here, please use the method where $this->user_has_write_permission is used
+                    $this->userHasWritePermission(
+                        $badge_item['parent_id']
+                    );
 
-                    $user_url_link = '';
+                    $user_url_link = ''; // TODO gvollbach: This variable is never used
                     if ($this->user_has_write_permission) {
                         $this->ctrl->setParameter($this->parent, 'pid', (string) $badge_item['parent_id']);
                         $this->ctrl->setParameter($this->parent, 'bid', (string) $badge_item['id']);
-                        $url = ILIAS_HTTP_PATH . '/' . $this->ctrl->getLinkTarget($this->parent, 'listObjectBadgeUsers');
+                        $url = ILIAS_HTTP_PATH . '/' . $this->ctrl->getLinkTarget(
+                            $this->parent,
+                            'listObjectBadgeUsers'
+                        );
                         $this->ctrl->setParameter($this->parent, 'bid', '');
                         $this->ctrl->setParameter($this->parent, 'pid', '');
-                        $user_url_link = $this->renderer->render(new Standard($this->lng->txt('user'), (string) new URI($url)));
+                        $user_url_link = $this->renderer->render(
+                            new Standard($this->lng->txt('user'), (string) new URI($url))
+                        );
                     }
 
                     $container_url_link = '';
                     if ($this->access->checkAccess('read', '', $ref_id)) {
                         $container_url = ilLink::_getLink($ref_id);
-                        $container_url_link = $this->renderer->render(new Standard($badge_item['parent_title'], (string) new URI($container_url)));
+                        $container_url_link = $this->renderer->render(
+                            new Standard($badge_item['parent_title'], (string) new URI($container_url))
+                        );
                         $container_icon = '<img class="ilIcon" src="' .
-                            ilObject::_getIcon((int) $badge_item["parent_id"], "big", $badge_item["parent_type"]) .
-                            '" alt="' . $this->lng->txt("obj_" . $badge_item["parent_type"]) .
-                            '" title="' . $this->lng->txt("obj_" . $badge_item["parent_type"]) . '" /> ';
+                            ilObject::_getIcon((int) $badge_item['parent_id'], 'big', $badge_item['parent_type']) .
+                            '" alt="' . $this->lng->txt('obj_' . $badge_item['parent_type']) .
+                            '" title="' . $this->lng->txt('obj_' . $badge_item['parent_type']) . '" /> ';
                     }
 
                     $badge_information = [
@@ -203,22 +223,25 @@ class ilObjectBadgeTableGUI
                         'id' => (int) $badge_item['id'],
                         'active' => (bool) $badge_item['active'],
                         'type' => $type_caption,
-                        'image_rid' => $modal_container->renderShyButton($image_html, $modal) . ' ' . $modal_container->renderModal($modal),
+                        'image_rid' => $modal_container->renderShyButton(
+                            $image_html,
+                            $modal
+                        ) . ' ' . $modal_container->renderModal($modal),
                         'title' => $modal_container->renderShyButton($badge_item['title'], $modal),
                         'container' => $badge_item['parent_title'],
-                        'container_icon' => $container_icon,
-                        'container_url' => $container_icon . $container_url_link ?: '',
+                        'container_icon' => $container_icon, // TODO gvollbach: This might not be defined
+                        'container_url' => $container_icon . $container_url_link ?: '', // TODO gvollbach: This might not be defined
                         'container_deleted' => ($badge_item['deleted'] ?? false),
                         'container_id' => (int) $badge_item['parent_id'],
                         'container_type' => $badge_item['parent_type'],
                     ];
                 }
                 if ($order) {
-                    list($order_field, $order_direction) = $order->join(
+                    [$order_field, $order_direction] = $order->join(
                         [],
                         fn($ret, $key, $value) => [$key, $value]
                     );
-                    usort($data, fn($a, $b) => $a[$order_field] <=> $b[$order_field]);
+                    usort($data, static fn($a, $b) => $a[$order_field] <=> $b[$order_field]);
                     if ($order_field === 'active') {
                         if ($order_direction === 'ASC') {
                             $data = array_reverse($data);
@@ -227,9 +250,11 @@ class ilObjectBadgeTableGUI
                         $data = array_reverse($data);
                     }
                 }
+
                 if ($range) {
                     $data = array_slice($data, $range->getStart(), $range->getLength());
                 }
+
                 return $data;
             }
         };
@@ -238,7 +263,7 @@ class ilObjectBadgeTableGUI
     /**
      * @return array<string,\ILIAS\UI\Component\Table\Action\Action>
      */
-    protected function getActions(
+    private function getActions(
         URLBuilder $url_builder,
         URLBuilderToken $action_parameter_token,
         URLBuilderToken $row_id_token
@@ -247,26 +272,26 @@ class ilObjectBadgeTableGUI
 
         return [
             'obj_badge_activate' => $f->table()->action()->multi(
-                $this->lng->txt("activate"),
-                $url_builder->withParameter($action_parameter_token, "obj_badge_activate"),
+                $this->lng->txt('activate'),
+                $url_builder->withParameter($action_parameter_token, 'obj_badge_activate'),
                 $row_id_token
             ),
             'obj_badge_deactivate' =>
                 $f->table()->action()->multi(
-                    $this->lng->txt("deactivate"),
-                    $url_builder->withParameter($action_parameter_token, "obj_badge_deactivate"),
+                    $this->lng->txt('deactivate'),
+                    $url_builder->withParameter($action_parameter_token, 'obj_badge_deactivate'),
                     $row_id_token
                 ),
             'obj_badge_delete' =>
                 $f->table()->action()->multi(
-                    $this->lng->txt("delete"),
-                    $url_builder->withParameter($action_parameter_token, "obj_badge_delete"),
+                    $this->lng->txt('delete'),
+                    $url_builder->withParameter($action_parameter_token, 'obj_badge_delete'),
                     $row_id_token
                 ),
             'obj_badge_show_users' =>
                 $f->table()->action()->single(
-                    $this->lng->txt("user"),
-                    $url_builder->withParameter($action_parameter_token, "obj_badge_show_users"),
+                    $this->lng->txt('user'),
+                    $url_builder->withParameter($action_parameter_token, 'obj_badge_show_users'),
                     $row_id_token
                 )
         ];
@@ -281,22 +306,28 @@ class ilObjectBadgeTableGUI
         $df = new \ILIAS\Data\Factory();
 
         $columns = [
-            'image_rid' => $f->table()->column()->text($this->lng->txt("image")),
-            'title' => $f->table()->column()->text($this->lng->txt("title")),
-            'type' => $f->table()->column()->text($this->lng->txt("type")),
-            'container_url' => $f->table()->column()->text($this->lng->txt("container")),
-            'active' => $f->table()->column()->boolean($this->lng->txt("active"), $this->lng->txt("yes"), $this->lng->txt("no")),
+            'image_rid' => $f->table()->column()->text($this->lng->txt('image')),
+            'title' => $f->table()->column()->text($this->lng->txt('title')),
+            'type' => $f->table()->column()->text($this->lng->txt('type')),
+            'container_url' => $f->table()->column()->text($this->lng->txt('container')),
+            'active' => $f->table()->column()->boolean(
+                $this->lng->txt('active'),
+                $this->lng->txt('yes'),
+                $this->lng->txt(
+                    'no'
+                )
+            ),
         ];
 
         $table_uri = $df->uri($request->getUri()->__toString());
         $url_builder = new URLBuilder($table_uri);
         $query_params_namespace = ['tid'];
 
-        list($url_builder, $action_parameter_token, $row_id_token) =
+        [$url_builder, $action_parameter_token, $row_id_token] =
             $url_builder->acquireParameters(
                 $query_params_namespace,
-                "table_action",
-                "id"
+                'table_action',
+                'id'
             );
 
         $data_retrieval = $this->buildDataRetrievalObject($f, $r, $this->parent_obj);
@@ -324,14 +355,20 @@ class ilObjectBadgeTableGUI
                 if (is_array($ids) && count($ids) > 0) {
                     foreach ($ids as $id) {
                         $badge = new ilBadge($id);
-                        $items[] = $f->modal()->interruptiveItem()->keyValue($id, (string) $badge->getId(), $badge->getTitle());
+                        $items[] = $f->modal()->interruptiveItem()->keyValue(
+                            $id,
+                            (string) $badge->getId(),
+                            $badge->getTitle()
+                        );
                     }
+                    // TODO gvollbach: Please provide the HTTP service to to send a response and close the connection
                     echo($r->renderAsync([
                         $f->modal()->interruptive(
                             $this->lng->txt('badge_deletion'),
                             $this->lng->txt('badge_deletion_confirmation'),
                             '#'
                         )->withAffectedItems($items)
+                            // TODO gvollbach: Why the console.log?
                           ->withAdditionalOnLoadCode(static fn($id): string => "console.log('ASYNC JS');")
                     ]));
                     exit();

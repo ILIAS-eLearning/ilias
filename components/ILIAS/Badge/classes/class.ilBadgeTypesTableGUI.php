@@ -50,6 +50,7 @@ class ilBadgeTypesTableGUI
     public function __construct()
     {
         global $DIC;
+
         $this->lng = $DIC->language();
         $this->lng->loadLanguageModule('cmps');
         $this->tpl = $DIC->ui()->mainTemplate();
@@ -60,19 +61,19 @@ class ilBadgeTypesTableGUI
         $this->http = $DIC->http();
     }
 
-    protected function buildDataRetrievalObject(Factory $f, Renderer $r)
+    private function buildDataRetrievalObject(Factory $f, Renderer $r): DataRetrieval
     {
         return new class ($f, $r) implements DataRetrieval {
             public function __construct(
-                protected Factory $ui_factory,
-                protected Renderer $ui_renderer
+                private Factory $ui_factory,
+                private Renderer $ui_renderer
             ) {
             }
 
             /**
-             * @return array<string, string>
+             * @return list<array{"id": string, "comp": string, "name": string, "manual": bool, "active": bool, "activity": bool}>
              */
-            protected function getBadgeImageTemplates(): array
+            private function getBadgeImageTemplates(): array
             {
                 $data = [];
                 $handler = ilBadgeHandler::getInstance();
@@ -84,14 +85,14 @@ class ilBadgeTypesTableGUI
                         foreach ($provider->getBadgeTypes() as $badge_obj) {
                             $id = $handler->getUniqueTypeId($component, $badge_obj);
 
-                            $data[] = array(
+                            $data[] = [
                                 'id' => $id,
                                 'comp' => $handler->getComponentCaption($component),
                                 'name' => $badge_obj->getCaption(),
                                 'manual' => !$badge_obj instanceof ilBadgeAuto,
-                                'active' => !in_array($id, $inactive, true),
-                                'activity' => in_array('bdga', $badge_obj->getValidObjectTypes(), true)
-                            );
+                                'active' => !\in_array($id, $inactive, true),
+                                'activity' => \in_array('bdga', $badge_obj->getValidObjectTypes(), true)
+                            ];
                         }
                     }
                 }
@@ -108,7 +109,7 @@ class ilBadgeTypesTableGUI
                 ?array $additional_parameters
             ): Generator {
                 $records = $this->getRecords($range, $order);
-                foreach ($records as $idx => $record) {
+                foreach ($records as $record) {
                     $row_id = (string) $record['id'];
                     yield $row_builder->buildDataRow($row_id, $record);
                 }
@@ -118,25 +119,28 @@ class ilBadgeTypesTableGUI
                 ?array $filter_data,
                 ?array $additional_parameters
             ): ?int {
-                return count($this->getRecords());
+                return \count($this->getRecords());
             }
 
-            protected function getRecords(Range $range = null, Order $order = null): array
+            /**
+             * @return list<array{"id": string, "comp": string, "name": string, "manual": bool, "active": bool, "activity": bool}>
+             */
+            private function getRecords(Range $range = null, Order $order = null): array
             {
                 $data = $this->getBadgeImageTemplates();
 
                 if ($order) {
-                    list($order_field, $order_direction) = $order->join(
+                    [$order_field, $order_direction] = $order->join(
                         [],
                         fn($ret, $key, $value) => [$key, $value]
                     );
-                    usort($data, fn($a, $b) => $a[$order_field] <=> $b[$order_field]);
+                    usort($data, static fn($a, $b) => $a[$order_field] <=> $b[$order_field]);
                     if ($order_direction === 'DESC') {
                         $data = array_reverse($data);
                     }
                 }
                 if ($range) {
-                    $data = array_slice($data, $range->getStart(), $range->getLength());
+                    $data = \array_slice($data, $range->getStart(), $range->getLength());
                 }
 
                 return $data;
@@ -145,9 +149,9 @@ class ilBadgeTypesTableGUI
     }
 
     /**
-     * @return array<string,\ILIAS\UI\Component\Table\Action\Action>
+     * @return array<string, \ILIAS\UI\Component\Table\Action\Action>
      */
-    protected function getActions(
+    private function getActions(
         URLBuilder $url_builder,
         URLBuilderToken $action_parameter_token,
         URLBuilderToken $row_id_token
@@ -186,29 +190,26 @@ class ilBadgeTypesTableGUI
                 $this->lng->txt('badge_manual'),
                 $this->lng->txt('yes'),
                 $this->lng->txt('no')
-            )
-                          ->withOrderingLabels(
-                              $badge_manual_txt . $this->lng->txt('no'),
-                              $badge_manual_txt . $this->lng->txt('yes')
-                          ),
+            )->withOrderingLabels(
+                $badge_manual_txt . $this->lng->txt('no'),
+                $badge_manual_txt . $this->lng->txt('yes')
+            ),
             'activity' => $f->table()->column()->boolean(
                 $this->lng->txt('badge_activity_badges'),
                 $this->lng->txt('yes'),
                 $this->lng->txt('no')
-            )
-                            ->withOrderingLabels(
-                                $badge_activity_txt . $this->lng->txt('no'),
-                                $badge_activity_txt . $this->lng->txt('yes')
-                            ),
+            )->withOrderingLabels(
+                $badge_activity_txt . $this->lng->txt('no'),
+                $badge_activity_txt . $this->lng->txt('yes')
+            ),
             'active' => $f->table()->column()->boolean(
                 $this->lng->txt('active'),
                 $this->lng->txt('yes'),
                 $this->lng->txt('no')
-            )
-                          ->withOrderingLabels(
-                              $active_txt . $this->lng->txt('no'),
-                              $active_txt . $this->lng->txt('yes')
-                          ),
+            )->withOrderingLabels(
+                $active_txt . $this->lng->txt('no'),
+                $active_txt . $this->lng->txt('yes')
+            ),
 
         ];
 
@@ -216,7 +217,7 @@ class ilBadgeTypesTableGUI
         $url_builder = new URLBuilder($table_uri);
         $query_params_namespace = ['tid'];
 
-        list($url_builder, $action_parameter_token, $row_id_token) =
+        [$url_builder, $action_parameter_token, $row_id_token] =
             $url_builder->acquireParameters(
                 $query_params_namespace,
                 'table_action',

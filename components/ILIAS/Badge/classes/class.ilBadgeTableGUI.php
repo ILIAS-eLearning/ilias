@@ -49,6 +49,7 @@ class ilBadgeTableGUI
     private readonly string $parent_type;
     private readonly ilLanguage $lng;
     private readonly ilGlobalTemplateInterface $tpl;
+
     public function __construct(int $parent_obj_id, string $parent_obj_type)
     {
         global $DIC;
@@ -64,45 +65,55 @@ class ilBadgeTableGUI
         $this->parent_id = $parent_obj_id;
         $this->parent_type = $parent_obj_type;
     }
-    protected function buildColumns(): array
+
+    /**
+     * TODO gvollbach: Please provide the exaxct shape of the list of arrays
+     */
+    private function buildColumns(): array
     {
         $column = $this->factory->table()->column();
         $lng = $this->lng;
 
         return [
-            'image_rid' => $column->text($lng->txt("image")),
-            'title' => $column->text($lng->txt("title")),
-            'type' => $column->text($lng->txt("type")),
-            'active' => $column->boolean($lng->txt("active"), $lng->txt("yes"), $lng->txt("no")),
+            'image_rid' => $column->text($lng->txt('image')),
+            'title' => $column->text($lng->txt('title')),
+            'type' => $column->text($lng->txt('type')),
+            'active' => $column->boolean($lng->txt('active'), $lng->txt('yes'), $lng->txt('no')),
         ];
     }
 
-    protected function buildDataRetrievalObject(Factory $f, Renderer $r, int $p, string $type)
+    private function buildDataRetrievalObject(Factory $f, Renderer $r, int $p, string $type): DataRetrieval
     {
         return new class ($f, $r, $p, $type) implements DataRetrieval {
-            protected int $parent_obj_id;
-            protected string $parent_obj_type;
-            protected ilBadgeImage $badge_image_service;
-            protected Factory $factory;
-            protected Renderer $renderer;
+            private int $parent_obj_id;
+            private string $parent_obj_type;
+            private ilBadgeImage $badge_image_service;
+            private Factory $factory;
+            private Renderer $renderer;
+
             public function __construct(
-                protected Factory $ui_factory,
-                protected Renderer $ui_renderer,
-                protected int $parent_id,
-                protected string $parent_type
+                private Factory $ui_factory,
+                private Renderer $ui_renderer,
+                private int $parent_id,
+                private string $parent_type
             ) {
                 global $DIC;
                 $this->parent_obj_id = $parent_id;
                 $this->parent_obj_type = $parent_type;
-                $this->badge_image_service = new ilBadgeImage($DIC->resourceStorage(), $DIC->upload(), $DIC->ui()->mainTemplate());
+                $this->badge_image_service = new ilBadgeImage(
+                    $DIC->resourceStorage(),
+                    $DIC->upload(),
+                    $DIC->ui()->mainTemplate()
+                );
                 $this->factory = $this->ui_factory;
                 $this->renderer = $this->ui_renderer;
             }
 
             /**
+             * TODO gvollbach: Please provide the exaxct shape of the list of arrays
              * @return array<string,string>
              */
-            protected function getBadges(Container $DIC): array
+            private function getBadges(Container $DIC): array
             {
                 $data = [];
                 $badge_img_large = null;
@@ -113,7 +124,11 @@ class ilBadgeTableGUI
                     $image_html = '';
                     $badge_rid = $badge->getImageRid();
                     $image_src = $this->badge_image_service->getImageFromResourceId($badge, $badge_rid);
-                    $badge_image_large = $this->badge_image_service->getImageFromResourceId($badge, $badge_rid, ilBadgeImage::IMAGE_SIZE_XL);
+                    $badge_image_large = $this->badge_image_service->getImageFromResourceId(
+                        $badge,
+                        $badge_rid,
+                        ilBadgeImage::IMAGE_SIZE_XL
+                    );
                     if ($badge_rid != '') {
                         $badge_template_image = $image_src;
                         if ($badge_template_image !== '') {
@@ -141,7 +156,7 @@ class ilBadgeTableGUI
                             $badge_information
                         );
                     }
-                    $data[] = array(
+                    $data[] = [
                         'id' => $badge->getId(),
                         'badge' => $badge,
                         'active' => $badge->isActive(),
@@ -149,11 +164,15 @@ class ilBadgeTableGUI
                             ? ilBadge::getExtendedTypeCaption($badge->getTypeInstance())
                             : $badge->getTypeInstance()->getCaption(),
                         'manual' => (!$badge->getTypeInstance() instanceof ilBadgeAuto),
-                        'image_rid' => $modal_container->renderShyButton($image_html, $modal) . ' ' . $modal_container->renderModal($modal),
+                        'image_rid' => $modal_container->renderShyButton(
+                            $image_html,
+                            $modal
+                        ) . ' ' . $modal_container->renderModal($modal),
                         'title' => $modal_container->renderShyButton($title, $modal),
                         'renderer' => ''
-                    );
+                    ];
                 }
+
                 return $data;
             }
 
@@ -166,7 +185,7 @@ class ilBadgeTableGUI
                 ?array $additional_parameters
             ): Generator {
                 $records = $this->getRecords($range, $order);
-                foreach ($records as $idx => $record) {
+                foreach ($records as $record) {
                     $row_id = (string) $record['id'];
                     yield $row_builder->buildDataRow($row_id, $record);
                 }
@@ -176,16 +195,19 @@ class ilBadgeTableGUI
                 ?array $filter_data,
                 ?array $additional_parameters
             ): ?int {
-                return count($this->getRecords());
+                return \count($this->getRecords());
             }
 
-            protected function getRecords(Range $range = null, Order $order = null): array
+            /**
+             * TODO gvollbach: Please provide the exaxct shape of the list of arrays
+             */
+            private function getRecords(Range $range = null, Order $order = null): array
             {
                 global $DIC;
                 $data = $this->getBadges($DIC);
 
                 if ($order) {
-                    list($order_field, $order_direction) = $order->join(
+                    [$order_field, $order_direction] = $order->join(
                         [],
                         fn($ret, $key, $value) => [$key, $value]
                     );
@@ -195,7 +217,7 @@ class ilBadgeTableGUI
                     }
                 }
                 if ($range) {
-                    $data = array_slice($data, $range->getStart(), $range->getLength());
+                    $data = \array_slice($data, $range->getStart(), $range->getLength());
                 }
 
                 return $data;
@@ -206,7 +228,7 @@ class ilBadgeTableGUI
     /**
      * @return array<string,\ILIAS\UI\Component\Table\Action\Action>
      */
-    protected function getActions(
+    private function getActions(
         URLBuilder $url_builder,
         URLBuilderToken $action_parameter_token,
         URLBuilderToken $row_id_token
@@ -215,25 +237,25 @@ class ilBadgeTableGUI
         return [
             'badge_table_activate' =>
                 $f->table()->action()->multi(
-                    $this->lng->txt("activate"),
-                    $url_builder->withParameter($action_parameter_token, "badge_table_activate"),
+                    $this->lng->txt('activate'),
+                    $url_builder->withParameter($action_parameter_token, 'badge_table_activate'),
                     $row_id_token
                 ),
             'badge_table_deactivate' =>
                 $f->table()->action()->multi(
-                    $this->lng->txt("deactivate"),
-                    $url_builder->withParameter($action_parameter_token, "badge_table_deactivate"),
+                    $this->lng->txt('deactivate'),
+                    $url_builder->withParameter($action_parameter_token, 'badge_table_deactivate'),
                     $row_id_token
                 ),
             'badge_table_edit' => $f->table()->action()->single(
-                $this->lng->txt("edit"),
-                $url_builder->withParameter($action_parameter_token, "badge_table_edit"),
+                $this->lng->txt('edit'),
+                $url_builder->withParameter($action_parameter_token, 'badge_table_edit'),
                 $row_id_token
             ),
             'badge_table_delete' =>
                 $f->table()->action()->standard(
-                    $this->lng->txt("delete"),
-                    $url_builder->withParameter($action_parameter_token, "badge_table_delete"),
+                    $this->lng->txt('delete'),
+                    $url_builder->withParameter($action_parameter_token, 'badge_table_delete'),
                     $row_id_token
                 )
         ];
@@ -253,11 +275,15 @@ class ilBadgeTableGUI
         $url_builder = new URLBuilder($table_uri);
         $query_params_namespace = ['tid'];
 
-        list($url_builder, $action_parameter_token, $row_id_token) =
+        [
+            $url_builder,
+            $action_parameter_token,
+            $row_id_token
+        ] =
             $url_builder->acquireParameters(
                 $query_params_namespace,
-                "table_action",
-                "id"
+                'table_action',
+                'id'
             );
 
         $actions = $this->getActions($url_builder, $action_parameter_token, $row_id_token);

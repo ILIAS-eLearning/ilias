@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace ILIAS\Badge;
 
-use ILIAS\UI\Implementation\Component\Image\Image;
+use ILIAS\UI\Component\Image\Image;
 use ILIAS\UI\Component\Modal\Modal;
 use ilBadgeAssignment;
 use ilLanguage;
