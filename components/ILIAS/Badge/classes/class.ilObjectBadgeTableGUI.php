@@ -171,13 +171,13 @@ class ilObjectBadgeTableGUI
                         $url = ILIAS_HTTP_PATH . '/' . $this->ctrl->getLinkTarget($this->parent, 'listObjectBadgeUsers');
                         $this->ctrl->setParameter($this->parent, 'bid', '');
                         $this->ctrl->setParameter($this->parent, 'pid', '');
-                        $user_url_link = $this->renderer->render(new Standard($this->lng->txt('user'), new URI($url)));
+                        $user_url_link = $this->renderer->render(new Standard($this->lng->txt('user'), (string) new URI($url)));
                     }
 
                     $container_url_link = '';
                     if ($this->access->checkAccess('read', '', $ref_id)) {
                         $container_url = ilLink::_getLink($ref_id);
-                        $container_url_link = $this->renderer->render(new Standard($badge_item['parent_title'], new URI($container_url)));
+                        $container_url_link = $this->renderer->render(new Standard($badge_item['parent_title'], (string) new URI($container_url)));
                         $container_icon = '<img class="ilIcon" src="' .
                             ilObject::_getIcon((int) $badge_item["parent_id"], "big", $badge_item["parent_type"]) .
                             '" alt="' . $this->lng->txt("obj_" . $badge_item["parent_type"]) .
@@ -233,10 +233,7 @@ class ilObjectBadgeTableGUI
     }
 
     /**
-     * @param URLBuilder      $url_builder
-     * @param URLBuilderToken $action_parameter_token
-     * @param URLBuilderToken $row_id_token
-     * @return array
+     * @return array<string,\ILIAS\UI\Component\Table\Action\Action>
      */
     protected function getActions(
         URLBuilder $url_builder,
@@ -324,7 +321,7 @@ class ilObjectBadgeTableGUI
                 if (is_array($ids) && count($ids) > 0) {
                     foreach ($ids as $id) {
                         $badge = new ilBadge($id);
-                        $items[] = $f->modal()->interruptiveItem()->keyValue($id, $badge->getId(), $badge->getTitle());
+                        $items[] = $f->modal()->interruptiveItem()->keyValue($id, (string) $badge->getId(), $badge->getTitle());
                     }
                     echo($r->renderAsync([
                         $f->modal()->interruptive(

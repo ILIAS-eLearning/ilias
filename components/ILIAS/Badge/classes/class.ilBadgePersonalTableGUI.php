@@ -42,7 +42,6 @@ class ilBadgePersonalTableGUI
     private readonly Renderer $renderer;
     private readonly \ILIAS\Refinery\Factory $refinery;
     private readonly ServerRequestInterface|RequestInterface $request;
-    private readonly Services $http;
     private readonly ilLanguage $lng;
     private readonly ilGlobalTemplateInterface $tpl;
     private readonly ILIAS\Container $dic;
@@ -57,7 +56,6 @@ class ilBadgePersonalTableGUI
         $this->renderer = $DIC->ui()->renderer();
         $this->refinery = $DIC->refinery();
         $this->request = $DIC->http()->request();
-        $this->http = $DIC->http();
     }
 
     protected function buildDataRetrievalObject(Factory $f, Renderer $r) : DataRetrieval
@@ -68,7 +66,6 @@ class ilBadgePersonalTableGUI
             private readonly Renderer $renderer;
             private readonly ilObjUser $user;
             private readonly ilAccess $access;
-            private readonly ilLanguage $lng;
 
             public function __construct(
                 protected Factory $ui_factory,
@@ -79,7 +76,6 @@ class ilBadgePersonalTableGUI
                 $this->renderer = $this->ui_renderer;
                 $this->user = $DIC->user();
                 $this->access = $DIC->access();
-                $this->lng = $DIC->language();
                 $this->badge_image_service = new ilBadgeImage($DIC->resourceStorage(),
                     $DIC->upload(),
                     $DIC->ui()->mainTemplate());
@@ -118,7 +114,7 @@ class ilBadgePersonalTableGUI
                     $badge = new ilBadge($ass->getBadgeId());
                     $modal_container = new ModalBuilder($ass);
                     $image_rid = $this->badge_image_service->getImageFromBadge($badge);
-                    if ($image_rid != '') {
+                    if ($image_rid !== '') {
                         $badge_img = $this->factory->image()->responsive($image_rid, $badge->getTitle());
                         $image_html = $this->renderer->render($badge_img);
 
@@ -187,13 +183,13 @@ class ilBadgePersonalTableGUI
         $f = $this->factory;
 
         return [
-            'obj_badge_activate' => $f->table()->action()->multi( //never in multi actions
+            'obj_badge_activate' => $f->table()->action()->multi(
                 $this->lng->txt('activate'),
                 $url_builder->withParameter($action_parameter_token, 'obj_badge_activate'),
                 $row_id_token
             ),
             'obj_badge_deactivate' =>
-                $f->table()->action()->multi( //in both
+                $f->table()->action()->multi(
                     $this->lng->txt('deactivate'),
                     $url_builder->withParameter($action_parameter_token, 'obj_badge_deactivate'),
                     $row_id_token

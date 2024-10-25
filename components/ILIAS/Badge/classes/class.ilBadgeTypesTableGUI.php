@@ -30,7 +30,6 @@ use ILIAS\UI\Component\Table\DataRowBuilder;
 use Generator;
 use ILIAS\UI\Component\Table\DataRetrieval;
 use ILIAS\UI\URLBuilderToken;
-use ILIAS\DI\Container;
 use ilBadgeHandler;
 use ilBadgeAuto;
 
@@ -125,7 +124,6 @@ class ilBadgeTypesTableGUI
 
             protected function getRecords(Range $range = null, Order $order = null) : array
             {
-
                 $data = $this->getBadgeImageTemplates();
 
                 if ($order) {
@@ -227,7 +225,6 @@ class ilBadgeTypesTableGUI
             );
 
         $actions = $this->getActions($url_builder, $action_parameter_token, $row_id_token);
-
         $data_retrieval = $this->buildDataRetrievalObject($f, $r);
 
         $table = $f->table()

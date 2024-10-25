@@ -23,20 +23,16 @@ use ILIAS\UI\Factory;
 use ILIAS\UI\URLBuilder;
 use ILIAS\Data\Order;
 use ILIAS\Data\Range;
-use ilBadgeImageTemplate;
 use ilLanguage;
 use ilGlobalTemplateInterface;
 use ILIAS\UI\Renderer;
 use Psr\Http\Message\ServerRequestInterface;
-use ILIAS\HTTP\Services;
 use Psr\Http\Message\RequestInterface;
 use ILIAS\UI\Component\Table\DataRowBuilder;
 use Generator;
 use ILIAS\UI\Component\Table\DataRetrieval;
-use ILIAS\UI\URLBuilderToken;
 use ILIAS\DI\Container;
 use ilBadgeHandler;
-use ilBadgeAuto;
 use ilObject;
 use ilBadge;
 use ilBadgeAssignment;
@@ -47,13 +43,12 @@ class ilBadgeUserTableGUI
 {
     private readonly Factory $factory;
     private readonly Renderer $renderer;
-    private readonly \ILIAS\Refinery\Factory $refinery;
     private readonly ServerRequestInterface|RequestInterface $request;
-    private readonly Services $http;
     private readonly int $parent_ref_id;
     private readonly ?ilBadge $award_badge;
     private readonly ilLanguage $lng;
     private readonly ilGlobalTemplateInterface $tpl;
+
     public function __construct(int $parent_ref_id, ?ilBadge $award_badge = null)
     {
         global $DIC;
@@ -61,19 +56,12 @@ class ilBadgeUserTableGUI
         $this->tpl = $DIC->ui()->mainTemplate();
         $this->factory = $DIC->ui()->factory();
         $this->renderer = $DIC->ui()->renderer();
-        $this->refinery = $DIC->refinery();
         $this->request = $DIC->http()->request();
-        $this->http = $DIC->http();
         $this->parent_ref_id = $parent_ref_id;
         $this->award_badge = $award_badge;
     }
 
-    /**
-     * @param Factory  $f
-     * @param Renderer $r
-     * @return DataRetrieval|__anonymous@1221
-     */
-    protected function buildDataRetrievalObject(Factory $f, Renderer $r, int $parent_ref_id, ?ilBadge $award_badge = null)
+    protected function buildDataRetrievalObject(Factory $f, Renderer $r, int $parent_ref_id, ?ilBadge $award_badge = null) : DataRetrieval
     {
         return new class ($f, $r, $parent_ref_id, $award_badge) implements DataRetrieval {
             public function __construct(
@@ -85,14 +73,10 @@ class ilBadgeUserTableGUI
             }
 
             /**
-             * @param Container $DIC
-             * @param array $data
-             * @return array
+             * @return array<string,string>
              */
-            protected function getBadgeImageTemplates(Container $DIC, array $data): array
+            protected function getBadgeImageTemplates(Container $DIC): array
             {
-
-                global $DIC;
                 $a_parent_obj_id = null;
                 $assignments = null;
                 $user_ids = null;
@@ -216,9 +200,8 @@ class ilBadgeUserTableGUI
             {
 
                 global $DIC;
-                $data = array();
 
-                $data = $this->getBadgeImageTemplates($DIC, $data);
+                $data = $this->getBadgeImageTemplates($DIC);
 
                 if ($order) {
                     list($order_field, $order_direction) = $order->join(
@@ -243,7 +226,6 @@ class ilBadgeUserTableGUI
     {
         $f = $this->factory;
         $r = $this->renderer;
-        $refinery = $this->refinery;
         $request = $this->request;
         $df = new \ILIAS\Data\Factory();
 
@@ -252,7 +234,8 @@ class ilBadgeUserTableGUI
             'login' => $f->table()->column()->text($this->lng->txt("login")),
             'type' => $f->table()->column()->text($this->lng->txt("type")),
             'title' => $f->table()->column()->text($this->lng->txt("title")),
-            'issued' => $f->table()->column()->date($this->lng->txt("badge_issued_on"), $df->dateFormat()->germanShort())
+            'issued' => $f->table()->column()->date($this->lng->txt("badge_issued_on"),
+                $df->dateFormat()->germanShort())
         ];
 
         $table_uri = $df->uri($request->getUri()->__toString());
@@ -265,7 +248,6 @@ class ilBadgeUserTableGUI
                 "table_action",
                 "id",
             );
-
 
         $data_retrieval = $this->buildDataRetrievalObject($f, $r, $this->parent_ref_id, $this->award_badge);
 
