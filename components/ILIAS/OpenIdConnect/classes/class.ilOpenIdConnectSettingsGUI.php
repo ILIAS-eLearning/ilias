@@ -40,6 +40,8 @@ class ilOpenIdConnectSettingsGUI
     private const DEFAULT_VALUES = 1;
     private const SAVED_VALUES = 2;
     private const POST_VALUE = 'Mode';
+    private const VIEW_TAB_PRE_FILED = 1;
+    private const VIEW_TAB_EFFECTIVE_MAPPING = 2;
     private const URL_VALIDATION_PROVIDER_STRING = '/.well-known/openid-configuration';
     private const EFFECTIVE_ATTRIBUTE_MAPPING_TAB = 2;
 
@@ -59,7 +61,7 @@ class ilOpenIdConnectSettingsGUI
     private ilToolbarGUI $toolbar;
     private ?ilUserDefinedFields $udf = null;
     private ilGlobalTemplateInterface $tpl;
-    private int $mapping_template = 2;
+    private int $mapping_template = self::VIEW_TAB_EFFECTIVE_MAPPING;
     private ServerRequestInterface $request;
     private ilOpenIdAttributeMappingTemplate $attribute_mapping_template;
     private Factory $ui;
@@ -827,7 +829,7 @@ class ilOpenIdConnectSettingsGUI
     {
         $this->showInfoMessage();
         $this->setSubTabs(self::STAB_PROFILE);
-        if ((int) $this->mapping_template === 2) {
+        if ((int) $this->mapping_template === self::VIEW_TAB_EFFECTIVE_MAPPING) {
             $this->userMapping();
             return;
         }
@@ -839,7 +841,7 @@ class ilOpenIdConnectSettingsGUI
     {
         $url_text = $this->lng->txt('auth_oidc_here');
 
-        if ($this->mapping_template === 2) {
+        if ($this->mapping_template === self::VIEW_TAB_EFFECTIVE_MAPPING) {
             $url = $this->renderer->render(
                 $this->factory->link()->standard(
                     $this->lng->txt('auth_oidc_here'),
