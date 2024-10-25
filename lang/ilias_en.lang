@@ -2204,6 +2204,7 @@ background_tasks#:#ui_msg_no_files_found#:#No files have been found. The downloa
 background_tasks#:#ui_msg_num_files#:#%s file(-s) were detected for download, do you want to continue?
 background_tasks#:#ui_msg_sum_file_sizes#:#The total download size before creating the zip-folder is %s. Do you want to continue?
 background_tasks#:#waiting#:#Waiting
+badge#:##:#Are you sure you want to delete the following badges and all their respective assignments?
 badge#:#awarded_by#:#Awarded by
 badge#:#badge_activity_badges#:#Activity Badges
 badge#:#badge_add_template#:#Add Template
@@ -2226,7 +2227,6 @@ badge#:#badge_criteria#:#Criteria
 badge#:#badge_crs_merit#:#Merit
 badge#:#badge_deletion#:#Badge successfully deleted.
 badge#:#badge_deletion_confirmation#:#Are you sure you want to delete the following badges and all their respective assignments?
-badge#:##:#Are you sure you want to delete the following badges and all their respective assignments?
 badge#:#badge_edit_with_published#:#%s users have already added this badge to their backpack. Because of this changing badge attributes will lead to inconsistencies. Creating a new badge might be a better solution.
 badge#:#badge_image_from_template#:#Use Template
 badge#:#badge_image_from_upload#:#Upload Image
