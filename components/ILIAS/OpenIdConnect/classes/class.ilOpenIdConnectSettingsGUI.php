@@ -859,8 +859,6 @@ class ilOpenIdConnectSettingsGUI
 
     private function showInfoMessage(): void
     {
-        $url_text = $this->lng->txt('auth_oidc_here');
-
         if ($this->mapping_template === self::VIEW_TAB_EFFECTIVE_MAPPING) {
             $url = $this->renderer->render(
                 $this->factory->link()->standard(
