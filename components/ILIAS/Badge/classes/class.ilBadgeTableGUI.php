@@ -72,13 +72,6 @@ class ilBadgeTableGUI
         ];
     }
 
-    /**
-     * @param Factory  $f
-     * @param Renderer $r
-     * @param int      $p
-     * @param string   $type
-     * @return DataRetrieval@2044
-     */
     protected function buildDataRetrievalObject(Factory $f, Renderer $r, int $p, string $type)
     {
         return new class ($f, $r, $p, $type) implements DataRetrieval {
@@ -102,9 +95,7 @@ class ilBadgeTableGUI
             }
 
             /**
-             * @param Container $DIC
-             * @param array $data
-             * @return array
+             * @return array<string,string>
              */
             protected function getBadges(Container $DIC): array
             {

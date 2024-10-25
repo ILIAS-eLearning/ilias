@@ -128,6 +128,9 @@ class ilObjectBadgeTableGUI
                 return count($this->getRecords());
             }
 
+            /**
+             * @return array<string,string>
+             */
             protected function getRecords(Range $range = null, Order $order = null): array
             {
                 $data = [];

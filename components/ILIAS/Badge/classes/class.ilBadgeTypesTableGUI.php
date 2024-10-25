@@ -56,11 +56,6 @@ class ilBadgeTypesTableGUI
         $this->http = $DIC->http();
     }
 
-    /**
-     * @param Factory  $f
-     * @param Renderer $r
-     * @return DataRetrieval
-     */
     protected function buildDataRetrievalObject(Factory $f, Renderer $r)
     {
         return new class ($f, $r) implements DataRetrieval {
