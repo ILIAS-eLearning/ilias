@@ -58,7 +58,7 @@ class ilBadgeTemplatesFilesMigration implements Migration
     {
         $this->helper->getDatabase()->setLimit(1);
         $res = $this->helper->getDatabase()->query(
-            "SELECT id, image, image_rid  FROM " . self::TABLE_NAME . " WHERE image_rid IS NULL OR image_rid = ''"
+            "SELECT id, image, image_rid FROM " . self::TABLE_NAME . " WHERE image_rid IS NULL OR image_rid = ''"
         );
         $row = $this->helper->getDatabase()->fetchObject($res);
         if (!($row instanceof stdClass)) {
