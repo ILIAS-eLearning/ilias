@@ -19,7 +19,6 @@
 declare(strict_types=1);
 
 use ILIAS\FileUpload\FileUpload;
-use ILIAS\UI\Component\Input\Container\Form\Standard;
 use ILIAS\UI\Factory;
 use ILIAS\UI\Renderer;
 use ILIAS\HTTP\Services;
@@ -137,6 +136,7 @@ class ilOpenIdConnectSettingsGUI
     private function settings(ilPropertyFormGUI $form = null): void
     {
         $this->checkAccess('read');
+
         $this->setSubTabs(self::STAB_SETTINGS);
 
         if (!$form instanceof ilPropertyFormGUI) {
@@ -396,7 +396,7 @@ class ilOpenIdConnectSettingsGUI
     /**
      * @return array<string, string>
      */
-    protected function prepareRoleSelection(bool $a_with_select_option = true): array
+    private function prepareRoleSelection(bool $a_with_select_option = true): array
     {
         $global_roles = ilUtil::_sortIds(
             $this->review->getGlobalRoles(),
@@ -599,6 +599,7 @@ class ilOpenIdConnectSettingsGUI
         } else {
             $this->failed_validation_messages = $this->lng->txt('err_check_input');
         }
+
         $this->mainTemplate->setOnScreenMessage('failure', $this->failed_validation_messages, true);
         $this->ctrl->redirect($this, 'scopes');
     }
@@ -639,6 +640,7 @@ class ilOpenIdConnectSettingsGUI
                     );
                 }
                 $this->scopes();
+
                 return false;
             }
         } catch (ilCurlConnectionException $e) {
@@ -649,6 +651,7 @@ class ilOpenIdConnectSettingsGUI
             );
             $this->failed_validation_messages = $e->getMessage();
             $this->scopes();
+
             return false;
         }
 
@@ -680,6 +683,7 @@ class ilOpenIdConnectSettingsGUI
         }
 
         $this->settings->save();
+
         $this->mainTemplate->setOnScreenMessage('success', $this->lng->txt('settings_saved'), true);
         $this->ctrl->redirect($this, self::STAB_PROFILE);
     }
@@ -712,6 +716,7 @@ class ilOpenIdConnectSettingsGUI
     private function roles(ilPropertyFormGUI $form = null): void
     {
         $this->checkAccess('read');
+
         $this->redirectToSettingsScreenIfNoURLIsConfigured();
 
         $this->setSubTabs(self::STAB_ROLES);
@@ -758,6 +763,7 @@ class ilOpenIdConnectSettingsGUI
     private function saveRoles(): void
     {
         $this->checkAccess('write');
+
         $form = $this->initRolesForm();
         if ($form->checkInput()) {
             $this->logger->dump($this->body, ilLogLevel::DEBUG);
@@ -800,7 +806,9 @@ class ilOpenIdConnectSettingsGUI
         }
 
         $form->setValuesByPost();
+
         $this->mainTemplate->setOnScreenMessage('failure', $this->lng->txt('err_check_input'));
+
         $this->roles($form);
     }
 
@@ -838,7 +846,9 @@ class ilOpenIdConnectSettingsGUI
     private function chooseMapping(): void
     {
         $this->showInfoMessage();
+
         $this->setSubTabs(self::STAB_PROFILE);
+
         if ((int) $this->mapping_template === self::VIEW_TAB_EFFECTIVE_MAPPING) {
             $this->userMapping();
             return;
@@ -856,8 +866,7 @@ class ilOpenIdConnectSettingsGUI
                 $this->factory->link()->standard(
                     $this->lng->txt('auth_oidc_here'),
                     'https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims'
-                )
-                              ->withOpenInNewViewport(true)
+                )->withOpenInNewViewport(true)
             );
             $message = sprintf($this->lng->txt('auth_odic_scope_tab_info'), $url);
         } else {
@@ -871,12 +880,6 @@ class ilOpenIdConnectSettingsGUI
             $message = sprintf($this->lng->txt('auth_odic_scope_info'), $url, $tab_name);
         }
 
-        $this->renderer->render(
-            $this->factory->link()->standard(
-                $url_text,
-                $url
-            )
-        );
         $this->mainTemplate->setOnScreenMessage('info', $message);
     }
 
@@ -885,9 +888,11 @@ class ilOpenIdConnectSettingsGUI
         $mapping = $this->attribute_mapping_template->getMappingRulesByAdditionalScopes(
             $this->settings->getAdditionalScopes()
         );
+
         if (count($mapping) > 0) {
             $this->settings->clearProfileMaps();
         }
+
         foreach ($mapping as $field => $item) {
             $this->settings->setProfileMappingFieldValue(
                 $field,
@@ -900,9 +905,9 @@ class ilOpenIdConnectSettingsGUI
 
     private function initUserMappingForm(): Form
     {
-        $ui_container = [];
         $this->initUserDefinedFields();
 
+        $ui_container = [];
         foreach ($this->settings->getProfileMappingFields() as $mapping => $lang) {
             $ui_container = $this->buildUserMappingInputForUserData($lang, $mapping, $ui_container);
         }
@@ -910,6 +915,7 @@ class ilOpenIdConnectSettingsGUI
         foreach ($this->udf->getDefinitions() as $definition) {
             $ui_container = $this->buildUserMappingInputFormUDF($definition, $ui_container);
         }
+
         $this->ctrl->setParameter(
             $this,
             'opic',
@@ -966,13 +972,18 @@ class ilOpenIdConnectSettingsGUI
         $value = $this->settings->getProfileMappingFieldValue($mapping);
         $update = $this->settings->getProfileMappingFieldUpdate($mapping);
 
-        $text_input = $this->ui->input()->field()
-                               ->text($lang, '')
-                               ->withValue($value)
-                               ->withDedicatedName($mapping . self::VALUE_STRING);
-        $checkbox_input = $this->ui->input()->field()->checkbox('', $this->lng->txt('auth_oidc_update_field_info'))
-                                   ->withValue($update)
-                                   ->withDedicatedName($mapping . self::UPDATE_STRING);
+        $text_input = $this->ui
+            ->input()
+            ->field()
+            ->text($lang, '')
+            ->withValue($value)
+            ->withDedicatedName($mapping . self::VALUE_STRING);
+        $checkbox_input = $this->ui
+            ->input()
+            ->field()
+            ->checkbox('', $this->lng->txt('auth_oidc_update_field_info'))
+            ->withValue($update)
+            ->withDedicatedName($mapping . self::UPDATE_STRING);
         $group = $this->ui->input()->field()->group(
             [$text_input, $checkbox_input]
         );
@@ -988,7 +999,7 @@ class ilOpenIdConnectSettingsGUI
         }
     }
 
-    public function userMapping(): void
+    private function userMapping(): void
     {
         $form = $this->initUserMappingForm();
 
@@ -1016,8 +1027,8 @@ class ilOpenIdConnectSettingsGUI
             $active_label = $this->lng->txt(ilOpenIdAttributeMappingTemplate::OPEN_ID_CONFIGURED_SCOPES);
         }
         $view_control = $this->factory->viewControl()->mode($actions, $aria_label)->withActive($active_label);
-        $html = $this->renderer->render($view_control);
-        $this->tpl->setContent($html . $this->renderer->render($form));
+
+        $this->tpl->setContent($this->renderer->render([$view_control, $form]));
     }
 
     private function redirectToSettingsScreenIfNoURLIsConfigured(): void
