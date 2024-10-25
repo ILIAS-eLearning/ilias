@@ -140,28 +140,21 @@ class ilTestExportOptionARC extends ilBasicLegacyExportOption
     protected function getExportFiles(
         string $directory
     ): array {
-        $file = [];
+        $files = [];
         try {
-            $h_dir = dir($directory);
-            while ($entry = $h_dir->read()) {
+            foreach (scandir($directory) as $file) {
                 if (
-                    $entry !== "." &&
-                    $entry !== ".." &&
-                    substr($entry, -4) === ".zip"
+                    in_array($file, ['.', '..']) ||
+                    !str_ends_with($file, ".zip")
                 ) {
-                    $ts = substr($entry, 0, strpos($entry, "__"));
-                    $file[$entry . $this->getExportType()] = [
-                        "type" => $this->getExportType(),
-                        "file" => $entry,
-                        "size" => (int) filesize($directory . "/" . $entry),
-                        "timestamp" => (int) $ts
-                    ];
+                    continue;
                 }
+                $files[$file] = ["file" => $file];
             }
         } catch (Exception $e) {
 
         }
-        return $file;
+        return $files;
     }
 
     protected function getDirectory(

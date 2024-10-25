@@ -37,7 +37,6 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class ilTestExportGUI extends ilExportGUI
 {
-    protected array $active_export_plugins;
     protected UIServices $ui;
 
     public function __construct(
@@ -54,68 +53,7 @@ class ilTestExportGUI extends ilExportGUI
         private readonly ilTestHTMLGenerator $html_generator,
         private readonly array $selected_files,
     ) {
-        $this->active_export_plugins = iterator_to_array($active_export_plugins);
         parent::__construct($parent_gui, null);
-    }
-
-    public function executeCommand(): void
-    {
-        $cmd = $this->ctrl->getCmd();
-        if (
-            $cmd === "exportPlugin" ||
-            $cmd === "showExportPluginMenu"
-        ) {
-            $this->$cmd();
-            return;
-        }
-        parent::executeCommand();
-    }
-
-    protected function buildExportPluginMenuForm(): StandardForm
-    {
-        $this->lng->loadLanguageModule('exp');
-        $items = [];
-        foreach ($this->active_export_plugins as $plugin) {
-            /** @var ilPlugin $plugin */
-            $items[$plugin->getId()] = $plugin->getFormatLabel();
-        }
-        $select = $this->ui_factory->input()->field()->select($this->lng->txt("export_type"), $items)
-            ->withRequired(true);
-        $section = $this->ui_factory->input()->field()->section(
-            [$select],
-            $this->lng->txt("export_options")
-        );
-        return $this->ui_factory->input()->container()->form()->standard(
-            $this->ctrl->getLinkTarget($this, "exportPlugin"),
-            [$section]
-        )->withSubmitLabel($this->lng->txt("export"));
-    }
-
-    protected function exportPlugin(): void
-    {
-        $form = $this->buildExportPluginMenuForm()->withRequest($this->http->request());
-        $plugin = null;
-        if (!is_null($form->getData())) {
-            $plugin_id = $form->getData()[0][0];
-            foreach ($this->active_export_plugins as $current_plugin) {
-                if ($current_plugin->getId() === $plugin_id) {
-                    $plugin = $current_plugin;
-                    break;
-                }
-            }
-        }
-        if (is_null($form->getData())) {
-            $this->tpl->setContent($this->ui_renderer->render($form));
-            return;
-        }
-        $plugin->export();
-        $this->ctrl->redirectByClass(ilExportGUI::class, ilExportGUI::CMD_LIST_EXPORT_FILES);
-    }
-
-    public function showExportPluginMenu(): void
-    {
-        $form = $this->buildExportPluginMenuForm();
-        $this->tpl->setContent($this->ui_renderer->render($form));
     }
 
     /**

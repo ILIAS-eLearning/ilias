@@ -1312,7 +1312,7 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
         }
     }
 
-    public function createExportExcelObject(): void
+    public function createExportExcel(): void
     {
         $rbacsystem = $this->rbac_system;
         if ($rbacsystem->checkAccess('write', $this->qplrequest->getRefId())) {
