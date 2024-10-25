@@ -17,8 +17,6 @@
 
 namespace ILIAS\UI\Component\Progress\State\Bar;
 
-use ILIAS\UI\Component\Progress\State\State;
-
 /**
  * @author Thibeau Fuhrer <thibeau@sr.solutions>
  */
@@ -46,7 +44,7 @@ interface Factory
      *     2: The provided message MUST BE concise and short. E.g. "determining progress".
      * ---
      * @param string|null $message
-     * @return State
+     * @return \ILIAS\UI\Component\Progress\State\Bar\State
      */
     public function indeterminate(?string $message = null): State;
 
@@ -76,7 +74,7 @@ interface Factory
      * ---
      * @param int         $visual_progress_value
      * @param string|null $message
-     * @return State
+     * @return \ILIAS\UI\Component\Progress\State\Bar\State
      */
     public function determinate(int $visual_progress_value, ?string $message = null): State;
 
@@ -100,7 +98,7 @@ interface Factory
      *     1: The provided message MUST BE concise and short. E.g. "Task XY done".
      * ---
      * @param string $message
-     * @return State
+     * @return \ILIAS\UI\Component\Progress\State\Bar\State
      */
     public function success(string $message): State;
 
@@ -124,7 +122,7 @@ interface Factory
      *     1: The provided message MUST BE concise and short. E.g. "Task XY failed."
      * ---
      * @param string $message
-     * @return State
+     * @return \ILIAS\UI\Component\Progress\State\Bar\State
      */
     public function failure(string $message): State;
 }

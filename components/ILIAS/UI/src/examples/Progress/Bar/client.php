@@ -26,23 +26,22 @@ function client(): string
 
     $progress_bar = $factory->progress()->bar('clicking the button 10 times');
 
-    $trigger = $factory->button()->standard('make some progress', '#');
-    $trigger = $trigger->withAdditionalOnLoadCode(
+    $make_progress = $factory->button()->standard('make some progress', '#');
+    $make_progress = $make_progress->withAdditionalOnLoadCode(
         static fn(string $id) => "
-            let count = 1;
-            document.getElementById('$id')?.addEventListener('click', ({ target }) => {
-                if (10 === count) {
-                    il.UI.Progress.Bar.success('{$progress_bar->getUpdateSignal()->getId()}', 'all done!');
-                    target.disabled = true;
+            let progress = 0;
+            document.getElementById('$id')?.addEventListener('click', (event) => {
+                if (90 === progress) {
+                    event.target.disabled = true;
+                    il.UI.Progress.Bar.success('{$progress_bar->getUpdateSignal()}', 'all done!');
                     return;
                 }
-            
-                let how_much_work_done = 10 / count;
-                il.UI.Progress.Bar.determinate('{$progress_bar->getUpdateSignal()->getId()}', how_much_work_done);
-                count += 1;
+                
+                progress += 10;
+                il.UI.Progress.Bar.determinate('{$progress_bar->getUpdateSignal()}', progress);
             });
-        "
+        ",
     );
 
-    return $renderer->render([$progress_bar, $trigger]);
+    return $renderer->render([$progress_bar, $make_progress]);
 }

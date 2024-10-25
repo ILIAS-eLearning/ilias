@@ -35,7 +35,7 @@ function server(): string
     $data_factory = new \ILIAS\Data\Factory();
 
     $endpoint_flag = 'progress_bar_example_endpoint';
-    $endpoint_url = $uri . "$endpoint_flag=1";
+    $endpoint_url = $uri . "&$endpoint_flag=1";
     $endpoint_url = $data_factory->uri($endpoint_url);
 
     $progress_bar = $factory->progress()->bar('waiting about 10 seconds', $endpoint_url);
@@ -43,8 +43,10 @@ function server(): string
     $trigger = $factory->button()->standard('start making progress', '#');
     $trigger = $trigger->withAdditionalOnLoadCode(
         static fn(string $id) => "
-            document.getElementById('$id')?.addEventListener('click', ({ target }) => {
-                il.UI.Progress.Bar.startAsync('{$progress_bar->getUpdateSignal()->getId()}', 'Estimating');
+            document.getElementById('$id')?.addEventListener('click', (event) => {
+                // always 'kick off' async progress bars with an indeterminate state.
+                il.UI.Progress.Bar.indeterminate('{$progress_bar->getUpdateSignal()}', 'Estimating...');
+                event.target.disabled = true;
             });
         "
     );
@@ -63,11 +65,11 @@ function callArtificialTaskEndpoint(GlobalHttpState $http, UI\Factory $factory, 
     $task_progress = getTaskProgress();
 
     $state = match ($task_progress) {
-        1 => $state = $factory->progress()->state()->bar()->determinate(10),
+        1 => $state = $factory->progress()->state()->bar()->determinate(10, 'Start processing...'),
         2 => $state = $factory->progress()->state()->bar()->determinate(20),
         3 => $state = $factory->progress()->state()->bar()->determinate(30),
         4 => $state = $factory->progress()->state()->bar()->determinate(40),
-        5 => $state = $factory->progress()->state()->bar()->determinate(50, 'Still processing.'),
+        5 => $state = $factory->progress()->state()->bar()->determinate(50, 'Still processing...'),
         6 => $state = $factory->progress()->state()->bar()->determinate(60),
         7 => $state = $factory->progress()->state()->bar()->determinate(70),
         8 => $state = $factory->progress()->state()->bar()->determinate(80),

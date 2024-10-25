@@ -42,7 +42,7 @@ interface Factory
      *       A Progress Bar State MUST NOT be used for anything other than updating a
      *       Progress Bar asynchronously.
      * ---
-     * @return Bar\Factory
+     * @return \ILIAS\UI\Component\Progress\State\Bar\Factory
      */
     public function bar(): Bar\Factory;
 }

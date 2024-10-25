@@ -43,14 +43,15 @@ interface Factory
      *     When the Progress Bar is finished, the Glyph changes to one indicating success or
      *     failure, and an according message will be shown.
      *   rivals:
-     *     ProgressMeter: use a ProgressMeter if the quality of the progress is evaluated
-     *     and/or the progress is compared.
-     *     Workflow: use a Workflow component if the underlying process/task is completed
-     *     in multiple steps that require further user interaction.
+     *     ProgressMeter: >
+     *       use a ProgressMeter if the quality of the progress is evaluated and/or the progress is compared.
+     *     Workflow: >
+     *       use a Workflow component if the underlying process/task is completed in multiple steps that require
+     *       further user interaction.
      *
-     * background:
-     *   - https://developer.mozilla.org/en-US/docs/Web/HTML/Element/progress
-     *   - https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/progressbar_role
+     * background: >
+     *   https://developer.mozilla.org/en-US/docs/Web/HTML/Element/progress,
+     *   https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/progressbar_role
      *
      * rules:
      *   usage:
