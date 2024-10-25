@@ -81,7 +81,7 @@ class ilOpenIdConnectUserSync
         $importParser->setFolderId(USER_FOLDER_ID);
         $importParser->startParsing();
         $debug = $importParser->getProtocol();
-        $this->logger->debug(json_encode($debug, JSON_THROW_ON_ERROR|JSON_PRETTY_PRINT));
+        $this->logger->debug(json_encode($debug, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
 
         $int_account = ilObjUser::_checkExternalAuthAccount(
             self::AUTH_MODE,
