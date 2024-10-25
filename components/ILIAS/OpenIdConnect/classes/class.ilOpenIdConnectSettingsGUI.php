@@ -439,6 +439,8 @@ class ilOpenIdConnectSettingsGUI
     private function profile(ilPropertyFormGUI $form = null): void
     {
         $this->checkAccess('read');
+        $this->redirectToSettingsScreenIfNoURLIsConfigured();
+
         $this->chooseMapping();
         $this->userMapping();
     }
@@ -446,6 +448,8 @@ class ilOpenIdConnectSettingsGUI
     private function scopes(ilPropertyFormGUI $form = null): void
     {
         $this->checkAccess('read');
+        $this->redirectToSettingsScreenIfNoURLIsConfigured();
+
         $this->setSubTabs(self::STAB_SCOPES);
         $url = $this->settings->getProvider();
         if ($url !== '') {
@@ -693,6 +697,8 @@ class ilOpenIdConnectSettingsGUI
     private function roles(ilPropertyFormGUI $form = null): void
     {
         $this->checkAccess('read');
+        $this->redirectToSettingsScreenIfNoURLIsConfigured();
+
         $this->setSubTabs(self::STAB_ROLES);
 
         if (!$form instanceof ilPropertyFormGUI) {
@@ -790,22 +796,26 @@ class ilOpenIdConnectSettingsGUI
             $this->ctrl->getLinkTarget($this, self::STAB_SETTINGS)
         );
 
-        $this->tabs->addSubTab(
-            self::STAB_SCOPES,
-            $this->lng->txt('auth_oidc_' . self::STAB_SCOPES),
-            $this->ctrl->getLinkTarget($this, self::STAB_SCOPES)
-        );
+        $url = $this->settings->getProvider();
+        if ($url !== '') {
+            $this->tabs->addSubTab(
+                self::STAB_SCOPES,
+                $this->lng->txt('auth_oidc_' . self::STAB_SCOPES),
+                $this->ctrl->getLinkTarget($this, self::STAB_SCOPES)
+            );
 
-        $this->tabs->addSubTab(
-            self::STAB_PROFILE,
-            $this->lng->txt('auth_oidc_' . self::STAB_PROFILE),
-            $this->ctrl->getLinkTarget($this, self::STAB_PROFILE)
-        );
-        $this->tabs->addSubTab(
-            self::STAB_ROLES,
-            $this->lng->txt('auth_oidc_' . self::STAB_ROLES),
-            $this->ctrl->getLinkTarget($this, self::STAB_ROLES)
-        );
+            $this->tabs->addSubTab(
+                self::STAB_PROFILE,
+                $this->lng->txt('auth_oidc_' . self::STAB_PROFILE),
+                $this->ctrl->getLinkTarget($this, self::STAB_PROFILE)
+            );
+            $this->tabs->addSubTab(
+                self::STAB_ROLES,
+                $this->lng->txt('auth_oidc_' . self::STAB_ROLES),
+                $this->ctrl->getLinkTarget($this, self::STAB_ROLES)
+            );
+        }
+
 
         $this->tabs->activateSubTab($active_tab);
     }
@@ -968,4 +978,11 @@ class ilOpenIdConnectSettingsGUI
         $this->tpl->setContent($html . $this->renderer->render($form));
     }
 
+    private function redirectToSettingsScreenIfNoURLIsConfigured() : void {
+        $url = $this->settings->getProvider();
+        if ($url === '') {
+            $this->ctrl->redirect($this, 'settings');
+            $this->error->raiseError($this->lng->txt('permission_denied'), $this->error->MESSAGE);
+        }
+    }
 }
