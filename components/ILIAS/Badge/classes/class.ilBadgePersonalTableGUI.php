@@ -58,7 +58,7 @@ class ilBadgePersonalTableGUI
         $this->request = $DIC->http()->request();
     }
 
-    protected function buildDataRetrievalObject(Factory $f, Renderer $r) : DataRetrieval
+    protected function buildDataRetrievalObject(Factory $f, Renderer $r): DataRetrieval
     {
         return new class ($f, $r) implements DataRetrieval {
             private readonly ilBadgeImage $badge_image_service;
@@ -76,9 +76,11 @@ class ilBadgePersonalTableGUI
                 $this->renderer = $this->ui_renderer;
                 $this->user = $DIC->user();
                 $this->access = $DIC->access();
-                $this->badge_image_service = new ilBadgeImage($DIC->resourceStorage(),
+                $this->badge_image_service = new ilBadgeImage(
+                    $DIC->resourceStorage(),
                     $DIC->upload(),
-                    $DIC->ui()->mainTemplate());
+                    $DIC->ui()->mainTemplate()
+                );
             }
 
             public function getRows(
@@ -88,7 +90,7 @@ class ilBadgePersonalTableGUI
                 Order $order,
                 ?array $filter_data,
                 ?array $additional_parameters
-            ) : Generator {
+            ): Generator {
                 $records = $this->getRecords($range, $order);
                 foreach ($records as $idx => $record) {
                     $row_id = (string) $record['id'];
@@ -99,11 +101,11 @@ class ilBadgePersonalTableGUI
             public function getTotalRowCount(
                 ?array $filter_data,
                 ?array $additional_parameters
-            ) : ?int {
+            ): ?int {
                 return count($this->getRecords());
             }
 
-            protected function getRecords(Range $range = null, Order $order = null) : array
+            protected function getRecords(Range $range = null, Order $order = null): array
             {
                 $data = [];
                 $a_user_id = $this->user->getId();
@@ -118,8 +120,11 @@ class ilBadgePersonalTableGUI
                         $badge_img = $this->factory->image()->responsive($image_rid, $badge->getTitle());
                         $image_html = $this->renderer->render($badge_img);
 
-                        $image_html_large = $this->badge_image_service->getImageFromResourceId($badge,
-                            $badge->getImageRid(), ilBadgeImage::IMAGE_SIZE_XL);
+                        $image_html_large = $this->badge_image_service->getImageFromResourceId(
+                            $badge,
+                            $badge->getImageRid(),
+                            ilBadgeImage::IMAGE_SIZE_XL
+                        );
                         if ($image_html_large !== '') {
                             $badge_img_large = $this->ui_factory->image()->responsive(
                                 $image_html_large,
@@ -142,8 +147,10 @@ class ilBadgePersonalTableGUI
 
                         if ($this->access->checkAccess('read', '', $ref_id)) {
                             $container_url = ilLink::_getLink($ref_id);
-                            $awarded_by = $this->renderer->render(new Standard($parent['title'],
-                                (string) new URI($container_url)));
+                            $awarded_by = $this->renderer->render(new Standard(
+                                $parent['title'],
+                                (string) new URI($container_url)
+                            ));
                         }
                     }
 
@@ -155,10 +162,14 @@ class ilBadgePersonalTableGUI
 
                     $data[] = [
                         'id' => $badge->getId(),
-                        'image' => $this->ui_renderer->render($this->ui_factory->button()->shy($image_html,
-                                $modal->getShowSignal())) . ' ' . $this->ui_renderer->render($modal),
-                        'title' => $this->ui_renderer->render($this->ui_factory->button()->shy($badge->getTitle(),
-                            $modal->getShowSignal())),
+                        'image' => $this->ui_renderer->render($this->ui_factory->button()->shy(
+                            $image_html,
+                            $modal->getShowSignal()
+                        )) . ' ' . $this->ui_renderer->render($modal),
+                        'title' => $this->ui_renderer->render($this->ui_factory->button()->shy(
+                            $badge->getTitle(),
+                            $modal->getShowSignal()
+                        )),
                         'user' => '',
                         'badge_in_profile' => '',
                         'badge_issued_on' => (new \DateTimeImmutable())->setTimestamp($ass->getTimestamp()),
@@ -179,7 +190,7 @@ class ilBadgePersonalTableGUI
         URLBuilder $url_builder,
         URLBuilderToken $action_parameter_token,
         URLBuilderToken $row_id_token
-    ) : array {
+    ): array {
         $f = $this->factory;
 
         return [
@@ -197,7 +208,7 @@ class ilBadgePersonalTableGUI
         ];
     }
 
-    public function renderTable() : void
+    public function renderTable(): void
     {
         $f = $this->factory;
         $r = $this->renderer;
@@ -211,9 +222,11 @@ class ilBadgePersonalTableGUI
             'title' => $f->table()->column()->text($this->lng->txt('title')),
             'awarded_by' => $f->table()->column()->text($this->lng->txt('awarded_by')),
             'badge_issued_on' => $f->table()->column()->date($this->lng->txt('badge_issued_on'), $date_format),
-            'active' => $f->table()->column()->boolean($this->lng->txt('badge_in_profile'),
+            'active' => $f->table()->column()->boolean(
+                $this->lng->txt('badge_in_profile'),
                 $this->lng->txt('yes'),
-                $this->lng->txt('no')),
+                $this->lng->txt('no')
+            ),
         ];
 
         $table_uri = $df->uri($request->getUri()->__toString());

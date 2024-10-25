@@ -68,7 +68,7 @@ class ilBadgeTypesTableGUI
             /**
              * @return array<string, string>
              */
-            protected function getBadgeImageTemplates() : array
+            protected function getBadgeImageTemplates(): array
             {
                 $data = [];
                 $handler = ilBadgeHandler::getInstance();
@@ -102,7 +102,7 @@ class ilBadgeTypesTableGUI
                 Order $order,
                 ?array $filter_data,
                 ?array $additional_parameters
-            ) : Generator {
+            ): Generator {
                 $records = $this->getRecords($range, $order);
                 foreach ($records as $idx => $record) {
                     $row_id = (string) $record['id'];
@@ -113,11 +113,11 @@ class ilBadgeTypesTableGUI
             public function getTotalRowCount(
                 ?array $filter_data,
                 ?array $additional_parameters
-            ) : ?int {
+            ): ?int {
                 return count($this->getRecords());
             }
 
-            protected function getRecords(Range $range = null, Order $order = null) : array
+            protected function getRecords(Range $range = null, Order $order = null): array
             {
                 $data = $this->getBadgeImageTemplates();
 
@@ -147,7 +147,7 @@ class ilBadgeTypesTableGUI
         URLBuilder $url_builder,
         URLBuilderToken $action_parameter_token,
         URLBuilderToken $row_id_token
-    ) : array {
+    ): array {
         $f = $this->factory;
         return [
             'badge_type_activate' => $f->table()->action()->multi(
@@ -164,7 +164,7 @@ class ilBadgeTypesTableGUI
         ];
     }
 
-    public function renderTable() : void
+    public function renderTable(): void
     {
         $f = $this->factory;
         $r = $this->renderer;

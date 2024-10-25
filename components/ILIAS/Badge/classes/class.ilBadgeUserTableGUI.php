@@ -61,7 +61,7 @@ class ilBadgeUserTableGUI
         $this->award_badge = $award_badge;
     }
 
-    protected function buildDataRetrievalObject(Factory $f, Renderer $r, int $parent_ref_id, ?ilBadge $award_badge = null) : DataRetrieval
+    protected function buildDataRetrievalObject(Factory $f, Renderer $r, int $parent_ref_id, ?ilBadge $award_badge = null): DataRetrieval
     {
         return new class ($f, $r, $parent_ref_id, $award_badge) implements DataRetrieval {
             public function __construct(
@@ -234,8 +234,10 @@ class ilBadgeUserTableGUI
             'login' => $f->table()->column()->text($this->lng->txt("login")),
             'type' => $f->table()->column()->text($this->lng->txt("type")),
             'title' => $f->table()->column()->text($this->lng->txt("title")),
-            'issued' => $f->table()->column()->date($this->lng->txt("badge_issued_on"),
-                $df->dateFormat()->germanShort())
+            'issued' => $f->table()->column()->date(
+                $this->lng->txt("badge_issued_on"),
+                $df->dateFormat()->germanShort()
+            )
         ];
 
         $table_uri = $df->uri($request->getUri()->__toString());

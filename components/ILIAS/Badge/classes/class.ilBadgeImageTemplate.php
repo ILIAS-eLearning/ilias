@@ -387,8 +387,8 @@ class ilBadgeImageTemplate
                 }
             }
         } elseif ($badge_id !== null) {
-                $badge = new ilBadge($badge_id);
-                $image_src = $badge->getImage();
+            $badge = new ilBadge($badge_id);
+            $image_src = $badge->getImage();
         }
 
         return $image_src;

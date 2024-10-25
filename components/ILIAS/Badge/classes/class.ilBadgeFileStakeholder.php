@@ -29,7 +29,7 @@ class ilBadgeFileStakeholder extends AbstractResourceStakeholder
         global $DIC;
         $this->default_owner = $DIC->isDependencyAvailable('user') ? $DIC->user()->getId() : 6;
     }
-    
+
     public function getId(): string
     {
         return 'badge';
