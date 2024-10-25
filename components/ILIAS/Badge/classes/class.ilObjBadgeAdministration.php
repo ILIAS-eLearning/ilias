@@ -16,16 +16,13 @@
  *
  *********************************************************************/
 
-/**
- * @author Jörg Lützenkirchen <luetzenkirchen@leifos.com>
- */
 class ilObjBadgeAdministration extends ilObject
 {
     public function __construct(
         int $a_id = 0,
         bool $a_call_by_reference = true
     ) {
-        $this->type = "bdga";
+        $this->type = 'bdga';
         parent::__construct($a_id, $a_call_by_reference);
     }
 }

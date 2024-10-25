@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -55,8 +56,11 @@ class ilBadgeImage
         return $this->getImageFromResourceId($badge, (string) $image_rid);
     }
 
-    public function getImageFromResourceId(ilBadge|array $badge, ?string $image_rid, $size = self::IMAGE_SIZE_XS): string
-    {
+    public function getImageFromResourceId(
+        ilBadge|array $badge,
+        ?string $image_rid,
+        $size = self::IMAGE_SIZE_XS
+    ): string {
         $image_src = '';
 
         if ($image_rid !== null) {
@@ -64,7 +68,7 @@ class ilBadgeImage
             if ($identification !== null) {
                 $flavour = $this->resource_storage->flavours()->get($identification, new \ilBadgePictureDefinition());
                 $urls = $this->resource_storage->consume()->flavourUrls($flavour)->getURLsAsArray(false);
-                if (sizeof($urls) === self::IMAGE_URL_COUNT && isset($urls[$size])) {
+                if (count($urls) === self::IMAGE_URL_COUNT && isset($urls[$size])) {
                     $image_src = $urls[$size];
                 }
             }

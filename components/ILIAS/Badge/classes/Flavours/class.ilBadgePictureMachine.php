@@ -21,20 +21,17 @@ declare(strict_types=1);
 use ILIAS\Filesystem\Stream\FileStream;
 use ILIAS\ResourceStorage\Flavour\Definition\CropToSquare;
 use ILIAS\ResourceStorage\Flavour\Definition\FlavourDefinition;
-use ILIAS\ResourceStorage\Flavour\Definition\ToGreyScale;
-use ILIAS\ResourceStorage\Flavour\Engine\GDEngine;
 use ILIAS\ResourceStorage\Flavour\Machine\DefaultMachines\AbstractMachine;
 use ILIAS\ResourceStorage\Flavour\Machine\DefaultMachines\CropSquare;
 use ILIAS\ResourceStorage\Flavour\Machine\DefaultMachines\GdImageToStreamTrait;
-use ILIAS\ResourceStorage\Flavour\Machine\DefaultMachines\MakeGreyScale;
-use ILIAS\ResourceStorage\Flavour\Machine\FlavourMachine;
 use ILIAS\ResourceStorage\Flavour\Machine\Result;
 use ILIAS\ResourceStorage\Information\FileInformation;
 use ILIAS\ResourceStorage\Flavour\Machine\DefaultMachines\ExtractPages;
 use ILIAS\ResourceStorage\Flavour\Definition\PagesToExtract;
 use ILIAS\ResourceStorage\Flavour\Engine\ImagickEngine;
+use ILIAS\Filesystem\Stream\Stream;
 
-class ilBadgePictureMachine extends AbstractMachine implements FlavourMachine
+class ilBadgePictureMachine extends AbstractMachine
 {
     use GdImageToStreamTrait;
 
@@ -42,13 +39,13 @@ class ilBadgePictureMachine extends AbstractMachine implements FlavourMachine
     private const FULL_QUALITY_SIZE_THRESHOLD = 100;
 
     private CropSquare $crop;
-    private MakeGreyScale $grey;
     private ?ilBadgePictureDefinition $definition = null;
     private ?FileInformation $information = null;
     private ExtractPages $extract_pages;
 
     public function __construct()
     {
+        parent::__construct();
         $this->extract_pages = new ExtractPages();
         $this->crop = new CropSquare();
     }
@@ -72,7 +69,8 @@ class ilBadgePictureMachine extends AbstractMachine implements FlavourMachine
         FileInformation $information,
         FileStream $stream,
         FlavourDefinition $for_definition
-    ): \Generator {
+    ): Generator {
+        /** @var ilBadgePictureDefinition $for_definition */
         $this->definition = $for_definition;
         $this->information = $information;
 
@@ -107,7 +105,7 @@ class ilBadgePictureMachine extends AbstractMachine implements FlavourMachine
     protected function cropImage(
         FileStream $stream,
         int $size
-    ) {
+    ): ?Stream {
         $quality = $size <= self::FULL_QUALITY_SIZE_THRESHOLD
             ? 100
             : $this->definition->getQuality();
@@ -123,5 +121,4 @@ class ilBadgePictureMachine extends AbstractMachine implements FlavourMachine
             )
         )->current()->getStream();
     }
-
 }

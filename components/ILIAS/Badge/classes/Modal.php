@@ -29,14 +29,18 @@ class Modal
 {
     /** @var Closure(string): string */
     private readonly Closure $sign_file;
-    private ?ilBadgeImage $badge_image_service;
+    private ilBadgeImage $badge_image_service;
 
     public function __construct(
         private readonly Container $container,
         $sign_file = [ilWACSignedPath::class, 'signFile']
     ) {
         $this->sign_file = Closure::fromCallable($sign_file);
-        $this->badge_image_service = new ilBadgeImage($container->resourceStorage(), $container->upload(), $container->ui()->mainTemplate());
+        $this->badge_image_service = new ilBadgeImage(
+            $container->resourceStorage(),
+            $container->upload(),
+            $container->ui()->mainTemplate()
+        );
     }
 
     /**

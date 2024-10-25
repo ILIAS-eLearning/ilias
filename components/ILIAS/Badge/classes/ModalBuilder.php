@@ -31,18 +31,19 @@ use ILIAS\UI\Factory;
 
 class ModalBuilder
 {
-    private ?Factory $ui_factory;
-    private ?Renderer $ui_renderer;
-    protected ?ilBadgeAssignment $assignment = null;
-    protected ilLanguage $lng;
+    private Factory $ui_factory;
+    private Renderer $ui_renderer;
+    private ilLanguage $lng;
+    private ?ilBadgeAssignment $assignment = null;
 
     public function __construct(ilBadgeAssignment $assignment = null)
     {
         global $DIC;
+
         $this->ui_factory = $DIC->ui()->factory();
         $this->ui_renderer = $DIC->ui()->renderer();
         $this->lng = $DIC->language();
-        $this->lng->loadLanguageModule("badge");
+        $this->lng->loadLanguageModule('badge');
 
         if ($assignment) {
             $this->assignment = $assignment;
@@ -50,7 +51,7 @@ class ModalBuilder
     }
 
     /**
-     * @param array <string,string> $badge_properties
+     * @param array<string, string> $badge_properties
      */
     public function constructModal(
         Image $badge_image,
@@ -78,8 +79,7 @@ class ModalBuilder
 
     public function renderShyButton(string $label, Modal $modal): string
     {
-        $button = $this->ui_factory->button()->shy($label, $modal->getShowSignal());
-        return $this->ui_renderer->render($button);
+        return $this->ui_renderer->render($this->ui_factory->button()->shy($label, $modal->getShowSignal()));
     }
 
     /**
@@ -90,9 +90,9 @@ class ModalBuilder
     {
         $translations = [];
 
-        if (sizeof($properties) > 0) {
+        if (\count($properties) > 0) {
             foreach ($properties as $lang_var => $data) {
-                if (strlen($data) > 0) {
+                if ($data !== '') {
                     $translations[$this->lng->txt($lang_var)] = $data;
                 }
             }

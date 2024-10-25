@@ -47,6 +47,7 @@ class ilBadgeTemplatesFilesMigration implements Migration
     {
         ilContext::init(ilContext::CONTEXT_CRON);
         ilInitialisation::initILIAS();
+
         $this->helper = new ilResourceStorageMigrationHelper(
             new ilBadgeFileStakeholder(),
             $environment
@@ -55,18 +56,20 @@ class ilBadgeTemplatesFilesMigration implements Migration
 
     public function step(Environment $environment): void
     {
-
-        $r = $this->helper->getDatabase()->query(
-            "SELECT id, image, image_rid  FROM " . self::TABLE_NAME . "
-                             WHERE  image_rid IS NULL OR image_rid = '' 
-                             LIMIT 1"
+        $this->helper->getDatabase()->setLimit(1);
+        $res = $this->helper->getDatabase()->query(
+            "SELECT id, image, image_rid  FROM " . self::TABLE_NAME . " WHERE image_rid IS NULL OR image_rid = ''"
         );
+        $row = $this->helper->getDatabase()->fetchObject($res);
+        if (!($row instanceof stdClass)) {
+            return;
+        }
 
-        $d = $this->helper->getDatabase()->fetchObject($r);
-        $id = (int) $d->id;
-        $image = $d->image;
+        $id = (int) $row->id;
+        $image = $row->image;
 
-        if ($image !== '') {
+        if ($image !== '' && $image !== null) {
+            $save_collection_id = '-';
             $image = $this->getImagePath($id, $image);
             $base_path = dirname($image);
             $pattern = '/(.+)/m';
@@ -80,21 +83,22 @@ class ilBadgeTemplatesFilesMigration implements Migration
                     null,
                     $this->getRevisionNameCallback()
                 );
+
+                $save_collection_id = $collection_id === null ? '-' : $collection_id->serialize();
             }
-            $save_collection_id = $collection_id === null ? '-' : $collection_id->serialize();
 
             $this->helper->getDatabase()->update(
                 self::TABLE_NAME,
                 [
-                    'image_rid' => ['text', $save_collection_id],
-                    'image' => ['text', null]
+                    'image_rid' => [ilDBConstants::T_TEXT, $save_collection_id],
+                    'image' => [ilDBConstants::T_TEXT, null]
                 ],
-                ['id' => ['integer', $id]]
+                ['id' => [ilDBConstants::T_INTEGER, $id]]
             );
         }
     }
 
-    public function getImagePath(
+    private function getImagePath(
         int $id,
         string $image,
         bool $a_full_path = true
@@ -102,16 +106,18 @@ class ilBadgeTemplatesFilesMigration implements Migration
         if ($id) {
             $exp = explode('.', $image);
             $suffix = strtolower(array_pop($exp));
+
             if ($a_full_path) {
                 return $this->getFilePath($id) . 'img' . $id . '.' . $suffix;
             }
+
             return 'img' . $id . '.' . $suffix;
         }
 
         return '';
     }
 
-    protected function getFilePath(
+    private function getFilePath(
         int $a_id,
         string $a_subdir = null
     ): string {
@@ -126,25 +132,27 @@ class ilBadgeTemplatesFilesMigration implements Migration
                 mkdir($path);
             }
         }
+
         return $path;
     }
 
     public function getRemainingAmountOfSteps(): int
     {
-        $r = $this->helper->getDatabase()->query(
-            "SELECT count(id) as amount FROM " . self::TABLE_NAME . "
-                             WHERE  image_rid IS NULL OR image_rid = '';"
+        $res = $this->helper->getDatabase()->query(
+            "SELECT COUNT(id) as amount FROM " . self::TABLE_NAME . " WHERE image_rid IS NULL OR image_rid = ''"
         );
-        $d = $this->helper->getDatabase()->fetchObject($r);
+        $row = $this->helper->getDatabase()->fetchObject($res);
 
-        return (int) $d->amount;
+        return (int) ($row->amount ?? 0);
     }
 
+    /**
+     * @return Closure(string): string
+     */
     public function getRevisionNameCallback(): Closure
     {
         return static function (string $file_name): string {
             return md5($file_name);
         };
     }
-
 }

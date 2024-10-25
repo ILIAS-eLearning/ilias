@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -29,16 +30,15 @@ class ilBadgeDBUpdateSteps implements ilDatabaseUpdateSteps
     public function step_1(): void
     {
         if (!$this->db->tableColumnExists('badge_badge', 'image_rid')) {
-            $attributes = [
-                'type' => 'text',
-                'length' => 64,
-                'notnull' => false,
-                'default' => '',
-            ];
             $this->db->addTableColumn(
                 'badge_badge',
                 'image_rid',
-                $attributes
+                [
+                    'type' => 'text',
+                    'length' => 64,
+                    'notnull' => false,
+                    'default' => '',
+                ]
             );
         }
     }
@@ -46,18 +46,16 @@ class ilBadgeDBUpdateSteps implements ilDatabaseUpdateSteps
     public function step_2(): void
     {
         if (!$this->db->tableColumnExists('badge_image_template', 'image_rid')) {
-            $attributes = [
-                'type' => 'text',
-                'length' => 64,
-                'notnull' => false,
-                'default' => '',
-            ];
             $this->db->addTableColumn(
                 'badge_image_template',
                 'image_rid',
-                $attributes
+                [
+                    'type' => 'text',
+                    'length' => 64,
+                    'notnull' => false,
+                    'default' => '',
+                ]
             );
         }
     }
-
 }

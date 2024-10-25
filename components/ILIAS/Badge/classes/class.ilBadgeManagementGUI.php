@@ -3,14 +3,17 @@
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
+ *
  * ILIAS is licensed with the GPL-3.0,
  * see https://www.gnu.org/licenses/gpl-3.0.en.html
  * You should have received a copy of said license along with the
  * source code, too.
+ *
  * If this is not the case or you just want to try ILIAS, you'll find
  * us at:
  * https://www.ilias.de
  * https://github.com/ILIAS-eLearning
+ *
  *********************************************************************/
 
 use ILIAS\Badge\ilBadgeImage;
@@ -23,13 +26,12 @@ use ILIAS\Badge\ilBadgeUserTableGUI;
 use ILIAS\Services\Badge\BadgeException;
 
 /**
- * Class ilBadgeManagementGUI
- * @author       Jörg Lützenkirchen <luetzenkirchen@leifos.com>
  * @ilCtrl_Calls ilBadgeManagementGUI: ilPropertyFormGUI
  */
 class ilBadgeManagementGUI
 {
     public const TABLE_ALL_OBJECTS_ACTION = 'ALL_OBJECTS';
+
     private ilBadgeGUIRequest $request;
     private ilBadgeManagementSessionRepository $session_repo;
     private ilLanguage $lng;
@@ -44,8 +46,8 @@ class ilBadgeManagementGUI
     private string $parent_obj_type;
 
     private ?ilBadgeImage $badge_image_service = null;
-    private ?Services $resource_storage = null;
-    private ?FileUpload $upload_service = null;
+    private ?Services $resource_storage;
+    private ?FileUpload $upload_service;
     private ?ilBadgePictureDefinition $flavour_definition = null;
 
     public function __construct(
