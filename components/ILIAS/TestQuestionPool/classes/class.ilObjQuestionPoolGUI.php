@@ -339,8 +339,8 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
                 $this->ctrl->forwardCommand($cp);
                 break;
 
-            case 'ilquestionpoolexportgui':
-                $exp_gui = new ilQuestionPoolExportGUI($this);
+            case 'ilexportgui':
+                $exp_gui = new ilExportGUI($this);
                 $ret = $this->ctrl->forwardCommand($exp_gui);
                 break;
 

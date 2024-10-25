@@ -37,8 +37,6 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class ilTestExportGUI extends ilExportGUI
 {
-    protected UIServices $ui;
-
     public function __construct(
         ilObjTestGUI $parent_gui,
         private readonly ilDBInterface $db,
