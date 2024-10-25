@@ -82,6 +82,10 @@ class ModalBuilder
         return $this->ui_renderer->render($button);
     }
 
+    /**
+     * @param array<string, string> $properties
+     * @return array<string, string>
+     */
     private function translateKeysWithValidDataAttribute(array $properties): array
     {
         $translations = [];
