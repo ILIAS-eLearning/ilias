@@ -547,7 +547,7 @@ class ilOpenIdConnectSettingsGUI
             $request_form = $form->withRequest($this->request);
             $result = $request_form->getData();
             if (is_null($result)) {
-                $this->mainTemplate->setOnScreenMessage('failure', $this->lng->txt('err_check_input'));
+                $this->mainTemplate->setOnScreenMessage('failure', $this->lng->txt('err_cdsfdfheck_input'));
                 $this->scopes();
                 return;
             } else {
@@ -611,15 +611,13 @@ class ilOpenIdConnectSettingsGUI
             $validation_result = !is_null($discoveryURL) ? $this->settings->validateScopes($discoveryURL, (array) $scopes) : [];
             if (!empty($validation_result)) {
                 if (ilOpenIdConnectSettings::VALIDATION_ISSUE_INVALID_SCOPE === $validation_result[0]) {
-                    $this->mainTemplate->setOnScreenMessage(
-                        'failure',
+                    $this->failed_validation_messages =
                         sprintf($this->lng->txt('auth_oidc_settings_invalid_scopes'), implode(",", $validation_result[1]))
-                    );
+                    ;
                 } else {
-                    $this->mainTemplate->setOnScreenMessage(
-                        'failure',
+                    $this->failed_validation_messages =
                         sprintf($this->lng->txt('auth_oidc_settings_discovery_error'), $validation_result[1])
-                    );
+                    ;
                 }
                 $this->scopes();
                 return false;
