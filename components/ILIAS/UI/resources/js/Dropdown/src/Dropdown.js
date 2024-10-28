@@ -93,6 +93,7 @@ export default class Dropdown {
   };
 
   show() {
+    il.UI.dropdown.instances.forEach((dd) => dd.hide());
     this.#list.style.display = 'block';
     this.#align();
     this.#button.setAttribute('aria-expanded', 'true');
