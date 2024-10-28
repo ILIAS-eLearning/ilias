@@ -19,7 +19,6 @@
 declare(strict_types=1);
 
 use ILIAS\Data\Factory as DataFactory;
-use ILIAS\HTTP\Services as HTTPServices;
 use ILIAS\Test\Questions\RandomQuestionSetNonAvailablePoolsTable;
 use ILIAS\Test\RequestDataCollector;
 use ILIAS\Test\Utilities\TitleColumnsBuilder;
@@ -76,13 +75,13 @@ class ilTestRandomQuestionSetConfigGUI
         private readonly ilAccessHandler $access,
         private readonly UIFactory $ui_factory,
         private readonly UIRenderer $ui_renderer,
+        private readonly DataFactory $data_factory,
         private readonly TabsManager $tabs_manager,
         private readonly ilLanguage $lng,
         private readonly TestLogger $logger,
         private readonly ilGlobalTemplateInterface $tpl,
         private readonly ilDBInterface $db,
         private readonly ilTree $tree,
-        private readonly HTTPServices $http,
         private readonly ilComponentRepository $component_repository,
         private readonly ilObjectDefinition $obj_definition,
         private readonly ilObjectDataCache $obj_cache,
