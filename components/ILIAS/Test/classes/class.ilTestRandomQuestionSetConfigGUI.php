@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 use ILIAS\Data\Factory as DataFactory;
 use ILIAS\Test\Questions\RandomQuestionSetNonAvailablePoolsTable;
+use ILIAS\Test\Questions\RandomQuestionSetSourcePoolDefinitionListTable;
 use ILIAS\Test\RequestDataCollector;
 use ILIAS\Test\Utilities\TitleColumnsBuilder;
 use ILIAS\Test\Presentation\TabsManager;
@@ -377,12 +378,17 @@ class ilTestRandomQuestionSetConfigGUI
         }
 
         $table = $this->buildSourcePoolDefinitionListTableGUI($disabled_form);
-        $table->setData($this->source_pool_definition_list);
-        $content .= $table->getHTML();
+        $content .= $this->ui_renderer->render($table->getComponent());
 
         if (!$this->source_pool_definition_list->areAllUsedPoolsAvailable()) {
-            $table = $this->buildNonAvailablePoolsTableGUI();
-            $table->setData($this->source_pool_definition_list);
+            $table = new RandomQuestionSetNonAvailablePoolsTable(
+                $this->ctrl,
+                $this->lng,
+                $this->ui_factory,
+                $this->data_factory,
+                $this->http,
+                $this->source_pool_definition_list
+            );
             $content .= $this->ui_renderer->render($table->getComponent());
         }
 
@@ -405,7 +411,7 @@ class ilTestRandomQuestionSetConfigGUI
         $this->question_set_config->loadFromDb();
 
         $table = $this->buildSourcePoolDefinitionListTableGUI();
-        $table->applySubmit($this->source_pool_definition_list, $this->testrequest);
+        $table->applySubmit($this->testrequest);
 
         $this->source_pool_definition_list->reindexPositions();
         $this->source_pool_definition_list->saveDefinitions();
@@ -433,35 +439,23 @@ class ilTestRandomQuestionSetConfigGUI
         return $toolbar;
     }
 
-    private function buildSourcePoolDefinitionListTableGUI(bool $disabled = false): ilTestRandomQuestionSetSourcePoolDefinitionListTableGUI
+    private function buildSourcePoolDefinitionListTableGUI(bool $disabled = false): RandomQuestionSetSourcePoolDefinitionListTable
     {
-        $table = new ilTestRandomQuestionSetSourcePoolDefinitionListTableGUI(
-            $this->access,
+        $translator = new ilTestQuestionFilterLabelTranslator($this->db, $this->lng);
+        $translator->loadLabels($this->source_pool_definition_list);
+
+        return new RandomQuestionSetSourcePoolDefinitionListTable(
             $this->ctrl,
             $this->lng,
             $this->ui_factory,
-            $this->ui_renderer,
+            $this->data_factory,
             $this->http,
-            $this->title_builder
-        );
-
-        $table->setEditable(!$this->isFrozenConfigRequired() && !$disabled);
-        $table->setShowAmount($this->question_set_config->isQuestionAmountConfigurationModePerPool());
-        $table->setShowMappedTaxonomyFilter(
+            $this->title_builder,
+            $translator,
+            $this->source_pool_definition_list,
+            !$this->isFrozenConfigRequired() && !$disabled,
+            $this->question_set_config->isQuestionAmountConfigurationModePerPool(),
             $this->question_set_config->getLastQuestionSyncTimestamp() != 0
-        );
-
-        return $table;
-    }
-
-    private function buildNonAvailablePoolsTableGUI(): RandomQuestionSetNonAvailablePoolsTable
-    {
-        return new RandomQuestionSetNonAvailablePoolsTable(
-            $this->ctrl,
-            $this->lng,
-            $this->ui_factory,
-            new DataFactory(),
-            $this->http->request()
         );
     }
 
