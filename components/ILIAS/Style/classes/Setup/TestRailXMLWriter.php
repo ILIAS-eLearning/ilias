@@ -34,16 +34,32 @@ class TestRailXMLWriter
 
     protected SimpleXMLElement $xml;
 
+    protected int $no_found_ids = 0;
+    protected int $no_expexted_ids = 0;
+    protected int $no_new_ids = 0;
+    protected int $no_components = 2;
+
+    protected array $expected_by_caseids = [];
+
     public function __construct(
         protected \ilTemplate $case_tpl,
         protected ExamplesYamlParser $parser,
         protected bool $only_new_cases
     ) {
         $this->xml = new SimpleXMLElement('<?xml version="1.0"?><sections></sections>');
+        foreach (self::$CASEIDS as $k => $v) {
+            $this->no_expexted_ids += count($v);
+            $this->expected_by_caseids = array_merge($this->expected_by_caseids, array_values($v));
+        }
     }
 
     public function getXML(): SimpleXMLElement
     {
+        print "\n found " . $this->no_components . ' components/cases';
+        print "\n update for " . $this->no_found_ids . ' of ' . $this->no_expexted_ids . ' known IDs';
+        print "\n new cases: " . $this->no_new_ids;
+        print "\n known ids unaccounted for: " . implode(',', $this->expected_by_caseids);
+        print "\n";
         return $this->xml;
     }
 
@@ -63,6 +79,7 @@ class TestRailXMLWriter
 
             foreach ($components as $component) {
                 list($component_name, $entry) = $component;
+                $this->no_components += 2;
                 $this->addComponentCases($xml_cases, $section, $component_name, $entry);
             }
         }
@@ -172,7 +189,7 @@ class TestRailXMLWriter
             );
         }
 
-        list($build, $case_id) = $this->getCaseId($section . '/' . $component_name, self::PREPARE);
+        list($build, $case_id) = $this->getCaseId($section . '/' . $component_name, self::VALIDATE);
         if ($build) {
             $steps = $this->getTemplate();
             $steps->setCurrentBlock('steps_validate');
@@ -221,6 +238,16 @@ class TestRailXMLWriter
             && array_key_exists($subkey, self::$CASEIDS[$component_path])
         ) {
             $case_id = self::$CASEIDS[$component_path][$subkey];
+            $this->no_found_ids += 1;
+            print "\n caseId for: $component_path ($subkey)";
+            unset(
+                $this->expected_by_caseids[
+                    array_search($case_id, $this->expected_by_caseids)
+                ]
+            );
+        } else {
+            $this->no_new_ids += 1;
+            print "\n no caseId for: $component_path ($subkey)";
         }
 
         $build = ($case_id === '' && $this->only_new_cases === true)

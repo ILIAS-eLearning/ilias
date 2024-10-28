@@ -81,7 +81,7 @@ trait TestrailCaseIds
             'show' => 'C31830',
             'validate' => 'C42346',
         ],
-        'Chart/ScaleBar' => [
+        'Chart/Scale Bar' => [
             'show' => 'C31829',
             'validate' => 'C42345',
         ],
@@ -117,11 +117,11 @@ trait TestrailCaseIds
             'show' => 'C49997',
             'validate' => 'C50021',
         ],
-        'Icon/Custom' => [
+        'Symbol/Icon/Custom' => [
             'show' => 'C25154',
             'validate' => 'C42282',
         ],
-        'Icon/Standard' => [
+        'Symbol/Icon/Standard' => [
             'show' => 'C25153',
             'validate' => 'C42281',
         ],
@@ -213,7 +213,7 @@ trait TestrailCaseIds
             'show' => 'C31845',
             'validate' => 'C42359',
         ],
-        'Input/Field/URL' => [
+        'Input/Field/Url' => [
             'show' => 'C52583',
             'validate' => 'C52584',
         ],
@@ -273,9 +273,11 @@ trait TestrailCaseIds
             'show' => 'C31867',
             'validate' => 'C42370',
         ],
+/*
         'Mainbar/MehrMenueinträge' => [
             '' => 'C32105',
         ],
+*/
         'Menu/Drilldown' => [
             'show' => 'C50008',
             'validate' => 'C50032',
@@ -307,7 +309,7 @@ trait TestrailCaseIds
             'show' => 'C31964',
             'validate' => 'C42385',
         ],
-        'Modal/InterruptiveItem' => [
+        'Modal/InterruptiveItem/Standard' => [
             'show' => 'C31960',
             'validate' => 'C42381',
         ],
@@ -582,7 +584,7 @@ trait TestrailCaseIds
             'show' => 'C50005',
             'validate' => 'C50029',
         ],
-        'Tree/Note/Bylined' => [
+        'Tree/Node/Bylined' => [
             'show' => 'C50006',
         ],
         'ViewControl/Mode' => [
