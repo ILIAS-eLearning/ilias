@@ -48,8 +48,7 @@ class ilTestRandomQuestionSetConfigGUI
     public const CMD_SAVE_GENERAL_CONFIG_FORM = 'saveGeneralConfigForm';
     public const CMD_SHOW_SRC_POOL_DEF_LIST = 'showSourcePoolDefinitionList';
     public const CMD_SAVE_SRC_POOL_DEF_LIST = 'saveSourcePoolDefinitionList';
-    public const CMD_DELETE_SINGLE_SRC_POOL_DEF = 'deleteSingleSourcePoolDefinition';
-    public const CMD_DELETE_MULTI_SRC_POOL_DEFS = 'deleteMultipleSourcePoolDefinitions';
+    public const CMD_DELETE_SRC_POOL_DEF = 'deleteSourcePoolDefinition';
     public const CMD_SHOW_POOL_SELECTOR_EXPLORER = 'showPoolSelectorExplorer';
     public const CMD_SHOW_CREATE_SRC_POOL_DEF_FORM = 'showCreateSourcePoolDefinitionForm';
     public const CMD_SAVE_CREATE_SRC_POOL_DEF_FORM = 'saveCreateSourcePoolDefinitionForm';
@@ -202,8 +201,7 @@ class ilTestRandomQuestionSetConfigGUI
             [
                 self::CMD_SAVE_GENERAL_CONFIG_FORM,
                 self::CMD_SAVE_SRC_POOL_DEF_LIST,
-                self::CMD_DELETE_SINGLE_SRC_POOL_DEF,
-                self::CMD_DELETE_MULTI_SRC_POOL_DEFS,
+                self::CMD_DELETE_SRC_POOL_DEF,
                 self::CMD_SAVE_CREATE_SRC_POOL_DEF_FORM,
                 self::CMD_SAVE_EDIT_SRC_POOL_DEF_FORM,
                 self::CMD_SAVE_AND_NEW_CREATE_SRC_POOL_DEF_FORM,
@@ -228,8 +226,7 @@ class ilTestRandomQuestionSetConfigGUI
 
             case self::CMD_SHOW_SRC_POOL_DEF_LIST:
             case self::CMD_SAVE_SRC_POOL_DEF_LIST:
-            case self::CMD_DELETE_SINGLE_SRC_POOL_DEF:
-            case self::CMD_DELETE_MULTI_SRC_POOL_DEFS:
+            case self::CMD_DELETE_SRC_POOL_DEF:
             case self::CMD_SHOW_CREATE_SRC_POOL_DEF_FORM:
             case self::CMD_SAVE_CREATE_SRC_POOL_DEF_FORM:
             case self::CMD_SHOW_EDIT_SRC_POOL_DEF_FORM:
@@ -386,7 +383,7 @@ class ilTestRandomQuestionSetConfigGUI
                 $this->lng,
                 $this->ui_factory,
                 $this->data_factory,
-                $this->http,
+                $this->testrequest->getRequest(),
                 $this->source_pool_definition_list
             );
             $content .= $this->ui_renderer->render($table->getComponent());
@@ -449,7 +446,7 @@ class ilTestRandomQuestionSetConfigGUI
             $this->lng,
             $this->ui_factory,
             $this->data_factory,
-            $this->http,
+            $this->testrequest->getRequest(),
             $this->title_builder,
             $translator,
             $this->source_pool_definition_list,
@@ -459,26 +456,9 @@ class ilTestRandomQuestionSetConfigGUI
         );
     }
 
-    private function deleteSingleSourcePoolDefinitionCmd(): void
-    {
-        $definitionId = $this->fetchSingleSourcePoolDefinitionIdParameter();
-        $this->deleteSourcePoolDefinitions([$definitionId]);
-
-        $this->ctrl->setParameterByClass(self::class, 'modified', 'remove');
-        $this->ctrl->redirect($this, self::CMD_SHOW_SRC_POOL_DEF_LIST);
-    }
-
-    private function deleteMultipleSourcePoolDefinitionsCmd(): void
+    private function deleteSourcePoolDefinitionCmd(): void
     {
         $definitionIds = $this->fetchMultiSourcePoolDefinitionIdsParameter();
-        $this->deleteSourcePoolDefinitions($definitionIds);
-
-        $this->ctrl->setParameterByClass(self::class, 'modified', 'remove');
-        $this->ctrl->redirect($this, self::CMD_SHOW_SRC_POOL_DEF_LIST);
-    }
-
-    private function deleteSourcePoolDefinitions($definitionIds): void
-    {
         foreach ($definitionIds as $definitionId) {
             $definition = $this->source_pool_definition_factory->getSourcePoolDefinitionByDefinitionId($definitionId);
             $definition->deleteFromDb();
@@ -492,6 +472,9 @@ class ilTestRandomQuestionSetConfigGUI
         $this->question_set_config->saveToDb();
 
         $this->test_obj->saveCompleteStatus($this->question_set_config);
+
+        $this->ctrl->setParameterByClass(self::class, 'modified', 'remove');
+        $this->ctrl->redirect($this, self::CMD_SHOW_SRC_POOL_DEF_LIST);
     }
 
     protected function showPoolSelectorExplorerCmd(): void
@@ -699,41 +682,34 @@ class ilTestRandomQuestionSetConfigGUI
         throw new ilTestMissingQuestionPoolIdParameterException();
     }
 
-    private function fetchSingleSourcePoolDefinitionIdParameter(): int
-    {
-        if ($this->testrequest->isset('src_pool_def_id')) {
-            $raw = $this->testrequest->raw('src_pool_def_id');
-            if (is_array($raw) && count($raw) === 1) {
-                return (int) $this->testrequest->raw('src_pool_def_id')[0];
-            } elseif (is_scalar($raw)) {
-                return (int) $raw;
-            }
-        }
-
-        throw new ilTestMissingSourcePoolDefinitionParameterException();
-    }
-
     private function fetchMultiSourcePoolDefinitionIdsParameter(): array
     {
-        if (!$this->testrequest->isset('src_pool_def_ids') || !is_array($this->testrequest->raw('src_pool_def_ids'))) {
+        if (!$this->testrequest->isset('src_pool_def_id')) {
             $this->tpl->setOnScreenMessage('failure', $this->lng->txt('tst_please_select_source_pool'), true);
             $this->ctrl->redirect($this, self::CMD_SHOW_SRC_POOL_DEF_LIST);
             return [];
         }
 
-        $definitionIds = [];
+        $definitionIds = is_array($this->testrequest->raw('src_pool_def_id'))
+            ? array_map('intval', $this->testrequest->raw('src_pool_def_id'))
+            : [(int) $this->testrequest->raw('src_pool_def_id')];
 
-        foreach ($this->testrequest->raw('src_pool_def_ids') as $definitionId) {
-            $definitionId = (int) $definitionId;
-
-            if (!$definitionId) {
+        foreach ($definitionIds as $definitionId) {
+            if ($definitionId === 0) {
                 throw new ilTestMissingSourcePoolDefinitionParameterException();
             }
-
-            $definitionIds[] = $definitionId;
         }
-
         return $definitionIds;
+    }
+
+    private function fetchSingleSourcePoolDefinitionIdParameter(): int
+    {
+        //even a single id can be an array (set by table actions) or a single value (set by form actions)
+        $definitionIds = $this->fetchMultiSourcePoolDefinitionIdsParameter();
+        if (count($definitionIds) !== 1) {
+            throw new ilTestMissingSourcePoolDefinitionParameterException();
+        }
+        return $definitionIds[0];
     }
 
     private function getSourcePoolDefinitionByAvailableQuestionPoolId($pool_id): ilTestRandomQuestionSetSourcePoolDefinition
@@ -787,7 +763,6 @@ class ilTestRandomQuestionSetConfigGUI
         if ($this->testrequest->isset('target_ref') && (int) $this->testrequest->raw('target_ref')) {
             return (int) $this->testrequest->raw('target_ref');
         }
-
         return null;
     }
 

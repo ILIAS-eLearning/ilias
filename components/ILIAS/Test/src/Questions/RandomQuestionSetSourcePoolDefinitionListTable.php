@@ -20,10 +20,8 @@ declare(strict_types=1);
 
 namespace ILIAS\Test\Questions;
 
-use GuzzleHttp\Psr7\ServerRequest;
 use ILIAS\Data\Factory as DataFactory;
 use ILIAS\Data\URI;
-use ILIAS\HTTP\GlobalHttpState;
 use ILIAS\Test\Utilities\TitleColumnsBuilder;
 use ILIAS\Test\RequestDataCollector;
 use ILIAS\UI\Component\Table\Action\Action;
@@ -34,23 +32,35 @@ use ILIAS\UI\Component\Table\Column\Column;
 use ILIAS\UI\Factory as UIFactory;
 use ILIAS\UI\URLBuilder;
 use ILIAS\UI\URLBuilderToken;
-use ilTestRandomQuestionSetSourcePoolDefinitionList as ilPoolDefinitionList;
+use ilTestRandomQuestionSetSourcePoolDefinitionList as PoolDefinitionList;
+use ilTestRandomQuestionSetConfigGUI as ConfigGUI;
+use Psr\Http\Message\ServerRequestInterface;
 
 class RandomQuestionSetSourcePoolDefinitionListTable implements OrderingBinding
 {
+    protected URI $target;
+    protected URLBuilder $url_builder;
+    protected URLBuilderToken $id_token;
+
     public function __construct(
         protected readonly \ilCtrlInterface $ctrl,
         protected readonly \ilLanguage $lng,
         protected readonly UIFactory $ui_factory,
         protected readonly DataFactory $data_factory,
-        protected readonly GlobalHttpState $http,
+        protected readonly ServerRequestInterface $request,
         protected readonly TitleColumnsBuilder $title_builder,
         protected readonly \ilTestQuestionFilterLabelTranslator $taxonomy_translator,
-        protected readonly ilPoolDefinitionList $source_pool_definition_list,
+        protected readonly PoolDefinitionList $source_pool_definition_list,
         protected readonly bool $editable,
         protected readonly bool $show_amount,
         protected readonly bool $show_mapped_taxonomy_filter
     ) {
+        $this->target = $this->data_factory->uri((string) $this->request->getUri());
+        $this->url_builder = new URLBuilder($this->target);
+        [$this->url_builder, $this->id_token] = $this->url_builder->acquireParameters(
+            ['src_pool_def'],
+            'id'
+        );
     }
 
     public function getRows(OrderingRowBuilder $row_builder, array $visible_column_ids): \Generator
@@ -107,12 +117,15 @@ class RandomQuestionSetSourcePoolDefinitionListTable implements OrderingBinding
 
     public function getComponent(): OrderingTable
     {
-        $target = $this->buildTargetURI(\ilTestRandomQuestionSetConfigGUI::CMD_SAVE_SRC_POOL_DEF_LIST);
-        $title = $this->lng->txt('tst_src_quest_pool_def_list_table');
         return $this->ui_factory->table()
-            ->ordering($title, $this->getColumns(), $this, $target)
-            ->withRequest($this->http->request())
+            ->ordering(
+                $this->lng->txt('tst_src_quest_pool_def_list_table'),
+                $this->getColumns(),
+                $this,
+                $this->getTarget(ConfigGUI::CMD_SAVE_SRC_POOL_DEF_LIST)
+            )
             ->withActions($this->getActions())
+            ->withRequest($this->request)
             ->withOrderingDisabled(!$this->editable)
             ->withId('src_pool_def_list');
     }
@@ -120,12 +133,14 @@ class RandomQuestionSetSourcePoolDefinitionListTable implements OrderingBinding
     public function applySubmit(RequestDataCollector $request): void
     {
         $quest_pos = array_flip($this->getComponent()->getData());
-        $quest_amounts = $request->raw('quest_amount');
+        $quest_amounts = array_map('intval', $request->raw('quest_amount') ?? []);
 
         foreach ($this->source_pool_definition_list as $source_pool_definition) {
-            $source_pool_definition->setSequencePosition($quest_pos[$source_pool_definition->getId()] ?? 0);
+            $pool_id = $source_pool_definition->getId();
+            $sequence_pos = array_key_exists($pool_id, $quest_pos) ? $quest_pos[$pool_id] : 0;
+            $source_pool_definition->setSequencePosition($sequence_pos);
 
-            $amount = (int) $quest_amounts[$source_pool_definition->getId()] ?? 0;
+            $amount = array_key_exists($pool_id, $quest_amounts) ? $quest_amounts[$pool_id] : 0;
             $source_pool_definition->setQuestionAmount($this->show_amount ? $amount : null);
         }
     }
@@ -165,11 +180,13 @@ class RandomQuestionSetSourcePoolDefinitionListTable implements OrderingBinding
         return [
             'delete' => $this->ui_factory->table()->action()->standard(
                 $this->lng->txt('delete'),
-                ... $this->getActionURI(\ilTestRandomQuestionSetConfigGUI::CMD_DELETE_MULTI_SRC_POOL_DEFS, true)
+                $this->url_builder->withURI($this->getTarget(ConfigGUI::CMD_DELETE_SRC_POOL_DEF)),
+                $this->id_token
             ),
             'edit' => $this->ui_factory->table()->action()->single(
                 $this->lng->txt('edit'),
-                ... $this->getActionURI(\ilTestRandomQuestionSetConfigGUI::CMD_SHOW_EDIT_SRC_POOL_DEF_FORM)
+                $this->url_builder->withURI($this->getTarget(ConfigGUI::CMD_SHOW_EDIT_SRC_POOL_DEF_FORM)),
+                $this->id_token
             )
         ];
     }
@@ -181,20 +198,8 @@ class RandomQuestionSetSourcePoolDefinitionListTable implements OrderingBinding
             : (string) $amount;
     }
 
-    protected function buildTargetURI(string $cmd): URI
+    protected function getTarget(string $cmd): URI
     {
-        $target = $this->ctrl->getLinkTargetByClass(\ilTestRandomQuestionSetConfigGUI::class, $cmd);
-        $path = parse_url($target, PHP_URL_PATH);
-        $query = parse_url($target, PHP_URL_QUERY);
-        return $this->data_factory->uri((string) ServerRequest::getUriFromGlobals()->withPath($path)->withQuery($query));
-    }
-
-    /**
-     * @return array{URLBuilder, URLBuilderToken}
-     */
-    protected function getActionURI(string $cmd, bool $multi = false): array
-    {
-        $builder = new URLBuilder($this->buildTargetURI($cmd));
-        return $builder->acquireParameters(['src_pool_def'], $multi ? 'ids' : 'id');
+        return $this->target->withParameter('cmd', $cmd);
     }
 }

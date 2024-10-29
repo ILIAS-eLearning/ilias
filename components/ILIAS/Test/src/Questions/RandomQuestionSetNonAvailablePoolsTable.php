@@ -21,12 +21,9 @@ declare(strict_types=1);
 namespace ILIAS\Test\Questions;
 
 use Generator;
-use GuzzleHttp\Psr7\ServerRequest;
 use ILIAS\Data\Factory as DataFactory;
 use ILIAS\Data\Order;
 use ILIAS\Data\Range;
-use ILIAS\Data\URI;
-use ILIAS\HTTP\GlobalHttpState;
 use ILIAS\UI\Component\Table\Action\Action;
 use ILIAS\UI\Component\Table\Column\Column;
 use ILIAS\UI\Component\Table\DataRetrieval;
@@ -34,8 +31,9 @@ use ILIAS\UI\Component\Table\DataRowBuilder;
 use ILIAS\UI\Component\Table\Data as DataTable;
 use ILIAS\UI\Factory as UIFactory;
 use ILIAS\UI\URLBuilder;
-use ILIAS\UI\URLBuilderToken;
-use ilTestRandomQuestionSetSourcePoolDefinitionList as ilPoolDefinitionList;
+use ilTestRandomQuestionSetSourcePoolDefinitionList as PoolDefinitionList;
+use ilTestRandomQuestionSetConfigGUI as ConfigGUI;
+use Psr\Http\Message\ServerRequestInterface;
 
 class RandomQuestionSetNonAvailablePoolsTable implements DataRetrieval
 {
@@ -44,8 +42,8 @@ class RandomQuestionSetNonAvailablePoolsTable implements DataRetrieval
         protected readonly \ilLanguage $lng,
         protected readonly UIFactory $ui_factory,
         protected readonly DataFactory $data_factory,
-        protected readonly GlobalHttpState $http,
-        protected readonly ilPoolDefinitionList $pool_definition_list
+        protected readonly ServerRequestInterface $request,
+        protected readonly PoolDefinitionList $pool_definition_list
     ) {
     }
 
@@ -87,7 +85,7 @@ class RandomQuestionSetNonAvailablePoolsTable implements DataRetrieval
     {
         return $this->ui_factory->table()
             ->data($this->lng->txt('tst_non_avail_pools_table'), $this->getColumns(), $this)
-            ->withRequest($this->http->request())
+            ->withRequest($this->request)
             ->withActions($this->getActions())
             ->withId('tst_non_avail_pools_table');
     }
@@ -110,28 +108,18 @@ class RandomQuestionSetNonAvailablePoolsTable implements DataRetrieval
      */
     protected function getActions(): array
     {
+        $target = $this->data_factory->uri((string) $this->request->getUri());
+        $url_builder = new URLBuilder($target);
+        [$url_builder, $id_token] = $url_builder->acquireParameters(
+            ['derive_pool'],
+            'ids'
+        );
         return [
             'derive_pool' => $this->ui_factory->table()->action()->single(
                 $this->lng->txt('tst_derive_new_pool'),
-                ...$this->getActionURI(\ilTestRandomQuestionSetConfigGUI::CMD_SELECT_DERIVATION_TARGET)
+                $url_builder->withURI($target->withParameter('cmd', ConfigGUI::CMD_SELECT_DERIVATION_TARGET)),
+                $id_token
             )
         ];
-    }
-
-    /**
-     * @return array{URLBuilder, URLBuilderToken}
-     */
-    protected function getActionURI(string $cmd): array
-    {
-        $builder = new URLBuilder($this->buildTargetURI($cmd));
-        return $builder->acquireParameters(['derive_pool'], 'ids');
-    }
-
-    protected function buildTargetURI(string $cmd): URI
-    {
-        $target = $this->ctrl->getLinkTargetByClass(\ilTestRandomQuestionSetConfigGUI::class, $cmd);
-        $path = parse_url($target, PHP_URL_PATH);
-        $query = parse_url($target, PHP_URL_QUERY);
-        return $this->data_factory->uri((string) ServerRequest::getUriFromGlobals()->withPath($path)->withQuery($query));
     }
 }
