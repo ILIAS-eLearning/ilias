@@ -153,24 +153,5 @@ abstract class ilSubItemListGUI
         $this->tpl->parseCurrentBlock();
     }
 
-    // begin-patch mime_filter
-    protected function parseRelevance(int $sub_item): void
-    {
-        if (
-            !ilSearchSettings::getInstance()->isSubRelevanceVisible() ||
-            !ilSearchSettings::getInstance()->enabledLucene()
-        ) {
-            return;
-        }
-
-        $relevance = $this->getHighlighter()->getRelevance($this->getObjId(), $sub_item);
-
-        $pbar = ilProgressBar::getInstance();
-        $pbar->setCurrent($relevance);
-
-        $this->tpl->setVariable('REL_PBAR', $pbar->render());
-    }
-    // end-patch mime_filter
-
     abstract public function getHTML(): string;
 }

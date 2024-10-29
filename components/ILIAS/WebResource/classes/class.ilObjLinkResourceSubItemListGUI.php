@@ -70,10 +70,6 @@ class ilObjLinkResourceSubItemListGUI extends ilSubItemListGUI
             );
             $this->tpl->setVariable('TARGET', '_blank');
             $this->tpl->setVariable('TITLE', $item->getTitle());
-
-            if (count($this->getSubItemIds(true)) > 1) {
-                $this->parseRelevance($sub_item);
-            }
             $this->tpl->parseCurrentBlock();
         }
 
