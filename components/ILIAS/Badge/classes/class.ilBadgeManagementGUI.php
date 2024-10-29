@@ -20,10 +20,9 @@ use ILIAS\Badge\ilBadgeImage;
 use ILIAS\ResourceStorage\Services;
 use ILIAS\FileUpload\FileUpload;
 use ILIAS\FileUpload\Exception\IllegalStateException;
-use ILIAS\ResourceStorage\Flavour\Definition\FlavourDefinition;
 use ILIAS\Badge\ilBadgeTableGUI;
 use ILIAS\Badge\ilBadgeUserTableGUI;
-use ILIAS\Services\Badge\BadgeException;
+use ILIAS\Refinery\Factory;
 
 /**
  * @ilCtrl_Calls ilBadgeManagementGUI: ilPropertyFormGUI
@@ -49,6 +48,8 @@ class ilBadgeManagementGUI
     private ?Services $resource_storage;
     private ?FileUpload $upload_service;
     private ?ilBadgePictureDefinition $flavour_definition = null;
+    private \ILIAS\HTTP\Services $http;
+    private Factory $refinery;
 
     public function __construct(
         private readonly int $parent_ref_id,
@@ -61,6 +62,8 @@ class ilBadgeManagementGUI
         $this->ctrl = $DIC->ctrl();
         $this->tabs = $DIC->tabs();
         $this->access = $DIC->access();
+        $this->http = $DIC->http();
+        $this->refinery = $DIC->refinery();
         $this->toolbar = $DIC->toolbar();
         $this->ui_factory = $DIC->ui()->factory();
         $this->resource_storage = $DIC->resourceStorage();
@@ -91,6 +94,33 @@ class ilBadgeManagementGUI
             $DIC->ui()->mainTemplate()
         );
         $this->flavour_definition = new ilBadgePictureDefinition();
+    }
+
+    protected function splitBadgeAndUserIdsFromString(array $splittable_user_ids): array
+    {
+        $user_ids = [];
+        $badge_id = null;
+
+        if ($splittable_user_ids !== []) {
+
+            foreach ($splittable_user_ids as $row) {
+                if (str_contains($row, '_')) {
+                    $split = explode('_', $row);
+
+                    if ($badge_id === null && $split[1] !== '') {
+                        $badge_id = $split[1];
+                    }
+
+                    if ($split[0] !== '') {
+                        $user_ids[] = $split[0];
+                    }
+                } else {
+                    return [$user_ids, 0];
+                }
+            }
+
+        }
+        return array($user_ids, $badge_id);
     }
 
     public function executeCommand(): void
@@ -152,8 +182,15 @@ class ilBadgeManagementGUI
                 } elseif ($action === 'badge_table_delete') {
                     $this->deleteBadges();
                     $render_default = false;
-                } elseif (isset($id) && $id === self::TABLE_ALL_OBJECTS_ACTION) {
-                    $a = 0;
+                } elseif ($action === 'award_revoke_badge') {
+                    $this->awardBadgeUserSelection();
+                    $render_default = false;
+                } elseif ($action === 'revokeBadge') {
+                    $this->deassignBadge();
+                    $render_default = false;
+                } elseif ($action === 'assignBadge') {
+                    $this->assignBadge();
+                    $render_default = false;
                 }
 
                 if ($render_default) {
@@ -768,11 +805,21 @@ class ilBadgeManagementGUI
     protected function awardBadgeUserSelection(): void
     {
         $ilCtrl = $this->ctrl;
-        $tpl = $this->tpl;
         $ilTabs = $this->tabs;
         $lng = $this->lng;
 
-        $bid = $this->request->getBadgeId();
+        $badge_ids = $this->request->getMultiActionBadgeIdsFromUrl();
+        $bid = null;
+
+        if ($badge_ids === []) {
+            $post = $this->http->wrapper()->post();
+            if ($post->has('bid')) {
+                $bid = $post->retrieve('bid', $this->refinery->kindlyTo()->int());
+            }
+        } elseif (count($badge_ids) === 1) {
+            $bid = (int) $badge_ids[0];
+        }
+
         if (!$bid ||
             !$this->hasWrite()) {
             $ilCtrl->redirect($this, 'listUsers');
@@ -781,6 +828,7 @@ class ilBadgeManagementGUI
         $manual = array_keys(
             ilBadgeHandler::getInstance()->getAvailableManualBadges($this->parent_obj_id, $this->parent_obj_type)
         );
+
         if (!in_array($bid, $manual, true)) {
             $ilCtrl->redirect($this, 'listUsers');
         }
@@ -827,8 +875,9 @@ class ilBadgeManagementGUI
         $ilUser = $this->user;
         $lng = $this->lng;
 
-        $user_ids = $this->request->getIds();
-        $badge_id = $this->request->getBadgeId();
+        $splittable_user_ids = $this->request->getBadgeAssignableUsers();
+        list($user_ids, $badge_id) = $this->splitBadgeAndUserIdsFromString($splittable_user_ids);
+
         if (!$user_ids ||
             !$badge_id ||
             !$this->hasWrite()) {
@@ -905,8 +954,10 @@ class ilBadgeManagementGUI
         $ilCtrl = $this->ctrl;
         $lng = $this->lng;
 
-        $user_ids = $this->request->getIds();
-        $badge_id = $this->request->getBadgeId();
+        $splittable_user_ids = $this->request->getBadgeAssignableUsers();
+
+        list($user_ids, $badge_id) = $this->splitBadgeAndUserIdsFromString($splittable_user_ids);
+
         if (!$user_ids ||
             !$badge_id ||
             !$this->hasWrite()) {

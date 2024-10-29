@@ -224,10 +224,11 @@ class ilBadgeImageTemplateTableGUI
 
         $out = [$table];
         $query = $this->http->wrapper()->query();
-        if ($query->has('tid_id')) {
+        $a = $query->has('tid');
+        if ($query->has('tid')) {
             $query_values = $query->retrieve(
-                'tid_id',
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())
+                'tid',
+                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int())
             );
 
             $items = [];
@@ -245,7 +246,7 @@ class ilBadgeImageTemplateTableGUI
                 foreach ($query_values as $id) {
                     $badge = new ilBadgeImageTemplate($id);
                     $items[] = $f->modal()->interruptiveItem()->keyValue(
-                        $id,
+                        (string) $id,
                         (string) $badge->getId(),
                         $badge->getTitle()
                     );
@@ -259,7 +260,7 @@ class ilBadgeImageTemplateTableGUI
                 );
             }
 
-            $action = $query->retrieve($action_parameter_token->getName(), $this->refinery->to()->string());
+            $action = $query->retrieve($action_parameter_token->getName(), $this->refinery->kindlyTo()->string());
             if ($action === 'badge_image_template_delete') {
                 $this->http->saveResponse(
                     $this->http

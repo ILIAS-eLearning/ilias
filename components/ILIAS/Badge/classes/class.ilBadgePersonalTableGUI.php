@@ -44,7 +44,7 @@ class ilBadgePersonalTableGUI
     private readonly ServerRequestInterface|RequestInterface $request;
     private readonly ilLanguage $lng;
     private readonly ilGlobalTemplateInterface $tpl;
-    private readonly ILIAS\Container $dic;
+    private readonly ILIAS\DI\Container $dic;
 
     public function __construct()
     {
