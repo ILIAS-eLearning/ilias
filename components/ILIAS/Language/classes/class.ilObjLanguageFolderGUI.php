@@ -514,7 +514,6 @@ class ilObjLanguageFolderGUI extends ilObjectGUI
 
         switch ($next_class) {
             case "ilpermissiongui":
-                include_once "Services/AccessControl/classes/class.ilPermissionGUI.php";
                 $perm_gui = new ilPermissionGUI($this);
                 $this->tabs_gui->activateTab("perm_settings");
                 $this->ctrl->forwardCommand($perm_gui);
@@ -849,8 +848,6 @@ class ilObjLanguageFolderGUI extends ilObjectGUI
         );
         $this->toolbar->addComponent($button);
 
-        include_once "./Services/Language/classes/class.ilLangDeprecated.php";
-
         $d = new ilLangDeprecated();
         $res = "";
         foreach ($d->getDeprecatedLangVars() as $key => $mod) {
@@ -865,7 +862,6 @@ class ilObjLanguageFolderGUI extends ilObjectGUI
      */
     public function downloadDeprecatedObject(): void
     {
-        include_once "./Services/Language/classes/class.ilLangDeprecated.php";
         $d = new ilLangDeprecated();
         $res = "";
         foreach ($d->getDeprecatedLangVars() as $key => $mod) {
@@ -878,7 +874,7 @@ class ilObjLanguageFolderGUI extends ilObjectGUI
     protected function getUrl(string $action, array $lang_ids = null): string
     {
         $url_builder = $this->url_builder->withParameter($this->action_token, $action);
-        if($lang_ids) {
+        if ($lang_ids) {
             $url_builder = $url_builder->withParameter($this->id_token, $lang_ids);
         }
         return $url_builder->buildURI()->__toString();
