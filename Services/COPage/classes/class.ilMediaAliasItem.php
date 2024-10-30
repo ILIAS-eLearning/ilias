@@ -16,6 +16,8 @@
  *
  *********************************************************************/
 
+declare(strict_types=1);
+
 /**
  * Class ilMediaAliasItem
  * Media Alias Item, component of a media object (file or reference)
@@ -295,7 +297,8 @@ class ilMediaAliasItem
             $this->getPcId(),
             "/Caption"
         );
-        if (is_object($caption_node)) {
+
+        if (is_object($caption_node) && $this->getCaption() != "") {
             return true;
         }
         return false;
@@ -356,7 +359,7 @@ class ilMediaAliasItem
             $this->getPcId(),
             "/TextRepresentation"
         );
-        if (is_object($text_representation_node)) {
+        if (is_object($text_representation_node) && $this->getTextRepresentation() != "") {
             return true;
         }
         return false;
