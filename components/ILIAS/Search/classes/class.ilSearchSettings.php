@@ -282,12 +282,6 @@ class ilSearchSettings
         return $this->lucene_offline_filter;
     }
 
-    public function isSubRelevanceVisible(): bool
-    {
-        return false;
-    }
-
-
     public function setLuceneMimeFilter(array $a_filter): void
     {
         $this->lucene_mime_filter = $a_filter;
