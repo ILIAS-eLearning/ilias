@@ -180,13 +180,13 @@ class ilBadgeManagementGUI
                     $this->editBadge();
                     $render_default = false;
                 } elseif ($action === 'badge_table_delete') {
-                    $this->deleteBadges();
+                    $this->confirmDeleteBadges();
                     $render_default = false;
                 } elseif ($action === 'award_revoke_badge') {
                     $this->awardBadgeUserSelection();
                     $render_default = false;
                 } elseif ($action === 'revokeBadge') {
-                    $this->deassignBadge();
+                    $this->confirmDeassignBadge();
                     $render_default = false;
                 } elseif ($action === 'assignBadge') {
                     $this->assignBadge();
@@ -601,7 +601,14 @@ class ilBadgeManagementGUI
         $tpl = $this->tpl;
         $ilTabs = $this->tabs;
 
-        $badge_ids = $this->getBadgesFromMultiAction();
+        $badge_ids = $this->request->getMultiActionBadgeIdsFromUrl();
+
+        if ($badge_ids === ['ALL_OBJECTS']) {
+            $badge_ids = [];
+            foreach (ilBadge::getInstancesByParentId($this->parent_obj_id) as $badge) {
+                $badge_ids[] = $badge->getId();
+            }
+        }
 
         $ilTabs->clearTargets();
         $ilTabs->setBackTarget(
@@ -616,7 +623,7 @@ class ilBadgeManagementGUI
         $confirmation_gui->setConfirm($lng->txt('delete'), 'deleteBadges');
 
         foreach ($badge_ids as $badge_id) {
-            $badge = new ilBadge($badge_id);
+            $badge = new ilBadge((int) $badge_id);
             $confirmation_gui->addItem(
                 'id[]',
                 (string) $badge_id,
@@ -633,7 +640,7 @@ class ilBadgeManagementGUI
         $ilCtrl = $this->ctrl;
         $lng = $this->lng;
 
-        $badge_ids = $this->request->getMultiActionBadgeIdsFromUrl();
+        $badge_ids = $this->request->getIds();
 
         if (count($badge_ids) > 0) {
             foreach ($badge_ids as $badge_id) {
@@ -909,7 +916,9 @@ class ilBadgeManagementGUI
         $ilTabs = $this->tabs;
 
         $user_ids = $this->request->getIds();
-        $badge_id = $this->request->getBadgeId();
+        $splittable_user_ids = $this->request->getMultiActionBadgeIdsFromUrl();
+        list($user_ids, $badge_id) = $this->splitBadgeAndUserIdsFromString($splittable_user_ids);
+
         if (!$user_ids ||
             !$badge_id ||
             !$this->hasWrite()) {
@@ -932,15 +941,15 @@ class ilBadgeManagementGUI
             sprintf($lng->txt('badge_assignment_deletion_confirmation'), $badge->getTitle())
         );
         $confirmation_gui->setCancel($lng->txt('cancel'), 'listUsers');
-        $confirmation_gui->setConfirm($lng->txt('delete'), 'deassignBadge');
+        $confirmation_gui->setConfirm($lng->txt('badge_remove_badge'), 'deassignBadge');
 
         $assigned_users = ilBadgeAssignment::getAssignedUsers($badge->getId());
 
         foreach ($user_ids as $user_id) {
             if (in_array($user_id, $assigned_users)) {
                 $confirmation_gui->addItem(
-                    'id[]',
-                    $user_id,
+                    "id[$user_id]",
+                    $badge_id,
                     ilUserUtil::getNamePresentation($user_id, false, false, '', true)
                 );
             }
@@ -954,9 +963,14 @@ class ilBadgeManagementGUI
         $ilCtrl = $this->ctrl;
         $lng = $this->lng;
 
-        $splittable_user_ids = $this->request->getBadgeAssignableUsers();
+        $post_values = $this->request->getIds();
+        $user_ids = [];
+        $badge_id = null;
+        foreach ($post_values as $usr_id => $found_badge_id) {
+            $badge_id = $found_badge_id;
+            $user_ids[] = $usr_id;
+        }
 
-        list($user_ids, $badge_id) = $this->splitBadgeAndUserIdsFromString($splittable_user_ids);
 
         if (!$user_ids ||
             !$badge_id ||
