@@ -37,7 +37,7 @@ class TestRailXMLWriter
     protected int $no_found_ids = 0;
     protected int $no_expexted_ids = 0;
     protected int $no_new_ids = 0;
-    protected int $no_components = 2;
+    protected int $no_components = 2; //initUISection calls getCaseId twice, updating new_ids/found_ids; this is to make total numbers match up
 
     protected array $expected_by_caseids = [];
 
@@ -250,8 +250,8 @@ class TestRailXMLWriter
             print "\n no caseId for: $component_path ($subkey)";
         }
 
-        $build = ($case_id === '' && $this->only_new_cases === true)
-            || ($case_id !== '' && $this->only_new_cases === false);
+        $build = ($case_id === '' && $this->only_new_cases)
+            || ($case_id !== '' && !$this->only_new_cases);
 
         return [$build, $case_id];
     }
