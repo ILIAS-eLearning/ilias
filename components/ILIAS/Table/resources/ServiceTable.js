@@ -1,126 +1,103 @@
-
 // Hide all on load
-var ilTableHideFilter = new Object();
+const ilTableHideFilter = {};
 
 /**
-* Hide all ilFormHelpLink elements
-*/
-function ilInitTableFilters()
-{
-	// hide filters
-	filtrs = YAHOO.util.Dom.getElementsByClassName('ilTableFilterSec');
-	for (var i = 0; i < filtrs.length; i++)
-	{
-		if (ilTableHideFilter[filtrs[i].id] == 1)
-		{
-			filtrs[i].style.display = 'none';
-		}
-		else
-		{
-			filtrs[i].style.display = '';
-		}
-	}
+ * Hide all ilFormHelpLink elements
+ */
+function ilInitTableFilters() {
+  // hide filters
+  const filters = document.querySelectorAll('.ilTableFilterSec');
+  filters.forEach((filter) => {
+    filter.style.display = ilTableHideFilter[filter.id] ? 'none' : '';
+  });
 
-	// show filter activators
-	filactvtrs = YAHOO.util.Dom.getElementsByClassName('ilTableFilterActivator');
-	for (var i = 0; i < filactvtrs.length; i++)
-	{
-		if (ilTableHideFilter[filactvtrs[i].id] == 1)
-		{
-			filactvtrs[i].style.display = '';
-		}
-		else
-		{
-			filactvtrs[i].style.display = 'none';
-		}
-	}
+  // show filter activators
+  const filterActivators = document.querySelectorAll('.ilTableFilterActivator');
+  filterActivators.forEach((activator) => {
+    activator.style.display = ilTableHideFilter[activator.id] ? '' : 'none';
+  });
 
-	// hide filter deactivators
-	fildctvtrs = YAHOO.util.Dom.getElementsByClassName('ilTableFilterDeactivator');
-	for (var i = 0; i < fildctvtrs.length; i++)
-	{
-		if (ilTableHideFilter[fildctvtrs[i].id] == 1)
-		{
-			fildctvtrs[i].style.display = 'none';
-		}
-		else
-		{
-			fildctvtrs[i].style.display = '';
-		}
-	}
-
+  // hide filter deactivators
+  const filterDeactivators = document.querySelectorAll('.ilTableFilterDeactivator');
+  filterDeactivators.forEach((deactivator) => {
+    deactivator.style.display = ilTableHideFilter[deactivator.id] ? 'none' : '';
+  });
 }
 
-function ilShowTableFilter(id, sUrl)
-{
-	var obj = document.getElementById(id);
-	obj.style.display = '';
-	var obj2 = document.getElementById("a" + id);
-	obj2.style.display = 'none';
-	var obj3 = document.getElementById("d" + id);
-	obj3.style.display = '';
-	if (sUrl != "")
-	{
-		ilTableJSHandler(sUrl);
-	}
-	return false;
+function ilShowTableFilter(id, sUrl) {
+  const filter = document.getElementById(id);
+  const activator = document.getElementById(`a${id}`);
+  const deactivator = document.getElementById(`d${id}`);
+
+  if (filter && activator && deactivator) {
+    filter.style.display = '';
+    activator.style.display = 'none';
+    deactivator.style.display = '';
+  }
+
+  if (sUrl) {
+    ilTableJSHandler(sUrl);
+  }
+
+  return false;
 }
 
-function ilHideTableFilter(id, sUrl)
-{
-	var obj = document.getElementById(id);
-	obj.style.display = 'none';
-	var obj2 = document.getElementById("a" + id);
-	obj2.style.display = '';
-	var obj3 = document.getElementById("d" + id);
-	obj3.style.display = 'none';
-	if (sUrl != "")
-	{
-		ilTableJSHandler(sUrl);
-	}
-	return false;
+function ilHideTableFilter(id, sUrl) {
+  const filter = document.getElementById(id);
+  const activator = document.getElementById(`a${id}`);
+  const deactivator = document.getElementById(`d${id}`);
+
+  if (filter && activator && deactivator) {
+    filter.style.display = 'none';
+    activator.style.display = '';
+    deactivator.style.display = 'none';
+  }
+
+  if (sUrl) {
+    ilTableJSHandler(sUrl);
+  }
+
+  return false;
 }
 
 // Success Handler
-var ilTableSuccessHandler = function(o)
-{
-	// parse headers function
-	function parseHeaders()
-	{
-	}
+function ilTableSuccessHandler(response) {
+  // parse headers function
+  function parseHeaders() {
+    // handle response headers if needed
+  }
+  parseHeaders();
 }
 
-// Success Handler
-var ilTableFailureHandler = function(o)
-{
-	//alert('FailureHandler');
+// Failure Handler
+function ilTableFailureHandler(error) {
+  console.error('Request failed', error);
 }
 
-function ilTableJSHandler(sUrl)
-{
-  const xhr = new XMLHttpRequest();
-  xhr.open('GET', sUrl);
-  xhr.onload = (e) => {
-    if (xhr.readyState === 4 && xhr.status === 200) {
-      ilTableSuccessHandler(e);
-    } else {
-      ilTableFailureHandler(e);
-    }
-  };
-  xhr.onerror = (e) => {
-    ilTableFailureHandler(e);
-  };
-  xhr.send();
-	return false;
+function ilTableJSHandler(sUrl) {
+  fetch(sUrl, { method: 'GET' })
+    .then((response) => {
+      if (response.ok) {
+        return response.text();
+      }
+      throw new Error('Network response was not ok.');
+    })
+    .then((data) => {
+      ilTableSuccessHandler(data);
+    })
+    .catch((error) => {
+      ilTableFailureHandler(error);
+    });
+
+  return false;
 }
 
-function ilTablePageSelection(el, cmd)
-{
-	var input = document.createElement("input");
-	input.setAttribute("type", "hidden");
-	input.setAttribute("name", cmd);
-	input.setAttribute("value", "1");
-	el.parentNode.appendChild(input);
-	el.form.submit();
-	return false;
+function ilTablePageSelection(el, cmd) {
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = cmd;
+  input.value = '1';
+  el.parentNode.appendChild(input);
+  el.form.submit();
+  return false;
 }
