@@ -193,14 +193,14 @@ class SubmissionRepository implements SubmissionRepositoryInterface
     public function getAllSubmissionIdsOfOwner(int $ass_id, int $user_id): array
     {
         $set = $this->db->queryF(
-            "SELECT returned_id FROM exc_returned " .
+            "SELECT id FROM exc_returned " .
             " WHERE ass_id = %s AND user_id = %s",
             ["integer", "integer"],
             [$ass_id, $user_id]
         );
         $user_ids = [];
         while ($rec = $this->db->fetchAssoc($set)) {
-            $user_ids[] = (int) $rec["returned_id"];
+            $user_ids = (int) $rec["id"];
         }
         return $user_ids;
     }
