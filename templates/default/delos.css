@@ -8274,6 +8274,18 @@ div.alert ul > li:before {
   background: #2c2c2c;
 }
 
+.il-video-container video {
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 100%;
+}
+.il-video-container iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: 0;
+}
+
 .webui-popover-content {
   display: none;
 }

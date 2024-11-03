@@ -74,12 +74,62 @@ class Renderer extends AbstractComponentRenderer
     public function renderVideo(
         Component\Component $component,
         RendererInterface $default_renderer
+    ): string
+    {
+        if ($this->isVimeo($component)) {
+            return $this->renderVimeo(
+                $component,
+                $default_renderer
+            );
+        } elseif ($this->isYoutube($component)) {
+            return $this->renderYoutube(
+                $component,
+                $default_renderer
+            );
+        }
+        return $this->renderNative(
+            $component,
+            $default_renderer
+        );
+    }
+
+    public function renderVimeo(
+        Component\Component $component,
+        RendererInterface $default_renderer
     ): string {
+
+        $tpl = $this->getTemplate("tpl.video_vimeo.html", true, true);
+
+        $id = $this->bindJavaScript($component);
+
+        $tpl->setVariable("ID", $id);
+        $tpl->setVariable("SOURCE", $component->getSource());
+
+        return $tpl->get();
+    }
+
+    public function renderYoutube(
+        Component\Component $component,
+        RendererInterface $default_renderer
+    ): string {
+
+        $tpl = $this->getTemplate("tpl.video_youtube.html", true, true);
+
+        $id = $this->bindJavaScript($component);
+
+        $tpl->setVariable("ID", $id);
+        $tpl->setVariable("SOURCE", $component->getSource());
+
+        return $tpl->get();
+    }
+
+    public function renderNative(
+            Component\Component $component,
+            RendererInterface $default_renderer
+        ): string {
+
         $tpl = $this->getTemplate("tpl.video.html", true, true);
 
-        $component = $component->withAdditionalOnLoadCode(function ($id) {
-            return "$('#$id').mediaelementplayer();";
-        });
         $id = $this->bindJavaScript($component);
 
         foreach ($component->getSubtitleFiles() as $lang_key => $file) {
@@ -101,11 +151,31 @@ class Renderer extends AbstractComponentRenderer
         return $tpl->get();
     }
 
+    protected function isVimeo(
+        Component\Component $component
+    ) : bool
+    {
+        if (is_int(strpos($component->getSource(), 'vimeo.com'))) {
+            return true;
+        }
+        return false;
+    }
+
+    protected function isYoutube(
+        Component\Component $component
+    ) : bool
+    {
+        if (is_int(strpos($component->getSource(), 'youtube.com'))) {
+            return true;
+        }
+        return false;
+    }
+
     public function registerResources(\ILIAS\UI\Implementation\Render\ResourceRegistry $registry): void
     {
         parent::registerResources($registry);
-        $registry->register('./assets/js/mediaelement-and-player.min.js');
-        $registry->register('./assets/css/mediaelementplayer.min.css');
-        $registry->register('./assets/js/vimeo.min.js');
+        $registry->register('https://player.vimeo.com/api/player.js');
     }
+
+
 }
