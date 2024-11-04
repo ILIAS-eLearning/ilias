@@ -79,7 +79,7 @@ class RandomQuestionSetSourcePoolDefinitionListTable implements OrderingBinding
                 ),
                 'lifecycle_filter' => $this->taxonomy_translator->getLifecycleFilterLabel($qp['lifecycle_filter']),
                 'type_filter' => $this->taxonomy_translator->getTypeFilterLabel($qp['type_filter']),
-                'question_amount' => $this->getAmountCellContent($qp['def_id'], $qp['question_amount'])
+                'question_amount' => (int) $qp['question_amount']
             ];
             yield $row_builder->buildOrderingRow((string) $qp['def_id'], $record);
         }
@@ -133,15 +133,11 @@ class RandomQuestionSetSourcePoolDefinitionListTable implements OrderingBinding
     public function applySubmit(RequestDataCollector $request): void
     {
         $quest_pos = array_flip($this->getComponent()->getData());
-        $quest_amounts = array_map('intval', $request->raw('quest_amount') ?? []);
 
         foreach ($this->source_pool_definition_list as $source_pool_definition) {
             $pool_id = $source_pool_definition->getId();
             $sequence_pos = array_key_exists($pool_id, $quest_pos) ? $quest_pos[$pool_id] : 0;
             $source_pool_definition->setSequencePosition($sequence_pos);
-
-            $amount = array_key_exists($pool_id, $quest_amounts) ? $quest_amounts[$pool_id] : 0;
-            $source_pool_definition->setQuestionAmount($this->show_amount ? $amount : null);
         }
     }
 
@@ -159,7 +155,7 @@ class RandomQuestionSetSourcePoolDefinitionListTable implements OrderingBinding
             ),
             'lifecycle_filter' => $column_factory->text($this->lng->txt('qst_lifecycle')),
             'type_filter' => $column_factory->text($this->lng->txt('tst_filter_question_type')),
-            'question_amount' => $column_factory->text($this->lng->txt('tst_question_amount')),
+            'question_amount' => $column_factory->number($this->lng->txt('tst_question_amount')),
         ];
 
         $columns_conditions = [
@@ -189,13 +185,6 @@ class RandomQuestionSetSourcePoolDefinitionListTable implements OrderingBinding
                 $this->id_token
             )
         ];
-    }
-
-    protected function getAmountCellContent(int $def_id, ?int $amount): string
-    {
-        return $this->editable
-            ? '<input type="text" size="4" value="' . $amount . '" name="quest_amount[' . $def_id . ']" />'
-            : (string) $amount;
     }
 
     protected function getTarget(string $cmd): URI

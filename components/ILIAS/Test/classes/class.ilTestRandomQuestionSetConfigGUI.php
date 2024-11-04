@@ -458,9 +458,9 @@ class ilTestRandomQuestionSetConfigGUI
 
     private function deleteSourcePoolDefinitionCmd(): void
     {
-        $definitionIds = $this->fetchMultiSourcePoolDefinitionIdsParameter();
-        foreach ($definitionIds as $definitionId) {
-            $definition = $this->source_pool_definition_factory->getSourcePoolDefinitionByDefinitionId($definitionId);
+        $definition_ids = $this->fetchMultiSourcePoolDefinitionIdsParameter();
+        foreach ($definition_ids as $definition_id) {
+            $definition = $this->source_pool_definition_factory->getSourcePoolDefinitionByDefinitionId($definition_id);
             $definition->deleteFromDb();
         }
 
@@ -690,26 +690,26 @@ class ilTestRandomQuestionSetConfigGUI
             return [];
         }
 
-        $definitionIds = is_array($this->testrequest->raw('src_pool_def_id'))
+        $definition_ids = is_array($this->testrequest->raw('src_pool_def_id'))
             ? array_map('intval', $this->testrequest->raw('src_pool_def_id'))
             : [(int) $this->testrequest->raw('src_pool_def_id')];
 
-        foreach ($definitionIds as $definitionId) {
-            if ($definitionId === 0) {
+        foreach ($definition_ids as $definition_id) {
+            if ($definition_id === 0) {
                 throw new ilTestMissingSourcePoolDefinitionParameterException();
             }
         }
-        return $definitionIds;
+        return $definition_ids;
     }
 
     private function fetchSingleSourcePoolDefinitionIdParameter(): int
     {
         //even a single id can be an array (set by table actions) or a single value (set by form actions)
-        $definitionIds = $this->fetchMultiSourcePoolDefinitionIdsParameter();
-        if (count($definitionIds) !== 1) {
+        $definition_ids = $this->fetchMultiSourcePoolDefinitionIdsParameter();
+        if (count($definition_ids) !== 1) {
             throw new ilTestMissingSourcePoolDefinitionParameterException();
         }
-        return $definitionIds[0];
+        return $definition_ids[0];
     }
 
     private function getSourcePoolDefinitionByAvailableQuestionPoolId($pool_id): ilTestRandomQuestionSetSourcePoolDefinition
