@@ -29,15 +29,4 @@ class ilBirthdayInputGUI extends ilDateTimeInputGUI
     {
         return date("Y") - 100;
     }
-
-    protected function parseDatePickerConfig(): array
-    {
-        $config = parent::parseDatePickerConfig();
-
-        $config["viewMode"] = "years";
-        $config["calendarWeeks"] = false;
-        $config["showTodayButton"] = false;
-
-        return $config;
-    }
 }
