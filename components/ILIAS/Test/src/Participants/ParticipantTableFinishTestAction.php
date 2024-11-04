@@ -179,7 +179,7 @@ class ParticipantTableFinishTestAction implements TableAction
         return $this->lng->txt('finish_test_multiple');
     }
 
-    public function getSelectionErrorMessage(): string
+    public function getSelectionErrorMessage(): ?string
     {
         return $this->lng->txt('finish_test_no_valid_participants_selected');
     }

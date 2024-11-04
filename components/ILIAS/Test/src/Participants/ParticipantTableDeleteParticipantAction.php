@@ -119,7 +119,7 @@ class ParticipantTableDeleteParticipantAction implements TableAction
         return $record->getActiveId() === null;
     }
 
-    public function getSelectionErrorMessage(): string
+    public function getSelectionErrorMessage(): ?string
     {
         return $this->lng->txt('delete_participants_no_valid_participants_selected');
     }

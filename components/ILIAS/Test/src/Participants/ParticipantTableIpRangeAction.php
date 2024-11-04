@@ -227,4 +227,9 @@ class ParticipantTableIpRangeAction implements TableAction
         }
         return false;
     }
+
+    public function getSelectionErrorMessage(): ?string
+    {
+        return null;
+    }
 }
