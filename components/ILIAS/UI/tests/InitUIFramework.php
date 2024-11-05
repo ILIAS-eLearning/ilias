@@ -62,6 +62,7 @@ class InitUIFramework
                 $c["ui.factory.launcher"],
                 $c["ui.factory.entity"],
                 $c["ui.factory.prompt"],
+                $c["ui.factory.navigation"],
             );
         };
         $c["ui.upload_limit_resolver"] = function ($c) {
@@ -405,6 +406,15 @@ class InitUIFramework
         $c["ui.factory.prompt"] = function ($c) {
             return new ILIAS\UI\Implementation\Component\Prompt\Factory($c["ui.signal_generator"]);
         };
+        
+        $c["ui.factory.navigation"] = function ($c) {
+            return new ILIAS\UI\Implementation\Component\Navigation\Factory(
+                $c["ui.data_factory"],
+                $c["refinery"],
+            );
+        };
+
+
 
         // currently this is will be a session storage because we cannot store
         // data on the client, see https://mantis.ilias.de/view.php?id=38503.
