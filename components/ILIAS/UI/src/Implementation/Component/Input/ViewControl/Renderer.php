@@ -47,6 +47,8 @@ class Renderer extends AbstractComponentRenderer
                 return $default_renderer->render($component->getInputs());
             case ($component instanceof Component\Input\ViewControl\NullControl):
                 return '';
+            case ($component instanceof Component\Input\ViewControl\Mode):
+                return $this->renderMode($component, $default_renderer);
 
             default:
                 $this->cannotHandleComponent($component);
@@ -375,6 +377,44 @@ class Renderer extends AbstractComponentRenderer
             )
         );
 
+        return $tpl->get();
+    }
+
+
+    protected function renderMode(Mode $component, RendererInterface $default_renderer): string
+    {
+        $tpl = $this->getTemplate("tpl.viewcontrol_mode.html", true, true);
+        $ui_factory = $this->getUIFactory();
+
+        $container_submit_signal = $component->getOnChangeSignal();
+        $set_value = $component->getValue() ?? '';
+        $out = [];
+        foreach ($component->getOptions() as $opt_value => $opt_label) {
+            $out[] = $ui_factory->button()->standard($opt_label, '#')
+                ->withEngagedState($opt_value === $set_value)
+                ->withOnLoadCode(static fn($id): string =>
+                    "document.getElementById('{$id}').addEventListener(
+                        'click',
+                        (e) => {
+                            const btn = e.srcElement;
+                            btn.parentElement.querySelectorAll('button').forEach(
+                                (button) => button.classList.remove('engaged')
+                            );
+                            btn.classList.add('engaged');
+                            btn.closest('.il-viewcontrol')
+                                .querySelector('.il-viewcontrol-value > input')
+                                .value = '{$opt_value}';
+                            $(e.target).trigger('{$container_submit_signal}');
+                            return false;
+                        }
+                    );
+                ");
+        }
+        $tpl->setVariable('BUTTONS', $default_renderer->render($out));
+        $tpl->setVariable('VALUE', $set_value);
+        $tpl->setVariable("NAME", $component->getName());
+
+        $id = $this->bindJavaScript($component);
         return $tpl->get();
     }
 

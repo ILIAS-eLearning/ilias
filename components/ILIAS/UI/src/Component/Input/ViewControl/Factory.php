@@ -126,7 +126,24 @@ interface Factory
      * ---
      * @return \ILIAS\UI\Component\Input\ViewControl\NullControl
      */
-
     public function nullControl(): NullControl;
+
+
+    /**
+    * ---
+     * description:
+     *   purpose: >
+     *      The mode view controls offers a mutually exclusive selection to
+     *      display data according to the chosen aspect.
+     *   composition: >
+     *      This view control renders a stateful button for each option.
+     *   effect: >
+     *      When clicking a button of the control, the corresponding view is
+     *      changed immediately; the clicked button is engaged while all others
+     *      are not.
+     * ---
+     * @return \ILIAS\UI\Component\Input\ViewControl\Mode
+     */
+    public function mode(array $options): Mode;
 
 }
