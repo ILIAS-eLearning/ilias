@@ -76,7 +76,7 @@ class ilMultipleChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
                         return false;
                     }
 
-                    if (strlen($answervalue) > $this->getMaxLength()) {
+                    if (mb_strlen($answervalue) > $this->getMaxLength()) {
                         $this->setAlert($lng->txt("msg_input_char_limit_max"));
                         return false;
                     }
