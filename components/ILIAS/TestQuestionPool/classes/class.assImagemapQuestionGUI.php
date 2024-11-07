@@ -227,10 +227,6 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
         $this->areaEditor('poly');
     }
 
-    /**
-     * Saves a shape of the area editor
-     * @throws ilCtrlException
-     */
     public function saveShape(): void
     {
         $coords = '';
@@ -262,9 +258,6 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
         $this->ctrl->redirect($this, 'editQuestion');
     }
 
-    /**
-     * @throws ilTemplateException|ilCtrlException
-     */
     public function areaEditor(string $shape = ''): void
     {
         if ($shape === '') {
@@ -273,7 +266,7 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
 
         $this->getQuestionTemplate();
 
-        $editorTpl = new ilTemplate('tpl.il_as_qpl_imagemap_question.html', true, true, 'components/ILIAS/TestQuestionPool');
+        $editor_tpl = new ilTemplate('tpl.il_as_qpl_imagemap_question.html', true, true, 'components/ILIAS/TestQuestionPool');
 
         $coords = [];
         $mapcoords = $this->request_data_collector->raw('image');
@@ -287,16 +280,16 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
             $coords[] = $cmd['areaEditor']['image'][0] . ',' . $cmd['areaEditor']['image'][1];
         }
         foreach ($coords as $value) {
-            $editorTpl->setCurrentBlock('hidden');
-            $editorTpl->setVariable('HIDDEN_NAME', 'image[mapcoords][]');
-            $editorTpl->setVariable('HIDDEN_VALUE', $value);
-            $editorTpl->parseCurrentBlock();
+            $editor_tpl->setCurrentBlock('hidden');
+            $editor_tpl->setVariable('HIDDEN_NAME', 'image[mapcoords][]');
+            $editor_tpl->setVariable('HIDDEN_VALUE', $value);
+            $editor_tpl->parseCurrentBlock();
         }
 
-        $editorTpl->setCurrentBlock('hidden');
-        $editorTpl->setVariable('HIDDEN_NAME', 'shape');
-        $editorTpl->setVariable('HIDDEN_VALUE', $shape);
-        $editorTpl->parseCurrentBlock();
+        $editor_tpl->setCurrentBlock('hidden');
+        $editor_tpl->setVariable('HIDDEN_NAME', 'shape');
+        $editor_tpl->setVariable('HIDDEN_VALUE', $shape);
+        $editor_tpl->parseCurrentBlock();
 
         $preview = new ilImagemapPreview($this->object->getImagePath() . $this->object->getImageFilename());
         foreach ($this->object->answers as $index => $answer) {
@@ -367,37 +360,34 @@ class assImagemapQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
         $preview->createPreview();
         $image_path = $this->object->getImagePathWeb() . $preview->getPreviewFilename($this->object->getImagePath(), $this->object->getImageFilename()) . '?img=' . time();
         if (!$hidearea) {
-            $editorTpl->setCurrentBlock('maparea');
-            $editorTpl->setVariable('IMAGEMAP_NAME', 'image');
+            $editor_tpl->setCurrentBlock('maparea');
+            $editor_tpl->setVariable('IMAGEMAP_NAME', 'image');
         } else {
-            $editorTpl->setCurrentBlock('imagearea');
-            $editorTpl->setVariable('ALT_IMAGE', $this->lng->txt('imagemap'));
+            $editor_tpl->setCurrentBlock('imagearea');
+            $editor_tpl->setVariable('ALT_IMAGE', $this->lng->txt('imagemap'));
         }
-        $editorTpl->setVariable('IMAGE_SOURCE', $image_path);
-        $editorTpl->parseCurrentBlock();
+        $editor_tpl->setVariable('IMAGE_SOURCE', $image_path);
+        $editor_tpl->parseCurrentBlock();
 
         if ($shape_title !== '') {
-            $editorTpl->setCurrentBlock('shapetitle');
-            $editorTpl->setVariable('VALUE_SHAPETITLE', $shape_title);
-            $editorTpl->parseCurrentBlock();
+            $editor_tpl->setCurrentBlock('shapetitle');
+            $editor_tpl->setVariable('VALUE_SHAPETITLE', $shape_title);
+            $editor_tpl->parseCurrentBlock();
         }
 
-        $editorTpl->setVariable('TEXT_IMAGEMAP', $this->lng->txt('imagemap'));
-        $editorTpl->setVariable('TEXT_SHAPETITLE', $this->lng->txt('ass_imap_hint'));
-        $editorTpl->setVariable('CANCEL', $this->lng->txt('cancel'));
-        $editorTpl->setVariable('SAVE', $this->lng->txt('save'));
-        $editorTpl->setVariable('DISABLED_SAVE', $disabled_save);
+        $editor_tpl->setVariable('TEXT_IMAGEMAP', $this->lng->txt('imagemap'));
+        $editor_tpl->setVariable('TEXT_SHAPETITLE', $this->lng->txt('ass_imap_hint'));
+        $editor_tpl->setVariable('CANCEL', $this->lng->txt('cancel'));
+        $editor_tpl->setVariable('SAVE', $this->lng->txt('save'));
+        $editor_tpl->setVariable('DISABLED_SAVE', $disabled_save);
 
         if (in_array($shape, assImagemapQuestion::AVAILABLE_SHAPES, true)) {
-            $editorTpl->setVariable('FORMACTION', $this->ctrl->getFormaction($this, 'add' . ucfirst($shape)));
+            $editor_tpl->setVariable('FORMACTION', $this->ctrl->getFormaction($this, 'add' . ucfirst($shape)));
         }
 
-        $this->tpl->setVariable('QUESTION_DATA', $editorTpl->get());
+        $this->tpl->setVariable('QUESTION_DATA', $editor_tpl->get());
     }
 
-    /**
-     * @throws ilCtrlException
-     */
     public function back(): void
     {
         $this->tpl->setOnScreenMessage('info', $this->lng->txt('msg_cancel'), true);

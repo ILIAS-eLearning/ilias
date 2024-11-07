@@ -16,8 +16,6 @@
  *
  *********************************************************************/
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
-
 /**
  * Class ilAssErrorTextCorrections
  *
@@ -28,14 +26,11 @@ use ILIAS\TestQuestionPool\RequestDataCollector;
  */
 class ilAssErrorTextCorrectionsInputGUI extends ilErrorTextWizardInputGUI
 {
-    private RequestDataCollector $request_data_collector;
-
     public function __construct(string $a_title = '', string $a_postvar = '')
     {
         parent::__construct($a_title, $a_postvar);
-        global $DIC;
-        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
     }
+
     public function setValue($a_value): void
     {
         if (is_array($a_value) && is_array($a_value['points'])) {
@@ -74,9 +69,6 @@ class ilAssErrorTextCorrectionsInputGUI extends ilErrorTextWizardInputGUI
         return $this->checkSubItemsInput();
     }
 
-    /**
-     * @throws ilTemplateException
-     */
     public function insert(ilTemplate $a_tpl): void
     {
         global $DIC;

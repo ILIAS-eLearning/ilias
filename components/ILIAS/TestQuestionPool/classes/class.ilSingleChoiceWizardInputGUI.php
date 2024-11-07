@@ -372,9 +372,6 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
         return $this->checkSubItemsInput();
     }
 
-    /**
-     * @throws ilTemplateException
-     */
     public function insert(ilTemplate $a_tpl): void
     {
         $tpl = new ilTemplate('tpl.prop_singlechoicewizardinput.html', true, true, 'components/ILIAS/TestQuestionPool');

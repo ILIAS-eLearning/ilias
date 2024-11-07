@@ -16,8 +16,6 @@
  *
  *********************************************************************/
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
-
 /**
  * @author		Björn Heyser <bheyser@databay.de>
  * @version		$Id$
@@ -38,8 +36,6 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
      */
     protected $qstObject;
 
-    protected readonly RequestDataCollector $request_data_collector;
-
     private $files;
 
     private $ignoreMissingUploadsEnabled;
@@ -58,8 +54,6 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
         $this->files = [];
 
         $this->ignoreMissingUploadsEnabled = false;
-
-        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function setFiles($files): void

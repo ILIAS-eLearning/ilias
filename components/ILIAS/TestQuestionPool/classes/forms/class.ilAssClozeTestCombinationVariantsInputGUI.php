@@ -16,8 +16,6 @@
  *
  *********************************************************************/
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
-
 /**
  * Class ilAssClozeTestCombinationVariantsInputGUI
  *
@@ -28,13 +26,9 @@ use ILIAS\TestQuestionPool\RequestDataCollector;
  */
 class ilAssClozeTestCombinationVariantsInputGUI extends ilAnswerWizardInputGUI
 {
-    private RequestDataCollector $request_data_collector;
-
     public function __construct(string $a_title = '', string $a_postvar = '')
     {
         parent::__construct($a_title, $a_postvar);
-        global $DIC;
-        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
     }
 
     public function setValue($a_value): void
@@ -88,17 +82,14 @@ class ilAssClozeTestCombinationVariantsInputGUI extends ilAnswerWizardInputGUI
         return true;
     }
 
-    /**
-     * @throws ilTemplateException
-     */
     public function insert(ilTemplate $a_tpl): void
     {
         $tpl = new ilTemplate('tpl.prop_gap_combi_answers_input.html', true, true, 'components/ILIAS/TestQuestionPool');
         $gaps = [];
 
         foreach ($this->values as $variant) {
-            foreach ($variant['gaps'] as $gapIndex => $answer) {
-                $gaps[$gapIndex] = $gapIndex;
+            foreach ($variant['gaps'] as $gap_index => $answer) {
+                $gaps[$gap_index] = $gap_index;
 
                 $tpl->setCurrentBlock('gap_answer');
                 $tpl->setVariable('GAP_ANSWER', $answer);
@@ -111,9 +102,9 @@ class ilAssClozeTestCombinationVariantsInputGUI extends ilAnswerWizardInputGUI
             $tpl->parseCurrentBlock();
         }
 
-        foreach ($gaps as $gapIndex) {
+        foreach ($gaps as $gap_index) {
             $tpl->setCurrentBlock('gap_header');
-            $tpl->setVariable('GAP_HEADER', 'Gap ' . ($gapIndex + 1));
+            $tpl->setVariable('GAP_HEADER', 'Gap ' . ($gap_index + 1));
             $tpl->parseCurrentBlock();
         }
 

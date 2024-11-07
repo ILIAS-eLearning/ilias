@@ -47,22 +47,22 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         $this->manipulationsEnabled = $manipulationsEnabled;
     }
 
-    /**
-     * @throws ilException
-     */
     public function __construct(
-        $parentOBJ,
-        $parentCmd,
+        $parent_obj,
+        $parent_cmd,
         ilCtrl $ctrl,
         ilLanguage $lng
     ) {
+        global $DIC;
+
         $this->lng = $lng;
         $this->ctrl = $ctrl;
+        $this->requestDataCollector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
 
         $this->setId('assQstSkl');
         $this->setPrefix('assQstSkl');
 
-        parent::__construct($parentOBJ, $parentCmd);
+        parent::__construct($parent_obj, $parent_cmd);
 
         $this->setStyle('table', 'fullwidth');
 
@@ -71,13 +71,8 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         $this->enable('header');
         $this->disable('sort');
         $this->disable('select_all');
-        global $DIC;
-        $this->requestDataCollector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
     }
 
-    /**
-     * @throws ilCtrlException
-     */
     public function init(): void
     {
         $this->initColumns();
@@ -106,9 +101,6 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         $this->addColumn($this->lng->txt('actions'), 'actions', '20%');
     }
 
-    /**
-     * @throws ilTemplateException|ilCtrlException
-     */
     public function fillRow(array $a_set): void
     {
         $assignments = $this->skillQuestionAssignmentList->getAssignmentsByQuestionId($a_set['question_id']);
@@ -179,9 +171,6 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         return $this->areManipulationsEnabled() ? $cnt + 1 : $cnt;
     }
 
-    /**
-     * @throws ilCtrlException
-     */
     private function getManageCompetenceAssignsActionLink(): string
     {
         $href = $this->ctrl->getLinkTarget(
@@ -192,9 +181,6 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         return $this->buildActionLink($href, $this->lng->txt('tst_manage_competence_assigns'));
     }
 
-    /**
-     * @throws ilCtrlException
-     */
     private function getCompetenceAssignPropertiesFormLink(ilAssQuestionSkillAssignment $assignment): string
     {
         $this->ctrl->setParameter($this->parent_obj, 'skill_base_id', $assignment->getSkillBaseId());
@@ -220,9 +206,6 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         return "<a href=\"{$href}\" title=\"{$label}\">{$label}</a>";
     }
 
-    /**
-     * @throws ilCtrlException
-     */
     private function buildActionColumnHTML($assignments): string
     {
         $actions = [];

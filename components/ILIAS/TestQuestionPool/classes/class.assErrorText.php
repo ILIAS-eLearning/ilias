@@ -21,7 +21,6 @@ declare(strict_types=1);
 use ILIAS\TestQuestionPool\Questions\QuestionLMExportable;
 use ILIAS\TestQuestionPool\Questions\QuestionAutosaveable;
 use ILIAS\Test\Logging\AdditionalInformationGenerator;
-use ILIAS\TestQuestionPool\RequestDataCollector;
 
 /**
  * Class for error text questions
@@ -57,7 +56,6 @@ class assErrorText extends assQuestion implements ilObjQuestionScoringAdjustable
     protected array $errordata = [];
     protected float $textsize;
     protected ?float $points_wrong = null;
-    private readonly RequestDataCollector $request_data_collector;
 
     public function __construct(
         string $title = '',
@@ -68,8 +66,6 @@ class assErrorText extends assQuestion implements ilObjQuestionScoringAdjustable
     ) {
         parent::__construct($title, $comment, $author, $owner, $question);
         $this->textsize = self::DEFAULT_TEXT_SIZE;
-        global $DIC;
-        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
     }
 
     public function isComplete(): bool
@@ -307,7 +303,7 @@ class assErrorText extends assQuestion implements ilObjQuestionScoringAdjustable
     {
         return explode(
             ',',
-            $this->request_data_collector->retrieveStringFromPost('qst_' . $this->getId())
+            $this->test_request->retrieveStringFromPost('qst_' . $this->getId())
         );
     }
 

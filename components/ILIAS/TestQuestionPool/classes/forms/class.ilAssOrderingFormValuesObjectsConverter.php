@@ -189,21 +189,21 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
     {
         $values = [];
 
-        foreach ($elements as $identifier => $orderingElement) {
+        foreach ($elements as $identifier => $ordering_element) {
             switch ($this->getContext()) {
                 case self::CONTEXT_MAINTAIN_ELEMENT_TEXT:
 
-                    $values[$identifier] = $this->getTextContentValueFromObject($orderingElement);
+                    $values[$identifier] = $this->getTextContentValueFromObject($ordering_element);
                     break;
 
                 case self::CONTEXT_MAINTAIN_ELEMENT_IMAGE:
 
-                    $values[$identifier] = $this->getImageContentValueFromObject($orderingElement);
+                    $values[$identifier] = $this->getImageContentValueFromObject($ordering_element);
                     break;
 
                 case self::CONTEXT_MAINTAIN_HIERARCHY:
 
-                    $values[$identifier] = $this->getStructValueFromObject($orderingElement);
+                    $values[$identifier] = $this->getStructValueFromObject($ordering_element);
                     break;
 
                 default:
@@ -242,22 +242,22 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
         ];
     }
 
-    protected function needsConvertToElements($valuesOrElements): bool
+    protected function needsConvertToElements($values_or_elements): bool
     {
-        if (!count($valuesOrElements)) {
+        if (!count($values_or_elements)) {
             return false;
         }
 
-        return !(current($valuesOrElements) instanceof ilAssOrderingElement);
+        return !(current($values_or_elements) instanceof ilAssOrderingElement);
     }
 
-    public function manipulateFormSubmitValues(array $submitValues): array
+    public function manipulateFormSubmitValues(array $submit_values): array
     {
-        if ($this->needsConvertToElements($submitValues)) {
-            $submitValues = $this->constructElementsFromValues($submitValues);
+        if ($this->needsConvertToElements($submit_values)) {
+            $submit_values = $this->constructElementsFromValues($submit_values);
         }
 
-        return $submitValues;
+        return $submit_values;
     }
 
     public function constructElementsFromValues(array $values): array
@@ -313,9 +313,9 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
         return $this->fetchSubmittedFileUploadProperty($fileUpload, 'tmp_name');
     }
 
-    protected function fetchSubmittedFileUploadProperty(mixed $fileUpload, string $property)
+    protected function fetchSubmittedFileUploadProperty(mixed $file_upload, string $property)
     {
-        return $fileUpload[$property] ?? null;
+        return $file_upload[$property] ?? null;
     }
 
     protected function fetchElementFileUpload($identifier)
@@ -325,30 +325,30 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
 
     protected function fetchSubmittedUploadFiles(): array
     {
-        $submittedUploadFiles = $this->getFileSubmitDataRestructuredByIdentifiers();
+        $submitted_upload_files = $this->getFileSubmitDataRestructuredByIdentifiers();
         //$submittedUploadFiles = $this->getFileSubmitsHavingActualUpload($submittedUploadFiles);
-        return $submittedUploadFiles;
+        return $submitted_upload_files;
     }
 
-    protected function getFileSubmitsHavingActualUpload(array $submittedUploadFiles): array
+    protected function getFileSubmitsHavingActualUpload(array $submitted_upload_files): array
     {
-        foreach ($submittedUploadFiles as $identifier => $uploadProperties) {
-            if (!isset($uploadProperties['tmp_name'])) {
-                unset($submittedUploadFiles[$identifier]);
+        foreach ($submitted_upload_files as $identifier => $upload_properties) {
+            if (!isset($upload_properties['tmp_name'])) {
+                unset($submitted_upload_files[$identifier]);
                 continue;
             }
 
-            if ($uploadProperties['tmp_name'] === '') {
-                unset($submittedUploadFiles[$identifier]);
+            if ($upload_properties['tmp_name'] === '') {
+                unset($submitted_upload_files[$identifier]);
                 continue;
             }
 
-            if (!is_uploaded_file($uploadProperties['tmp_name'])) {
-                unset($submittedUploadFiles[$identifier]);
+            if (!is_uploaded_file($upload_properties['tmp_name'])) {
+                unset($submitted_upload_files[$identifier]);
             }
         }
 
-        return $submittedUploadFiles;
+        return $submitted_upload_files;
     }
 
     /**
@@ -356,19 +356,19 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
      */
     protected function getFileSubmitDataRestructuredByIdentifiers(): array
     {
-        $submittedUploadFiles = [];
+        $submitted_upload_files = [];
 
         foreach ($this->getFileSubmitData() as $uploadProperty => $valueElement) {
-            foreach ($valueElement as $elementIdentifier => $uploadValue) {
-                if (!isset($submittedUploadFiles[$elementIdentifier])) {
-                    $submittedUploadFiles[$elementIdentifier] = [];
+            foreach ($valueElement as $element_identifier => $uploadValue) {
+                if (!isset($submitted_upload_files[$element_identifier])) {
+                    $submitted_upload_files[$element_identifier] = [];
                 }
 
-                $submittedUploadFiles[$elementIdentifier][$uploadProperty] = $uploadValue;
+                $submitted_upload_files[$element_identifier][$uploadProperty] = $uploadValue;
             }
         }
 
-        return $submittedUploadFiles;
+        return $submitted_upload_files;
     }
 
     protected function getFileSubmitData(): array
@@ -393,16 +393,16 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
             return false;
         }
 
-        $fieldArr = $cmd[$this->getImageRemovalCommand()];
+        $field_arr = $cmd[$this->getImageRemovalCommand()];
 
-        if (!isset($fieldArr[$this->getPostVar()])) {
+        if (!isset($field_arr[$this->getPostVar()])) {
             return false;
         }
 
         return (string) str_replace(
             ilIdentifiedMultiValuesJsPositionIndexRemover::IDENTIFIER_INDICATOR_PREFIX,
             '',
-            (string) key($fieldArr[$this->getPostVar()])
+            (string) key($field_arr[$this->getPostVar()])
         ) === (string) $identifier;
     }
 }

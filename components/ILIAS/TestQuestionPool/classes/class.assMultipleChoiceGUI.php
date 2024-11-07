@@ -16,8 +16,6 @@
  *
  *********************************************************************/
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
-
 /**
  * Multiple choice question GUI representation
  *
@@ -35,7 +33,6 @@ use ILIAS\TestQuestionPool\RequestDataCollector;
 class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjustable, ilGuiAnswerScoringAdjustable
 {
     private bool $rebuild_thumbnails = false;
-    protected RequestDataCollector $testrequest;
 
     /**
     * assMultipleChoiceGUI constructor
@@ -47,13 +44,11 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
     */
     public function __construct($id = -1)
     {
-        global $DIC;
         parent::__construct();
         $this->object = new assMultipleChoice();
         if ($id >= 0) {
             $this->object->loadFromDb($id);
         }
-        $this->testrequest = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     /**
@@ -168,7 +163,7 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
     public function addchoice(): void
     {
         $this->writePostData(true);
-        $position = key($this->testrequest->raw('cmd')['addchoice']);
+        $position = key($this->request_data_collector->raw('cmd')['addchoice']);
         $this->object->addAnswer("", 0, $position + 1);
         $this->editQuestion();
     }
@@ -176,7 +171,7 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
     public function removechoice(): void
     {
         $this->writePostData(true);
-        $position = key($this->testrequest->raw('cmd')['removechoice']);
+        $position = key($this->request_data_collector->raw('cmd')['removechoice']);
         $this->object->deleteAnswer($position);
         $this->editQuestion();
     }
@@ -641,22 +636,22 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
      */
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $shuffle = $this->testrequest->retrieveStringValueFromPost('shuffle') ?? '0';
+        $shuffle = $this->request_data_collector->retrieveStringValueFromPost('shuffle') ?? '0';
         $this->object->setShuffle((bool) $shuffle);
 
         $selectionLimit = (int) $form->getItemByPostVar('selection_limit')?->getValue();
         $this->object->setSelectionLimit($selectionLimit > 0 ? $selectionLimit : null);
 
-        $feedback_setting = $this->testrequest->retrieveIntValueFromPost('feedback_setting');
+        $feedback_setting = $this->request_data_collector->retrieveIntValueFromPost('feedback_setting');
         if (is_int($feedback_setting)) {
             $this->object->setSpecificFeedbackSetting($feedback_setting);
         }
 
-        $types = $this->testrequest->retrieveIntValueFromPost('types') ?? 0;
+        $types = $this->request_data_collector->retrieveIntValueFromPost('types') ?? 0;
 
         $this->object->setMultilineAnswerSetting($types);
 
-        $choice = $this->testrequest->retrieveArrayOfArraysOfStringsFromPost('choice');
+        $choice = $this->request_data_collector->retrieveArrayOfArraysOfStringsFromPost('choice');
 
         if (isset($choice['imagename']) && is_array($choice['imagename']) && $types === 1) {
             $this->object->setIsSingleline(true);
@@ -665,7 +660,7 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
             $this->object->setIsSingleline($types === 0);
         }
 
-        $thumb_size = $this->testrequest->retrieveIntValueFromPost('thumb_size');
+        $thumb_size = $this->request_data_collector->retrieveIntValueFromPost('thumb_size');
 
         if (is_int($thumb_size) && $thumb_size !== $this->object->getThumbSize()) {
             $this->object->setThumbSize($thumb_size);
@@ -678,9 +673,9 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
         // Delete all existing answers and create new answers from the form data
         $this->object->flushAnswers();
 
-        $choice = $this->testrequest->retrieveArrayOfArraysOfStringsFromPost('choice');
-
+        $choice = $this->request_data_collector->retrieveArrayOfArraysOfStringsFromPost('choice');
         $choice = $this->cleanupAnswerText($choice, !$this->object->isSingleline());
+
         if (!$this->object->isSingleline()) {
             foreach ($choice['answer'] as $index => $answer) {
                 $answertext = $answer;

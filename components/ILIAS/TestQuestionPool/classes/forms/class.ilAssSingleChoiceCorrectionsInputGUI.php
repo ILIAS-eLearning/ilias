@@ -15,8 +15,6 @@
  *
  *********************************************************************/
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
-
 /**
  * Class ilAssSingleChoiceCorrectionsInputGUI
  *

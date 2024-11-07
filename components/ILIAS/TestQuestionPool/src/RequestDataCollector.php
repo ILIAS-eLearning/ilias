@@ -43,7 +43,6 @@ class RequestDataCollector
 
     /**
      * @return UploadResult[]
-     * @throws IllegalStateException
      */
     public function getProcessedUploads(): array
     {

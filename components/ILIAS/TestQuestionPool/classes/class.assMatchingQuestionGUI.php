@@ -18,9 +18,6 @@
 
 declare(strict_types=1);
 
-use ILIAS\HTTP\Services as HTTPServices;
-use ILIAS\TestQuestionPool\RequestDataCollector;
-
 /**
  * Matching question GUI representation
  *
@@ -37,22 +34,14 @@ use ILIAS\TestQuestionPool\RequestDataCollector;
  */
 class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjustable, ilGuiAnswerScoringAdjustable
 {
-    protected HTTPServices $http;
-    protected RequestDataCollector $testrequest;
-
     public function __construct($id = -1)
     {
-        /** @var ILIAS\DI\Container $DIC */
-        global $DIC;
-        $this->http = $DIC['http'];
         parent::__construct();
         $this->object = new assMatchingQuestion();
         $this->setErrorMessage($this->lng->txt('msg_form_save_error'));
         if ($id >= 0) {
             $this->object->loadFromDb($id);
         }
-
-        $this->testrequest = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     /**
@@ -193,7 +182,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->testrequest->retrieveArrayOfIdentities('cmd');
+        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
         $this->object->removeTermImage(key($cmd['removeimageterms'] ?? []));
         $this->editQuestion();
     }
@@ -209,7 +198,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->testrequest->retrieveArrayOfIdentities('cmd');
+        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
         $this->object->removeDefinitionImage(key($cmd['removeimagedefinitions'] ?? []));
         $this->editQuestion();
     }
@@ -217,9 +206,8 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     public function addterms(): void
     {
         $this->setAdditionalContentEditingModeFromPost();
-        $this->writePostData(true); //FIXME
-        $cmd = $this->testrequest->retrieveArrayOfIdentities('cmd');
         $this->writePostData(true);
+        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
         $this->object->insertTerm(key($cmd['addterms'] ?? []) + 1);
         $this->editQuestion();
     }
@@ -227,9 +215,8 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     public function removeterms(): void
     {
         $this->setAdditionalContentEditingModeFromPost();
-        $this->writePostData(true); //FIXME
-        $cmd = $this->testrequest->retrieveArrayOfIdentities('cmd');
         $this->writePostData(true);
+        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
         $this->object->deleteTerm(key($cmd['removeterms'] ?? []));
         $this->editQuestion();
     }
@@ -238,7 +225,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->testrequest->retrieveArrayOfIdentities('cmd');
+        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
         $this->object->insertDefinition(key($cmd['adddefinitions'] ?? []) + 1);
         $this->editQuestion();
     }
@@ -247,7 +234,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->testrequest->retrieveArrayOfIdentities('cmd');
+        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
         $this->object->deleteDefinition(key($cmd['removedefinitions'] ?? []));
         $this->editQuestion();
     }
@@ -256,7 +243,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->testrequest->retrieveArrayOfIdentities('cmd');
+        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
         $this->object->insertMatchingPair(key($cmd['addpairs'] ?? []) + 1);
         $this->editQuestion();
     }
@@ -265,7 +252,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->testrequest->retrieveArrayOfIdentities('cmd');
+        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
         $this->object->deleteMatchingPair(key($cmd['removepairs'] ?? []));
         $this->editQuestion();
     }
@@ -921,9 +908,9 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
      */
     public function checkInput(): bool
     {
-        $title = $this->testrequest->retrieveStringFromPost('title');
-        $author = $this->testrequest->retrieveStringFromPost('author');
-        $question = $this->testrequest->retrieveStringFromPost('question');
+        $title = $this->request_data_collector->retrieveStringFromPost('title');
+        $author = $this->request_data_collector->retrieveStringFromPost('author');
+        $question = $this->request_data_collector->retrieveStringFromPost('question');
 
         return !(!$title || !$author || !$question);
     }

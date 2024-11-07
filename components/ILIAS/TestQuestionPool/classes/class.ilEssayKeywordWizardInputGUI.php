@@ -1,7 +1,5 @@
 <?php
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
-
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -20,13 +18,9 @@ use ILIAS\TestQuestionPool\RequestDataCollector;
 
 class ilEssayKeywordWizardInputGUI extends ilSingleChoiceWizardInputGUI
 {
-    protected readonly RequestDataCollector $request_data_collector;
     public function __construct($a_title = '', $a_postvar = '')
     {
-        global $DIC;
         parent::__construct($a_title, $a_postvar);
-
-        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function setValue($a_value): void

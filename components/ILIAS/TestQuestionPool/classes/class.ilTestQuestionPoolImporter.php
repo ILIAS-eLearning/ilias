@@ -18,8 +18,6 @@
 
 declare(strict_types=1);
 
-use ILIAS\HTTP\Services as Http;
-use ILIAS\Refinery\Factory as Refinery;
 use ILIAS\TestQuestionPool\Import\TestQuestionsImportTrait;
 use ILIAS\TestQuestionPool\RequestDataCollector;
 
@@ -35,31 +33,24 @@ class ilTestQuestionPoolImporter extends ilXmlImporter
 {
     use TestQuestionsImportTrait;
 
-    protected readonly RequestDataCollector $request_data_collector;
-
     /**
      * @var ilObjQuestionPool
      */
     private $pool_obj;
     private ilObjUser $user;
 
-    private Http $http;
-    private Refinery $refinery;
+    protected readonly RequestDataCollector $request_data_collector;
 
     public function __construct()
     {
         global $DIC;
         parent::__construct();
 
-        $this->http = $DIC->http();
-        $this->refinery = $DIC->refinery();
-
-        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
+        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
     }
 
     /**
      * Import XML
-     * @throws ilDatabaseException|ilObjectNotFoundException|ilSaxParserException
      */
     public function importXmlRepresentation(string $a_entity, string $a_id, string $a_xml, ilImportMapping $a_mapping): void
     {
@@ -195,9 +186,6 @@ class ilTestQuestionPoolImporter extends ilXmlImporter
         }
     }
 
-    /**
-     * @throws ilSaxParserException
-     */
     protected function importQuestionSkillAssignments($xmlFile, ilImportMapping $mappingRegistry, $targetParentObjId): void
     {
         $parser = new ilAssQuestionSkillAssignmentXmlParser($xmlFile);

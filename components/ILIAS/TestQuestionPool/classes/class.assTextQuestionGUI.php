@@ -16,8 +16,6 @@
  *
  *********************************************************************/
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
-
 /**
  * Text question GUI representation
  *
@@ -35,8 +33,6 @@ use ILIAS\TestQuestionPool\RequestDataCollector;
 class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjustable, ilGuiAnswerScoringAdjustable
 {
     protected bool $tiny_mce_enabled;
-
-    protected readonly RequestDataCollector $request_data_collector;
     /**
      * assTextQuestionGUI constructor
      *
@@ -46,7 +42,6 @@ class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringA
      */
     public function __construct($id = -1)
     {
-        global $DIC;
         $this->tiny_mce_enabled = (new ilSetting('advanced_editing'))->get('advanced_editing_javascript_editor')
             === 'tinymce' ? true : false;
         parent::__construct();
@@ -54,7 +49,6 @@ class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringA
         if ($id >= 0) {
             $this->object->loadFromDb($id);
         }
-        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     /**

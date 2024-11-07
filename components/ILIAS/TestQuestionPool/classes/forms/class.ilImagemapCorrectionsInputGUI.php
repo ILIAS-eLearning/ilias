@@ -33,8 +33,7 @@ class ilImagemapCorrectionsInputGUI extends ilImagemapFileInputGUI
     public function __construct(string $a_title = '', string $a_postvar = '')
     {
         parent::__construct($a_title, $a_postvar);
-        global $DIC;
-        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
+        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $this->upload_service);
     }
 
     public function setValueByArray(array $a_values): void
@@ -92,9 +91,6 @@ class ilImagemapCorrectionsInputGUI extends ilImagemapFileInputGUI
         return true;
     }
 
-    /**
-     * @throws ilTemplateException
-     */
     public function insert(ilTemplate $a_tpl): void
     {
         global $DIC;

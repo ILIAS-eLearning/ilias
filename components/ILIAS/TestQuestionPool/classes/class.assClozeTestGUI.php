@@ -294,8 +294,8 @@ JS;
                     }
                     break;
             }
-            $assClozeGapCombinationObject = new assClozeGapCombination();
-            $assClozeGapCombinationObject::clearGapCombinationsFromDb($this->object->getId());
+            $ass_cloze_gab_combination = new assClozeGapCombination();
+            $ass_cloze_gab_combination::clearGapCombinationsFromDb($this->object->getId());
 
             $gap_combination = $this->request_data_collector->retrieveNestedArraysOfFloats('gap_combination', 4);
 
@@ -303,7 +303,7 @@ JS;
             if (is_array($gap_combination)) {
                 $gap_combination_values = $this->request_data_collector->retrieveNestedArraysOfFloats('gap_combination', 4);
 
-                $assClozeGapCombinationObject->saveGapCombinationToDb(
+                $ass_cloze_gab_combination->saveGapCombinationToDb(
                     $this->object->getId(),
                     $gap_combination,
                     $gap_combination_values

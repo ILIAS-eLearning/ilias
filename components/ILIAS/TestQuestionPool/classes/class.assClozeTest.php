@@ -23,7 +23,6 @@ use ILIAS\TestQuestionPool\Questions\QuestionAutosaveable;
 use ILIAS\TestQuestionPool\Questions\QuestionPartiallySaveable;
 use ILIAS\Test\Logging\AdditionalInformationGenerator;
 use ILIAS\Refinery\Random\Group as RandomGroup;
-use ILIAS\TestQuestionPool\RequestDataCollector;
 
 /**
  * Class for cloze tests
@@ -79,7 +78,6 @@ class assClozeTest extends assQuestion implements ilObjQuestionScoringAdjustable
     public ilAssQuestionFeedback $feedbackOBJ;
     protected $feedbackMode = ilAssClozeTestFeedback::FB_MODE_GAP_QUESTION;
     private RandomGroup $randomGroup;
-    private readonly RequestDataCollector $request_data_collector;
 
     public function __construct(
         string $title = "",
@@ -89,11 +87,9 @@ class assClozeTest extends assQuestion implements ilObjQuestionScoringAdjustable
         string $question = ""
     ) {
         global $DIC;
-
         parent::__construct($title, $comment, $author, $owner, $question);
         $this->setQuestion($question); // @TODO: Should this be $question?? See setter for why this is not trivial.
         $this->randomGroup = $DIC->refinery()->random();
-        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
     }
 
     /**
@@ -1073,11 +1069,11 @@ class assClozeTest extends assQuestion implements ilObjQuestionScoringAdjustable
 
     public function getSolutionSubmitValidation(): array
     {
-        $solutionSubmit = [];
+        $solution_submit = [];
 
-        foreach ($this->request_data_collector->getPostKeys() as $key) {
+        foreach ($this->test_request->getPostKeys() as $key) {
             if (preg_match("/^gap_(\d+)/", $key, $matches)) {
-                $value = $this->request_data_collector->retrieveArrayOfStringWithFilter($key, static function ($key) {
+                $value = $this->test_request->retrieveArrayOfStringWithFilter($key, static function ($key) {
                     return preg_match("/^gap_(\d+)/", $key);
                 });
 
@@ -1093,11 +1089,11 @@ class assClozeTest extends assQuestion implements ilObjQuestionScoringAdjustable
                 if ($gap->getType() === assClozeGap::TYPE_NUMERIC) {
                     $value = str_replace(',', '.', $value);
                 }
-                $solutionSubmit[trim($matches[1])] = $value;
+                $solution_submit[trim($matches[1])] = $value;
             }
         }
 
-        return $solutionSubmit;
+        return $solution_submit;
     }
 
     protected function getSolutionSubmit(): array

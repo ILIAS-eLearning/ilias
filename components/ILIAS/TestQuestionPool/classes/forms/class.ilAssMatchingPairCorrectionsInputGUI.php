@@ -16,8 +16,6 @@
  *
  *********************************************************************/
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
-
 /**
  * Class class.ilAssMatchingPairCorrectionsInputGUI
  *
@@ -81,9 +79,6 @@ class ilAssMatchingPairCorrectionsInputGUI extends ilMatchingPairWizardInputGUI
         return $this->checkSubItemsInput();
     }
 
-    /**
-     * @throws ilTemplateException
-     */
     public function insert(ilTemplate $a_tpl): void
     {
         $tpl = new ilTemplate('tpl.prop_matchingpaircorrection_input.html', true, true, 'components/ILIAS/TestQuestionPool');

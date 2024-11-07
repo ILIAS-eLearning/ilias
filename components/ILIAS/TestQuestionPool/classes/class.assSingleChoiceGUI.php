@@ -525,9 +525,6 @@ class assSingleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringA
         return ilLegacyFormElementsUtil::prepareTextareaOutput($output, true);
     }
 
-    /**
-     * @throws ilException
-     */
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
         $types = $this->request_data_collector->retrieveStringValueFromPost('types', '0');

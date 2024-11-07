@@ -23,7 +23,6 @@ use ILIAS\Test\Participants\ParticipantRepository;
 use ILIAS\Test\Logging\AdditionalInformationGenerator;
 use ILIAS\FileDelivery\Delivery\Disposition;
 use ILIAS\FileUpload\Exception\IllegalStateException;
-use ILIAS\TestQuestionPool\RequestDataCollector;
 
 /**
  * Class for file upload questions
@@ -54,7 +53,6 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
 
     /** @var boolean Indicates whether completion by submission is enabled or not */
     protected $completion_by_submission = false;
-    private readonly RequestDataCollector $request_data_collector;
 
     /**
      * assFileUpload constructor
@@ -84,7 +82,6 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
 
         $local_dic = QuestionPoolDIC::dic();
         $this->participant_repository = $local_dic['participant_repository'];
-        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
     }
 
     /**
@@ -569,7 +566,7 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
 
                 if ($this->isFileDeletionAction()) {
                     if ($this->isFileDeletionSubmitAvailable()) {
-                        $delete_files = $this->request_data_collector->retrieveArraysOfInts(self::DELETE_FILES_TBL_POSTVAR);
+                        $delete_files = $this->test_request->retrieveArraysOfInts(self::DELETE_FILES_TBL_POSTVAR);
 
                         foreach ($delete_files as $solution_id) {
                             $this->removeSolutionRecordById($solution_id);
@@ -579,7 +576,7 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
                     }
                 } else {
                     if ($this->isFileReuseHandlingRequired()) {
-                        $reuse_files = $this->request_data_collector->retrieveArraysOfInts(self::REUSE_FILES_TBL_POSTVAR);
+                        $reuse_files = $this->test_request->retrieveArraysOfInts(self::REUSE_FILES_TBL_POSTVAR);
 
                         foreach ($reuse_files as $solutionId) {
                             $solution = $this->getSolutionRecordById($solutionId);
@@ -634,7 +631,7 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
     {
         $rids_to_delete = [];
         if ($this->isFileDeletionAction() && $this->isFileDeletionSubmitAvailable()) {
-            $delete_files = $this->request_data_collector->retrieveArraysOfInts(self::DELETE_FILES_TBL_POSTVAR);
+            $delete_files = $this->test_request->retrieveArraysOfInts(self::DELETE_FILES_TBL_POSTVAR);
 
             $res = $this->db->query(
                 "SELECT value1 FROM tst_solutions WHERE value2 = 'rid' AND " . $this->db->in(
@@ -703,7 +700,7 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
             // hey: prevPassSolutions - readability spree - get a chance to understand the code
             if ($this->isFileDeletionSubmitAvailable()) {
                 // hey.
-                $delete_files = $this->request_data_collector->retrieveArraysOfInts(self::DELETE_FILES_TBL_POSTVAR);
+                $delete_files = $this->test_request->retrieveArraysOfInts(self::DELETE_FILES_TBL_POSTVAR);
 
                 $userSolution = $this->deletePreviewFileUploads($previewSession->getUserId(), $userSolution, $delete_files);
             } else {

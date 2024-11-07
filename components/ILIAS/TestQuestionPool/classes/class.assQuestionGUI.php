@@ -24,7 +24,6 @@ use ILIAS\TestQuestionPool\Questions\QuestionAutosaveable;
 use ILIAS\TestQuestionPool\Questions\SuggestedSolution\SuggestedSolution;
 use ILIAS\TestQuestionPool\Questions\SuggestedSolution\SuggestedSolutionsDatabaseRepository;
 use ILIAS\TestQuestionPool\Questions\GeneralQuestionPropertiesRepository;
-use ILIAS\HTTP\Services as Http;
 use ILIAS\Refinery\Factory as Refinery;
 use ILIAS\Notes\GUIService;
 
@@ -121,7 +120,6 @@ abstract class assQuestionGUI
     protected ilGlobalPageTemplate $tpl;
     protected ilLanguage $lng;
     protected Refinery $refinery;
-    protected Http $http;
 
     protected $error;
     protected string $errormessage;
@@ -179,7 +177,6 @@ abstract class assQuestionGUI
         $this->logger = $DIC['ilLog'];
         $this->component_repository = $DIC['component.repository'];
         $this->refinery = $DIC['refinery'];
-        $this->http = $DIC->http();
 
         $local_dic = QuestionPoolDIC::dic();
         $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
@@ -1287,9 +1284,6 @@ abstract class assQuestionGUI
         $this->tpl->setVariable("ADM_CONTENT", $template->get());
     }
 
-    /**
-     * @throws ilCtrlException
-     */
     public function saveSuggestedSolutionType(): void
     {
         $solution_type = $this->request_data_collector->retrieveStringFromPost('solutiontype');

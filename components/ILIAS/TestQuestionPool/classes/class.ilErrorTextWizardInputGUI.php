@@ -34,7 +34,7 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
     protected $value_maxlength = 150;
     protected $key_name = "";
     protected $value_name = "";
-    protected readonly RequestDataCollector $requestDataCollector;
+    protected readonly RequestDataCollector $request_data_collector;
 
     /**
     * Constructor
@@ -47,7 +47,7 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
         global $DIC;
         parent::__construct($a_title, $a_postvar);
 
-        $this->requestDataCollector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
+        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function setValue($a_value): void
@@ -211,7 +211,7 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        $post_var = $this->requestDataCollector->retrieveArrayOfStringsFromPost($this->getPostVar());
+        $post_var = $this->request_data_collector->retrieveArrayOfStringsFromPost($this->getPostVar());
 
         $found_values = is_array($post_var) ? ilArrayUtil::stripSlashesRecursive($post_var) : null;
 

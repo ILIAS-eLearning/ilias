@@ -15,8 +15,6 @@
  *
  *********************************************************************/
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
-
 /**
  * Numeric question GUI representation
  *
@@ -35,8 +33,6 @@ use ILIAS\TestQuestionPool\RequestDataCollector;
  */
 class assNumericGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjustable, ilGuiAnswerScoringAdjustable
 {
-    protected RequestDataCollector $testrequest;
-
     /**
      * assNumericGUI constructor
      *
@@ -46,13 +42,11 @@ class assNumericGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjust
      */
     public function __construct($id = -1)
     {
-        global $DIC;
         parent::__construct();
         $this->object = new assNumeric();
         if ($id >= 0) {
             $this->object->loadFromDb($id);
         }
-        $this->testrequest = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function getCommand($cmd)
@@ -290,18 +284,18 @@ class assNumericGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjust
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $this->object->setMaxChars($this->testrequest->retrieveIntValueFromPost('maxchars') ?? 6);
+        $this->object->setMaxChars($this->request_data_collector->retrieveIntValueFromPost('maxchars') ?? 6);
     }
 
     public function writeAnswerSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $lowerlimit = $this->testrequest->retrieveFloatValueFromPost('lowerlimit') ?? 0.0;
+        $lowerlimit = $this->request_data_collector->retrieveFloatValueFromPost('lowerlimit') ?? 0.0;
         $this->object->setLowerLimit($lowerlimit);
 
-        $upperlimit = $this->testrequest->retrieveFloatValueFromPost('upperlimit') ?? 0.0;
+        $upperlimit = $this->request_data_collector->retrieveFloatValueFromPost('upperlimit') ?? 0.0;
         $this->object->setUpperLimit($upperlimit);
 
-        $points = $this->testrequest->retrieveStringValueFromPost('points') ?? '0.0';
+        $points = $this->request_data_collector->retrieveStringValueFromPost('points') ?? '0.0';
         $this->object->setPoints((float) str_replace(',', '.', $points));
     }
 

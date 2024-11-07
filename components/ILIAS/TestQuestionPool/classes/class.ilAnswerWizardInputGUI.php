@@ -39,7 +39,7 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
 
     protected GlyphFactory $glyph_factory;
     protected Renderer $renderer;
-    protected readonly RequestDataCollector $requestDataCollector;
+    protected readonly RequestDataCollector $request_data_collector;
 
     /**
     * Constructor
@@ -54,11 +54,10 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
         global $DIC;
         $this->glyph_factory = $DIC->ui()->factory()->symbol()->glyph();
         $this->renderer = $DIC->ui()->renderer();
+        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
 
         $this->setSize('25');
         $this->validationRegexp = "";
-
-        $this->requestDataCollector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function setValue($a_value): void
@@ -220,7 +219,7 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
         global $DIC;
         $lng = $DIC['lng'];
 
-        $found_values = $this->requestDataCollector->retrieveArrayOfStringsFromPost($this->getPostVar());
+        $found_values = $this->request_data_collector->retrieveArrayOfStringsFromPost($this->getPostVar());
 
         if (is_array($found_values)) {
             $found_values = ilArrayUtil::stripSlashesRecursive($found_values);

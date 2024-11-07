@@ -50,7 +50,6 @@ class assMultipleChoice extends assQuestion implements ilObjQuestionScoringAdjus
     public bool $is_singleline = true;
     public int $feedback_setting = 0;
     protected ?int $selection_limit = null;
-    protected RequestDataCollector $testrequest;
 
     public function setIsSingleline(bool $is_singleline): void
     {
@@ -83,7 +82,7 @@ class assMultipleChoice extends assQuestion implements ilObjQuestionScoringAdjus
         parent::__construct($title, $comment, $author, $owner, $question);
         $this->answers = [];
         $this->shuffle = true;
-        $this->testrequest = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
+        $this->test_request = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function getSelectionLimit(): ?int
@@ -391,7 +390,7 @@ class assMultipleChoice extends assQuestion implements ilObjQuestionScoringAdjus
 
     protected function isForcedEmptySolution(array $solutionSubmit): bool
     {
-        $tst_force_form_diff_input = $this->testrequest->retrieveArrayOfStringsFromPost('tst_force_form_diff_input') ?? [];
+        $tst_force_form_diff_input = $this->test_request->retrieveArrayOfStringsFromPost('tst_force_form_diff_input') ?? [];
 
         return !count($solutionSubmit) && !empty($tst_force_form_diff_input);
     }

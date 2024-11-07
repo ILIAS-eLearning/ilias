@@ -84,7 +84,7 @@ abstract class assQuestion implements Question
     protected \ilAssQuestionLifecycle $lifecycle;
     public \ilAssQuestionFeedback $feedbackOBJ;
     protected \ilAssQuestionPage $page;
-    protected RequestDataCollector $testrequest;
+    protected RequestDataCollector $test_request;
 
     protected int $id;
     protected string $title;
@@ -140,7 +140,7 @@ abstract class assQuestion implements Question
         $this->log = $ilLog;
         $this->http = $DIC->http();
         $this->refinery = $DIC->refinery();
-        $this->testrequest = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
+        $this->test_request = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
 
         $this->thumb_size = self::DEFAULT_THUMB_SIZE;
 
@@ -223,7 +223,7 @@ abstract class assQuestion implements Question
 
     protected function getQuestionAction(): string
     {
-        $cmd = $this->testrequest->retrieveArrayOfStringsFromPost('cmd');
+        $cmd = $this->test_request->retrieveArrayOfStringsFromPost('cmd');
 
         if (
             !isset($cmd[$this->questionActionCmd])
@@ -238,7 +238,7 @@ abstract class assQuestion implements Question
 
     protected function isNonEmptyItemListPostSubmission(string $post_submission_field_name): bool
     {
-        return !empty($this->testrequest->retrieveArrayOfStringsFromPost($post_submission_field_name) ?? []);
+        return !empty($this->test_request->retrieveArrayOfStringsFromPost($post_submission_field_name) ?? []);
     }
 
     public function getCurrentUser(): ilObjUser

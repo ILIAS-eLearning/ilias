@@ -16,8 +16,6 @@
  *
  *********************************************************************/
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
-
 /**
  * Multiple choice question GUI representation
  *
@@ -35,8 +33,6 @@ use ILIAS\TestQuestionPool\RequestDataCollector;
  */
 class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjustable, ilGuiAnswerScoringAdjustable
 {
-    protected readonly RequestDataCollector $request_data_collector;
-
     private $answers_from_post;
 
     /**
@@ -48,13 +44,11 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
      */
     public function __construct($id = -1)
     {
-        global $DIC;
         parent::__construct();
         $this->object = new assTextSubset();
         if ($id >= 0) {
             $this->object->loadFromDb($id);
         }
-        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     /**
