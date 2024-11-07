@@ -482,9 +482,8 @@ according to your needs.
 <a name="java-rpc-configuration"></a>
 ## Configure ILIAS Java RPC server (optional)
 
-The ILIAS Java RPC server is used for certain optional functions as Lucene Search
-or generating PDF Certificates. To enable the RPC server you need to place a
-configuration file in `<YOUR_ILIAS_DIR>/components/ILIAS/WebServices/RPC/lib/ilServer.properties`:
+The ILIAS Java RPC server is used for certain optional functions as Lucene Search or generating PDF Certificates. 
+To configure the RPC server you need to place a configuration file in its root directory. An installation guide as well as a more detailed configuration instruction can be found in our [RPC server documentation](https://github.com/ILIAS-eLearning/ILIAS/blob/trunk/components/ILIAS/WebServices/RPC/lib/README.md). A sample configuration is located in `<YOUR_ILIAS_DIR>/components/ILIAS/WebServices/RPC/lib/ilServer.ini` and looks like this:
 
 ```
 [Server]
