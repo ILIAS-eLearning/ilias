@@ -32,13 +32,9 @@ class ilAssSingleChoiceCorrectionsInputGUI extends ilSingleChoiceWizardInputGUI
      */
     protected $qstObject;
 
-    private readonly RequestDataCollector $request_data_collector;
-
     public function __construct(string $a_title = '', string $a_postvar = '')
     {
         parent::__construct($a_title, $a_postvar);
-        global $DIC;
-        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
     }
 
     public function setValue($a_value): void

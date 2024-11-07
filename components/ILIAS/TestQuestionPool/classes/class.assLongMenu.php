@@ -603,11 +603,12 @@ class assLongMenu extends assQuestion implements ilObjQuestionScoringAdjustable,
             return [];
         }
 
+        $solution_submit = [];
         foreach ($answer as $key => $value) {
-            $solutionSubmit[$key] = $value;
+            $solution_submit[$key] = $value;
         }
 
-        return $solutionSubmit;
+        return $solution_submit;
     }
 
     protected function savePreviewData(ilAssQuestionPreviewSession $preview_session): void

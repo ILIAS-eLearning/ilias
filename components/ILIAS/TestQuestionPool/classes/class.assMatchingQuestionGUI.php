@@ -265,7 +265,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->request->retrieveArrayOfIdentities('cmd');
+        $cmd = $this->testrequest->retrieveArrayOfIdentities('cmd');
         $this->object->deleteMatchingPair(key($cmd['removepairs'] ?? []));
         $this->editQuestion();
     }

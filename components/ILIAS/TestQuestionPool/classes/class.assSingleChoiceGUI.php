@@ -191,7 +191,7 @@ class assSingleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringA
     public function addchoice(): void
     {
         $this->writePostData(true);
-        $position = key($this->request->raw('cmd')['addchoice']);
+        $position = key($this->request_data_collector->raw('cmd')['addchoice']);
         $this->object->addAnswer("", 0, $position + 1);
         $this->editQuestion();
     }
@@ -199,7 +199,7 @@ class assSingleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringA
     public function removechoice(): void
     {
         $this->writePostData(true);
-        $position = key($this->request->raw('cmd')['removechoice']);
+        $position = key($this->request_data_collector->raw('cmd')['removechoice']);
         $this->object->deleteAnswer($position);
         $this->editQuestion();
     }

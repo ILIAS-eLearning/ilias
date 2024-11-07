@@ -168,7 +168,7 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
     public function addchoice(): void
     {
         $this->writePostData(true);
-        $position = key($this->request->raw('cmd')['addchoice']);
+        $position = key($this->testrequest->raw('cmd')['addchoice']);
         $this->object->addAnswer("", 0, $position + 1);
         $this->editQuestion();
     }
@@ -176,7 +176,7 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
     public function removechoice(): void
     {
         $this->writePostData(true);
-        $position = key($this->request->raw('cmd')['removechoice']);
+        $position = key($this->testrequest->raw('cmd')['removechoice']);
         $this->object->deleteAnswer($position);
         $this->editQuestion();
     }

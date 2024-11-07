@@ -744,7 +744,7 @@ abstract class assQuestionGUI
 
     public function setAdditionalContentEditingModeFromPost(): void
     {
-        $additional_content_editing_mode = $this->request->retrieveStringValueFromPost('additional_content_editing_mode');
+        $additional_content_editing_mode = $this->request_data_collector->retrieveStringValueFromPost('additional_content_editing_mode');
         if ($additional_content_editing_mode !== null
             && in_array($additional_content_editing_mode, $this->object->getValidAdditionalContentEditingModes())) {
             $this->object->setAdditionalContentEditingMode($additional_content_editing_mode);
