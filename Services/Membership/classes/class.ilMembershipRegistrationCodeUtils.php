@@ -49,28 +49,32 @@ class ilMembershipRegistrationCodeUtils
                 $crs = new ilObjCourse($a_ref_id, true);
                 $is_online = $crs->isActivated();
             }
+            if ($a_type === 'grp') {
+                $grp = new ilObjGroup($a_ref_id, true);
+                $is_online = !$grp->getOfflineStatus();
+            }
             $parent_id = $tree->getParentId($a_ref_id);
             $is_valid_type = $a_type === 'crs' || $a_type === 'grp';
-            $is_course_available =
+            $is_obj_available =
                 $is_online &&
                 $access->checkAccess("visible", "", $a_ref_id);
             $is_parent_available =
                 $access->checkAccess("read", "", $parent_id) &&
                 $access->checkAccess("visible", "", $parent_id);
-            # Redirect to crs parent if crs not available
+            # Redirect to object parent if object not available
             if (
                 $is_valid_type &&
-                !$is_course_available &&
+                !$is_obj_available &&
                 $is_parent_available
             ) {
                 $link_target = ilLink::_getLink($parent_id);
                 $message .= " " . $lng->txt("crs_access_not_possible");
                 $message_type = ilGlobalTemplateInterface::MESSAGE_TYPE_INFO;
             }
-            # Redirect to dashboard if crs and crs parent object are unavailable
+            # Redirect to dashboard if object and parent object are unavailable
             if (
                 $is_valid_type &&
-                !$is_course_available &&
+                !$is_obj_available &&
                 !$is_parent_available
             ) {
                 $link_target = "";
