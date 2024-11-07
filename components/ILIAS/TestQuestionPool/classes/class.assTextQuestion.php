@@ -845,7 +845,7 @@ class assTextQuestion extends assQuestion implements ilObjQuestionScoringAdjusta
         return $solution_values[0]['value1'];
     }
 
-    public function getCorrectSolutionForTextOutput(int $active_id, int $pass): array
+    public function getCorrectSolutionForTextOutput(int $active_id, int $pass): array|string
     {
         switch ($this->getKeywordRelation()) {
             case self::SCORING_MODE_KEYWORD_RELATION_NONE:

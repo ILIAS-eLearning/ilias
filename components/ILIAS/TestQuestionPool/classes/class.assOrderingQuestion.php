@@ -1181,7 +1181,7 @@ class assOrderingQuestion extends assQuestion implements ilObjQuestionScoringAdj
                     }
                 }
             }
-        } elseif ($this->getOrderingType() == OQ_NESTED_TERMS || $this->getOrderingType() == OQ_NESTED_PICTURES) {
+        } elseif ($this->getOrderingType() == self::OQ_NESTED_TERMS || $this->getOrderingType() == self::OQ_NESTED_PICTURES) {
             $index = 0;
             foreach ($form_submission_data_structure['content'] as $randomId => $content) {
                 $indentation = $form_submission_data_structure['indentation'];

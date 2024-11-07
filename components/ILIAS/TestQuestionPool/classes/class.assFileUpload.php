@@ -941,7 +941,7 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
         );
     }
 
-    public function getCorrectSolutionForTextOutput(int $active_id, int $pass): array
+    public function getCorrectSolutionForTextOutput(int $active_id, int $pass): string
     {
         return '';
     }

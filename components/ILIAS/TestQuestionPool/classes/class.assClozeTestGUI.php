@@ -1708,9 +1708,6 @@ JS;
             }
         }
 
-        $combinationPoints = $combinationPoints;
-        $combinationValues = $combinationValues;
-
         $assClozeGapCombinationObject = new assClozeGapCombination();
         $assClozeGapCombinationObject->clearGapCombinationsFromDb($this->object->getId());
 

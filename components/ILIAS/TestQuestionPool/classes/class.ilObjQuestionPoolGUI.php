@@ -513,7 +513,7 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
                 break;
 
             case 'ilbulkeditquestionsgui':
-                if (!$ilAccess->checkAccess('read', '', $this->object->getRefId())) {
+                if (!$this->access->checkAccess('read', '', $this->object->getRefId())) {
                     $this->redirectAfterMissingWrite();
                 }
                 $this->tabs_gui->setBackTarget(
