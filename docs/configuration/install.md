@@ -514,7 +514,7 @@ After=network.target
 [Service]
 Environment=JAVA_OPTS="-Dfile.encoding=UTF-8"
 Environment=ILSERVER_JAR="/var/www/html/ilias/components/ILIAS/WebServices/RPC/lib/ilServer.jar"
-Environment=ILSERVER_INI="/var/www/html/ilias/components/ILIAS/WebServices/RPC/lib/ilServer.properties"
+Environment=ILSERVER_INI="/var/www/html/ilias/components/ILIAS/WebServices/RPC/lib/ilServer.ini"
 
 ExecStart=-/usr/bin/java $JAVA_OPTS -jar $ILSERVER_JAR $ILSERVER_INI start
 ExecStop=/usr/bin/java $JAVA_OPTS -jar $ILSERVER_JAR $ILSERVER_INI stop
