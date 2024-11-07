@@ -661,7 +661,7 @@ class ilAssQuestionList implements ilTaxAssignedItemInfo
             [$question_id, $question_id]
         );
         while ($row = $this->db->fetchAssoc($res)) {
-            if (trim($row['feedback']) !== '') {
+            if (trim((string) $row['feedback']) !== '') {
                 return true;
             }
             foreach ($pagetypes as $pagetype) {
