@@ -18,7 +18,11 @@
 
 declare(strict_types=1);
 
-use Jumbojett\OpenIDConnectClient;
+use ILIAS\Cache\Config;
+use ILIAS\Cache\Services as GlobalCache;
+use ILIAS\OpenIdConnect\Authentication\Authenticator;
+use ILIAS\OpenIdConnect\Authentication\OpenIdConnectProvider;
+use ILIAS\Refinery\Factory as Refinery;
 
 class ilAuthProviderOpenIdConnect extends ilAuthProvider
 {
@@ -28,6 +32,9 @@ class ilAuthProviderOpenIdConnect extends ilAuthProvider
     /** @var array $body */
     private readonly ilLogger $logger;
     private readonly ilLanguage $lng;
+    private readonly Refinery $refinery;
+    private readonly GlobalCache $cache;
+    private Authenticator $authenticator;
 
     public function __construct(ilAuthCredentials $credentials)
     {
@@ -38,6 +45,14 @@ class ilAuthProviderOpenIdConnect extends ilAuthProvider
         $this->settings = ilOpenIdConnectSettings::getInstance();
         $this->lng = $DIC->language();
         $this->lng->loadLanguageModule('auth');
+        $this->refinery = $DIC->refinery();
+        $this->cache = $DIC->globalCache();
+
+        $this->authenticator = new Authenticator(
+            $DIC->refinery(),
+            $DIC->http(),
+            $DIC->ctrl()
+        );
     }
 
     public function handleLogout(): void
@@ -51,13 +66,14 @@ class ilAuthProviderOpenIdConnect extends ilAuthProvider
 
         if (isset($id_token) && $id_token !== '') {
             ilSession::set(self::OIDC_AUTH_IDTOKEN, '');
-            $oidc = $this->initClient();
+            $provider = $this->initClient();
+
             try {
-                $oidc->signOut(
-                    $id_token,
-                    ILIAS_HTTP_PATH . '/' . ilStartUpGUI::logoutUrl()
+                $this->authenticator->logout(
+                    $provider,
+                    $id_token
                 );
-            } catch (\Jumbojett\OpenIDConnectClientException $e) {
+            } catch (ilException $e) {
                 $this->logger->warning('Logging out of OIDC provider failed with: ' . $e->getMessage());
             }
         }
@@ -66,33 +82,16 @@ class ilAuthProviderOpenIdConnect extends ilAuthProvider
     public function doAuthentication(ilAuthStatus $status): bool
     {
         try {
-            $oidc = $this->initClient();
-            $oidc->setRedirectURL(ILIAS_HTTP_PATH . '/openidconnect.php');
-
-            $proxy = ilProxySettings::_getInstance();
-            if ($proxy->isActive()) {
-                $host = $proxy->getHost();
-                $port = $proxy->getPort();
-                if ($port) {
-                    $host .= ':' . $port;
-                }
-                $oidc->setHttpProxy($host);
-            }
-
-            $this->logger->debug(
-                'Redirect url is: ' .
-                $oidc->getRedirectURL()
-            );
-
-            $oidc->addScope($this->settings->getAllScopes());
+            $auth_params = [];
             if ($this->settings->getLoginPromptType() === ilOpenIdConnectSettings::LOGIN_ENFORCE) {
-                $oidc->addAuthParam(['prompt' => 'login']);
+                $auth_params['prompt'] = 'login';
             }
 
-            $oidc->authenticate();
+            $provider = $this->initClient();
+            $access_token = $this->authenticator->authenticate($provider, $auth_params);
             // user is authenticated, otherwise redirected to authorization endpoint or exception
 
-            $claims = $oidc->requestUserInfo();
+            $claims = $provider->getIdTokenPayload($access_token)['body'];
             $this->logger->dump($claims, ilLogLevel::DEBUG);
             $status = $this->handleUpdate($status, $claims);
 
@@ -100,7 +99,7 @@ class ilAuthProviderOpenIdConnect extends ilAuthProvider
             //$_GET['target'] = $this->getCredentials()->getRedirectionTarget();// TODO PHP8-REVIEW Please eliminate this. Mutating the request is not allowed and will not work in ILIAS 8.
 
             if ($this->settings->getLogoutScope() === ilOpenIdConnectSettings::LOGOUT_SCOPE_GLOBAL) {
-                ilSession::set(self::OIDC_AUTH_IDTOKEN, $oidc->getIdToken());
+                ilSession::set(self::OIDC_AUTH_IDTOKEN, $provider->getIdToken($access_token));
             }
             return true;
         } catch (Exception $e) {
@@ -112,11 +111,11 @@ class ilAuthProviderOpenIdConnect extends ilAuthProvider
         }
     }
 
-    /**
-     * @param stdClass $user_info
-     */
-    private function handleUpdate(ilAuthStatus $status, $user_info): ilAuthStatus
+    private function handleUpdate(ilAuthStatus $status, array $user_info): ilAuthStatus
     {
+        // Transform assoc array to stdClass to be compatible with existing handleUpdate implementation.
+        $user_info = (object) $user_info;
+
         if (!is_object($user_info)) {
             $this->logger->error('Received invalid user credentials: ');
             $this->logger->dump($user_info, ilLogLevel::ERROR);
@@ -162,16 +161,24 @@ class ilAuthProviderOpenIdConnect extends ilAuthProvider
         return $status;
     }
 
-    private function initClient(): OpenIDConnectClient
+    private function initClient(): OpenIdConnectProvider
     {
-        $oidc = new OpenIDConnectClient(
-            $this->settings->getProvider(),
-            $this->settings->getClientId(),
-            $this->settings->getSecret()
-        );
+        $options = [
+            'clientId' => $this->settings->getClientId(),
+            'clientSecret' => $this->settings->getSecret(),
+            'redirectUri' => ILIAS_HTTP_PATH . '/openidconnect.php',
+            'url_provider' => $this->settings->getProvider(),
+            'scopes' => $this->settings->getAllScopes(),
+            'scope_separator' => $this->settings->getScopeSeparator()
+        ];
 
-        $oidc->setCodeChallengeMethod('S256');
+        $proxy = ilProxySettings::_getInstance();
+        if ($proxy->isActive()) {
+            $options['proxy'] = $proxy->getHost() . ':' . $proxy->getPort();
+            $options['verify'] = false;
+        }
 
-        return $oidc;
+        return (new OpenIdConnectProvider($this->refinery, $options))
+            ->withCache($this->cache);
     }
 }

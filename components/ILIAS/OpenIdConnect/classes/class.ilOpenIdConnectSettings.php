@@ -90,6 +90,7 @@ class ilOpenIdConnectSettings
     private ?string $custom_discovery_url = null;
     private ilLanguage $lng;
     private ilUserDefinedFields $udf;
+    private string $scope_separator = ' ';
 
     private function __construct()
     {
@@ -447,6 +448,8 @@ class ilOpenIdConnectSettings
         } else {
             $this->storage->delete('custom_discovery_url');
         }
+
+        $this->storage->set('scope_separator', $this->getScopeSeparator());
     }
 
     protected function load(): void
@@ -491,6 +494,7 @@ class ilOpenIdConnectSettings
         if (self::URL_VALIDATION_CUSTOM === $this->getValidateScopes()) {
             $this->setCustomDiscoveryUrl($this->storage->get('custom_discovery_url'));
         }
+        $this->setScopeSeparator($this->storage->get('scope_separator') ?? ' ');
     }
 
     public function getProfileMappingFieldValue(string $field): string
@@ -555,5 +559,15 @@ class ilOpenIdConnectSettings
         }
 
         return $mapping_fields;
+    }
+
+    public function getScopeSeparator(): string
+    {
+        return $this->scope_separator;
+    }
+
+    public function setScopeSeparator(string $scope_separator): void
+    {
+        $this->scope_separator = $scope_separator;
     }
 }
