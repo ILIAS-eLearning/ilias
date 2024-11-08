@@ -21,7 +21,7 @@ declare(strict_types=1);
 use ILIAS\FileUpload\FileUpload;
 use ILIAS\UI\Factory;
 use ILIAS\UI\Renderer;
-use ILIAS\HTTP\Services;
+use ILIAS\HTTP\Services as HttpService;
 use Psr\Http\Message\ServerRequestInterface;
 use ILIAS\UI\Component\Input\Container\Form\FormInput;
 use ILIAS\UI\Component\Input\Container\Form\Form;
@@ -65,7 +65,7 @@ class ilOpenIdConnectSettingsGUI
     private ilOpenIdAttributeMappingTemplate $attribute_mapping_template;
     private Factory $ui;
     private Renderer $renderer;
-    private Services $http;
+    private HttpService $http;
     private Factory $factory;
     private \ILIAS\Refinery\Factory $refinery;
     private string $failed_validation_messages = '';
@@ -498,6 +498,20 @@ class ilOpenIdConnectSettingsGUI
             ->withDedicatedName('default_scope')
             ->withDisabled(true);
 
+        $scope_separator = $this->ui
+            ->input()
+            ->field()
+            ->select(
+                $this->lng->txt('auth_oidc_settings_scope_separator'),
+                [
+                    ' ' => $this->lng->txt('auth_oidc_settings_scope_separator_space'),
+                    ',' => $this->lng->txt('auth_oidc_settings_scope_separator_comma')
+                ]
+            )
+            ->withRequired(true)
+            ->withValue($this->settings->getScopeSeparator())
+            ->withDedicatedName('scope_separator');
+
         $scopeValues = $this->settings->getAdditionalScopes();
 
         $tag_input = $this->ui
@@ -540,12 +554,13 @@ class ilOpenIdConnectSettingsGUI
             ],
             $this->lng->txt('auth_oidc_settings_validate_scopes')
         )->withDedicatedName('validate_scopes')->withValue($this->settings->getValidateScopes());
-        $group = $this->ui->input()->field()->group(
-            [$disabled_input, $tag_input, $url_validation]
-        );
-        $ui_container[] = $group;
 
-        return $ui_container;
+        return array_merge($ui_container, [
+            'default_scope' => $disabled_input,
+            'custom_scope' => $tag_input,
+            'scope_separator' => $scope_separator,
+            'validate_scopes' => $url_validation
+        ]);
     }
 
     private function saveScopes(): void
@@ -556,6 +571,7 @@ class ilOpenIdConnectSettingsGUI
         $type = null;
         $url = null;
         $custom_scopes = [];
+        $separator = " ";
 
         $form = $this->initScopesForm();
         if ($this->request->getMethod() === 'POST') {
@@ -567,28 +583,23 @@ class ilOpenIdConnectSettingsGUI
                 return;
             }
 
-            foreach ($form->getInputs() as $group => $groups) {
-                foreach ($groups->getInputs() as $key => $input) {
-                    $dedicated_name = $input->getDedicatedName();
-                    $result_data = $result[$group][$key];
-                    if ($dedicated_name === 'validate_scopes') {
-                        $type = (int) $result_data[0];
-                        $url = array_pop($result_data[1]);
-                    } elseif ($dedicated_name === 'custom_scope') {
-                        $custom_scopes = $result_data;
-                    }
-                }
-            }
+            $custom_scopes = $result['custom_scope'];
+            $validate_scopes = $result['validate_scopes'];
+            $type = (int) $validate_scopes[0];
+            $separator = $result['scope_separator'];
+
+            $url = array_pop($validate_scopes[1]);
 
             if ($url === null && $type === ilOpenIdConnectSettings::URL_VALIDATION_PROVIDER) {
                 $url = $this->settings->getProvider();
             }
-            $validation = $this->validateDiscoveryUrl($type, $url, $custom_scopes);
+            $validation = $this->validateDiscoveryUrl($type, $url, $result['custom_scope']);
         }
 
         if ($validation) {
             $this->settings->setAdditionalScopes((array) $custom_scopes);
             $this->settings->setValidateScopes((int) $type);
+            $this->settings->setScopeSeparator($separator);
             if (ilOpenIdConnectSettings::URL_VALIDATION_CUSTOM === $this->settings->getValidateScopes()) {
                 $this->settings->setCustomDiscoveryUrl($url);
             }

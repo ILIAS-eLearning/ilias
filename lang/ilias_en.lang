@@ -2133,6 +2133,10 @@ auth#:#auth_oidc_settings_logout_scope_global_info#:#When a users logs out, they
 auth#:#auth_oidc_settings_logout_scope_local#:#Log Out of ILIAS ONLY
 auth#:#auth_oidc_settings_logout_scope_local_info#:#When a user logs out, they only end their session in  ILIAS, not their OpenID Connect session.
 auth#:#auth_oidc_settings_provider#:#Provider URL
+auth#:#auth_oidc_settings_scope_separator#:#Scope Trennzeichen
+auth#:#auth_oidc_settings_scope_separator_comma#:#Komma (",")
+auth#:#auth_oidc_settings_scope_separator_info#:#Diese Zeichen wird dazu verwendet, die Scopes in der Authenfizierungs-URL zu einem String zuverbinden.
+auth#:#auth_oidc_settings_scope_separator_space#:#Leerzeichen (" ")
 auth#:#auth_oidc_settings_secret#:#Client Key
 auth#:#auth_oidc_settings_section_user_sync#:#User Synchronisation Settings
 auth#:#auth_oidc_settings_session_duration#:#Duration
