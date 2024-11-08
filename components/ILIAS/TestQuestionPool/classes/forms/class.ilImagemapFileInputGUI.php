@@ -16,6 +16,7 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\RequestValidationHelper;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\Component\Symbol\Glyph\Factory as GlyphFactory;
 
@@ -35,6 +36,7 @@ class ilImagemapFileInputGUI extends ilImageFileInputGUI
 
     protected $pointsUncheckedFieldEnabled = false;
 
+    protected RequestValidationHelper $request_helper;
     protected GlyphFactory $glyph_factory;
     protected Renderer $renderer;
 
@@ -49,6 +51,7 @@ class ilImagemapFileInputGUI extends ilImageFileInputGUI
         parent::__construct($a_title, $a_postvar);
 
         global $DIC;
+        $this->request_helper = new RequestValidationHelper($this->refinery);
         $this->glyph_factory = $DIC->ui()->factory()->symbol()->glyph();
         $this->renderer = $DIC->ui()->renderer();
     }

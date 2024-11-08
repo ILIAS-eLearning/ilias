@@ -19,6 +19,7 @@
 declare(strict_types=1);
 
 use ILIAS\HTTP\Services as HTTPServices;
+use ILIAS\TestQuestionPool\QuestionPoolDIC;
 use ILIAS\UI\Factory as UIFactory;
 use ILIAS\Refinery\Factory as Refinery;
 use ILIAS\Refinery\Random\Group as RandomGroup;
@@ -90,11 +91,11 @@ class ilAssQuestionPreviewGUI
         private readonly Refinery $refinery,
         private readonly int $parent_obj_ref_id
     ) {
-        global $DIC;
         $this->tpl->addCss(ilObjStyleSheet::getContentStylePath(0));
         $this->tpl->addCss(ilObjStyleSheet::getSyntaxStylePath());
 
-        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
+        $local_dic = QuestionPoolDIC::dic();
+        $this->request_data_collector = $local_dic['request_data_collector'];
     }
 
     public function setInfoMessage(string $message): void
@@ -233,9 +234,8 @@ class ilAssQuestionPreviewGUI
 
     protected function isCommentingRequired(): bool
     {
-        $ref_id = $this->request_data_collector->retrieveIntValueFromPost('ref_id', 0);
-
-        return !$this->preview_settings->isTestRefId() && $this->rbac_system->checkAccess('read', (int) $ref_id);
+        return !$this->preview_settings->isTestRefId() &&
+            $this->rbac_system->checkAccess('read', $this->request_data_collector->getRefId());
     }
 
     public function showCmd(string $commands_panel_html = ''): void

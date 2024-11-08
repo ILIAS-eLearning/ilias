@@ -155,15 +155,14 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $position = key($this->request_data_collector->raw('cmd')['removeimagechoice']);
-        $this->object->removeAnswerImage($position);
+        $this->object->removeAnswerImage($this->request_data_collector->getCmdIndex('removeimagechoice'));
         $this->editQuestion();
     }
 
     public function addchoice(): void
     {
         $this->writePostData(true);
-        $position = key($this->request_data_collector->raw('cmd')['addchoice']);
+        $position = $this->request_data_collector->getCmdIndex('addchoice');
         $this->object->addAnswer("", 0, $position + 1);
         $this->editQuestion();
     }
@@ -171,8 +170,7 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
     public function removechoice(): void
     {
         $this->writePostData(true);
-        $position = key($this->request_data_collector->raw('cmd')['removechoice']);
-        $this->object->deleteAnswer($position);
+        $this->object->deleteAnswer($this->request_data_collector->getCmdIndex('removechoice'));
         $this->editQuestion();
     }
 
@@ -636,23 +634,20 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
      */
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $shuffle = $this->request_data_collector->retrieveStringValueFromPost('shuffle') ?? '0';
-        $this->object->setShuffle((bool) $shuffle);
+        $this->object->setShuffle($this->request_data_collector->bool('shuffle'));
 
         $selectionLimit = (int) $form->getItemByPostVar('selection_limit')?->getValue();
         $this->object->setSelectionLimit($selectionLimit > 0 ? $selectionLimit : null);
 
-        $feedback_setting = $this->request_data_collector->retrieveIntValueFromPost('feedback_setting');
-        if (is_int($feedback_setting)) {
+        $feedback_setting = $this->request_data_collector->int('feedback_setting');
+        if ($feedback_setting !== 0) {
             $this->object->setSpecificFeedbackSetting($feedback_setting);
         }
 
-        $types = $this->request_data_collector->retrieveIntValueFromPost('types') ?? 0;
-
+        $types = $this->request_data_collector->int('types');
         $this->object->setMultilineAnswerSetting($types);
 
-        $choice = $this->request_data_collector->retrieveArrayOfArraysOfStringsFromPost('choice');
-
+        $choice = $this->request_data_collector->rawArray('choice');
         if (isset($choice['imagename']) && is_array($choice['imagename']) && $types === 1) {
             $this->object->setIsSingleline(true);
             $this->tpl->setOnScreenMessage('info', $this->lng->txt('info_answer_type_change'), true);
@@ -660,9 +655,8 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
             $this->object->setIsSingleline($types === 0);
         }
 
-        $thumb_size = $this->request_data_collector->retrieveIntValueFromPost('thumb_size');
-
-        if (is_int($thumb_size) && $thumb_size !== $this->object->getThumbSize()) {
+        $thumb_size = $this->request_data_collector->int('thumb_size') ?? $this->object->getThumbSize();
+        if ($thumb_size !== $this->object->getThumbSize()) {
             $this->object->setThumbSize($thumb_size);
             $this->rebuild_thumbnails = true;
         }
@@ -673,7 +667,7 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
         // Delete all existing answers and create new answers from the form data
         $this->object->flushAnswers();
 
-        $choice = $this->request_data_collector->retrieveArrayOfArraysOfStringsFromPost('choice');
+        $choice = $this->request_data_collector->rawArray('choice');
         $choice = $this->cleanupAnswerText($choice, !$this->object->isSingleline());
 
         if (!$this->object->isSingleline()) {

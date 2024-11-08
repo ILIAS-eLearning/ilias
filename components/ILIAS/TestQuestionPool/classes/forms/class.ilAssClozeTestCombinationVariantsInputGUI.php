@@ -26,59 +26,21 @@
  */
 class ilAssClozeTestCombinationVariantsInputGUI extends ilAnswerWizardInputGUI
 {
-    public function __construct(string $a_title = '', string $a_postvar = '')
-    {
-        parent::__construct($a_title, $a_postvar);
-    }
-
     public function setValue($a_value): void
     {
-        if (is_array($a_value) && is_array($a_value['points'])) {
-            foreach ($a_value['points'] as $idx => $term) {
-                $this->values[$idx]['points'] = $a_value['points'][$idx];
-            }
+        foreach ($this->request_helper->transformPoints($a_value) as $index => $value) {
+            $this->values[$index]['points'] = $value;
         }
     }
 
     public function checkInput(): bool
     {
-        global $DIC;
-        $lng = $DIC->language();
-
-        $values = $this->request_data_collector->retrieveFloatArrayOrIntArrayFromPost($this->getPostVar());
-
-        $max = 0;
-        foreach ($values['points'] ?? [] as $points) {
-            $max = max($max, $points);
-            if ($points === '' || !is_numeric($points)) {
-                $this->setAlert($lng->txt('form_msg_numeric_value_required'));
-                return false;
-            }
-
-            if ($this->minvalueShouldBeGreater()) {
-                if (
-                    trim($points) !== ''
-                    && $this->getMinValue() !== false
-                    && $points <= $this->getMinValue()
-                ) {
-                    $this->setAlert($lng->txt('form_msg_value_too_low'));
-                    return false;
-                }
-            } elseif (
-                trim($points) !== ''
-                && $this->getMinValue() !== false
-                && $points < $this->getMinValue()
-            ) {
-                $this->setAlert($lng->txt('form_msg_value_too_low'));
-                return false;
-            }
-        }
-
-        if ($max === 0) {
-            $this->setAlert($lng->txt('enter_enough_positive_points'));
+        // check points
+        $points = $this->request_helper->checkPointsInputEnoughPositive($this->raw($this->getPostVar()), true);
+        if (!is_array($points)) {
+            $this->setAlert($this->lng->txt($points));
             return false;
         }
-
         return true;
     }
 

@@ -1050,7 +1050,7 @@ class assClozeTest extends assQuestion implements ilObjQuestionScoringAdjustable
                 continue;
             }
 
-            if ($gap->getType() === assClozeGap::TYPE_SELECT && $value === -1) {
+            if ($gap->getType() === assClozeGap::TYPE_SELECT && $value == -1) {
                 continue;
             }
 
@@ -1071,26 +1071,20 @@ class assClozeTest extends assQuestion implements ilObjQuestionScoringAdjustable
     {
         $solution_submit = [];
 
-        foreach ($this->test_request->getPostKeys() as $key) {
-            if (preg_match("/^gap_(\d+)/", $key, $matches)) {
-                $value = $this->test_request->retrieveArrayOfStringWithFilter($key, static function ($key) {
-                    return preg_match("/^gap_(\d+)/", $key);
-                });
-
-                if ($value === null || $value === ''
-                    || !preg_match('/^gap_(\d+)/', $key, $matches)) {
-                    continue;
-                }
-                $gap = $this->getGap((int) $matches[1]);
-                if ($gap === null
-                    || $gap->getType() === assClozeGap::TYPE_SELECT && $value === -1) {
-                    continue;
-                }
-                if ($gap->getType() === assClozeGap::TYPE_NUMERIC) {
-                    $value = str_replace(',', '.', $value);
-                }
-                $solution_submit[trim($matches[1])] = $value;
+        foreach ($this->questionpool_request->getPostKeys() as $post_key) {
+            $value = $this->questionpool_request->string($post_key);
+            if ($value === '' || !preg_match('/^gap_(\d+)/', $post_key, $matches)) {
+                continue;
             }
+            $gap = $this->getGap((int) $matches[1]);
+            if ($gap === null
+                || $gap->getType() === assClozeGap::TYPE_SELECT && $value === '-1') {
+                continue;
+            }
+            if ($gap->getType() === assClozeGap::TYPE_NUMERIC) {
+                $value = $this->questionpool_request->float($post_key);
+            }
+            $solution_submit[trim($matches[1])] = $value;
         }
 
         return $solution_submit;

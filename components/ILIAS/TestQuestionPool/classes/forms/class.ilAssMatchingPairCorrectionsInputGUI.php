@@ -28,11 +28,6 @@ class ilAssMatchingPairCorrectionsInputGUI extends ilMatchingPairWizardInputGUI
 {
     private string $path_including_prefix;
 
-    public function __construct(string $a_title = '', string $a_postvar = '')
-    {
-        parent::__construct($a_title, $a_postvar);
-    }
-
     public function getPairs(): array
     {
         return $this->pairs;
@@ -42,37 +37,26 @@ class ilAssMatchingPairCorrectionsInputGUI extends ilMatchingPairWizardInputGUI
     {
         $this->path_including_prefix = $path_including_prefix;
     }
-
     public function setValue($a_value): void
     {
-        if (is_array($a_value) && is_array($a_value['points'])) {
-            foreach ($a_value['points'] as $idx => $term) {
-                $this->pairs[$idx]->withPoints($a_value['points'][$idx]);
-            }
+        foreach ($this->request_helper->transformPoints($a_value) as $index => $value) {
+            $this->pairs[$index] = $this->pairs[$index]->withPoints($value);
         }
     }
 
     public function checkInput(): bool
     {
-        $found_values = $this->request_data_collector->retrieveNestedArraysOfStrings($this->getPostVar());
+        $data = $this->raw($this->getPostVar());
+        $result = $this->request_helper->checkPointsInput($data, $this->getRequired());
 
-        if (is_array($found_values)) {
-            $max = 0;
-            foreach ($found_values['points'] as $val) {
-                if ($val > 0) {
-                    $max += $val;
-                }
-                if ($val === '' && $this->getRequired()) {
-                    $this->setAlert($this->lng->txt('msg_input_is_required'));
-                    return false;
-                }
-            }
-            if ($max <= 0) {
-                $this->setAlert($this->lng->txt('enter_enough_positive_points'));
-                return false;
-            }
-        } elseif ($this->getRequired()) {
-            $this->setAlert($this->lng->txt('msg_input_is_required'));
+        if (!is_array($result)) {
+            $this->setAlert($this->lng->txt($result));
+            return false;
+        }
+
+        $sum = array_sum(array_filter($result, fn($points) => $points > 0));
+        if ($sum <= 0) {
+            $this->setAlert($this->lng->txt('enter_enough_positive_points'));
             return false;
         }
 

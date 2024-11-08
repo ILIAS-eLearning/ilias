@@ -103,16 +103,14 @@ class assLongMenuGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjus
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
         $min_auto_complete = (int) $form->getInput('min_auto_complete');
-        $longmenu_text = $this->request_data_collector->raw('longmenu_text') ?? '';
-        $hidden_text_files = $this->request_data_collector->raw('hidden_text_files') ?? '';
-        $hidden_correct_answers = $this->request_data_collector->raw('hidden_correct_answers') ?? [];
+        $hidden_text_files = $this->request_data_collector->string('hidden_text_files');
+        $hidden_correct_answers = $this->request_data_collector->string('hidden_correct_answers');
         $long_menu_type = $this->request_data_collector->raw('long_menu_type') ?? [];
-        $this->object->setLongMenuTextValue(ilUtil::stripSlashes($longmenu_text));
+        $this->object->setLongMenuTextValue($this->request_data_collector->string('longmenu_text'));
         $this->object->setAnswers($this->trimArrayRecursive($this->stripSlashesRecursive(json_decode($hidden_text_files))));
         $this->object->setCorrectAnswers($this->trimArrayRecursive($this->stripSlashesRecursive(json_decode($hidden_correct_answers))));
         $this->object->setAnswerType(ilArrayUtil::stripSlashesRecursive($long_menu_type));
-        $this->object->setQuestion($this->request_data_collector->raw('question'));
-        $this->object->setLongMenuTextValue($this->request_data_collector->raw('longmenu_text'));
+        $this->object->setQuestion($this->request_data_collector->string('question'));
         $this->object->setMinAutoComplete($min_auto_complete);
         $this->object->setIdenticalScoring($this->request_data_collector->int('identical_scoring'));
 

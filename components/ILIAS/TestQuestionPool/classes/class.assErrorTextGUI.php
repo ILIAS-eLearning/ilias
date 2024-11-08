@@ -67,8 +67,8 @@ class assErrorTextGUI extends assQuestionGUI implements ilGuiQuestionScoringAdju
 
     public function writeAnswerSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $errordata = $this->restructurePostDataForSaving($this->request_data_collector->raw('errordata') ?? []);
-        $this->object->setErrorData($errordata);
+        $data = $this->restructurePostDataForSaving($this->request_data_collector->raw('errordata') ?? []);
+        $this->object->setErrorData($data);
         $this->object->removeErrorDataWithoutPosition();
     }
 
@@ -89,7 +89,7 @@ class assErrorTextGUI extends assQuestionGUI implements ilGuiQuestionScoringAdju
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
         $this->object->setQuestion(
-            $this->request_data_collector->raw('question')
+            $this->request_data_collector->string('question')
         );
 
         $this->object->setErrorText(

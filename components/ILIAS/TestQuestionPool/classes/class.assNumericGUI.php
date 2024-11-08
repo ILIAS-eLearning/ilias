@@ -284,19 +284,14 @@ class assNumericGUI extends assQuestionGUI implements ilGuiQuestionScoringAdjust
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $this->object->setMaxChars($this->request_data_collector->retrieveIntValueFromPost('maxchars') ?? 6);
+        $this->object->setMaxChars($this->request_data_collector->int('maxchars') ?? 6);
     }
 
     public function writeAnswerSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $lowerlimit = $this->request_data_collector->retrieveFloatValueFromPost('lowerlimit') ?? 0.0;
-        $this->object->setLowerLimit($lowerlimit);
-
-        $upperlimit = $this->request_data_collector->retrieveFloatValueFromPost('upperlimit') ?? 0.0;
-        $this->object->setUpperLimit($upperlimit);
-
-        $points = $this->request_data_collector->retrieveStringValueFromPost('points') ?? '0.0';
-        $this->object->setPoints((float) str_replace(',', '.', $points));
+        $this->object->setLowerLimit($this->request_data_collector->float('lowerlimit'));
+        $this->object->setUpperLimit($this->request_data_collector->float('upperlimit'));
+        $this->object->setPoints($this->request_data_collector->float('points'));
     }
 
     public function populateQuestionSpecificFormPart(\ilPropertyFormGUI $form): ilPropertyFormGUI

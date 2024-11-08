@@ -85,7 +85,6 @@ JS;
     private $gapIndex;
 
     private RandomGroup $randomGroup;
-    private ArrayBasedRequestWrapper $post;
     private UIFactory $ui_factory;
     private UIRenderer $ui_renderer;
 
@@ -100,7 +99,6 @@ JS;
         global $DIC;
         $this->ui_factory = $DIC->ui()->factory();
         $this->ui_renderer = $DIC->ui()->renderer();
-        $this->post = $DIC->http()->wrapper()->post();
 
         $this->object = new assClozeTest();
         if ($id >= 0) {
@@ -140,8 +138,8 @@ JS;
         $this->writeQuestionGenericPostData();
         $this->object->setClozeText($cloze_text);
         $this->object->setTextgapRating($this->request_data_collector->raw('textgap_rating'));
-        $this->object->setIdenticalScoring((bool) ($this->request_data_collector->raw('identical_scoring') ?? false));
-        $this->object->setFixedTextLength(($this->request_data_collector->int('fixedTextLength') ?? 0));
+        $this->object->setIdenticalScoring($this->request_data_collector->bool('identical_scoring') ?? false);
+        $this->object->setFixedTextLength($this->request_data_collector->int('fixedTextLength'));
         $this->writeAnswerSpecificPostData(new ilPropertyFormGUI());
         $this->saveTaxonomyAssignments();
         return 0;
@@ -149,167 +147,97 @@ JS;
 
     public function writeAnswerSpecificPostData(ilPropertyFormGUI $form): void
     {
-        if (!$this->post->has('gap')) {
+        $gaps = $this->request_data_collector->strArray('gap');
+        if (empty($gaps)) {
             return;
         }
-
-        $gaps = $this->post->retrieve(
-            "gap",
-            $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string())
-        );
 
         if ($this->ctrl->getCmd() !== 'createGaps') {
             $this->object->clearGapAnswers();
         }
 
+        $answer_trafo = $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->string());
+        $points_trafo = $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->float());
+
         foreach ($gaps as $idx => $hidden) {
-            $clozetype = $this->post->retrieve(
-                "clozetype_" . $idx,
-                $this->refinery->kindlyTo()->string()
-            );
+            $cloze_type = $this->request_data_collector->int('clozetype_' . $idx);
+            $this->object->setGapType($idx, $cloze_type);
 
-            $this->object->setGapType($idx, $clozetype);
+            $gap_idx = $this->request_data_collector->rawArray('gap_' . $idx);
 
-            switch ($clozetype) {
-                case assClozeGap::TYPE_TEXT:
-
-                    $this->object->setGapShuffle($idx, 0);
-
-                    $gap_idx = $this->request_data_collector->retrieveNestedArraysOfStrings(
-                        'gap_' . $idx,
-                        3,
-                        [
-                            'answer' => null,
-                            'points' => null
-                        ]
-                    );
-
-                    if ($this->ctrl->getCmd() !== 'createGaps') {
-                        if (is_array($gap_idx['answer'])) {
-                            foreach ($gap_idx as $order => $value) {
-                                $this->object->addGapAnswer($idx, $order, $value);
-                            }
-                        } else {
-                            $this->object->addGapAnswer($idx, 0, '');
+            if ($cloze_type === assClozeGap::TYPE_TEXT || $cloze_type === assClozeGap::TYPE_SELECT) {
+                $answer = $answer_trafo->transform($gap_idx['answer'] ?? []);
+                if ($this->ctrl->getCmd() !== 'createGaps') {
+                    if (!empty($answer)) {
+                        foreach ($answer as $order => $value) {
+                            $this->object->addGapAnswer($idx, $order, $value);
                         }
-                    }
-
-                    if (is_array($gap_idx['points'])) {
-                        foreach ($gap_idx['points'] as $order => $value) {
-                            $this->object->setGapAnswerPoints($idx, $order, $value);
-                        }
-                    }
-
-                    $k_gapsize = 'gap_' . $idx . '_gapsize';
-                    if ($this->post->has($k_gapsize)) {
-                        $gap_size = $this->request_data_collector->retrieveIntValueFromPost($k_gapsize, 0);
-                        $this->object->setGapSize($idx, $gap_size);
-                    }
-                    break;
-
-                case assClozeGap::TYPE_SELECT:
-                    $shuffle_idx = $this->request_data_collector->retrieveIntValueFromPost('shuffle_' . $idx, 0);
-                    $this->object->setGapShuffle($idx, $shuffle_idx);
-
-                    $gap_idx = $this->request_data_collector->retrieveNestedArraysOfStrings(
-                        'gap_' . $idx,
-                        3,
-                        [
-                            'answer' => null,
-                            'points' => null
-                        ]
-                    );
-
-                    if ($this->ctrl->getCmd() !== 'createGaps') {
-                        if (is_array($gap_idx['answer'])) {
-                            foreach ($gap_idx['answer'] as $order => $value) {
-                                $this->object->addGapAnswer($idx, $order, $value);
-                            }
-                        } else {
-                            $this->object->addGapAnswer($idx, 0, '');
-                        }
-                    }
-
-                    if (is_array($gap_idx['points'])) {
-                        foreach ($gap_idx['points'] as $order => $value) {
-                            $this->object->setGapAnswerPoints($idx, $order, $value);
-                        }
-                    }
-                    break;
-
-                case assClozeGap::TYPE_NUMERIC:
-
-                    $this->object->setGapShuffle($idx, 0);
-
-                    $gap = $this->object->getGap($idx);
-                    if (!$gap) {
-                        break;
-                    }
-
-                    $this->object->getGap($idx)?->clearItems();
-
-                    $gap_idx_numeric = $this->request_data_collector->retrieveStringFromPost('gap_' . $idx . '_numeric', null);
-
-                    if (is_string($gap_idx_numeric)) {
-                        if ($this->ctrl->getCmd() !== 'createGaps') {
-                            $this->object->addGapAnswer(
-                                $idx,
-                                0,
-                                str_replace(',', '.', $gap_idx_numeric)
-                            );
-                        }
-
-                        $gap_idx_numeric_lower = $this->request_data_collector->retrieveStringFromPost('gap_' . $idx . '_numeric_lower');
-
-                        $this->object->setGapAnswerLowerBound(
-                            $idx,
-                            0,
-                            str_replace(',', '.', $gap_idx_numeric_lower)
-                        );
-
-                        $gap_idx_numeric_upper = $this->request_data_collector->retrieveStringFromPost('gap_' . $idx . '_numeric_upper');
-
-                        $this->object->setGapAnswerUpperBound(
-                            $idx,
-                            0,
-                            str_replace(',', '.', $gap_idx_numeric_upper)
-                        );
-
-                        $gap_idx_numeric_points = $this->request_data_collector->retrieveFloatValueFromPost('gap_' . $idx . '_numeric_points', 0.0);
-
-                        $this->object->setGapAnswerPoints($idx, 0, $gap_idx_numeric_points);
                     } else {
-                        if ($this->ctrl->getCmd() !== 'createGaps') {
-                            $this->object->addGapAnswer($idx, 0, '');
-                        }
-
-                        $this->object->setGapAnswerLowerBound($idx, 0, '');
-                        $this->object->setGapAnswerUpperBound($idx, 0, '');
+                        $this->object->addGapAnswer($idx, 0, '');
                     }
+                }
 
-                    $gap_idx_size = $this->request_data_collector->retrieveIntValueFromPost('gap_' . $idx . '_gapsize');
-
-                    if (is_int($gap_idx_size)) {
-                        $this->object->setGapSize($idx, $gap_idx_size);
-                    }
-                    break;
+                $points = $points_trafo->transform($gap_idx['points'] ?? []);
+                foreach ($points as $order => $value) {
+                    $this->object->setGapAnswerPoints($idx, $order, $value);
+                }
             }
+
+            if ($cloze_type === assClozeGap::TYPE_TEXT || $cloze_type === assClozeGap::TYPE_NUMERIC) {
+                $this->object->setGapShuffle(0);
+
+                $gap_size = $this->request_data_collector->int('gap_' . $idx . '_gapsize');
+                if ($gap_size !== 0) {
+                    $this->object->setGapSize($idx, $gap_size);
+                }
+            } else {
+                $this->object->setGapShuffle($idx, $this->request_data_collector->int('shuffle_' . $idx));
+            }
+
+            if ($cloze_type === assClozeGap::TYPE_NUMERIC && $this->object->getGap($idx) !== null) {
+                $this->object->getGap($idx)->clearItems();
+
+                $gap_idx_numeric = $this->request_data_collector->float('gap_' . $idx . '_numeric');
+                if ($gap_idx_numeric !== 0.0) {
+                    $this->object->addGapAnswer($idx, 0, (string) $gap_idx_numeric);
+                    $this->object->setGapAnswerLowerBound(
+                        $idx,
+                        0,
+                        (string) $this->request_data_collector->float('gap_' . $idx . '_numeric_lower')
+                    );
+                    $this->object->setGapAnswerUpperBound(
+                        $idx,
+                        0,
+                        (string) $this->request_data_collector->float('gap_' . $idx . '_numeric_upper')
+                    );
+                    $this->object->setGapAnswerPoints(
+                        $idx,
+                        0,
+                        $this->request_data_collector->float('gap_' . $idx . '_numeric_points')
+                    );
+                } else {
+                    if ($this->ctrl->getCmd() !== 'createGaps') {
+                        $this->object->addGapAnswer($idx, 0, '');
+                    }
+
+                    $this->object->setGapAnswerLowerBound($idx, 0, '');
+                    $this->object->setGapAnswerUpperBound($idx, 0, '');
+                }
+            }
+
             $ass_cloze_gab_combination = new assClozeGapCombination();
             $ass_cloze_gab_combination::clearGapCombinationsFromDb($this->object->getId());
 
-            $gap_combination = $this->request_data_collector->retrieveNestedArraysOfFloats('gap_combination', 4);
-
-
-            if (is_array($gap_combination)) {
-                $gap_combination_values = $this->request_data_collector->retrieveNestedArraysOfFloats('gap_combination', 4);
-
+            $gap_combination = $this->request_data_collector->floatArray('gap_combination', 4);
+            if (count($gap_combination) > 0) {
                 $ass_cloze_gab_combination->saveGapCombinationToDb(
                     $this->object->getId(),
                     $gap_combination,
-                    $gap_combination_values
+                    $this->request_data_collector->strArray('gap_combination_values', 4)
                 );
             }
         }
+
         if ($this->ctrl->getCmd() !== 'createGaps') {
             $this->object->updateClozeTextFromGaps();
         }
@@ -317,10 +245,10 @@ JS;
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $this->object->setClozeText($this->request_data_collector->retrieveStringFromPost('cloze_quest'));
-        $this->object->setTextgapRating($this->request_data_collector->retrieveStringFromPost('textgap_rating'));
-        $this->object->setIdenticalScoring($this->request_data_collector->retrieveBoolFromPost('textgap_rating', true));
-        $this->object->setFixedTextLength($this->request_data_collector->retrieveIntValueFromPost('fixedTextLength'));
+        $this->object->setClozeText($this->request_data_collector->string('cloze_quest'));
+        $this->object->setTextgapRating($this->request_data_collector->string('textgap_rating'));
+        $this->object->setIdenticalScoring($this->request_data_collector->bool('textgap_rating') ?? true);
+        $this->object->setFixedTextLength($this->request_data_collector->int('fixedTextLength'));
     }
 
     /**
@@ -775,9 +703,10 @@ JS;
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-
-        $cmd = $this->request_data_collector->retrieveNestedArraysOfInts('cmd', 2, []);
-        $this->object->deleteAnswerText($this->gapIndex, key($cmd['removegap_' . $this->gapIndex]));
+        $this->object->deleteAnswerText(
+            $this->gapIndex,
+            $this->request_data_collector->getCmdIndex('removegap_' . $this->gapIndex)
+        );
         $this->editQuestion();
     }
 
@@ -785,9 +714,11 @@ JS;
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-
-        $cmd = $this->request_data_collector->retrieveNestedArraysOfInts('cmd', 2, []);
-        $this->object->addGapAnswer($this->gapIndex, key($cmd['addgap_' . $this->gapIndex]) + 1, '');
+        $this->object->addGapAnswer(
+            $this->gapIndex,
+            $this->request_data_collector->getCmdIndex('addgap_' . $this->gapIndex) + 1,
+            ''
+        );
         $this->editQuestion();
     }
 

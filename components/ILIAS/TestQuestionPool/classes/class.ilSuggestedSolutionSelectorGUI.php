@@ -16,8 +16,6 @@
  *
  *********************************************************************/
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
-
 /**
 * This class represents a selection list property in a property form.
 *
@@ -33,8 +31,6 @@ class ilSuggestedSolutionSelectorGUI extends ilSubEnabledFormPropertyGUI
     protected $intlink;
     protected $intlinktext;
 
-    protected readonly RequestDataCollector $request_data_collector;
-
     /**
     * Constructor
     *
@@ -45,9 +41,6 @@ class ilSuggestedSolutionSelectorGUI extends ilSubEnabledFormPropertyGUI
     {
         parent::__construct($a_title, $a_postvar);
         $this->setType("select");
-
-        global $DIC;
-        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     /**
@@ -166,13 +159,8 @@ class ilSuggestedSolutionSelectorGUI extends ilSubEnabledFormPropertyGUI
     */
     public function checkInput(): bool
     {
-        global $DIC;
-        $lng = $DIC['lng'];
-
-        $post_var = $this->request_data_collector->retrieveStringValueFromPost($this->getPostVar(), '');
-
-        if ($this->getRequired() && trim(ilUtil::stripSlashes($post_var)) === '') {
-            $this->setAlert($lng->txt('msg_input_is_required'));
+        if ($this->getRequired() && $this->str($this->getPostVar()) === '') {
+            $this->setAlert($this->lng->txt('msg_input_is_required'));
             return false;
         }
 
@@ -181,9 +169,6 @@ class ilSuggestedSolutionSelectorGUI extends ilSubEnabledFormPropertyGUI
 
     public function insert($a_tpl): void
     {
-        global $DIC;
-        $lng = $DIC['lng'];
-
         $template = new ilTemplate("tpl.prop_suggestedsolutionselector.html", true, true, "components/ILIAS/TestQuestionPool");
 
         foreach ($this->getOptions() as $option_value => $option_text) {
@@ -200,7 +185,7 @@ class ilSuggestedSolutionSelectorGUI extends ilSubEnabledFormPropertyGUI
         }
         if ($this->getInternalLink()) {
             $template->setCurrentBlock("delete_internallink");
-            $template->setVariable("TEXT_DELETE_INTERNALLINK", $lng->txt("remove_solution"));
+            $template->setVariable("TEXT_DELETE_INTERNALLINK", $this->lng->txt("remove_solution"));
             $template->setVariable("POST_VAR", $this->getPostVar());
             $template->parseCurrentBlock();
             $template->setCurrentBlock("internal_link");
@@ -216,7 +201,10 @@ class ilSuggestedSolutionSelectorGUI extends ilSubEnabledFormPropertyGUI
                 " disabled=\"disabled\""
             );
         }
-        $template->setVariable("TEXT_ADD_INTERNALLINK", ($this->getInternalLink()) ? $lng->txt("change") : $lng->txt("add"));
+        $template->setVariable(
+            "TEXT_ADD_INTERNALLINK",
+            ($this->getInternalLink()) ? $this->lng->txt("change") : $this->lng->txt("add")
+        );
         $template->setVariable("CMD_ADD_INTERNALLINK", $this->getAddCommand());
         $template->parseCurrentBlock();
         $a_tpl->setCurrentBlock("prop_generic");

@@ -78,11 +78,9 @@ class assMultipleChoice extends assQuestion implements ilObjQuestionScoringAdjus
         string $question = "",
         private int $output_type = self::OUTPUT_ORDER
     ) {
-        global $DIC;
         parent::__construct($title, $comment, $author, $owner, $question);
         $this->answers = [];
         $this->shuffle = true;
-        $this->test_request = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function getSelectionLimit(): ?int
@@ -390,8 +388,7 @@ class assMultipleChoice extends assQuestion implements ilObjQuestionScoringAdjus
 
     protected function isForcedEmptySolution(array $solutionSubmit): bool
     {
-        $tst_force_form_diff_input = $this->test_request->retrieveArrayOfStringsFromPost('tst_force_form_diff_input') ?? [];
-
+        $tst_force_form_diff_input = $this->questionpool_request->strArray('tst_force_form_diff_input');
         return !count($solutionSubmit) && !empty($tst_force_form_diff_input);
     }
 

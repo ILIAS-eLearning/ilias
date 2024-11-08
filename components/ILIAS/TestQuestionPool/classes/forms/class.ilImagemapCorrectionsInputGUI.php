@@ -16,8 +16,6 @@
  *
  *********************************************************************/
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
-
 /**
  * Class ilImagemapCorrectionsInputGUI
  *
@@ -28,14 +26,6 @@ use ILIAS\TestQuestionPool\RequestDataCollector;
  */
 class ilImagemapCorrectionsInputGUI extends ilImagemapFileInputGUI
 {
-    private readonly RequestDataCollector $request_data_collector;
-
-    public function __construct(string $a_title = '', string $a_postvar = '')
-    {
-        parent::__construct($a_title, $a_postvar);
-        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $this->upload_service);
-    }
-
     public function setValueByArray(array $a_values): void
     {
         $this->setAreasByArray($a_values[$this->getPostVar()]['coords']);
@@ -43,48 +33,33 @@ class ilImagemapCorrectionsInputGUI extends ilImagemapFileInputGUI
 
     public function setAreasByArray($a_areas): void
     {
-        if (is_array($a_areas['points'])) {
-            foreach ($this->areas as $idx => $name) {
-                if (isset($a_areas['points_unchecked']) && $this->getPointsUncheckedFieldEnabled()) {
-                    $this->areas[$idx]->setPointsUnchecked($a_areas['points_unchecked'][$idx]);
-                } else {
-                    $this->areas[$idx]->setPointsUnchecked(0);
-                }
+        $points = $this->request_helper->transformPoints($a_areas, 'points');
+        $points_unchecked = $this->request_helper->transformPoints($a_areas, 'points_unchecked');
 
-                $this->areas[$idx]->setPoints($a_areas['points'][$idx]);
-            }
+        foreach ($this->areas as $index => $name) {
+            $points_unchecked[$index] = $points_unchecked[$index] && $this->getPointsUncheckedFieldEnabled()
+                ? $points_unchecked[$index] : 0;
+
+            $this->areas[$index]->setPointsUnchecked($points_unchecked[$index]);
+            $this->areas[$index]->setPoints($points[$index]);
         }
     }
 
     public function checkInput(): bool
     {
-        global $DIC;
-        $lng = $DIC['lng'];
-
-        $post_var = $this->request_data_collector->retrieveNestedArraysOfStrings($this->getPostVar(), 2);
-        $post_var = is_array($post_var) ? ilArrayUtil::stripSlashesRecursive($post_var) : $post_var;
-
-        $max = 0;
-        if (is_array($post_var['coords']['points'])) {
-            foreach ($post_var['coords']['points'] as $idx => $name) {
-                if ($post_var['coords']['points'][$idx] === '' && $this->getRequired()) {
-                    $this->setAlert($lng->txt('form_msg_area_missing_points'));
-                    return false;
-                }
-
-                if (!is_numeric($post_var['coords']['points'][$idx])) {
-                    $this->setAlert($lng->txt('form_msg_numeric_value_required'));
-                    return false;
-                }
-
-                if ($post_var['coords']['points'][$idx] > 0) {
-                    $max = (int) $post_var['coords']['points'][$idx];
-                }
-            }
+        $data = $this->raw($this->getPostVar());
+        if (!is_array($data) || !is_array($data['coords'])) {
+            $this->setAlert($this->lng->txt('form_msg_input_is_required'));
+            return false;
         }
 
-        if ($max === 0) {
-            $this->setAlert($lng->txt('enter_enough_positive_points'));
+        $result = $this->request_helper->checkPointsInputEnoughPositive($data['coords'], $this->getRequired());
+        if (!is_array($result)) {
+            if ($result === 'msg_input_is_required') {
+                $this->setAlert($this->lng->txt('form_msg_area_missing_points'));
+            } else {
+                $this->setAlert($this->lng->txt($result));
+            }
             return false;
         }
 

@@ -144,30 +144,6 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
         $this->notes_service->gui()->initJavascript();
     }
 
-    protected function getQueryParamString(string $param): ?string
-    {
-        if (!$this->request_wrapper->has($param)) {
-            return null;
-        }
-        $trafo = $this->refinery->byTrying([
-            $this->refinery->kindlyTo()->null(),
-            $this->refinery->kindlyTo()->string()
-        ]);
-        return $this->request_wrapper->retrieve($param, $trafo);
-    }
-
-    protected function getQueryParamInt(string $param): ?int
-    {
-        if (!$this->request_wrapper->has($param)) {
-            return null;
-        }
-        $trafo = $this->refinery->byTrying([
-            $this->refinery->kindlyTo()->null(),
-            $this->refinery->kindlyTo()->int()
-        ]);
-        return $this->request_wrapper->retrieve($param, $trafo);
-    }
-
     public function executeCommand(): void
     {
         $write_access = $this->access->checkAccess('write', '', $this->request_data_collector->getRefId());
@@ -190,7 +166,7 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
 
         $cmd = $this->ctrl->getCmd(self::DEFAULT_CMD);
         $next_class = $this->ctrl->getNextClass($this);
-        $q_id = $this->getQueryParamInt('q_id');
+        $q_id = $this->request_data_collector->getQuestionId() ?? null;
 
         if (in_array($next_class, ['', 'ilobjquestionpoolgui']) && $cmd == self::DEFAULT_CMD) {
             $q_id = -1;
@@ -543,11 +519,8 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
             case '':
 
                 //table actions.
-                if ($action = $this->getQueryParamString($this->action_parameter_token->getName())) {
-                    $ids = $this->request_wrapper->retrieve(
-                        $this->row_id_token->getName(),
-                        $this->refinery->custom()->transformation(fn($v) => $v)
-                    );
+                if ($action = $this->request_data_collector->string($this->action_parameter_token->getName())) {
+                    $ids = $this->request_data_collector->raw($this->row_id_token->getName()) ?? null;
 
                     if (is_null($ids)) {
                         $this->tpl->setOnScreenMessage('failure', $this->lng->txt('msg_no_questions_selected'), true);
@@ -746,7 +719,7 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
     public function downloadFileObject(): void
     {
         $file = explode('_', $this->request_data_collector->raw('file_id'));
-        $fileObj = new ilObjFile($file[count($file) - 1], false);
+        $fileObj = new ilObjFile((int) $file[count($file) - 1], false);
         $fileObj->sendFile();
         exit;
     }
@@ -1051,7 +1024,7 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
      */
     public function confirmDeleteQuestionsObject(): void
     {
-        $qst_ids = $this->request_data_collector->retrieveArrayOfIntsFromPost('q_id') ?? [];
+        $qst_ids = $this->request_data_collector->intArray('q_id');
         foreach ($qst_ids as $value) {
             $this->object->deleteQuestion((int) $value);
             $this->object->cleanupClipboard((int) $value);
@@ -1552,7 +1525,7 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
         }
         // questions
         $force_active = false;
-        $commands = $this->getQueryParamString('cmd');
+        $commands = $this->request_data_collector->raw('cmd');
         if (is_array($commands)) {
             foreach ($commands as $key => $value) {
                 if (preg_match('/^delete_.*/', $key, $matches) ||
@@ -1567,11 +1540,7 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
             }
         }
 
-        $image_map_x = $this->request_data_collector->retrieveStringValueFromPost('imagemap_x');
-
-        if (isset($image_map_x)) {
-            $force_active = true;
-        }
+        $force_active = $force_active || $this->request_data_collector->isset('imagemap_x');
         if (!$force_active) {
             $force_active = strtolower($this->ctrl->getCmdClass()) === strtolower(self::class)
                 || $this->ctrl->getCmdClass() === '' && $this->ctrl->getCmd() === ''

@@ -194,48 +194,48 @@ class ilAssQuestionSkillAssignmentsGUI
 
         return false;
     }
+
     private function saveSkillPointsCmd(): void
     {
         $success = true;
-        $skill_points = $this->request_data_collector->retrieveNestedArraysOfFloats('skill_points');
+        $skill_points = $this->request_data_collector->rawArray('skill_points');
 
-        if (is_array($skill_points)) {
-            for ($i = 0; $i < 2; $i++) {
-                foreach ($skill_points as $assignment_key => $skill_point) {
-                    $assignment_key = explode(':', $assignment_key);
-                    $skillBaseId = (int) $assignment_key[0];
-                    $skillTrefId = (int) $assignment_key[1];
-                    $questionId = (int) $assignment_key[2];
+        for ($i = 0; $i < 2; $i++) {
+            foreach ($skill_points as $assignment_key => $skill_point) {
+                $assignment_key = explode(':', $assignment_key);
+                $skillBaseId = (int) $assignment_key[0];
+                $skillTrefId = (int) $assignment_key[1];
+                $questionId = (int) $assignment_key[2];
 
-                    if ($this->isTestQuestion($questionId)) {
-                        $assignment = new ilAssQuestionSkillAssignment($this->db);
+                if ($this->isTestQuestion($questionId)) {
+                    $assignment = new ilAssQuestionSkillAssignment($this->db);
 
-                        if ($i === 0) {
-                            if (!$assignment->isValidSkillPoint($skill_point)) {
-                                $success = false;
-                                break 2;
-                            }
-                            continue;
+                    if ($i === 0) {
+                        if (!$assignment->isValidSkillPoint($skill_point)) {
+                            $success = false;
+                            break 2;
                         }
+                        continue;
+                    }
 
-                        $assignment->setParentObjId($this->getQuestionContainerId());
-                        $assignment->setQuestionId($questionId);
-                        $assignment->setSkillBaseId($skillBaseId);
-                        $assignment->setSkillTrefId($skillTrefId);
+                    $assignment->setParentObjId($this->getQuestionContainerId());
+                    $assignment->setQuestionId($questionId);
+                    $assignment->setSkillBaseId($skillBaseId);
+                    $assignment->setSkillTrefId($skillTrefId);
 
-                        if ($assignment->dbRecordExists()) {
-                            $assignment->loadFromDb();
+                    if ($assignment->dbRecordExists()) {
+                        $assignment->loadFromDb();
 
-                            if (!$assignment->hasEvalModeBySolution()) {
-                                $assignment->setSkillPoints((int) $skill_point);
-                                $assignment->saveToDb();
+                        if (!$assignment->hasEvalModeBySolution()) {
+                            $assignment->setSkillPoints($skill_point);
+                            $assignment->saveToDb();
 
-                                // add skill usage
-                                $this->skillUsageService->addUsage($this->getQuestionContainerId(), $skillBaseId, $skillTrefId);
-                            }
+                            // add skill usage
+                            $this->skillUsageService->addUsage($this->getQuestionContainerId(), $skillBaseId, $skillTrefId);
                         }
                     }
                 }
+
             }
         }
 
@@ -251,7 +251,7 @@ class ilAssQuestionSkillAssignmentsGUI
 
     private function updateSkillQuestionAssignmentsCmd(): void
     {
-        $question_id = (int) $this->request_data_collector->raw('question_id');
+        $question_id = $this->request_data_collector->getQuestionId();
 
         if ($this->isTestQuestion($question_id)) {
             $assignmentList = new ilAssQuestionSkillAssignmentList($this->db);
@@ -320,7 +320,7 @@ class ilAssQuestionSkillAssignmentsGUI
     private function showSkillSelectionCmd(): void
     {
         $this->ctrl->saveParameter($this, 'question_id');
-        $question_id = (int) $this->request_data_collector->raw('question_id');
+        $question_id = $this->request_data_collector->getQuestionId();
 
         $assignmentList = new ilAssQuestionSkillAssignmentList($this->db);
         $assignmentList->setParentObjId($this->getQuestionContainerId());
@@ -363,14 +363,14 @@ class ilAssQuestionSkillAssignmentsGUI
         $this->keepAssignmentParameters();
 
         if ($question_gui === null) {
-            $question_gui = assQuestionGUI::_getQuestionGUI('', (int) $this->request_data_collector->raw('question_id'));
+            $question_gui = assQuestionGUI::_getQuestionGUI('', $this->request_data_collector->getQuestionId());
         }
 
         if ($assignment === null) {
             $assignment = $this->buildQuestionSkillAssignment(
-                (int) $this->request_data_collector->raw('question_id'),
-                (int) $this->request_data_collector->raw('skill_base_id'),
-                (int) $this->request_data_collector->raw('skill_tref_id')
+                $this->request_data_collector->getQuestionId(),
+                $this->request_data_collector->int('skill_base_id'),
+                $this->request_data_collector->int('skill_tref_id')
             );
         }
 
@@ -383,14 +383,15 @@ class ilAssQuestionSkillAssignmentsGUI
 
     private function saveSkillQuestionAssignmentPropertiesFormCmd(): void
     {
-        $question_id = $this->request_data_collector->int('question_id');
+        $question_id = $this->request_data_collector->getQuestionId();
+
         if ($this->isTestQuestion($question_id)) {
             $question_gui = assQuestionGUI::_getQuestionGUI('', $question_id);
 
             $assignment = $this->buildQuestionSkillAssignment(
-                (int) $this->request_data_collector->raw('question_id'),
-                (int) $this->request_data_collector->raw('skill_base_id'),
-                (int) $this->request_data_collector->raw('skill_tref_id')
+                $question_id,
+                $this->request_data_collector->int('skill_base_id'),
+                $this->request_data_collector->int('skill_tref_id')
             );
 
             $this->keepAssignmentParameters();
@@ -433,8 +434,8 @@ class ilAssQuestionSkillAssignmentsGUI
             // add skill usage
             $this->skillUsageService->addUsage(
                 $this->getQuestionContainerId(),
-                (int) $this->request_data_collector->raw('skill_base_id'),
-                (int) $this->request_data_collector->raw('skill_tref_id')
+                $this->request_data_collector->int('skill_base_id'),
+                $this->request_data_collector->int('skill_tref_id')
             );
 
             $this->tpl->setOnScreenMessage('success', $this->lng->txt('qpl_qst_skl_assign_properties_modified'), true);
@@ -501,14 +502,11 @@ class ilAssQuestionSkillAssignmentsGUI
 
     private function showSyncOriginalConfirmationCmd(): void
     {
-        $question_id = (int) $this->request_data_collector->raw('question_id');
-
         $confirmation = new ilConfirmationGUI();
-
         $confirmation->setHeaderText($this->lng->txt('qpl_sync_quest_skl_assigns_confirmation'));
 
         $confirmation->setFormAction($this->ctrl->getFormAction($this));
-        $confirmation->addHiddenItem('question_id', $question_id);
+        $confirmation->addHiddenItem('question_id', $this->request_data_collector->getQuestionId());
         $confirmation->setConfirm($this->lng->txt('yes'), self::CMD_SYNC_ORIGINAL);
         $confirmation->setCancel($this->lng->txt('no'), self::CMD_SHOW_SKILL_QUEST_ASSIGNS);
 
@@ -517,10 +515,9 @@ class ilAssQuestionSkillAssignmentsGUI
 
     private function syncOriginalCmd(): void
     {
-        $questionId = $this->request_data_collector->retrieveIntValueFromPost('question_id', 0);
-
-        if ($this->isTestQuestion($questionId) && $this->isSyncOriginalPossibleAndAllowed($questionId)) {
-            $question = assQuestion::instantiateQuestion($questionId);
+        $question_id = $this->request_data_collector->getQuestionId();
+        if ($this->isTestQuestion($question_id) && $this->isSyncOriginalPossibleAndAllowed($question_id)) {
+            $question = assQuestion::instantiateQuestion($question_id);
 
             $question->syncSkillAssignments(
                 $question->getObjId(),

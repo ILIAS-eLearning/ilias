@@ -521,9 +521,9 @@ class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringA
     {
         $this->setAdditionalContentEditingModeFromPost();
         ilSession::set('subquestion_index', 0);
-        $cmd = $this->request_data_collector->retrieveArrayOfBoolsFromPost('cmd');
+        $cmd = $this->request_data_collector->rawArray('cmd');
 
-        if (($cmd['addSuggestedSolution'] ?? false) && $this->writePostData()) {
+        if ($cmd['addSuggestedSolution'] && $this->writePostData()) {
             $this->tpl->setOnScreenMessage('info', $this->getErrorMessage());
             $this->editQuestion();
             return;
@@ -541,17 +541,10 @@ class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringA
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $word_counter = $this->request_data_collector->retrieveBoolFromPost('wordcounter', false);
-        $this->object->setWordCounterEnabled($word_counter);
-
-        $max_chars = $this->request_data_collector->retrieveIntValueFromPost('maxchars', 0);
-        $this->object->setMaxNumOfChars($max_chars);
-
-        $text_rating = $this->request_data_collector->retrieveStringValueFromPost('text_rating', '');
-        $this->object->setTextRating($text_rating);
-
-        $scoring_mode = $this->request_data_collector->retrieveStringValueFromPost('scoring_mode');
-        $this->object->setKeywordRelation($scoring_mode);
+        $this->object->setWordCounterEnabled($this->request_data_collector->bool('wordcounter') ?? false);
+        $this->object->setMaxNumOfChars($this->request_data_collector->int('maxchars'));
+        $this->object->setTextRating($this->request_data_collector->string('text_rating'));
+        $this->object->setKeywordRelation($this->request_data_collector->string('scoring_mode'));
     }
 
     public function writeAnswerSpecificPostData(ilPropertyFormGUI $form): void
@@ -560,7 +553,7 @@ class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringA
         switch ($this->object->getKeywordRelation()) {
             case assTextQuestion::SCORING_MODE_KEYWORD_RELATION_NONE:
                 $this->object->setAnswers([]);
-                $points = str_replace(',', '.', $this->request_data_collector->raw('non_keyword_points') ?? '');
+                $points = str_replace(',', '.', $this->request_data_collector->string('non_keyword_points'));
                 break;
             case assTextQuestion::SCORING_MODE_KEYWORD_RELATION_ANY:
                 $this->object->setAnswers($this->request_data_collector->raw('any_keyword'));
@@ -568,11 +561,11 @@ class assTextQuestionGUI extends assQuestionGUI implements ilGuiQuestionScoringA
                 break;
             case assTextQuestion::SCORING_MODE_KEYWORD_RELATION_ALL:
                 $this->object->setAnswers($this->request_data_collector->raw('all_keyword'));
-                $points = str_replace(',', '.', $this->request_data_collector->raw('all_keyword_points') ?? '');
+                $points = str_replace(',', '.', $this->request_data_collector->string('all_keyword_points'));
                 break;
             case assTextQuestion::SCORING_MODE_KEYWORD_RELATION_ONE:
                 $this->object->setAnswers($this->request_data_collector->raw('one_keyword'));
-                $points = (float) str_replace(',', '.', $this->request_data_collector->raw('one_keyword_points') ?? '');
+                $points = (float) str_replace(',', '.', $this->request_data_collector->string('one_keyword_points'));
                 break;
         }
         $this->object->setPoints((float) $points);

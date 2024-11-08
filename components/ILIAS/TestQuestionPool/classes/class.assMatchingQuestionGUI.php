@@ -18,6 +18,8 @@
 
 declare(strict_types=1);
 
+use ILIAS\Refinery\Transformation;
+
 /**
  * Matching question GUI representation
  *
@@ -62,22 +64,21 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
 
     public function writeAnswerSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $array_of_strings_trafo = $this->request_data_collector->retrieveMappedValuesOfStringFromPost([]);
-        $array_of_ints_trafo = $this->request_data_collector->retrieveMappedValuesOfIntFromPost([]);
-        $array_of_floats_trafo = $this->request_data_collector->retrieveMappedValuesOfFloatFromPost([]);
         // Delete all existing answers and create new answers from the form data
         $this->object->flushMatchingPairs();
         $this->object->flushTerms();
         $this->object->flushDefinitions();
+
+        $r = $this->refinery->kindlyTo();
 
         $uploads = $this->request_data_collector->getProcessedUploads();
         $allowed_mime_types = ['image/jpeg', 'image/png', 'image/gif'];
 
         if ($this->request_data_collector->isset('terms')) {
             $terms = $this->request_data_collector->raw('terms');
-            $answers = $array_of_strings_trafo->transform($terms['answer']);
-            $terms_image_names = $array_of_strings_trafo->transform($terms['imagename'] ?? []);
-            $terms_identifiers = $array_of_ints_trafo->transform($terms['identifier']);
+            $answers = $this->request_helper->transformArray($terms, 'answer', $r->string());
+            $terms_image_names = $this->request_helper->transformArray($terms, 'imagename', $r->string());
+            $terms_identifiers = $this->request_helper->transformArray($terms, 'identifier', $r->int());
 
             foreach ($answers as $index => $answer) {
                 $filename = $terms_image_names[$index] ?? '';
@@ -109,9 +110,9 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
 
         if ($this->request_data_collector->isset('definitions')) {
             $definitions = $this->request_data_collector->raw('definitions');
-            $answers = $array_of_strings_trafo->transform($definitions['answer']);
-            $definitions_image_names = $array_of_strings_trafo->transform($definitions['imagename'] ?? []);
-            $definitions_identifiers = $array_of_ints_trafo->transform($definitions['identifier']);
+            $answers = $this->request_helper->transformArray($definitions, 'answer', $r->string());
+            $definitions_image_names = $this->request_helper->transformArray($definitions, 'imagename', $r->string());
+            $definitions_identifiers = $this->request_helper->transformArray($definitions, 'identifier', $r->int());
 
             foreach ($answers as $index => $answer) {
                 $filename = $definitions_image_names[$index] ?? '';
@@ -142,9 +143,9 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
 
         if ($this->request_data_collector->isset('pairs')) {
             $pairs = $this->request_data_collector->raw('pairs');
-            $points_of_pairs = $array_of_floats_trafo->transform($pairs['points']);
-            $pair_terms = $array_of_ints_trafo->transform($pairs['term']);
-            $pair_definitions = $array_of_ints_trafo->transform($pairs['definition']);
+            $points_of_pairs = $this->request_helper->transformArray($pairs, 'points', $r->float());
+            $pair_terms = $this->request_helper->transformArray($pairs, 'term', $r->int());
+            $pair_definitions = $this->request_helper->transformArray($pairs, 'definition', $r->int());
 
             foreach ($points_of_pairs as $index => $points) {
                 $term_id = $pair_terms[$index] ?? 0;
@@ -182,8 +183,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
-        $this->object->removeTermImage(key($cmd['removeimageterms'] ?? []));
+        $this->object->removeTermImage($this->request_data_collector->getCmdIndex('removeimageterms'));
         $this->editQuestion();
     }
 
@@ -198,8 +198,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
-        $this->object->removeDefinitionImage(key($cmd['removeimagedefinitions'] ?? []));
+        $this->object->removeDefinitionImage($this->request_data_collector->getCmdIndex('removeimagedefinitions'));
         $this->editQuestion();
     }
 
@@ -207,8 +206,8 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
-        $this->object->insertTerm(key($cmd['addterms'] ?? []) + 1);
+        $add_terms = $this->request_data_collector->getCmdIndex('addterms');
+        $this->object->insertTerm($add_terms + 1);
         $this->editQuestion();
     }
 
@@ -216,8 +215,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
-        $this->object->deleteTerm(key($cmd['removeterms'] ?? []));
+        $this->object->deleteTerm($this->request_data_collector->getCmdIndex('removeterms'));
         $this->editQuestion();
     }
 
@@ -225,8 +223,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
-        $this->object->insertDefinition(key($cmd['adddefinitions'] ?? []) + 1);
+        $this->object->insertDefinition($this->request_data_collector->getCmdIndex('adddefinitions') + 1);
         $this->editQuestion();
     }
 
@@ -234,8 +231,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
-        $this->object->deleteDefinition(key($cmd['removedefinitions'] ?? []));
+        $this->object->deleteDefinition($this->request_data_collector->getCmdIndex('removedefinitions'));
         $this->editQuestion();
     }
 
@@ -243,8 +239,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
-        $this->object->insertMatchingPair(key($cmd['addpairs'] ?? []) + 1);
+        $this->object->insertMatchingPair($this->request_data_collector->getCmdIndex('addpairs') + 1);
         $this->editQuestion();
     }
 
@@ -252,8 +247,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->request_data_collector->retrieveArrayOfIdentities('cmd');
-        $this->object->deleteMatchingPair(key($cmd['removepairs'] ?? []));
+        $this->object->deleteMatchingPair($this->request_data_collector->getCmdIndex('removepairs'));
         $this->editQuestion();
     }
 
@@ -908,9 +902,9 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
      */
     public function checkInput(): bool
     {
-        $title = $this->request_data_collector->retrieveStringFromPost('title');
-        $author = $this->request_data_collector->retrieveStringFromPost('author');
-        $question = $this->request_data_collector->retrieveStringFromPost('question');
+        $title = $this->request_data_collector->string('title');
+        $author = $this->request_data_collector->string('author');
+        $question = $this->request_data_collector->string('question');
 
         return !(!$title || !$author || !$question);
     }

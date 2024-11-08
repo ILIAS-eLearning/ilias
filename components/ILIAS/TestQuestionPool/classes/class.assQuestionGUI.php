@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 use ILIAS\TestQuestionPool\QuestionPoolDIC;
 use ILIAS\TestQuestionPool\RequestDataCollector;
+use ILIAS\TestQuestionPool\RequestValidationHelper;
 use ILIAS\TestQuestionPool\Questions\QuestionAutosaveable;
 use ILIAS\TestQuestionPool\Questions\SuggestedSolution\SuggestedSolution;
 use ILIAS\TestQuestionPool\Questions\SuggestedSolution\SuggestedSolutionsDatabaseRepository;
@@ -150,11 +151,13 @@ abstract class assQuestionGUI
     private bool $previousSolutionPrefilled = false;
 
     protected ilPropertyFormGUI $editForm;
+    protected readonly RequestValidationHelper $request_helper;
     protected readonly RequestDataCollector $request_data_collector;
     protected bool $parent_type_is_lm = false;
 
     private ?int $copy_to_existing_pool_on_save = null;
     private ?string $copy_to_new_pool_on_save = null;
+
     private ?int $move_after_question_with_id = null;
     private bool $context_allows_sync_to_pool = false;
     private string $question_sync_modal = '';
@@ -179,7 +182,8 @@ abstract class assQuestionGUI
         $this->refinery = $DIC['refinery'];
 
         $local_dic = QuestionPoolDIC::dic();
-        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
+        $this->request_helper = $local_dic['request_validation_helper'];
+        $this->request_data_collector = $local_dic['request_data_collector'];
         $this->questionrepository = $local_dic['question.general_properties.repository'];
 
         $this->errormessage = $this->lng->txt("fill_out_all_required_fields");
@@ -741,8 +745,8 @@ abstract class assQuestionGUI
 
     public function setAdditionalContentEditingModeFromPost(): void
     {
-        $additional_content_editing_mode = $this->request_data_collector->retrieveStringValueFromPost('additional_content_editing_mode');
-        if ($additional_content_editing_mode !== null
+        $additional_content_editing_mode = $this->request_data_collector->string('additional_content_editing_mode');
+        if ($additional_content_editing_mode !== ''
             && in_array($additional_content_editing_mode, $this->object->getValidAdditionalContentEditingModes())) {
             $this->object->setAdditionalContentEditingMode($additional_content_editing_mode);
         }
@@ -755,7 +759,7 @@ abstract class assQuestionGUI
         }
 
         if ($this->request_data_collector->isset('pool_title')) {
-            $this->copy_to_new_pool_on_save = $this->request_data_collector->raw('pool_title');
+            $this->copy_to_new_pool_on_save = $this->request_data_collector->string('pool_title');
         }
 
         if ($this->request_data_collector->isset('move_after_question_with_id')) {
@@ -1088,8 +1092,8 @@ abstract class assQuestionGUI
         $solution = $this->object->getSuggestedSolution(0);
         $options = $this->getTypeOptions();
 
-        $solution_type = $this->request_data_collector->raw('solutiontype');
-        if (is_string($solution_type) && strcmp($solution_type, "file") == 0
+        $solution_type = $this->request_data_collector->string('solutiontype');
+        if (strcmp($solution_type, "file") == 0
             && (!$solution || $solution->getType() !== SuggestedSolution::TYPE_FILE)
         ) {
             $solution = $this->getSuggestedSolutionsRepo()->create(
@@ -1098,10 +1102,8 @@ abstract class assQuestionGUI
             );
         }
 
-        $solution_filename = $this->request_data_collector->raw('filename');
-        if ($save &&
-            is_string($solution_filename) &&
-            strlen($solution_filename)) {
+        $solution_filename = $this->request_data_collector->string('filename');
+        if ($save && !empty($solution_filename)) {
             $solution = $solution->withTitle($solution_filename);
         }
 
@@ -1203,7 +1205,7 @@ abstract class assQuestionGUI
             if ($save) {
                 if ($form->checkInput()) {
                     if ($solution->isOfTypeFile()) {
-                        $solution = $solution->withTitle($this->request_data_collector->retrieveStringFromPost('filename'));
+                        $solution = $solution->withTitle($this->request_data_collector->string('filename'));
                     }
 
                     if (!$solution->isOfTypeLink()) {
@@ -1254,8 +1256,8 @@ abstract class assQuestionGUI
 
     public function outSolutionExplorer(): void
     {
-        $type = $this->request_data_collector->raw("link_new_type");
-        $search = $this->request_data_collector->raw("search_link_type");
+        $type = $this->request_data_collector->string("link_new_type");
+        $search = $this->request_data_collector->string("search_link_type");
         $this->ctrl->setParameter($this, "link_new_type", $type);
         $this->ctrl->setParameter($this, "search_link_type", $search);
         $this->ctrl->saveParameter($this, ["subquestion_index", "link_new_type", "search_link_type"]);
@@ -1286,7 +1288,7 @@ abstract class assQuestionGUI
 
     public function saveSuggestedSolutionType(): void
     {
-        $solution_type = $this->request_data_collector->retrieveStringFromPost('solutiontype');
+        $solution_type = $this->request_data_collector->string('solutiontype');
 
         switch ($solution_type) {
             case 'lm':
@@ -1373,7 +1375,7 @@ abstract class assQuestionGUI
         }
 
         $table = new ilQuestionInternalLinkSelectionTableGUI($this, 'cancelExplorer', __METHOD__);
-        $table->setTitle($this->lng->txt('obj_' . ilUtil::stripSlashes($this->request_data_collector->raw('search_link_type'))));
+        $table->setTitle($this->lng->txt('obj_' . ilUtil::stripSlashes($this->request_data_collector->string('search_link_type'))));
         $table->setData($rows);
 
         $this->tpl->setContent($table->getHTML());
@@ -1403,7 +1405,7 @@ abstract class assQuestionGUI
         }
 
         $table = new ilQuestionInternalLinkSelectionTableGUI($this, 'cancelExplorer', __METHOD__);
-        $table->setTitle($this->lng->txt('obj_' . ilUtil::stripSlashes($this->request_data_collector->raw('search_link_type'))));
+        $table->setTitle($this->lng->txt('obj_' . ilUtil::stripSlashes($this->request_data_collector->string('search_link_type'))));
         $table->setData($rows);
 
         $this->tpl->setContent($table->getHTML());
@@ -1413,7 +1415,7 @@ abstract class assQuestionGUI
     {
         $this->ctrl->setParameter($this, 'q_id', $this->object->getId());
 
-        $glossary = new ilObjGlossary($this->request_data_collector->raw('source_id'), true);
+        $glossary = new ilObjGlossary($this->request_data_collector->int('source_id'), true);
         $terms = $glossary->getTermList();
 
         $rows = [];
@@ -1439,7 +1441,8 @@ abstract class assQuestionGUI
     {
         $repo = $this->getSuggestedSolutionsRepo();
         $question_id = $this->object->getId();
-        $subquestion_index = ($this->request_data_collector->raw("subquestion_index") > 0) ? $this->request_data_collector->raw("subquestion_index") : 0;
+        $subquestion_index = $this->request_data_collector->int('subquestion_index');
+        $subquestion_index = ($subquestion_index > 0) ? $subquestion_index : 0;
 
         $solution = $repo->create($question_id, $type)
             ->withSubquestionIndex($subquestion_index)
@@ -1451,7 +1454,7 @@ abstract class assQuestionGUI
     public function linkChilds(): void
     {
         $this->ctrl->saveParameter($this, ["subquestion_index", "link_new_type", "search_link_type"]);
-        switch ($this->request_data_collector->raw("search_link_type")) {
+        switch ($this->request_data_collector->string("search_link_type")) {
             case "pg":
                 $this->outPageSelector();
                 break;
@@ -1643,17 +1646,18 @@ abstract class assQuestionGUI
 
     protected function writeQuestionGenericPostData(): void
     {
-        $this->object->setTitle($this->request_data_collector->retrieveStringValueFromPost('title') ?? '');
-        $this->object->setAuthor($this->request_data_collector->retrieveStringValueFromPost('author') ?? '');
-        $this->object->setComment($this->request_data_collector->retrieveStringValueFromPost('comment') ?? '');
-        if ($this->object->getSelfAssessmentEditingMode()
-            && (($nr_of_tries = $this->request_data_collector->retrieveIntValueFromPost('nr_of_tries')) !== null)) {
+        $this->object->setTitle($this->request_data_collector->string('title'));
+        $this->object->setAuthor($this->request_data_collector->string('author'));
+        $this->object->setComment($this->request_data_collector->string('comment'));
+
+        $nr_of_tries = $this->request_data_collector->int('nr_of_tries');
+        if ($nr_of_tries !== 0 && $this->object->getSelfAssessmentEditingMode()) {
             $this->object->setNrOfTries($nr_of_tries);
         }
 
         try {
             $lifecycle = ilAssQuestionLifecycle::getInstance(
-                $this->request_data_collector->retrieveStringValueFromPost('lifecycle')
+                $this->request_data_collector->string('lifecycle')
             );
             $this->object->setLifecycle($lifecycle);
         } catch (ilTestQuestionPoolInvalidArgumentException $e) {
@@ -1661,7 +1665,7 @@ abstract class assQuestionGUI
 
         $this->object->setQuestion(
             ilUtil::stripOnlySlashes(
-                $this->request_data_collector->retrieveStringValueFromPost('question') ?? ''
+                $this->request_data_collector->string('question')
             )
         );
 

@@ -60,8 +60,8 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
          * sk 26.09.22: This is horrific but I don't see a better way right now,
          * without needing to check most questions for side-effects.
          */
-        $answers = $this->request_data_collector->retrieveArrayOfStringsFromPost('answers', []);
-        $this->answers_from_post = $answers['answer'] ?? null;
+        $answers = $this->request_data_collector->rawArray('answers');
+        $this->answers_from_post = $answers['answer'] ?? [];
 
         if (!(!$always && $this->editQuestion(true))) {
             $this->writeQuestionGenericPostData();
@@ -117,8 +117,9 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->request_data_collector->retrieveArrayOfStringsFromPost('addanswers', ['addanswers' => []]);
-        $this->object->addAnswer('', 0, key($cmd['addanswers']) + 1);
+        $cmd = $this->request_data_collector->raw('cmd') ?? [];
+        $add_answers = in_array('addanswers', $cmd) && is_array($cmd['addanswers']) ? $cmd['addanswers'] : [];
+        $this->object->addAnswer('', 0, key($add_answers) + 1);
         $this->editQuestion();
     }
 
@@ -126,8 +127,9 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
     {
         $this->setAdditionalContentEditingModeFromPost();
         $this->writePostData(true);
-        $cmd = $this->request_data_collector->retrieveArrayOfStringsFromPost('removeanswers', ['removeanswers' => []]);
-        $this->object->deleteAnswer(key($cmd['removeanswers']));
+        $cmd = $this->request_data_collector->raw('cmd') ?? [];
+        $remove_answers = in_array('removeanswers', $cmd) && is_array($cmd['removeanswers']) ? $cmd['removeanswers'] : [];
+        $this->object->deleteAnswer(key($remove_answers));
         $this->editQuestion();
     }
 
@@ -295,11 +297,8 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $correct_answers = $this->request_data_collector->retrieveIntValueFromPost('correctanswers', 0);
-        $this->object->setCorrectAnswers($correct_answers);
-
-        $text_rating = $this->request_data_collector->retrieveStringValueFromPost('text_rating', '');
-        $this->object->setTextRating($text_rating);
+        $this->object->setCorrectAnswers($this->request_data_collector->int('correctanswers'));
+        $this->object->setTextRating($this->request_data_collector->string('text_rating'));
     }
 
     public function writeAnswerSpecificPostData(ilPropertyFormGUI $form): void
@@ -307,10 +306,11 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
         // Delete all existing answers and create new answers from the form data
         $this->object->flushAnswers();
 
-        $answers = $this->request_data_collector->retrieveArrayOfArraysOfStringsFromPost('answers');
+        $answers = $this->request_data_collector->floatArray('answers', 3);
+        $points = $answers['points'] ?? [];
 
         foreach ($this->answers_from_post as $index => $answertext) {
-            $this->object->addAnswer(htmlentities(assQuestion::extendedTrim($answertext)), $answers['points'][$index], $index);
+            $this->object->addAnswer(htmlentities(assQuestion::extendedTrim($answertext)), $points[$index], $index);
         }
     }
 

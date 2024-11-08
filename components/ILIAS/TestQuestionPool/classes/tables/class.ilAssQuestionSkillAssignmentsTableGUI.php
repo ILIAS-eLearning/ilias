@@ -16,6 +16,7 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\QuestionPoolDIC;
 use ILIAS\TestQuestionPool\RequestDataCollector;
 
 /**
@@ -27,7 +28,7 @@ use ILIAS\TestQuestionPool\RequestDataCollector;
 class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
 {
     private ilAssQuestionSkillAssignmentList $skillQuestionAssignmentList;
-    private RequestDataCollector $requestDataCollector;
+    private RequestDataCollector $request_data_collector;
 
     private bool $loadSkillPointsFromRequest = false;
     private bool $manipulationsEnabled;
@@ -53,11 +54,11 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         ilCtrl $ctrl,
         ilLanguage $lng
     ) {
-        global $DIC;
-
         $this->lng = $lng;
         $this->ctrl = $ctrl;
-        $this->requestDataCollector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
+
+        $local_dic = QuestionPoolDIC::dic();
+        $this->request_data_collector = $local_dic['request_data_collector'];
 
         $this->setId('assQstSkl');
         $this->setPrefix('assQstSkl');
@@ -256,8 +257,7 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
         ]);
 
         if ($this->loadSkillPointsFromRequest) {
-            $skill_points = $this->requestDataCollector->retrieveNestedArraysOfStrings('skill_points', 2) ?? [];
-
+            $skill_points = $this->request_data_collector->strArray('skill_points', 2);
             $points = ilUtil::stripSlashes($skill_points[$assignmentKey] ?? '');
         } else {
             $points = $assignment->getSkillPoints();

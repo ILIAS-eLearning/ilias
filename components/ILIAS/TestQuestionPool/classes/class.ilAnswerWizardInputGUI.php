@@ -16,7 +16,7 @@
  *
  *********************************************************************/
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
+use ILIAS\TestQuestionPool\RequestValidationHelper;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\Component\Symbol\Glyph\Factory as GlyphFactory;
 
@@ -37,9 +37,9 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
     protected $minvalue = false;
     protected $minvalueShouldBeGreater = false;
 
+    protected RequestValidationHelper $request_helper;
     protected GlyphFactory $glyph_factory;
     protected Renderer $renderer;
-    protected readonly RequestDataCollector $request_data_collector;
 
     /**
     * Constructor
@@ -52,9 +52,9 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
         parent::__construct($a_title, $a_postvar);
 
         global $DIC;
+        $this->request_helper = new RequestValidationHelper($this->refinery);
         $this->glyph_factory = $DIC->ui()->factory()->symbol()->glyph();
         $this->renderer = $DIC->ui()->renderer();
-        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
 
         $this->setSize('25');
         $this->validationRegexp = "";
@@ -63,16 +63,17 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
     public function setValue($a_value): void
     {
         $this->values = [];
-        if (is_array($a_value)) {
-            if (is_array($a_value['answer'])) {
-                foreach ($a_value['answer'] as $index => $value) {
-                    $answer = new ASS_AnswerBinaryStateImage($value, $a_value['points'][$index], $index, true, null, -1);
-                    if (isset($a_value['imagename'][$index])) {
-                        $answer->setImage($a_value['imagename'][$index]);
-                    }
-                    array_push($this->values, $answer);
-                }
+
+        $answers = $this->request_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
+        $images = $this->request_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->string());
+        $points = $this->request_helper->transformPoints($a_value);
+
+        foreach ($answers as $index => $value) {
+            $answer = new ASS_AnswerBinaryStateImage($value, $points[$index], $index, true, null, -1);
+            if ($this->request_helper->inArray($images, $index)) {
+                $answer->setImage($images[$index]);
             }
+            $this->values[] = $answer;
         }
     }
 
@@ -216,58 +217,36 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
     */
     public function checkInput(): bool
     {
-        global $DIC;
-        $lng = $DIC['lng'];
+        $data = $this->raw($this->getPostVar());
 
-        $found_values = $this->request_data_collector->retrieveArrayOfStringsFromPost($this->getPostVar());
+        if (!is_array($data)) {
+            $this->setAlert($this->lng->txt('msg_input_is_required'));
+            return false;
+        }
 
-        if (is_array($found_values)) {
-            $found_values = ilArrayUtil::stripSlashesRecursive($found_values);
-            // check answers
-            if (is_array($found_values['answer'])) {
-                foreach ($found_values['answer'] as $answervalue) {
-                    if ($answervalue === '') {
-                        $this->setAlert($lng->txt('msg_input_is_required'));
-                        return false;
-                    }
+        // check points
+        $points = $this->request_helper->checkPointsInputEnoughPositive($data, true);
+        if (!is_array($points)) {
+            $this->setAlert($this->lng->txt($points));
+            return false;
+        }
+        foreach ($points as $value) {
+            if ($value !== 0.0 && $this->getMinValue() !== false) {
+                if (($this->minvalueShouldBeGreater() && $points <= $this->getMinValue()) ||
+                    (!$this->minvalueShouldBeGreater() && $points < $this->getMinValue())) {
+                    $this->setAlert($this->lng->txt('form_msg_value_too_low'));
+                    return false;
                 }
             }
-            // check points
-            $max = 0;
-            if (is_array($found_values['points'])) {
-                foreach ($found_values['points'] as $points) {
-                    $max = max($max, $points);
-                    if ($points === '' || (!is_numeric($points))) {
-                        $this->setAlert($lng->txt('form_msg_numeric_value_required'));
-                        return false;
-                    }
+        }
 
-                    if ($this->minvalueShouldBeGreater()) {
-                        if (
-                            trim($points) !== ''
-                            && $this->getMinValue() !== false
-                            && $points <= $this->getMinValue()
-                        ) {
-                            $this->setAlert($lng->txt('form_msg_value_too_low'));
-                            return false;
-                        }
-                    } elseif (
-                        trim($points) !== ''
-                        && $this->getMinValue() !== false
-                        && $points < $this->getMinValue()
-                    ) {
-                        $this->setAlert($lng->txt('form_msg_value_too_low'));
-                        return false;
-                    }
-                }
-            }
-            if ($max === 0) {
-                $this->setAlert($lng->txt('enter_enough_positive_points'));
+        // check answers
+        $answers = $this->request_helper->transformArray($data, 'answer', $this->refinery->kindlyTo()->string());
+        foreach ($answers as $answer) {
+            if ($answer === '') {
+                $this->setAlert($this->lng->txt('msg_input_is_required'));
                 return false;
             }
-        } else {
-            $this->setAlert($lng->txt('msg_input_is_required'));
-            return false;
         }
 
         return $this->checkSubItemsInput();

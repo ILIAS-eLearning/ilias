@@ -16,17 +16,17 @@
  *
  *********************************************************************/
 
-use ILIAS\TestQuestionPool\RequestDataCollector;
+use ILIAS\TestQuestionPool\RequestValidationHelper;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\Component\Symbol\Glyph\Factory as GlyphFactory;
 
 /**
-* This class represents a key value pair wizard property in a property form.
-*
-* @author Helmut Schottmüller <ilias@aurealis.de>
-* @version $Id$
-* @ingroup	ServicesForm
-*/
+ * This class represents a key value pair wizard property in a property form.
+ *
+ * @author Helmut Schottmüller <ilias@aurealis.de>
+ * @version $Id$
+ * @ingroup    ServicesForm
+ */
 class ilMatchingPairWizardInputGUI extends ilTextInputGUI
 {
     protected $pairs = [];
@@ -34,26 +34,24 @@ class ilMatchingPairWizardInputGUI extends ilTextInputGUI
     protected $terms = [];
     protected $definitions = [];
 
+    protected RequestValidationHelper $request_helper;
     protected GlyphFactory $glyph_factory;
     protected Renderer $renderer;
 
-    protected readonly RequestDataCollector $request_data_collector;
-
     /**
-    * Constructor
-    *
-    * @param	string	$a_title	Title
-    * @param	string	$a_postvar	Post Variable
-    */
+     * Constructor
+     *
+     * @param string $a_title Title
+     * @param string $a_postvar Post Variable
+     */
     public function __construct($a_title = "", $a_postvar = "")
     {
         parent::__construct($a_title, $a_postvar);
 
         global $DIC;
+        $this->request_helper = new RequestValidationHelper($this->refinery);
         $this->glyph_factory = $DIC->ui()->factory()->symbol()->glyph();
         $this->renderer = $DIC->ui()->renderer();
-
-        $this->request_data_collector = new RequestDataCollector($this->http, $this->refinery, $DIC->upload());
     }
 
     public function setValue($a_value): void
@@ -61,141 +59,119 @@ class ilMatchingPairWizardInputGUI extends ilTextInputGUI
         $this->pairs = [];
         $this->terms = [];
         $this->definitions = [];
-        if (is_array($a_value)) {
-            if (isset($a_value['term']) && is_array($a_value['term'])) {
-                foreach ($a_value['term'] as $idx => $term) {
-                    $this->pairs[] = new assAnswerMatchingPair(
-                        new assAnswerMatchingTerm('', '', $term),
-                        new assAnswerMatchingDefinition('', '', $a_value['definition'][$idx]),
-                        (float) $a_value['points'][$idx]
-                    );
-                }
-            }
-            $term_ids = explode(",", $a_value['term_id']);
-            foreach ($term_ids as $id) {
-                $this->terms[] = new assAnswerMatchingTerm('', '', $id);
-            }
-            $definition_ids = explode(",", $a_value['definition_id']);
-            foreach ($definition_ids as $id) {
-                $this->definitions[] = new assAnswerMatchingDefinition('', '', $id);
-            }
+
+        $to_int = $this->refinery->kindlyTo()->int();
+        $points = $this->request_helper->transformPoints($a_value);
+        $terms = $this->request_helper->transformArray($a_value, 'term', $to_int);
+        $definitions = $this->request_helper->transformArray($a_value, 'definition', $to_int);
+
+        foreach ($terms as $index => $term) {
+            $this->pairs[] = new assAnswerMatchingPair(
+                new assAnswerMatchingTerm('', '', $term),
+                new assAnswerMatchingDefinition('', '', $definitions[$index]),
+                $points[$index]
+            );
+        }
+
+        $term_ids = explode(",", $a_value['term_id']);
+        foreach ($term_ids as $id) {
+            $this->terms[] = new assAnswerMatchingTerm('', '', (int) $id);
+        }
+
+        $definition_ids = explode(",", $a_value['definition_id']);
+        foreach ($definition_ids as $id) {
+            $this->definitions[] = new assAnswerMatchingDefinition('', '', (int) $id);
         }
     }
 
     /**
-    * Set terms.
-    *
-    * @param	array	$a_terms	Terms
-    */
+     * Set terms.
+     *
+     * @param array $a_terms Terms
+     */
     public function setTerms($a_terms): void
     {
         $this->terms = $a_terms;
     }
 
     /**
-    * Set definitions.
-    *
-    * @param	array	$a_definitions	Definitions
-    */
+     * Set definitions.
+     *
+     * @param array $a_definitions Definitions
+     */
     public function setDefinitions($a_definitions): void
     {
         $this->definitions = $a_definitions;
     }
 
     /**
-    * Set pairs.
-    *
-    * @param	array	$a_pairs	Pairs
-    */
+     * Set pairs.
+     *
+     * @param array $a_pairs Pairs
+     */
     public function setPairs($a_pairs): void
     {
         $this->pairs = $a_pairs;
     }
 
     /**
-    * Set allow move
-    *
-    * @param	boolean	$a_allow_move Allow move
-    */
+     * Set allow move
+     *
+     * @param boolean $a_allow_move Allow move
+     */
     public function setAllowMove($a_allow_move): void
     {
         $this->allowMove = $a_allow_move;
     }
 
     /**
-    * Get allow move
-    *
-    * @return	boolean	Allow move
-    */
+     * Get allow move
+     *
+     * @return    boolean    Allow move
+     */
     public function getAllowMove(): bool
     {
         return $this->allowMove;
     }
 
     /**
-    * Check input, strip slashes etc. set alert, if input is not ok.
-    * @return	boolean		Input ok, true/false
-    */
+     * Check input, strip slashes etc. set alert, if input is not ok.
+     * @return    boolean        Input ok, true/false
+     */
     public function checkInput(): bool
     {
-        global $DIC;
-        $lng = $DIC['lng'];
+        $to_int = $this->refinery->kindlyTo()->int();
+        $data = $this->raw($this->getPostVar());
 
-        $post_var = $this->request_data_collector->retrieveArrayOfStringsFromPost($this->getPostVar());
-        $found_values = is_array($post_var) ? ilArrayUtil::stripSlashesRecursive($post_var) : $post_var;
+        if (!is_array($data)) {
+            $this->setAlert($this->lng->txt('msg_input_is_required'));
+            return false;
+        }
 
-        if (is_array($found_values)) {
-            // check answers
-            if (isset($found_values['term']) && is_array($found_values['term'])) {
-                foreach ($found_values['term'] as $val) {
-                    if ($val < 1 && $this->getRequired()) {
-                        $this->setAlert($lng->txt('msg_input_is_required'));
-                        return false;
-                    }
-                }
-                foreach ($found_values['definition'] as $val) {
-                    if ($val < 1 && $this->getRequired()) {
-                        $this->setAlert($lng->txt('msg_input_is_required'));
-                        return false;
-                    }
-                }
-                $max = 0;
-                foreach ($found_values['points'] as $val) {
-                    if ($val === '' && $this->getRequired()) {
-                        $this->setAlert($lng->txt('msg_input_is_required'));
-                        return false;
-                    }
-                    $val = str_replace(',', '.', $val);
-                    if (!is_numeric($val)) {
-                        $this->setAlert($lng->txt('form_msg_numeric_value_required'));
-                        return false;
-                    }
+        // check points
+        $result_points = $this->request_helper->checkPointsInputEnoughPositive($data, true);
+        if (!is_array($result_points)) {
+            $this->setAlert($this->lng->txt($result_points));
+            return false;
+        }
 
-                    $val = (float) $val;
-                    if ($val > 0) {
-                        $max += $val;
-                    }
-                }
-                if ($max <= 0) {
-                    $this->setAlert($lng->txt('enter_enough_positive_points'));
-                    return false;
-                }
-            } elseif ($this->getRequired()) {
-                $this->setAlert($lng->txt('msg_input_is_required'));
+        // check answers
+        $terms = $this->request_helper->transformArray($data, 'term', $to_int);
+        $definitions = $this->request_helper->transformArray($data, 'definition', $to_int);
+        foreach ([$terms, $definitions] as $value) {
+            if ($value < 1 && $this->getRequired()) {
+                $this->setAlert($this->lng->txt('msg_input_is_required'));
                 return false;
             }
-        } elseif ($this->getRequired()) {
-            $this->setAlert($lng->txt('msg_input_is_required'));
-            return false;
         }
 
         return $this->checkSubItemsInput();
     }
 
     /**
-    * Insert property html
-    * @return	void	Size
-    */
+     * Insert property html
+     * @return    void    Size
+     */
     public function insert(ilTemplate $a_tpl): void
     {
         global $DIC;

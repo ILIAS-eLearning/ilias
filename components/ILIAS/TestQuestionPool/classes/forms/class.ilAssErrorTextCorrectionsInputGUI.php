@@ -26,41 +26,25 @@
  */
 class ilAssErrorTextCorrectionsInputGUI extends ilErrorTextWizardInputGUI
 {
-    public function __construct(string $a_title = '', string $a_postvar = '')
-    {
-        parent::__construct($a_title, $a_postvar);
-    }
-
     public function setValue($a_value): void
     {
-        if (is_array($a_value) && is_array($a_value['points'])) {
-            foreach ($this->values as $idx => $key) {
-                $this->values[$idx] = $this->values[$idx]->withPoints(
-                    str_replace(',', '.', $a_value['points'][$idx])
-                );
-            }
+        foreach ($this->request_helper->transformPoints($a_value) as $index => $points) {
+            $this->values[$index] = $this->values[$index]->withPoints($points);
         }
     }
 
     public function checkInput(): bool
     {
-        $found_values = $this->request_data_collector->retrieveArrayOfStringsFromPost($this->getPostVar());
+        $data = $this->raw($this->getPostVar());
+        $result = $this->request_helper->checkPointsInput($data, $this->getRequired());
 
-        if (!is_array($found_values['points'])) {
-            $this->setAlert($this->lng->txt('msg_input_is_required'));
+        if (!is_array($result)) {
+            $this->setAlert($this->lng->txt($result));
             return false;
         }
 
-        foreach ($found_values['points'] as $val) {
-            if ($val === '' && $this->getRequired()) {
-                $this->setAlert($this->lng->txt('msg_input_is_required'));
-                return false;
-            }
-            if (!is_numeric(str_replace(',', '.', $val))) {
-                $this->setAlert($this->lng->txt('form_msg_numeric_value_required'));
-                return false;
-            }
-            if ((float) $val <= 0) {
+        foreach ($result as $points) {
+            if ($points < 0) {
                 $this->setAlert($this->lng->txt('positive_numbers_required'));
                 return false;
             }

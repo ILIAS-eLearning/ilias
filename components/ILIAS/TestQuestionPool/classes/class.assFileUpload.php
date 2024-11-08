@@ -566,7 +566,7 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
 
                 if ($this->isFileDeletionAction()) {
                     if ($this->isFileDeletionSubmitAvailable()) {
-                        $delete_files = $this->test_request->retrieveArraysOfInts(self::DELETE_FILES_TBL_POSTVAR);
+                        $delete_files = $this->questionpool_request->intArray(self::DELETE_FILES_TBL_POSTVAR);
 
                         foreach ($delete_files as $solution_id) {
                             $this->removeSolutionRecordById($solution_id);
@@ -576,7 +576,7 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
                     }
                 } else {
                     if ($this->isFileReuseHandlingRequired()) {
-                        $reuse_files = $this->test_request->retrieveArraysOfInts(self::REUSE_FILES_TBL_POSTVAR);
+                        $reuse_files = $this->questionpool_request->intArray(self::REUSE_FILES_TBL_POSTVAR);
 
                         foreach ($reuse_files as $solutionId) {
                             $solution = $this->getSolutionRecordById($solutionId);
@@ -631,7 +631,7 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
     {
         $rids_to_delete = [];
         if ($this->isFileDeletionAction() && $this->isFileDeletionSubmitAvailable()) {
-            $delete_files = $this->test_request->retrieveArraysOfInts(self::DELETE_FILES_TBL_POSTVAR);
+            $delete_files = $this->questionpool_request->intArray(self::DELETE_FILES_TBL_POSTVAR);
 
             $res = $this->db->query(
                 "SELECT value1 FROM tst_solutions WHERE value2 = 'rid' AND " . $this->db->in(
@@ -700,7 +700,7 @@ class assFileUpload extends assQuestion implements ilObjQuestionScoringAdjustabl
             // hey: prevPassSolutions - readability spree - get a chance to understand the code
             if ($this->isFileDeletionSubmitAvailable()) {
                 // hey.
-                $delete_files = $this->test_request->retrieveArraysOfInts(self::DELETE_FILES_TBL_POSTVAR);
+                $delete_files = $this->questionpool_request->intArray(self::DELETE_FILES_TBL_POSTVAR);
 
                 $userSolution = $this->deletePreviewFileUploads($previewSession->getUserId(), $userSolution, $delete_files);
             } else {

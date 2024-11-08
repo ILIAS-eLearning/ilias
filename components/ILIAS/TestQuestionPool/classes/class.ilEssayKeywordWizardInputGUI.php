@@ -18,31 +18,16 @@
 
 class ilEssayKeywordWizardInputGUI extends ilSingleChoiceWizardInputGUI
 {
-    public function __construct($a_title = '', $a_postvar = '')
-    {
-        parent::__construct($a_title, $a_postvar);
-    }
-
     public function setValue($a_value): void
     {
+        $answers = $this->request_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
+        $points = $this->request_helper->transformPoints($a_value, 'points');
+        $points_unchecked = $this->request_helper->transformPoints($a_value, 'points_unchecked');
+
         $this->values = [];
-        if (is_array($a_value)) {
-            if (is_array($a_value['answer'])) {
-                foreach ($a_value['answer'] as $index => $value) {
-                    if (isset($a_value['points'])) {
-                        $pvalue = $a_value['points'][$index];
-                    } else {
-                        $value = 0.0;
-                    }
-                    if (isset($a_value['points_unchecked'])) {
-                        $value_unchecked = $a_value['points_unchecked'][$index];
-                    } else {
-                        $value_unchecked = 0.0;
-                    }
-                    $answer = new ASS_AnswerMultipleResponseImage($value, (float) $pvalue, $index, $value_unchecked);
-                    $this->values[] = $answer;
-                }
-            }
+        foreach ($answers as $index => $value) {
+            $answer = new ASS_AnswerMultipleResponseImage($value, $points[$index], $index, $points_unchecked[$index]);
+            $this->values[] = $answer;
         }
     }
 
@@ -52,51 +37,25 @@ class ilEssayKeywordWizardInputGUI extends ilSingleChoiceWizardInputGUI
      */
     public function checkInput(): bool
     {
-        global $DIC;
-        $lng = $DIC['lng'];
+        $r = $this->refinery->kindlyTo();
+        $data = $this->raw($this->getPostVar());
 
-        $post_var = $this->request_data_collector->retrieveArrayOfStringsFromPost($this->getPostVar());
+        if (!is_array($data)) {
+            $this->setAlert($this->lng->txt('msg_input_is_required'));
+            return false;
+        }
 
-        $found_values = is_array($post_var)
-            ? ilArrayUtil::stripSlashesRecursive(
-                $post_var,
-                false,
-                ilObjAdvancedEditing::_getUsedHTMLTagsAsString('assessment')
-            )
-            : $post_var;
+        // check answers
+        $answers = $this->checkAnswersInput($data);
+        if (!is_array($answers)) {
+            $this->setAlert($this->lng->txt($answers));
+            return false;
+        }
 
-        if (is_array($found_values)) {
-            // check answers
-            if (is_array($found_values['answer'])) {
-                foreach ($found_values['answer'] as $aidx => $answervalue) {
-                    if ($answervalue === '' && (!isset($found_values['imagename']) || $found_values['imagename'][$aidx] === '')) {
-                        $this->setAlert($lng->txt('msg_input_is_required'));
-                        return false;
-                    }
-
-                    if (mb_strlen($answervalue) > $this->getMaxLength()) {
-                        $this->setAlert($lng->txt("msg_input_char_limit_max"));
-                        return false;
-                    }
-                }
-            }
-            // check points
-            $max = 0;
-            if (is_array($found_values['points'])) {
-                foreach ($found_values['points'] as $points) {
-                    $max = max($max, $points);
-                    if ($points === '' || (!is_numeric($points))) {
-                        $this->setAlert($lng->txt('form_msg_numeric_value_required'));
-                        return false;
-                    }
-                }
-            }
-            if ($max === 0) {
-                $this->setAlert($lng->txt('enter_enough_positive_points'));
-                return false;
-            }
-        } else {
-            $this->setAlert($lng->txt('msg_input_is_required'));
+        // check points
+        $result = $this->request_helper->checkPointsInputEnoughPositive($data, true);
+        if (!is_array($result)) {
+            $this->setAlert($this->lng->txt($result));
             return false;
         }
 

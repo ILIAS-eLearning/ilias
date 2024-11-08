@@ -16,6 +16,7 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\QuestionPoolDIC;
 use ILIAS\TestQuestionPool\RequestDataCollector;
 
 /**
@@ -67,8 +68,8 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
 
     public function __construct()
     {
-        global $DIC;
-        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
+        $local_dic = QuestionPoolDIC::dic();
+        $this->request_data_collector = $local_dic['request_data_collector'];
     }
 
     /**
@@ -387,7 +388,7 @@ class ilAssOrderingFormValuesObjectsConverter implements ilFormValuesManipulator
             return false;
         }
 
-        $cmd = $this->request_data_collector->retrieveNestedArraysOfStrings('cmd', 3);
+        $cmd = $this->request_data_collector->strArray('cmd', 3);
 
         if (!isset($cmd[$this->getImageRemovalCommand()])) {
             return false;

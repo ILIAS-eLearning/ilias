@@ -30,48 +30,20 @@ class ilAssSingleChoiceCorrectionsInputGUI extends ilSingleChoiceWizardInputGUI
      */
     protected $qstObject;
 
-    public function __construct(string $a_title = '', string $a_postvar = '')
-    {
-        parent::__construct($a_title, $a_postvar);
-    }
-
     public function setValue($a_value): void
     {
-        if (is_array($a_value) && is_array($a_value['points'])) {
-            foreach ($a_value['points'] as $index => $value) {
-                $this->values[$index]->setPoints($value);
-            }
+        foreach ($this->request_helper->transformPoints($a_value) as $index => $value) {
+            $this->values[$index]->setPoints($value);
         }
     }
 
     public function checkInput(): bool
     {
-        global $DIC;
-        $lng = $DIC['lng'];
+        $data = $this->raw($this->getPostVar());
 
-        $found_values = $this->request_data_collector->retrieveNestedArraysOfStrings($this->getPostVar(), 2);
-
-        if (is_array($found_values)) {
-            // check points
-            $max = 0;
-            if (is_array($found_values['points'])) {
-                foreach ($found_values['points'] as $points) {
-                    $points = str_replace(',', '.', $points);
-                    $max = max($max, $points);
-
-                    if ($points === '' || !is_numeric($points)) {
-                        $this->setAlert($lng->txt('form_msg_numeric_value_required'));
-                        return false;
-                    }
-                }
-            }
-
-            if ($max === 0) {
-                $this->setAlert($lng->txt('enter_enough_positive_points'));
-                return false;
-            }
-        } else {
-            $this->setAlert($lng->txt('msg_input_is_required'));
+        $result = $this->request_helper->checkPointsInputEnoughPositive($data, $this->getRequired());
+        if (!is_array($result)) {
+            $this->setAlert($this->lng->txt($result));
             return false;
         }
 

@@ -80,19 +80,16 @@ class assKprimChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAd
 
     public function removeImage(): void
     {
-        $cmd = $this->request_data_collector->retrieveNestedArraysOfStrings('cmd', 2, []);
-        $this->object->removeAnswerImage(key($cmd['removeImage'] ?? []));
-
+        $this->object->removeAnswerImage($this->request_data_collector->getCmdIndex('removeImage'));
         $this->object->saveToDb();
         $this->editQuestion();
     }
 
     public function downkprimanswers(): void
     {
-        $cmd = $this->request_data_collector->retrieveNestedArraysOfStrings('cmd', 2, []);
-
-        if (isset($cmd[__FUNCTION__]) && count($cmd[__FUNCTION__])) {
-            $this->object->moveAnswerDown(key($cmd[__FUNCTION__]));
+        $index = $this->request_data_collector->getCmdIndex(__FUNCTION__);
+        if (!empty($index)) {
+            $this->object->moveAnswerDown($index);
             $this->object->saveToDb();
         }
 
@@ -101,10 +98,9 @@ class assKprimChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAd
 
     public function upkprimanswers(): void
     {
-        $cmd = $this->request_data_collector->retrieveNestedArraysOfStrings('cmd', 2, []);
-
-        if (isset($cmd[__FUNCTION__]) && count($cmd[__FUNCTION__])) {
-            $this->object->moveAnswerUp(key($cmd[__FUNCTION__]));
+        $index = $this->request_data_collector->getCmdIndex(__FUNCTION__);
+        if (!empty($index)) {
+            $this->object->moveAnswerUp($index);
             $this->object->saveToDb();
         }
 
@@ -122,8 +118,7 @@ class assKprimChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringAd
 
         if ($always && $answers_input instanceof ilFormPropertyGUI) {
             $answers_input->setIgnoreMissingUploadsEnabled(true);
-
-            $answer_input_postvar = $this->request_data_collector->retrieveNestedArraysOfStrings($answers_input->getPostVar(), 2, []);
+            $answer_input_postvar = $this->request_data_collector->strArray($answers_input->getPostVar(), 2);
 
             if (!$answers_input->checkUploads($answer_input_postvar)) {
                 $this->tpl->setOnScreenMessage('failure', $this->lng->txt('form_input_not_valid'));

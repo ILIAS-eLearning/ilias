@@ -19,6 +19,7 @@
 declare(strict_types=1);
 
 use ILIAS\TestQuestionPool\Import\TestQuestionsImportTrait;
+use ILIAS\TestQuestionPool\QuestionPoolDIC;
 use ILIAS\TestQuestionPool\RequestDataCollector;
 
 /**
@@ -43,10 +44,10 @@ class ilTestQuestionPoolImporter extends ilXmlImporter
 
     public function __construct()
     {
-        global $DIC;
         parent::__construct();
 
-        $this->request_data_collector = new RequestDataCollector($DIC->http(), $DIC->refinery(), $DIC->upload());
+        $local_dic = QuestionPoolDIC::dic();
+        $this->request_data_collector = $local_dic['request_data_collector'];
     }
 
     /**
@@ -91,7 +92,7 @@ class ilTestQuestionPoolImporter extends ilXmlImporter
 
         $new_obj?->fromXML($xmlfile);
 
-        $qpl_new = $this->request_data_collector->retrieveStringValueFromPost('qpl_new', '');
+        $qpl_new = $this->request_data_collector->string('qpl_new');
 
         // set another question pool name (if possible)
         if ($qpl_new !== '') {

@@ -527,14 +527,11 @@ class assSingleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringA
 
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
-        $types = $this->request_data_collector->retrieveStringValueFromPost('types', '0');
+        $types = $this->request_data_collector->string('types') ?? '0';
         $this->object->setMultilineAnswerSetting($types);
+        $this->object->setShuffle($this->request_data_collector->bool('shuffle') ?? false);
 
-        $shuffle = $this->request_data_collector->retrieveBoolFromPost('shuffle', false);
-        $this->object->setShuffle($shuffle);
-
-        $choice = $this->request_data_collector->retrieveArrayOfArraysOfStringsFromPost('choice', null);
-
+        $choice = $this->request_data_collector->rawArray('choice');
         if (isset($choice['imagename']) && is_array($choice['imagename']) && $types === '1') {
             $this->object->setIsSingleline(true);
             $this->tpl->setOnScreenMessage('info', $this->lng->txt('info_answer_type_change'), true);
@@ -543,8 +540,7 @@ class assSingleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScoringA
         }
 
         $object_thumb_size = $this->object->getThumbSize();
-        $thumb_size = $this->request_data_collector->retrieveIntValueFromPost('thumb_size', $object_thumb_size);
-
+        $thumb_size = $this->request_data_collector->int('thumb_size') ?? $object_thumb_size;
         if ($thumb_size !== $object_thumb_size) {
             $this->object->setThumbSize($thumb_size);
             $this->rebuild_thumbnails = true;

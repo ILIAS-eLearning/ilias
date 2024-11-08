@@ -303,7 +303,7 @@ class assErrorText extends assQuestion implements ilObjQuestionScoringAdjustable
     {
         return explode(
             ',',
-            $this->test_request->retrieveStringFromPost('qst_' . $this->getId())
+            $this->questionpool_request->string('qst_' . $this->getId())
         );
     }
 

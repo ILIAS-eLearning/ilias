@@ -597,23 +597,16 @@ class assLongMenu extends assQuestion implements ilObjQuestionScoringAdjustable,
 
     protected function getSolutionSubmit(): array
     {
-        $answer = $this->questionpool_request->retrieveArrayOfStringsFromPost('answer');
-
-        if ($answer === null) {
-            return [];
-        }
-
         $solution_submit = [];
-        foreach ($answer as $key => $value) {
+        foreach ($this->questionpool_request->strArray('answer') as $key => $value) {
             $solution_submit[$key] = $value;
         }
-
         return $solution_submit;
     }
 
     protected function savePreviewData(ilAssQuestionPreviewSession $preview_session): void
     {
-        $answer = $this->questionpool_request->retrieveArrayOfStringsFromPost('answer', []);
+        $answer = $this->questionpool_request->strArray('answer');
         $preview_session->setParticipantsSolution(array_map(static fn($value) => trim($value), $answer));
     }
 

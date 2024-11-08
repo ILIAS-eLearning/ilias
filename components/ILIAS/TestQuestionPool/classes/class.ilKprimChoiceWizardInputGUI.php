@@ -76,33 +76,34 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
         return $this->ignoreMissingUploadsEnabled;
     }
 
-    public function setValue($value): void
+    public function setValue($a_value): void
     {
         $this->values = [];
-        $answer_type = $this->request_data_collector->retrieveStringValueFromPost('answer_type');
 
-        $a_value = $this->cleanupAnswerText($value, $answer_type === 'multiLine');
+        $answer_type = $this->str('answer_type');
+        $a_value = $this->cleanupAnswerText($a_value, $answer_type === 'multiLine');
+        $answers = $this->request_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
+        $imagename = $this->request_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->string());
+        $correctness = $this->request_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->bool());
 
-        if (is_array($a_value['answer'])) {
-            foreach ($a_value['answer'] as $index => $value) {
-                $answer = new ilAssKprimChoiceAnswer();
+        foreach ($answers as $index => $value) {
+            $answer = new ilAssKprimChoiceAnswer();
 
-                $answer->setPosition($index);
-                $answer->setAnswertext($value);
-                if (isset($a_value['imagename'])) {
-                    $answer->setImageFile($a_value['imagename'][$index] ?? '');
-                }
+            $answer->setPosition($index);
+            $answer->setAnswertext($value);
+            $answer->setThumbPrefix($this->qstObject->getThumbPrefix());
+            $answer->setImageFsDir($this->qstObject->getImagePath());
+            $answer->setImageWebDir($this->qstObject->getImagePathWeb());
 
-                if (isset($a_value['correctness'][$index]) && $a_value['correctness'][$index] !== '') {
-                    $answer->setCorrectness((bool) $a_value['correctness'][$index]);
-                }
-
-                $answer->setThumbPrefix($this->qstObject->getThumbPrefix());
-                $answer->setImageFsDir($this->qstObject->getImagePath());
-                $answer->setImageWebDir($this->qstObject->getImagePathWeb());
-
-                $this->values[] = $answer;
+            if ($this->request_helper->inArray($imagename, $index)) {
+                $answer->setImageFile($imagename[$index]);
             }
+
+            if (isset($correctness[$index])) {
+                $answer->setCorrectness($correctness[$index]);
+            }
+
+            $this->values[] = $answer;
         }
 
         #vd($this->values);
@@ -110,46 +111,28 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
 
     public function checkInput(): bool
     {
-        global $DIC;
-        $lng = $DIC['lng'];
+        $data = $this->raw($this->getPostVar());
 
-        $post_var = $this->request_data_collector->retrieveArrayOfStringsFromPost($this->getPostVar());
+        if (!is_array($data)) {
+            $this->setAlert($this->lng->txt('msg_input_is_required'));
+            return false;
+        }
 
-        $found_values = is_array($post_var)
-            ? ilArrayUtil::stripSlashesRecursive(
-                $post_var,
-                false,
-                ilObjAdvancedEditing::_getUsedHTMLTagsAsString('assessment')
-            )
-            : $post_var;
+        // check answers
+        $answers = $this->checkAnswersInput($data);
+        if (!is_array($answers)) {
+            $this->setAlert($this->lng->txt($answers));
+            return false;
+        }
 
-        if (is_array($found_values)) {
-            // check answers
-            if (is_array($found_values['answer'])) {
-                foreach ($found_values['answer'] as $answer_value) {
-                    if ($answer_value === '' && !isset($found_values['imagename'])) {
-                        $this->setAlert($lng->txt('msg_input_is_required'));
-                        return false;
-                    }
+        // check correctness
+        $correctness = $this->request_helper->transformArray($data, 'correctness', $this->refinery->kindlyTo()->bool());
+        if (count($answers) !== count($correctness)) {
+            $this->setAlert($this->lng->txt('msg_input_is_required'));
+            return false;
+        }
 
-                    if (mb_strlen($answer_value) > $this->getMaxLength()) {
-                        $this->setAlert($lng->txt("msg_input_char_limit_max"));
-                        return false;
-                    }
-                }
-            }
-
-            // check correctness
-            if (!isset($found_values['correctness']) || count($found_values['correctness']) < count($found_values['answer'])) {
-                $this->setAlert($lng->txt('msg_input_is_required'));
-                return false;
-            }
-
-            if (!$this->checkUploads($found_values)) {
-                return false;
-            }
-        } else {
-            $this->setAlert($lng->txt('msg_input_is_required'));
+        if (!$this->checkUploads($data)) {
             return false;
         }
 

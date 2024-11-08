@@ -179,8 +179,8 @@ class assFormulaQuestionGUI extends assQuestionGUI
                         $this->request_data_collector->int("result_type_{$result}")
                     );
                     $this->object->addResult($resObj);
-                    $available_units = $this->request_data_collector->retrieveArrayOfIntsFromPost("units_{$result}");
-                    if ($available_units !== null) {
+                    $available_units = $this->request_data_collector->intArray("units_{$result}");
+                    if (!empty($available_units)) {
                         $this->object->addResultUnits($resObj, $available_units);
                     }
                 }
@@ -774,9 +774,9 @@ class assFormulaQuestionGUI extends assQuestionGUI
      */
     public function checkInput(): bool
     {
-        $title = $this->request_data_collector->retrieveStringFromPost('title');
-        $author = $this->request_data_collector->retrieveStringFromPost('author');
-        $question = $this->request_data_collector->retrieveStringFromPost('question');
+        $title = $this->request_data_collector->string('title');
+        $author = $this->request_data_collector->string('author');
+        $question = $this->request_data_collector->string('question');
 
         if (!$title || !$author || !$question) {
             $this->addErrorMessage($this->lng->txt('fill_out_all_required_fields'));
