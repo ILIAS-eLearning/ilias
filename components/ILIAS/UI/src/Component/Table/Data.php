@@ -53,7 +53,7 @@ interface Data extends Table
     public function withOrder(?Order $order): self;
     public function withRange(?Range $range): self;
     public function withFilter(?array $filter): self;
-    public function withAdditionalParameters(?array $additional_parameters): self;
+    public function withAdditionalParameters(array $additional_parameters): self;
 
     /**
      * The DataTable comes with a storage to keep e.g. ViewControl-settings throughout requests.

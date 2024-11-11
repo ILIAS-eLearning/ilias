@@ -171,6 +171,10 @@ function base()
                 }
                 $record['achieve'] = $icon;
 
+                if ($additional_parameters['anon_mail'] === 'hide') {
+                    $record['email'] = '-';
+                }
+
                 yield $row_builder->buildDataRow($row_id, $record)
                     /** Actions may be disabled for specific rows: */
                     ->withDisabledAction('delete', ($record['login'] === 'superuser'));
@@ -239,6 +243,14 @@ function base()
             ->withRange(new Range(0, 2))
             ->withOrder(new Order('achieve', Order::DESC))
 
+            ->withAdditionalViewControl(
+                'anon_mail',
+                $f->input()->viewControl()->mode([
+                    'show' => 'show mails',
+                    'hide' => 'anon mails'
+                ])
+                ->withValue('show')
+            )
             ->withRequest($request);
 
     /**

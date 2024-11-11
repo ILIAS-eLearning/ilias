@@ -257,4 +257,62 @@ class DataViewControlsTest extends TableTestBase
         $this->assertEquals(new Order('f2', Order::DESC), $table->getOrder());
         $this->assertEquals(1, count($table->getSelectedOptionalColumns()));
     }
+
+    public function testDataTableHasNoFieldSelectionButAdditionalViewControl(): void
+    {
+        $factory = $this->getTableFactory();
+        $columns = [
+            'f1' => $factory->column()->text('f1'),
+            'f2' => $factory->column()->text('f2'),
+        ];
+        $total_count = 200;
+        $table = $factory->data('Table', $columns, $this->getDataRetrieval($total_count))
+            ->withAdditionalViewControl(
+                'additional_control',
+                $this->getViewControlFactory()->mode([
+                    'mode1' => 'a mode',
+                    'mode2' => 'another mode'
+                ])
+            )
+            ->withId('testing_data_table_id')
+            ->withRequest(
+                $this->getRequestMock([
+                    'view_control/input_0/input_1' => 0,
+                    'view_control/input_0/input_2' => 10,
+                    'view_control/input_3/input_4' => 'f2',
+                    'view_control/input_3/input_5' => 'DESC',
+                    'view_control/input_6' => 'mode2'
+                ])
+            );
+
+        $additional_parameters = ['existing' => true];
+        list($table, $view_controls) = $table->applyViewControls([], $additional_parameters);
+
+        $this->assertEquals(
+            [
+                C\Table\Data::VIEWCONTROL_KEY_PAGINATION,
+                C\Table\Data::VIEWCONTROL_KEY_ORDERING,
+                'additional_control'
+            ],
+            array_keys($view_controls->getInputs())
+        );
+        $this->assertEquals(
+            [
+                'additional_control' => 'mode2',
+                'existing' => true,
+            ],
+            $table->getAdditionalParameters()
+        );
+
+        //applied values from session with empty request
+        $table = $table->withRequest($this->getRequestMock([]));
+        list($table, $view_controls) = $table->applyViewControls([], $additional_parameters);
+        $this->assertEquals(
+            [
+                'additional_control' => 'mode2',
+                'existing' => true,
+            ],
+            $table->getAdditionalParameters()
+        );
+    }
 }
