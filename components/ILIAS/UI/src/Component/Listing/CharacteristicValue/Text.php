@@ -22,11 +22,12 @@ namespace ILIAS\UI\Component\Listing\CharacteristicValue;
 
 use ILIAS\UI\Component\Component;
 use ILIAS\UI\Component\Layout\Alignment\Block;
+use ILIAS\UI\Component\Navigation\Sequence\SegmentContent;
 
 /**
  * Interface Text
  */
-interface Text extends Component, Block
+interface Text extends Component, Block, SegmentContent
 {
     /**
      * Gets the items as array of key value pairs for the list.

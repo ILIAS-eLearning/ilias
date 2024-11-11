@@ -39,7 +39,7 @@ interface Segment
 
     /**
      * Segments may add actions to the sequence.
-     * Those actions SHOULD target the actually displayed contents rather
+     * Those actions MUST target the actually displayed contents rather
      * than changing context entirely (i.e. breaking the sequence).
      */
     public function withActions(...$actions): static;
