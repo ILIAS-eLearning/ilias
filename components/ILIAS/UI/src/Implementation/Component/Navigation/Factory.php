@@ -29,6 +29,7 @@ class Factory implements INavigation\Factory
     public function __construct(
         protected DataFactory $data_factory,
         protected Refinery $refinery,
+        protected \ArrayAccess $storage,
     ) {
     }
 
@@ -42,6 +43,7 @@ class Factory implements INavigation\Factory
             new Sequence\SegmentBuilder(),
             $this->data_factory,
             $this->refinery,
+            $this->storage,
             $binding
         );
     }

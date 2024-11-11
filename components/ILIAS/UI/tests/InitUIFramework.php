@@ -406,11 +406,12 @@ class InitUIFramework
         $c["ui.factory.prompt"] = function ($c) {
             return new ILIAS\UI\Implementation\Component\Prompt\Factory($c["ui.signal_generator"]);
         };
-        
+
         $c["ui.factory.navigation"] = function ($c) {
             return new ILIAS\UI\Implementation\Component\Navigation\Factory(
                 $c["ui.data_factory"],
                 $c["refinery"],
+                $c["ui.storage"],
             );
         };
 

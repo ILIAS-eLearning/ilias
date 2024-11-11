@@ -48,8 +48,8 @@ interface Sequence extends Component
     public function withActions(...$actions): static;
 
     /**
-     * The Sequence comes with a storage to keep e.g. ViewControl-settings throughout requests.
+     * The Sequence comes with a storage to keep ViewControl-settings throughout requests.
      * Set an Id to enable the storage and identify the distinct sequence.
      */
-    //public function withId(string $id): static;
+    public function withId(string $id): static;
 }

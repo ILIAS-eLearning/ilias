@@ -47,7 +47,7 @@ class Renderer extends AbstractComponentRenderer
 
         $binding = $component->getBinding();
         $vc_data = $component->getViewControls()?->getData() ?? [];
-        $filter_data = $component->getFilter()?->getData() ?? [];
+        $filter_data = [];
         $positions = $binding->getSequencePositions(
             $vc_data,
             $filter_data

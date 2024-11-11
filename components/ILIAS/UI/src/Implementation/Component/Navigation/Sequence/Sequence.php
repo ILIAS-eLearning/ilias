@@ -34,6 +34,7 @@ use ILIAS\UI\Implementation\Component\Input\ArrayInputData;
 class Sequence implements ISequence\Sequence
 {
     use ComponentHelper;
+
     private const PARAM_POSITION = 'p';
     public const STORAGE_ID_PREFIX = self::class . '_';
 
@@ -41,15 +42,15 @@ class Sequence implements ISequence\Sequence
     protected ?URLBuilder $url_builder = null;
     protected ?URLBuilderToken $token_position = null;
     protected ?ViewControlContainer $viewcontrols = null;
-    protected $filter = null;
     protected ?array $actions = null;
     protected int $position = 0;
+    protected ?string $id = null;
 
     public function __construct(
         protected ISequence\SegmentBuilder $segment_builder,
         protected DataFactory $data_factory,
         protected Refinery $refinery,
-        //protected \ArrayAccess $storage,
+        protected \ArrayAccess $storage,
         protected ISequence\Binding $binding
     ) {
     }
@@ -90,18 +91,6 @@ class Sequence implements ISequence\Sequence
         return $this->viewcontrols;
     }
 
-    public function withFilter($filter): static
-    {
-        $clone = clone $this;
-        $clone->filter = $filter;
-        return $clone;
-    }
-
-    public function getFilter() //: ?ViewControlContainer
-    {
-        return $this->filter;
-    }
-
     public function withActions(...$actions): static
     {
         $clone = clone $this;
@@ -113,9 +102,6 @@ class Sequence implements ISequence\Sequence
     {
         return $this->actions;
     }
-
-
-
 
     protected function checkRequest(): void
     {
@@ -155,7 +141,11 @@ class Sequence implements ISequence\Sequence
         );
 
 
-        $this->viewcontrols = $this->viewcontrols->withRequest($this->request);
+        $this->viewcontrols = $this->applyValuesToViewcontrols(
+            $this->viewcontrols,
+            $this->request
+        );
+        //$this->viewcontrols = $this->viewcontrols->withRequest($this->request);
     }
 
     public function getNext(int $direction): URI
@@ -166,51 +156,51 @@ class Sequence implements ISequence\Sequence
             ->buildURI();
     }
 
-    /*
-        protected function getStorageData(): ?array
-        {
-            if (null !== ($storage_id = $this->getStorageId())) {
-                return $this->storage[$storage_id] ?? null;
-            }
-            return null;
+    protected function getStorageData(): ?array
+    {
+        if (null !== ($storage_id = $this->getStorageId())) {
+            return $this->storage[$storage_id] ?? null;
         }
+        return null;
+    }
 
-        protected function setStorageData(array $data): void
-        {
-            if (null !== ($storage_id = $this->getStorageId())) {
-                $this->storage[$storage_id] = $data;
-            }
+    protected function setStorageData(array $data): void
+    {
+        if (null !== ($storage_id = $this->getStorageId())) {
+            $this->storage[$storage_id] = $data;
         }
+    }
 
-        protected function getStorageId(): ?string
-        {
-            if (null !== ($id = $this->getId())) {
-                return static::STORAGE_ID_PREFIX . $id;
-            }
-            return null;
+    protected function getStorageId(): ?string
+    {
+        if (null !== ($id = $this->getId())) {
+            return static::STORAGE_ID_PREFIX . $id;
         }
+        return null;
+    }
 
-        public function withId(string $id): static
-        {
-            $clone = clone $this;
-            $clone->id = $id;
-            return $clone;
-        }
+    public function withId(string $id): static
+    {
+        $clone = clone $this;
+        $clone->id = $id;
+        return $clone;
+    }
 
-        protected function getId(): ?string
-        {
-            return $this->id;
-        }
-        protected function applyValuesToViewcontrols(
-            ViewControlContainer\ViewControl $view_controls,
-            ServerRequestInterface $request
-        ): ViewControlContainer\ViewControl {
-            $stored_values = new ArrayInputData($this->getStorageData() ?? []);
-            $view_controls = $view_controls
-                ->withStoredInput($stored_values)
-                ->withRequest($request);
-            $this->setStorageData($view_controls->getComponentInternalValues());
-            return $view_controls;
-        }
-    */
+    protected function getId(): ?string
+    {
+        return $this->id;
+    }
+
+    protected function applyValuesToViewcontrols(
+        ViewControlContainer $view_controls,
+        ServerRequestInterface $request
+    ): ViewControlContainer {
+        $stored_values = new ArrayInputData($this->getStorageData() ?? []);
+        $view_controls = $view_controls
+            ->withStoredInput($stored_values)
+            ->withRequest($request);
+        $this->setStorageData($view_controls->getComponentInternalValues());
+        return $view_controls;
+    }
+
 }

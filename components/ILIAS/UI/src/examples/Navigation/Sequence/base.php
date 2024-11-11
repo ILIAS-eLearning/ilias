@@ -35,12 +35,10 @@ function base()
             ];
         }
 
-
         public function getSequencePositions(
             array $viewcontrol_values,
             array $filter_values
         ): array {
-            //this is actually a filter, not a vc!
             $chunks = $viewcontrol_values['chunks'] ?? [];
             $chunks[] = 'c0';
             return array_values(
@@ -84,16 +82,13 @@ function base()
         ))
     ]);
 
-    //$filter = $f->input()->container()->filter()->standard();
-
     $global_actions = [
         $f->button()->standard('a global action', '#')
     ];
 
-
     $sequence = $f->navigation()->sequence($binding)
         ->withViewControls($viewcontrols)
-        //->withFilter($filter),
+        ->withId('example')
         ->withActions($global_actions)
         ->withRequest($request);
 
