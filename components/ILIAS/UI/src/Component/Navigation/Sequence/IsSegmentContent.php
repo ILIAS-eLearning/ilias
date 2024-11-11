@@ -21,10 +21,10 @@ declare(strict_types=1);
 namespace ILIAS\UI\Component\Navigation\Sequence;
 
 /**
- * SegmentContent is allowed in Segments.
+ * IsSegmentContent is allowed in Segments.
  * Any actions included/provided by (parts of) a Segment MUST NOT leave
  * the context of the sequence.
  */
-interface SegmentContent
+interface IsSegmentContent
 {
 }

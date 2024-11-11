@@ -11,6 +11,19 @@ use ILIAS\UI\Component\Navigation\Sequence\Segment;
 use ILIAS\UI\URLBuilder;
 use Psr\Http\Message\ServerRequestInterface;
 
+/**
+ * ---
+ * description: >
+ *   Base example for rendering a sequence navigation.
+ *
+ * expected output: >
+ *   ILIAS shows a group of buttons and a characteristic value listing.
+ *   Buttons are "back" and "next", of which the back button is inactive until
+ *   the next button was clicked.
+ *   A vieww control allows the user to select chunks of data, and an additional
+ *   button (without real function) is labeled "a global action".
+ * ---
+ */
 function base()
 {
     global $DIC;
@@ -28,10 +41,13 @@ function base()
         ) {
             $this->seq_data = [
                 ['c0', 'pos 1', [getListing($f)]],
-                ['c0', 'pos 2', [$f->legacy('some legacy content')]],
+                ['c0', 'pos 2', [
+                    $f->legacy('some legacy content'),
+                    $f->legacy('some more legacy content'),
+                ]],
                 ['c1', 'pos 3', [getImage($f)]],
                 ['c2', 'pos 4', [getTable($f)]],
-                ['c1', 'pos 5', [$f->legacy('some more legacy content')]],
+                ['c1', 'pos 5', [getForm($f)]],
             ];
         }
 
@@ -197,6 +213,17 @@ function getTable(UIFactory $ui_factory): \ILIAS\UI\Component\Table\Presentation
                 'address' => '',
                 'fee' => '-'
             ]
+        ]
+    );
+}
+
+function getForm(UIFactory $ui_factory): \ILIAS\UI\Component\Input\Container\Form\Standard
+{
+    return $ui_factory->input()->container()->form()->standard(
+        '#',
+        [
+            $ui_factory->input()->field()->text('a text field'),
+            $ui_factory->input()->field()->numeric('a number field'),
         ]
     );
 }

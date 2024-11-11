@@ -22,5 +22,5 @@ namespace ILIAS\UI\Component\Navigation\Sequence;
 
 interface SegmentBuilder
 {
-    public function build(string $title, SegmentContent ...$contents): Segment;
+    public function build(string $title, IsSegmentContent ...$contents): Segment;
 }

@@ -26,7 +26,7 @@ class SegmentBuilder implements ISequence\SegmentBuilder
 {
     public function build(
         string $title,
-        ISequence\SegmentContent ...$contents
+        ISequence\IsSegmentContent ...$contents
     ): ISequence\Segment {
         return new Segment($title, ...$contents);
     }

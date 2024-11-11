@@ -121,7 +121,7 @@ class Sequence implements ISequence\Sequence
     protected function initFromRequest(): void
     {
         $base_uri = $this->data_factory->uri($this->request->getUri()->__toString());
-        $namespace = ['sequence']; // add id
+        $namespace = ['sequence' . $this->getId() ?? ''];
         $url_builder = new URLBuilder($base_uri);
         list(
             $this->url_builder,
@@ -140,12 +140,12 @@ class Sequence implements ISequence\Sequence
             ])
         );
 
-
-        $this->viewcontrols = $this->applyValuesToViewcontrols(
-            $this->viewcontrols,
-            $this->request
-        );
-        //$this->viewcontrols = $this->viewcontrols->withRequest($this->request);
+        if ($this->viewcontrols) {
+            $this->viewcontrols = $this->applyValuesToViewcontrols(
+                $this->viewcontrols,
+                $this->request
+            );
+        }
     }
 
     public function getNext(int $direction): URI

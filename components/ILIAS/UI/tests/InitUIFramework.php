@@ -415,8 +415,6 @@ class InitUIFramework
             );
         };
 
-
-
         // currently this is will be a session storage because we cannot store
         // data on the client, see https://mantis.ilias.de/view.php?id=38503.
         $c["ui.storage"] = function ($c): ArrayAccess {

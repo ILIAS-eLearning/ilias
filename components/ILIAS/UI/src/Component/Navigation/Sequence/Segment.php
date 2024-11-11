@@ -31,14 +31,14 @@ interface Segment
     public function getTitle(): string;
 
     /**
-     * The actual "contents" of the view displayed when operating a sequence.
-     * Valid Components are flagged with the SegmentContent interface.
-     * @return SegmentContent[]
+     * The actual "contents" of the displayed view when operating a sequence.
+     * Valid Components are flagged with the IsSegmentContent interface.
+     * @return IsSegmentContent[]
      */
     public function getContents(): array;
 
     /**
-     * Segments may add actions to the sequence.
+     * Segments MAY add actions to the sequence.
      * Those actions MUST target the actually displayed contents rather
      * than changing context entirely (i.e. breaking the sequence).
      */

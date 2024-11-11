@@ -25,7 +25,7 @@ use ILIAS\UI\Component\Clickable;
 use ILIAS\UI\Component\Signal;
 use ILIAS\UI\Component\Component;
 use ILIAS\UI\Component\Layout\Alignment\Block;
-use ILIAS\UI\Component\Navigation\Sequence\SegmentContent;
+use ILIAS\UI\Component\Navigation\Sequence\IsSegmentContent;
 
 /**
  * This describes how a glyph could be modified during construction of UI.
@@ -33,7 +33,7 @@ use ILIAS\UI\Component\Navigation\Sequence\SegmentContent;
  * Interface Image
  * @package ILIAS\UI\Component\Image
  */
-interface Image extends Component, JavaScriptBindable, Clickable, Block, SegmentContent
+interface Image extends Component, JavaScriptBindable, Clickable, Block, IsSegmentContent
 {
     /**
      * Types of images

@@ -57,7 +57,7 @@ interface Factory
      *   usage:
      *     1: >
      *       Use a sequence when the order of presentation is crucial or the
-     *       sequencial presentation aids focus. The sequence is not more of
+     *       sequencial presentation aids focus. The sequence is not of an
      *       explorative nature but rather instructional.
      *   interaction:
      *     1: >

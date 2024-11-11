@@ -24,12 +24,11 @@ use ILIAS\UI\Component\ViewControl\HasViewControls;
 use Closure;
 use ILIAS\UI\Implementation\Component\Signal;
 use ILIAS\UI\Component\JavaScriptBindable;
-use ILIAS\UI\Component\Navigation\Sequence\SegmentContent;
 
 /**
  * This describes a Presentation Table
  */
-interface Presentation extends Table, HasViewControls, JavaScriptBindable, SegmentContent
+interface Presentation extends Table, HasViewControls, JavaScriptBindable
 {
     /**
      * Get a table like this with the closure $row_mapping.

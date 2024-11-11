@@ -27,13 +27,13 @@ class Segment implements ISequence\Segment
     protected ?array $actions = null;
 
     /**
-     * @var ISequence\SegmentContent[]
+     * @var ISequence\IsSegmentContent[]
      */
     protected array $contents;
 
     public function __construct(
         protected string $title,
-        ISequence\SegmentContent ...$contents,
+        ISequence\IsSegmentContent ...$contents,
     ) {
         $this->contents = $contents;
     }

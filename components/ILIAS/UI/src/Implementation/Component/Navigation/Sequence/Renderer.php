@@ -33,13 +33,13 @@ class Renderer extends AbstractComponentRenderer
     public function render(Component\Component $component, RendererInterface $default_renderer): string
     {
         if ($component instanceof Component\Navigation\Sequence\Sequence) {
-            return $this->renderLinear($component, $default_renderer);
+            return $this->renderSequence($component, $default_renderer);
         }
 
         $this->cannotHandleComponent($component);
     }
 
-    protected function renderLinear(
+    protected function renderSequence(
         Component\Navigation\Sequence\Sequence $component,
         RendererInterface $default_renderer
     ): string {
@@ -67,21 +67,20 @@ class Renderer extends AbstractComponentRenderer
         );
 
         $ui_factory = $this->getUIFactory();
-        $back = $ui_factory->button()->standard('back', $component->getNext(-1)->__toString())
+        $back = $ui_factory->button()->standard($this->txt('back'), $component->getNext(-1)->__toString())
             ->withSymbol($ui_factory->symbol()->glyph()->back())
             ->withUnavailableAction($position - 1 < 0);
 
-        $next = $ui_factory->button()->standard('next', $component->getNext(1)->__toString())
+        $next = $ui_factory->button()->standard($this->txt('next'), $component->getNext(1)->__toString())
             ->withSymbol($ui_factory->symbol()->glyph()->next())
             ->withUnavailableAction($position + 1 === count($positions));
 
         $tpl->setVariable('BACK', $default_renderer->render($back));
         $tpl->setVariable('NEXT', $default_renderer->render($next));
 
-        $tpl->setVariable('VIEWCONTROLS', $default_renderer->render($component->getViewControls()));
-
-        $tpl->setVariable('SEGMENT_TITLLE', $segment->getTitle());
-        $tpl->setVariable('SEGMENT_CONTENTS', $default_renderer->render($segment->getContents()));
+        if ($viewcontrols = $component->getViewControls()) {
+            $tpl->setVariable('VIEWCONTROLS', $default_renderer->render($viewcontrols));
+        }
 
         if ($actions = $segment->getActions()) {
             $tpl->setVariable('ACTIONS_SEGMENT', $default_renderer->render($actions));
@@ -89,6 +88,9 @@ class Renderer extends AbstractComponentRenderer
         if ($actions = $component->getActions()) {
             $tpl->setVariable('ACTIONS_GLOBAL', $default_renderer->render($actions));
         }
+
+        $tpl->setVariable('SEGMENT_TITLLE', $segment->getTitle());
+        $tpl->setVariable('SEGMENT_CONTENTS', $default_renderer->render($segment->getContents()));
         return $tpl->get();
     }
 }
