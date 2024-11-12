@@ -115,15 +115,7 @@ class ilTestQuestionNavigationGUI
      */
     private $anythingRendered = false;
 
-    /**
-     * @var ?Signal
-     */
-    private ?Signal $showDiscardModalSignal = null;
-
-    /**
-     * @param ilLanguage $lng
-     */
-
+    private ?Signal $show_discard_modal_signal = null;
 
     public function __construct(
         protected ilLanguage $lng,
@@ -376,20 +368,14 @@ class ilTestQuestionNavigationGUI
         $this->anythingRendered = true;
     }
 
-    /**
-     * @param Signal $showDiscardModalSignal
-     */
-    public function setShowDiscardModalSignal(Signal $showDiscardModalSignal): void
+    public function setShowDiscardModalSignal(Signal $signal): void
     {
-        $this->showDiscardModalSignal = $showDiscardModalSignal;
+        $this->show_discard_modal_signal = $signal;
     }
 
-    /**
-     * @return Signal
-     */
     public function getShowDiscardModalSignal(): Signal
     {
-        return $this->showDiscardModalSignal ?? new \ILIAS\UI\Implementation\Component\Signal("");
+        return $this->show_discard_modal_signal ?? new \ILIAS\UI\Implementation\Component\Signal("");
     }
 
     public function getActionsHTML(): string

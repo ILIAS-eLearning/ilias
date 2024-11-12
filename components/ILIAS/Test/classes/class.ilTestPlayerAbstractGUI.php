@@ -2577,24 +2577,20 @@ JS;
         return ilTestPlayerCommands::QUESTION_SUMMARY;
     }
 
-
-    /**
-     * @throws ilTemplateException
-     */
-    protected function populateInstantResponseModal(assQuestionGUI $question_gui, $navUrl): void
+    protected function populateInstantResponseModal(assQuestionGUI $question_gui, $nav_url): void
     {
         $question_gui->setNavigationGUI(null);
         $question_gui->getQuestionHeaderBlockBuilder()->setQuestionAnswered(true);
 
-        $answerFeedbackEnabled = $this->object->getSpecificAnswerFeedback();
+        $answer_feedback_enabled = $this->object->getSpecificAnswerFeedback();
 
         $solutionoutput = $question_gui->getSolutionOutput(
-            $this->test_session->getActiveId(), 	#active_id
+            $this->test_session->getActiveId(), #active_id
             $this->test_session->getPass(),		#pass
             false, 								#graphical_output
             false,								#result_output
             true, 								#show_question_only
-            $answerFeedbackEnabled,				#show_feedback
+            $answer_feedback_enabled,			#show_feedback
             false, 								#show_correct_solution
             false, 								#show_manual_scoring
             true								#show_question_text
@@ -2616,19 +2612,16 @@ JS;
         $this->tpl = $saved_tpl;
 
         $tpl->setVariable('QUESTION_OUTPUT', $pageoutput);
-        $this->tpl->setVariable('INSTANT_RESPONSE_MODAL', $this->getQuestionFeedbackModalHtml($tpl, $navUrl));
+        $this->tpl->setVariable('INSTANT_RESPONSE_MODAL', $this->getQuestionFeedbackModalHtml($tpl, $nav_url));
     }
 
-    /**
-     * @throws ilTemplateException
-     */
-    private function getQuestionFeedbackModalHtml(ilTemplate $tpl, string $navUrl): string
+    private function getQuestionFeedbackModalHtml(ilTemplate $tpl, string $nav_url): string
     {
         $modal = $this->ui_factory->modal()->roundtrip(
             $this->lng->txt('tst_instant_feedback'),
             $this->ui_factory->legacy($tpl->get()),
             [],
-            $navUrl
+            $nav_url
         )->withCancelButtonLabel($this->lng->txt('proceed'));
 
         return $this->ui_renderer->render([
@@ -2914,7 +2907,6 @@ JS;
 
     /**
      * @return array<self::DISCARD_MODAL|self::LOCKS_CHANGED_MODAL|self::LOCKS_UNCHANGED_MODAL, Signal>
-     * @throws ilTemplateException|ilCtrlException
      */
     protected function populateModals(): array
     {
@@ -2928,10 +2920,6 @@ JS;
         return $signals;
     }
 
-    /**
-     * @return Signal Signal to show the modal
-     * @throws ilTemplateException|ilCtrlException
-     */
     protected function populateDiscardSolutionModal(): Signal
     {
         $modal = $this->ui_factory->modal()->interruptive(
@@ -2946,10 +2934,6 @@ JS;
         return $modal->getShowSignal();
     }
 
-    /**
-     * @return Signal Signal to show the modal
-     * @throws ilTemplateException
-     */
     protected function populateNextLocksUnchangedModal(): Signal
     {
         $modal = $this->ui_factory->modal()->interruptive(
