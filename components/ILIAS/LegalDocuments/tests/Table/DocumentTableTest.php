@@ -24,7 +24,7 @@ use ilCtrl;
 use ILIAS\Data\Factory;
 use ILIAS\LegalDocuments\EditLinks;
 use ILIAS\UI\Component\Component;
-use ILIAS\UI\Component\Legacy\Legacy;
+use ILIAS\UI\Component\Legacy;
 use ILIAS\UI\Factory as UIFactory;
 use ILIAS\LegalDocuments\Value\CriterionContent;
 use ILIAS\LegalDocuments\Value\Criterion;
@@ -71,6 +71,55 @@ class DocumentTableTest extends TestCase
             $this->mock(Renderer::class),
             $this->mockTree(ilObjUser::class, ['getTimeZone' => 'europe/berlin'])
         ));
+    }
+
+    public function testShowCriteria(): void
+    {
+        $ui = $this->mock(UI::class);
+        $ui->method('txt')->willReturnCallback(fn($s) => 'txt: ' . $s);
+
+        $instance = new DocumentTable(
+            $this->fail(...),
+            $this->mock(DocumentRepository::class),
+            $ui,
+            $this->mock(DocumentModal::class)
+        );
+
+        $criteria = [
+            $this->mock(Criterion::class),
+            $this->mock(Criterion::class),
+        ];
+
+        $this->assertSame(['a', 'b', 'a', 'b'], $instance->showCriteria(
+            $this->mockTree(Document::class, ['criteria' => $criteria]),
+            function (Criterion $criterion) use ($criteria) {
+                $this->assertTrue(in_array($criterion, $criteria, true));
+                return ['a', 'b'];
+            }
+        ));
+    }
+
+    public function testShowCriterion(): void
+    {
+        $content = $this->mock(CriterionContent::class);
+        $legacy = $this->mock(Legacy\Factory::class);
+        $component = $this->mock(Component::class);
+
+        $ui = $this->mockTree(UI::class, ['create' => $this->mockMethod(UIFactory::class, 'legacy', ['<br/>'], $legacy)]);
+
+        $instance = new DocumentTable(
+            function (CriterionContent $c) use ($content, $component) {
+                $this->assertSame($content, $c);
+                return $component;
+            },
+            $this->mock(DocumentRepository::class),
+            $ui,
+            $this->mock(DocumentModal::class)
+        );
+
+        $criterion = $this->mockTree(Criterion::class, ['content' => $content]);
+
+        $this->assertSame([$component, $legacy], $instance->showCriterion($criterion));
     }
 
     public function testCriterionName(): void

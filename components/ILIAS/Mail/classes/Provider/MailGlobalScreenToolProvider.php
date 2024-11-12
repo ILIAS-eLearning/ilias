@@ -24,7 +24,7 @@ use ILIAS\GlobalScreen\Scope\Tool\Provider\AbstractDynamicToolProvider;
 use ILIAS\GlobalScreen\ScreenContext\Stack\ContextCollection;
 use ILIAS\GlobalScreen\Identification\IdentificationInterface;
 use ILIAS\GlobalScreen\ScreenContext\Stack\CalledContexts;
-use ILIAS\UI\Component\Legacy\Legacy;
+use ILIAS\UI\Component\Legacy\LegacyContent;
 use ilMailExplorer;
 use ilMailGUI;
 
@@ -60,10 +60,10 @@ class MailGlobalScreenToolProvider extends AbstractDynamicToolProvider
                 ->tool($identification('mail_folders_tree'))
                 ->withTitle($title)
                 ->withSymbol($icon)
-                ->withContentWrapper(function (): Legacy {
+                ->withContentWrapper(function (): LegacyContent {
                     $exp = new ilMailExplorer(new ilMailGUI(), $this->dic->user()->getId());
 
-                    return $this->dic->ui()->factory()->legacy($exp->getHTML(true));
+                    return $this->dic->ui()->factory()->legacy()->legacyContent($exp->getHTML(true));
                 });
         }
 

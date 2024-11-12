@@ -27,9 +27,9 @@ use ILIAS\UI\Component as C;
  */
 class Legacy extends Secondary implements C\Panel\Secondary\Legacy
 {
-    protected C\Legacy\Legacy $legacy;
+    protected C\Legacy\LegacyContent $legacy;
 
-    public function __construct(string $title, C\Legacy\Legacy $legacy)
+    public function __construct(string $title, C\Legacy\LegacyContent $legacy)
     {
         $this->title = $title;
         $this->legacy = $legacy;
@@ -38,7 +38,7 @@ class Legacy extends Secondary implements C\Panel\Secondary\Legacy
     /**
      * @inheritdoc
      */
-    public function getLegacyComponent(): C\Legacy\Legacy
+    public function getLegacyComponent(): C\Legacy\LegacyContent
     {
         return $this->legacy;
     }

@@ -73,7 +73,7 @@ class LPMainBarProvider extends AbstractStaticMainMenuProvider
                 ->withPosition(30)
                 ->withSymbol($icon)
                 ->withNonAvailableReason(
-                    $this->dic->ui()->factory()->legacy(
+                    $this->dic->ui()->factory()->legacy()->legacyContent(
                         "{$this->dic->language()->txt('component_not_active')}"
                     )
                 )

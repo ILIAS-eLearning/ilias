@@ -61,7 +61,7 @@ final class WithdrawProcess implements WithdrawProcessInterface
 
         return [
             $this->ui->create()->divider()->horizontal(),
-            $this->ui->create()->legacy($this->ui->txt($lng))
+            $this->ui->create()->legacy()->legacyContent($this->ui->txt($lng))
         ];
     }
 

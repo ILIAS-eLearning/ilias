@@ -21,9 +21,8 @@ declare(strict_types=1);
 namespace ILIAS\Test\Logging;
 
 use ILIAS\Test\Utilities\TitleColumnsBuilder;
-
 use ILIAS\UI\Factory as UIFactory;
-use ILIAS\UI\Component\Legacy\Legacy;
+use ILIAS\UI\Component\Legacy\LegacyContent;
 use ILIAS\UI\Component\Table\DataRowBuilder;
 use ILIAS\UI\Component\Table\DataRow;
 
@@ -119,8 +118,8 @@ class TestError implements TestUserInteraction
         AdditionalInformationGenerator $additional_info,
         UIFactory $ui_factory,
         array $environment
-    ): Legacy {
-        return $ui_factory->legacy($this->error_message);
+    ): LegacyContent {
+        return $ui_factory->legacy()->legacyContent($this->error_message);
     }
 
     public function toStorage(): array

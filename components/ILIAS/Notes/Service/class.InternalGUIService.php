@@ -90,7 +90,7 @@ class InternalGUIService
     public function getModalTemplate(): array
     {
         $ui = $this->ui();
-        $modal = $ui->factory()->modal()->roundtrip('#notes_title#', $ui->factory()->legacy(''));
+        $modal = $ui->factory()->modal()->roundtrip('#notes_title#', $ui->factory()->legacy()->legacyContent(''));
         $modalt["show"] = $modal->getShowSignal()->getId();
         $modalt["close"] = $modal->getCloseSignal()->getId();
         $modalt["template"] = $ui->renderer()->renderAsync($modal);

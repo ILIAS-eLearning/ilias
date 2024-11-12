@@ -69,7 +69,7 @@ class RoundTripTest extends ModalBase
 
     public function testSimpleRendering(): void
     {
-        $roundtrip = $this->getModalFactory()->roundtrip('Title', $this->getUIFactory()->legacy('Content'))
+        $roundtrip = $this->getModalFactory()->roundtrip('Title', $this->getUIFactory()->legacy()->legacyContent('Content'))
             ->withActionButtons([
                 $this->getButtonFactory()->primary('Action 1', ''),
                 $this->getButtonFactory()->standard('Action 2', ''),

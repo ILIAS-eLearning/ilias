@@ -24,8 +24,8 @@ function with_card()
 
     $block = $f->panel()->standard(
         "Panel Title",
-        $f->panel()->sub("Sub Panel Title", $f->legacy("Some Content"))
-            ->withFurtherInformation($f->card()->standard("Card Heading")->withSections(array($f->legacy("Card Content"))))
+        $f->panel()->sub("Sub Panel Title", $f->legacy()->legacyContent("Some Content"))
+            ->withFurtherInformation($f->card()->standard("Card Heading")->withSections(array($f->legacy()->legacyContent("Card Content"))))
     );
 
     return $renderer->render($block);

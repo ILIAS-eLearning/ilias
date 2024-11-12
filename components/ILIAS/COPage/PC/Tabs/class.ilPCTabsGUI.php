@@ -582,7 +582,7 @@ class ilPCTabsGUI extends ilPageContentGUI
             $content = $this->getTabContent($cap["pc_id"]);
             $items[] = $ui->factory()->panel()->standard(
                 $cap["caption"],
-                $ui->factory()->legacy($content)
+                $ui->factory()->legacy()->legacyContent($content)
             )
                 ->withActions($dd);
             $cnt++;

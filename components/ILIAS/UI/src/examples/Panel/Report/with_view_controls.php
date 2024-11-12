@@ -56,9 +56,9 @@ function with_view_controls(): string
         $content = "This is clearly a lot more information!";
     }
 
-    $sub1 = $f->panel()->sub("Sub Panel Title 1", $f->legacy($content))
-            ->withFurtherInformation($f->card()->standard("Card Heading")->withSections(array($f->legacy("Card Content"))));
-    $sub2 = $f->panel()->sub("Sub Panel Title 2", $f->legacy($content));
+    $sub1 = $f->panel()->sub("Sub Panel Title 1", $f->legacy()->legacyContent($content))
+            ->withFurtherInformation($f->card()->standard("Card Heading")->withSections(array($f->legacy()->legacyContent("Card Content"))));
+    $sub2 = $f->panel()->sub("Sub Panel Title 2", $f->legacy()->legacyContent($content));
 
     $block = $f->panel()->report("Report Title", [$sub1, $sub2])
         ->withActions($actions)

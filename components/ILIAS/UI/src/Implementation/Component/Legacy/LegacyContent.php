@@ -28,10 +28,10 @@ use ILIAS\UI\Implementation\Component\SignalGeneratorInterface;
 use InvalidArgumentException;
 
 /**
- * Class Legacy
+ * Class LegacyContent
  * @package ILIAS\UI\Implementation\Component\Legacy
  */
-class Legacy implements C\Legacy\Legacy
+class LegacyContent implements C\Legacy\LegacyContent
 {
     use ComponentHelper;
     use JavaScriptBindable;
@@ -60,7 +60,7 @@ class Legacy implements C\Legacy\Legacy
     /**
      * @inheritdoc
      */
-    public function withCustomSignal(string $signal_name, string $js_code): C\Legacy\Legacy
+    public function withCustomSignal(string $signal_name, string $js_code): static
     {
         $clone = clone $this;
         $clone->registerSignalAndCustomCode($signal_name, $js_code);

@@ -64,7 +64,7 @@ function base()
         ->withRequest($request);
 
     return $r->render([
-        $f->legacy('<pre>' . print_r($vc_container->getData(), true) . '</pre>'),
+        $f->legacy()->legacyContent('<pre>' . print_r($vc_container->getData(), true) . '</pre>'),
         $f->divider()->horizontal(),
         $vc_container
     ]);
