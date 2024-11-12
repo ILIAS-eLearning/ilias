@@ -4961,7 +4961,7 @@ class ilObjTest extends ilObject implements ilMarkSchemaAware, ilEctsGradesEnabl
                     $this->setSequenceSettings((int) $metadata["entry"]);
                     break;
                 case "solution_details":
-                    $result_details_settings = $result_details_settings->withShowSolutionDetails((bool) $metadata["entry"]);
+                    $result_details_settings = $result_details_settings->withShowPassDetails((bool) $metadata["entry"]);
                     break;
                 case "print_bs_with_res":
                     $result_details_settings = $result_details_settings->withPrintBestSolutionWithResult((bool) $metadata["entry"]);
@@ -5095,7 +5095,7 @@ class ilObjTest extends ilObject implements ilMarkSchemaAware, ilEctsGradesEnabl
                     $this->setFixedParticipants($metadata["entry"]);
                     break;
                 case "score_reporting":
-                    $this->setScoreReporting((int) $metadata["entry"]);
+                    $result_summary_settings = $result_summary_settings->withScoreReporting((int) $metadata["entry"]);
                     break;
                 case "shuffle_questions":
                     $this->setShuffleQuestions($metadata["entry"]);
@@ -5471,7 +5471,7 @@ class ilObjTest extends ilObject implements ilMarkSchemaAware, ilEctsGradesEnabl
         // solution details
         $a_xml_writer->xmlStartTag("qtimetadatafield");
         $a_xml_writer->xmlElement("fieldlabel", null, "score_reporting");
-        $a_xml_writer->xmlElement("fieldentry", null, sprintf("%d", $this->getScoreReporting()));
+        $a_xml_writer->xmlElement("fieldentry", null, sprintf("%d", $this->getScoreSettings()->getResultSummarySettings()->getScoreReporting()));
         $a_xml_writer->xmlEndTag("qtimetadatafield");
 
         $a_xml_writer->xmlStartTag("qtimetadatafield");
