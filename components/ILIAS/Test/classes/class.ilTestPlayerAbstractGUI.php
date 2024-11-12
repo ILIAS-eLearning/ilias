@@ -2345,12 +2345,14 @@ JS;
 
     protected function isParticipantsAnswerFixed($question_id): bool
     {
-        if ($this->object->isInstantFeedbackAnswerFixationEnabled() && $this->test_sequence->isQuestionChecked($question_id)) {
-            return true;
-        }
-
-        if ($this->object->isFollowupQuestionAnswerFixationEnabled() && $this->test_sequence->isNextQuestionPresented($question_id)) {
-            return true;
+        if ($this->object->isInstantFeedbackAnswerFixationEnabled()) {
+            // Checking for 'Lock Answers After Feedback or Moving to Next Question' or 'Lock Answers After Feedback'
+            return $this->test_sequence->isQuestionChecked($question_id);
+        } elseif ($this->object->isFollowupQuestionAnswerFixationEnabled()) {
+            // Checking for 'Lock Answers After Moving to Next Question': ForcedFeedbackNavUrl is registered when an
+            // instant response is shown. This already locks the answer when the feedback modal is displayed and not
+            // only when the next page is displayed
+            return $this->isForcedFeedbackNavUrlRegistered() || $this->test_sequence->isNextQuestionPresented($question_id);
         }
 
         return false;
