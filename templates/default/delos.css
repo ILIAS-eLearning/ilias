@@ -8271,7 +8271,9 @@ div.alert ul > li:before {
 }
 
 .il-audio-player {
-  background: #2c2c2c;
+  background: transparent;
+  height: 30px;
+  width: 100%;
 }
 
 .il-video-container video {

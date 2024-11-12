@@ -45,9 +45,6 @@ class Renderer extends AbstractComponentRenderer
     {
         $tpl = $this->getTemplate("tpl.audio.html", true, true);
 
-        $component = $component->withAdditionalOnLoadCode(function ($id) {
-            return "$('#$id').mediaelementplayer({stretching: 'responsive'});";
-        });
         $id = $this->bindJavaScript($component);
 
         if ($component->getTranscription() != "") {
@@ -170,12 +167,4 @@ class Renderer extends AbstractComponentRenderer
         }
         return false;
     }
-
-    public function registerResources(\ILIAS\UI\Implementation\Render\ResourceRegistry $registry): void
-    {
-        parent::registerResources($registry);
-        $registry->register('https://player.vimeo.com/api/player.js');
-    }
-
-
 }
