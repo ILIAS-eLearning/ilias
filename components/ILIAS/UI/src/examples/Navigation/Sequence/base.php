@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ILIAS\UI\examples\Navigation\Sequence;
 
 use ILIAS\UI\Factory as UIFactory;
+use ILIAS\UI\Renderer as UIRenderer;
 use ILIAS\UI\Component\Navigation\Sequence\Binding;
 use ILIAS\UI\Component\Navigation\Sequence\SegmentBuilder;
 use ILIAS\UI\Component\Navigation\Sequence\Segment;
@@ -33,21 +34,19 @@ function base()
     $refinery = $DIC['refinery'];
     $request = $DIC->http()->request();
 
-    $binding = new class ($f) implements Binding {
+    $binding = new class ($f, $r) implements Binding {
         private array $seq_data;
 
         public function __construct(
-            protected UIFactory $f
+            protected UIFactory $f,
+            protected UIRenderer $r
         ) {
             $this->seq_data = [
-                ['c0', 'pos 1', [getListing($f)]],
-                ['c0', 'pos 2', [
-                    $f->legacy('some legacy content'),
-                    $f->legacy('some more legacy content'),
-                ]],
-                ['c1', 'pos 3', [getImage($f)]],
-                ['c2', 'pos 4', [getTable($f)]],
-                ['c1', 'pos 5', [getForm($f)]],
+                ['c0', 'pos 1', getListing($f)],
+                //['c0', 'pos 2', 'some legacy content'],
+                ['c1', 'pos 3', getImage($f)],
+                ['c2', 'pos 4', getTable($f)],
+                ['c1', 'pos 5', getForm($f)],
             ];
         }
 
@@ -66,19 +65,18 @@ function base()
         }
 
         public function getSegment(
-            SegmentBuilder $builder,
             mixed $position_data,
             array $viewcontrol_values,
             array $filter_values
         ): Segment {
             list($chunk, $title, $data) = $position_data;
 
-            $segment = $builder->build($title, ...$data);
+            $segment = $this->f->legacy()->legacySegment($title, $this->r->render($data));
 
             if ($chunk === 'c1') {
-                $segment = $segment->withActions([
-                   $action = $this->f->button()->standard('a segment action for ' . $title, '#')
-                ]);
+                $segment = $segment->withSegmentActions(
+                    $this->f->button()->standard('a segment action for ' . $title, '#')
+                );
             }
             return $segment;
         }

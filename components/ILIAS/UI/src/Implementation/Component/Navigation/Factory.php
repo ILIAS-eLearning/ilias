@@ -40,7 +40,6 @@ class Factory implements INavigation\Factory
         INavigation\Sequence\Binding $binding
     ): INavigation\Sequence\Sequence {
         return new Sequence\Sequence(
-            new Sequence\SegmentBuilder(),
             $this->data_factory,
             $this->refinery,
             $this->storage,

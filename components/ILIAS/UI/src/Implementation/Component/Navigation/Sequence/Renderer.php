@@ -60,7 +60,6 @@ class Renderer extends AbstractComponentRenderer
         }
 
         $segment = $component->getBinding()->getSegment(
-            $component->getSegmentBuilder(),
             $positions[$position],
             $vc_data,
             $filter_data
@@ -82,15 +81,16 @@ class Renderer extends AbstractComponentRenderer
             $tpl->setVariable('VIEWCONTROLS', $default_renderer->render($viewcontrols));
         }
 
-        if ($actions = $segment->getActions()) {
-            $tpl->setVariable('ACTIONS_SEGMENT', $default_renderer->render($actions));
-        }
         if ($actions = $component->getActions()) {
             $tpl->setVariable('ACTIONS_GLOBAL', $default_renderer->render($actions));
         }
 
-        $tpl->setVariable('SEGMENT_TITLLE', $segment->getTitle());
-        $tpl->setVariable('SEGMENT_CONTENTS', $default_renderer->render($segment->getContents()));
+        if ($actions = $segment->getSegmentActions()) {
+            $tpl->setVariable('ACTIONS_SEGMENT', $default_renderer->render($actions));
+        }
+
+        $tpl->setVariable('SEGMENT_TITLLE', $segment->getSegmentTitle());
+        $tpl->setVariable('SEGMENT_CONTENTS', $segment->getSegmentContent());
         return $tpl->get();
     }
 }

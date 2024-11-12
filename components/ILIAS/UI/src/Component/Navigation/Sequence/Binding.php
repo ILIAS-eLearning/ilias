@@ -40,7 +40,6 @@ interface Binding
      * Receives position data (provided by getSequencePositions) and builds a segment.
      */
     public function getSegment(
-        SegmentBuilder $builder,
         mixed $position_data,
         array $viewcontrol_values,
         array $filter_values

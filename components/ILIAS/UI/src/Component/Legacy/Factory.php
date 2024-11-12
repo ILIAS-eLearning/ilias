@@ -47,4 +47,28 @@ interface Factory
      */
     public function content(string $content): Content;
 
+    /**
+     * ---
+     * description:
+     *   purpose: >
+     *     The legacy segment is used as container for visible content in
+     *     the context of sequence nvigations.
+     *     We currently lack quite a lot of UI components for describing the
+     *     actual contents of the page, e.g. questions, combinations of text/table/form, etc.
+     *     Until these components exist an enable us to better describe the
+     *     correlations to navigations, the legacy segment is used to contain
+     *     rendered HTML.
+     *   composition: >
+     *     The legacy segment contains html (or any other content) as string;
+     *     it also has a title.
+     *
+     * context:
+     *   - A segment is the content affected by operating the sequence navigation.
+     * ---
+     * @param string $title the title of the legacy segment
+     * @param string $content the content of the legacy segment
+     * @return \ILIAS\UI\Component\Legacy\LegacySegment
+     */
+    public function legacySegment(string $title, string $content): LegacySegment;
+
 }

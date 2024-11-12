@@ -47,17 +47,11 @@ class Sequence implements ISequence\Sequence
     protected ?string $id = null;
 
     public function __construct(
-        protected ISequence\SegmentBuilder $segment_builder,
         protected DataFactory $data_factory,
         protected Refinery $refinery,
         protected \ArrayAccess $storage,
         protected ISequence\Binding $binding
     ) {
-    }
-
-    public function getSegmentBuilder(): ISequence\SegmentBuilder
-    {
-        return $this->segment_builder;
     }
 
     public function getBinding(): ISequence\Binding

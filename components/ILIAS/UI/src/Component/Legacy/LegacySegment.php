@@ -18,9 +18,18 @@
 
 declare(strict_types=1);
 
-namespace ILIAS\UI\Component\Navigation\Sequence;
+namespace ILIAS\UI\Component\Legacy;
 
-interface SegmentBuilder
+use ILIAS\UI\Component\Component;
+use ILIAS\UI\Component\Navigation\Sequence\Segment;
+use ILIAS\UI\Component\Button;
+
+interface LegacySegment extends Component, Segment
 {
-    public function build(string $title, IsSegmentContent ...$contents): Segment;
+    /**
+     * Segments MAY add actions to the sequence.
+     * Those actions MUST target the actually displayed contents rather
+     * than changing context entirely (i.e. breaking the sequence).
+     */
+    public function withSegmentActions(Button\Standard ...$actions): static;
 }

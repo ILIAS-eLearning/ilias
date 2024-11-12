@@ -18,44 +18,43 @@
 
 declare(strict_types=1);
 
-namespace ILIAS\UI\Implementation\Component\Navigation\Sequence;
+namespace ILIAS\UI\Implementation\Component\Legacy;
 
-use ILIAS\UI\Component\Navigation\Sequence as ISequence;
+use ILIAS\UI\Component\Legacy\LegacySegment as ISegment;
+use ILIAS\UI\Implementation\Component\ComponentHelper;
+use ILIAS\UI\Component\Button;
 
-class Segment implements ISequence\Segment
+class LegacySegment implements ISegment
 {
+    use ComponentHelper;
+
     protected ?array $actions = null;
 
-    /**
-     * @var ISequence\IsSegmentContent[]
-     */
-    protected array $contents;
 
     public function __construct(
         protected string $title,
-        ISequence\IsSegmentContent ...$contents,
+        protected string $content
     ) {
-        $this->contents = $contents;
     }
 
-    public function getContents(): array
-    {
-        return $this->contents;
-    }
-
-    public function getTitle(): string
+    public function getSegmentTitle(): string
     {
         return $this->title;
     }
 
-    public function withActions(...$actions): static
+    public function getSegmentContent(): string
+    {
+        return $this->content;
+    }
+
+    public function withSegmentActions(Button\Standard ...$actions): static
     {
         $clone = clone $this;
         $clone->actions = $actions;
         return $clone;
     }
 
-    public function getActions(): ?array
+    public function getSegmentActions(): ?array
     {
         return $this->actions;
     }

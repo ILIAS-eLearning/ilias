@@ -21,9 +21,8 @@ declare(strict_types=1);
 namespace ILIAS\UI\Component\Table;
 
 use ILIAS\UI\Component\Component;
-use ILIAS\UI\Component\Navigation\Sequence\IsSegmentContent;
 
-interface Table extends Component, IsSegmentContent
+interface Table extends Component
 {
     public function withTitle(string $title): self;
 

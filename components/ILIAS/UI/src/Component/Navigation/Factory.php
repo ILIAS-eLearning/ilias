@@ -26,18 +26,18 @@ interface Factory
      * ---
      * description:
      *   purpose: >
-     *      The Sequence Navigation is used to guide users through a process in a
-     *      structured manner, ensuring they complete tasks or gather information
-     *      in the intended order.
-     *      Elements (or the amount of) may change during the process, however,
+     *      The Sequence Navigation is used to move through a series of elements
+     *      in a particular order.
+     *      Elements (or the amount of) may change during navigation, however,
      *      they will remain in a consecutive order.
      *   composition: >
      *      Sequence Navigation consists of several groups of buttons, mainly.
      *      First of all, there is the primary navigation of back- and next buttons
      *      to navigate through the parts of the sequence; a part is called a "Segment".
-     *      While every Segment of a sequence is part of a bigger process, there
-     *      might be additional buttons for actions targeting this outer context, or
-     *      terminating the browsing of the sequence.
+     *      While every Segment of a sequence is part of a bigger process (i.e.
+     *      the perception of the entire sequence), there might be additional buttons
+     *      for actions targeting outer context, or terminating the browsing
+     *      of the sequence.
      *      Every shown segement may also add buttons with actions regarding the
      *      current segement.
      *      Finally, there may be view controls and filters to change the amount of
