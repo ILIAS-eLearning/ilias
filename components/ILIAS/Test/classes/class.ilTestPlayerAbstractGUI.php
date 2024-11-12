@@ -370,7 +370,7 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
             || ($question_obj instanceof QuestionPartiallySaveable
                 && !$question_obj->validateSolutionSubmit())) {
             $this->ctrl->setParameter($this, 'save_error', '1');
-            ilSession::set('previouspost', $_POST);
+            ilSession::set('previouspost', $this->testrequest->getParsedBody());
         }
 
         return $saved;
