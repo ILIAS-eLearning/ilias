@@ -4961,7 +4961,7 @@ class ilObjTest extends ilObject implements ilMarkSchemaAware, ilEctsGradesEnabl
                     $this->setSequenceSettings((int) $metadata["entry"]);
                     break;
                 case "solution_details":
-                    $result_details_settings = $result_details_settings->withShowPassDetails((bool) $metadata["entry"]);
+                    $result_details_settings = $result_details_settings->withShowSolutionDetails((bool) $metadata["entry"]);
                     break;
                 case "print_bs_with_res":
                     $result_details_settings = $result_details_settings->withPrintBestSolutionWithResult((bool) $metadata["entry"]);
@@ -5254,6 +5254,7 @@ class ilObjTest extends ilObject implements ilMarkSchemaAware, ilEctsGradesEnabl
         }
 
         $this->saveToDb();
+        $result_summary_settings = $result_summary_settings->withShowPassDetails($result_details_settings->getShowPassDetails());
         $score_settings = $score_settings
                 ->withGamificationSettings($gamification_settings)
                 ->withScoringSettings($scoring_settings)
@@ -5447,7 +5448,7 @@ class ilObjTest extends ilObject implements ilMarkSchemaAware, ilEctsGradesEnabl
         // results presentation
         $a_xml_writer->xmlStartTag("qtimetadatafield");
         $a_xml_writer->xmlElement("fieldlabel", null, "results_presentation");
-        $a_xml_writer->xmlElement("fieldentry", null, sprintf("%d", $this->getResultsPresentation()));
+        $a_xml_writer->xmlElement("fieldentry", null, sprintf("%d", $this->getScoreSettings()->getResultDetailsSettings()->getResultsPresentation()));
         $a_xml_writer->xmlEndTag("qtimetadatafield");
 
         // examid in test pass
@@ -7946,7 +7947,7 @@ class ilObjTest extends ilObject implements ilMarkSchemaAware, ilEctsGradesEnabl
     */
     public function getResultsPresentation(): int
     {
-        return ($this->results_presentation) ? $this->results_presentation : 0;
+        return $this->getScoreSettings()->getResultDetailsSettings()->getResultsPresentation();
     }
 
     /**
