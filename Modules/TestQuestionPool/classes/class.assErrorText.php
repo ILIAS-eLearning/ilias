@@ -667,17 +667,17 @@ class assErrorText extends assQuestion implements ilObjQuestionScoringAdjustable
         array $correctness_icons
     ): string {
         $text = $this->getTextForPosition($position, $paragraph, $show_correct_solution);
-        if ($text === '') {
-            return '';
-        }
         $class = $this->getClassForPosition($position, $show_correct_solution, $selections);
+
+        if ($text === '') {
+            $text = ' [ ]';
+        }
         $img = $this->getCorrectnessIconForPosition(
             $position,
             $graphical_output,
             $selections,
             $correctness_icons
         );
-
         return ' ' . $this->getErrorTokenHtml($text, $class, $use_link_tags) . $img;
     }
 
