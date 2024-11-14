@@ -54,6 +54,13 @@ class SuperGlobalDropInReplacement extends KeyValueAccess
      */
     public function offsetUnset($offset): void
     {
-        throw new LogicException("Modifying global Request-Array such as \$_GET is not allowed!");
+        if ($offset === 'ticket') {
+            // Allow phpCAS to unset the 'ticket'
+            // they do this in CAS/Client.php#L1070
+            // unset($_GET['ticket']);
+            parent::offsetUnset($offset);
+        } else {
+            throw new LogicException("Modifying global Request-Array such as \$_GET is not allowed!");
+        }
     }
 }
