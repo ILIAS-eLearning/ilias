@@ -73,11 +73,11 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
         foreach ($answers as $index => $value) {
             $answer = new ASS_AnswerBinaryStateImage(
                 $value,
-                $points[$index],
+                $points[$index] ?? 0.0,
                 (int) $index,
                 true,
                 null,
-                (int) $a_value['answer_id'][$index]
+                (int) $a_value['answer_id'][$index] ?? 0
             );
             if (isset($a_value['imagename'][$index])) {
                 $answer->setImage($a_value['imagename'][$index]);

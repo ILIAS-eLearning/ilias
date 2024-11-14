@@ -37,9 +37,9 @@ class ilMultipleChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
         $images = $this->request_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->string());
 
         foreach ($answers as $index => $value) {
-            $answer = new ASS_AnswerMultipleResponseImage($value, $points[$index], $index);
-            $answer->setPointsChecked($points[$index]);
-            $answer->setPointsUnchecked($points_unchecked[$index]);
+            $answer = new ASS_AnswerMultipleResponseImage($value, $points[$index] ?? 0.0, $index);
+            $answer->setPointsChecked($points[$index] ?? 0.0);
+            $answer->setPointsUnchecked($points_unchecked[$index] ?? 0.0);
 
             if ($this->request_helper->inArray($images, $index)) {
                 $answer->setImage($images[$index]);

@@ -69,7 +69,14 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
         $points = $this->request_helper->transformPoints($a_value);
 
         foreach ($answers as $index => $value) {
-            $answer = new ASS_AnswerBinaryStateImage($value, $points[$index], $index, true, null, -1);
+            $answer = new ASS_AnswerBinaryStateImage(
+                $value,
+                $points[$index] ?? 0.0,
+                $index,
+                true,
+                null,
+                -1
+            );
             if ($this->request_helper->inArray($images, $index)) {
                 $answer->setImage($images[$index]);
             }

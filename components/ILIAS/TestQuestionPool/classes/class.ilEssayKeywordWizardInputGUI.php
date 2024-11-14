@@ -26,7 +26,12 @@ class ilEssayKeywordWizardInputGUI extends ilSingleChoiceWizardInputGUI
 
         $this->values = [];
         foreach ($answers as $index => $value) {
-            $answer = new ASS_AnswerMultipleResponseImage($value, $points[$index], $index, $points_unchecked[$index]);
+            $answer = new ASS_AnswerMultipleResponseImage(
+                $value,
+                $points[$index] ?? 0.0,
+                $index,
+                $points_unchecked[$index] ?? 0.0
+            );
             $this->values[] = $answer;
         }
     }

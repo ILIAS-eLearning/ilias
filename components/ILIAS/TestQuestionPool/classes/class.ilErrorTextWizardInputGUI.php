@@ -56,7 +56,11 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
 
         $this->values = [];
         foreach ($keys as $index => $key) {
-            $this->values[] = new assAnswerErrorText($key, $a_value['value'][$index], $points[$index]);
+            $this->values[] = new assAnswerErrorText(
+                $key,
+                $a_value['value'][$index] ?? '',
+                $points[$index] ?? 0.0
+            );
         }
     }
 

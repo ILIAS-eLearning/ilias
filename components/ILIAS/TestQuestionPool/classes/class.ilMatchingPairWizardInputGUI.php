@@ -68,17 +68,17 @@ class ilMatchingPairWizardInputGUI extends ilTextInputGUI
         foreach ($terms as $index => $term) {
             $this->pairs[] = new assAnswerMatchingPair(
                 new assAnswerMatchingTerm('', '', $term),
-                new assAnswerMatchingDefinition('', '', $definitions[$index]),
+                new assAnswerMatchingDefinition('', '', $definitions[$index] ?? 0),
                 $points[$index]
             );
         }
 
-        $term_ids = explode(",", $a_value['term_id']);
+        $term_ids = explode(',', $a_value['term_id']);
         foreach ($term_ids as $id) {
             $this->terms[] = new assAnswerMatchingTerm('', '', (int) $id);
         }
 
-        $definition_ids = explode(",", $a_value['definition_id']);
+        $definition_ids = explode(',', $a_value['definition_id']);
         foreach ($definition_ids as $id) {
             $this->definitions[] = new assAnswerMatchingDefinition('', '', (int) $id);
         }

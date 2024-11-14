@@ -36,8 +36,8 @@ class ilAssMultipleChoiceCorrectionsInputGUI extends ilMultipleChoiceWizardInput
         $points_unchecked = $this->request_helper->transformPoints($a_value, 'points_unchecked');
 
         foreach ($this->values as $index => $value) {
-            $this->values[$index]->setPoints($points[$index]);
-            $this->values[$index]->setPointsUnchecked($points_unchecked[$index]);
+            $this->values[$index]->setPoints($points[$index] ?? 0.0);
+            $this->values[$index]->setPointsUnchecked($points_unchecked[$index] ?? 0.0);
         }
     }
 
