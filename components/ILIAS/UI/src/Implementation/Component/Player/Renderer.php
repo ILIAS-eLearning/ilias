@@ -71,8 +71,7 @@ class Renderer extends AbstractComponentRenderer
     public function renderVideo(
         Component\Component $component,
         RendererInterface $default_renderer
-    ): string
-    {
+    ): string {
         if ($this->isVimeo($component)) {
             return $this->renderVimeo(
                 $component,
@@ -121,9 +120,9 @@ class Renderer extends AbstractComponentRenderer
     }
 
     public function renderNative(
-            Component\Component $component,
-            RendererInterface $default_renderer
-        ): string {
+        Component\Component $component,
+        RendererInterface $default_renderer
+    ): string {
 
         $tpl = $this->getTemplate("tpl.video.html", true, true);
 
@@ -150,8 +149,7 @@ class Renderer extends AbstractComponentRenderer
 
     protected function isVimeo(
         Component\Component $component
-    ) : bool
-    {
+    ): bool {
         if (is_int(strpos($component->getSource(), 'vimeo.com'))) {
             return true;
         }
@@ -160,8 +158,7 @@ class Renderer extends AbstractComponentRenderer
 
     protected function isYoutube(
         Component\Component $component
-    ) : bool
-    {
+    ): bool {
         if (is_int(strpos($component->getSource(), 'youtube.com'))) {
             return true;
         }
