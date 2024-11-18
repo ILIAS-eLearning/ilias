@@ -45,20 +45,6 @@ class ilAuthProviderCAS extends ilAuthProvider
         $this->settings = ilCASSettings::getInstance();
     }
 
-    private function getIliasBaseUrl(): string
-    {
-        // Get the scheme (http or https)
-        $scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-
-        // Get the host name and port if available
-        $host = $_SERVER['HTTP_HOST'];
-
-        // Construct the base URL
-        $baseUrl = $scheme . "://" . $host;
-
-        return $baseUrl;
-    }
-
     protected function getSettings(): ilCASSettings
     {
         return $this->settings;
@@ -67,7 +53,6 @@ class ilAuthProviderCAS extends ilAuthProvider
     public function doAuthentication(ilAuthStatus $status): bool
     {
         $this->getLogger()->debug('Starting cas authentication attempt... ');
-        $baseUrl = $this->getIliasBaseUrl();
 
         try {
             // If you need a logger, uncomment this, the use statements
@@ -96,7 +81,7 @@ class ilAuthProviderCAS extends ilAuthProvider
                 $this->getSettings()->getServer(),
                 $this->getSettings()->getPort(),
                 $this->getSettings()->getUri(),
-                $baseUrl
+                ilUtil::_getHttpPath()
             );
 
             phpCAS::setNoCasServerValidation();
