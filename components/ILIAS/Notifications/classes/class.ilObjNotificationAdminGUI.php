@@ -31,6 +31,7 @@ use ILIAS\UI\Component\Input\Container\Form\Form;
 class ilObjNotificationAdminGUI extends ilObjectGUI
 {
     protected Container $dic;
+    protected \ILIAS\Notifications\ilNotificationSystem $notification_system;
 
     public function __construct($a_data, int $a_id = 0, bool $a_call_by_reference = true, bool $a_prepare_output = true)
     {
@@ -41,6 +42,7 @@ class ilObjNotificationAdminGUI extends ilObjectGUI
         $this->type = 'nota';
         parent::__construct($a_data, $a_id, $a_call_by_reference, false);
         $this->lng->loadLanguageModule('notifications_adm');
+        $this->notification_system = $DIC->notifications()->system();
     }
 
     public function executeCommand(): void
@@ -76,6 +78,10 @@ class ilObjNotificationAdminGUI extends ilObjectGUI
             $values = [];
             if ($settings->get('enable_osd') === '0' || $settings->get('enable_osd') === null) {
                 $values['enable_osd'] = null;
+                $values['osd_interval'] = (int) $settings->get('osd_interval');
+                $values['osd_vanish'] = (int) $settings->get('osd_vanish');
+                $values['osd_delay'] = (int) $settings->get('osd_delay');
+                $values['osd_play_sound'] = (bool) $settings->get('osd_play_sound');
             } else {
                 $values['enable_osd'] = [
                     'osd_interval' => (int) $settings->get('osd_interval'),
@@ -103,6 +109,11 @@ class ilObjNotificationAdminGUI extends ilObjectGUI
 
         $form = $this->getForm()->withRequest($this->dic->http()->request());
         $data = $form->getData();
+        if ($data === null) {
+            $this->showOSDSettings($form);
+            return;
+        }
+
         if (isset($data['osd']) && is_array($data['osd'])) {
             if (isset($data['osd']['enable_osd'])) {
                 $settings->set('enable_osd', '1');
@@ -111,12 +122,17 @@ class ilObjNotificationAdminGUI extends ilObjectGUI
                 $settings->set('osd_delay', ((string) $data['osd']['enable_osd']['osd_delay']));
                 $settings->set('osd_play_sound', ($data['osd']['enable_osd']['osd_play_sound']) ? '1' : '0');
             } else {
-                global $DIC;
-                $DIC->notifications()->system()->clear('osd');
+                $this->notification_system->clear('osd');
                 $settings->set('enable_osd', '0');
             }
         }
-        $this->showOSDSettings($form);
+
+        $this->tpl->setOnScreenMessage(
+            $this->tpl::MESSAGE_TYPE_SUCCESS,
+            $this->lng->txt('saved_successfully'),
+            true
+        );
+        $this->ctrl->redirect($this, 'showOSDSettings');
     }
 
     /**
@@ -127,38 +143,65 @@ class ilObjNotificationAdminGUI extends ilObjectGUI
     {
         $enable_osd = $this->dic->ui()->factory()->input()->field()->optionalGroup(
             [
-                'osd_interval' => $this->dic->ui()->factory()->input()->field()->numeric(
-                    $this->lng->txt('osd_interval'),
-                    $this->lng->txt('osd_interval_desc')
-                )->withRequired(true)
-                                            ->withAdditionalTransformation(
-                                                $this->dic->refinery()->custom()->constraint(
-                                                    static function ($value) {
-                                                        return $value >= 3000;
-                                                    },
-                                                    $this->lng->txt('osd_error_refresh_interval_too_small')
-                                                )
-                                            ),
-                'osd_vanish' => $this->dic->ui()->factory()->input()->field()->numeric(
-                    $this->lng->txt('osd_vanish'),
-                    $this->lng->txt('osd_vanish_desc')
-                )->withRequired(true)
-                                          ->withAdditionalTransformation(
-                                              $this->dic->refinery()->custom()->constraint(
-                                                  static function ($value) {
-                                                      return $value >= 1000;
-                                                  },
-                                                  $this->lng->txt('osd_error_presentation_time_too_small')
-                                              )
-                                          ),
-                'osd_delay' => $this->dic->ui()->factory()->input()->field()->numeric(
-                    $this->lng->txt('osd_delay'),
-                    $this->lng->txt('osd_delay_desc')
-                )->withRequired(true),
-                'osd_play_sound' => $this->dic->ui()->factory()->input()->field()->checkbox(
-                    $this->lng->txt('osd_play_sound'),
-                    $this->lng->txt('osd_play_sound_desc')
-                )
+                'osd_interval' =>
+                    $this->dic->ui()
+                              ->factory()
+                              ->input()
+                              ->field()
+                              ->numeric(
+                                  $this->lng->txt('osd_interval'),
+                                  $this->lng->txt('osd_interval_desc')
+                              )
+                              ->withRequired(true)
+                              ->withAdditionalTransformation(
+                                  $this->dic->refinery()->custom()->constraint(
+                                      static function ($value): bool {
+                                          return $value >= 3000;
+                                      },
+                                      $this->lng->txt('osd_error_refresh_interval_too_small')
+                                  )
+                              )
+                              ->withValue($values['osd_interval'] ?? null),
+                'osd_vanish' =>
+                    $this->dic->ui()
+                              ->factory()
+                              ->input()
+                              ->field()
+                              ->numeric(
+                                  $this->lng->txt('osd_vanish'),
+                                  $this->lng->txt('osd_vanish_desc')
+                              )
+                              ->withRequired(true)
+                              ->withValue($values['osd_vanish'] ?? null)
+                              ->withAdditionalTransformation(
+                                  $this->dic->refinery()->custom()->constraint(
+                                      static function ($value): bool {
+                                          return $value >= 1000;
+                                      },
+                                      $this->lng->txt('osd_error_presentation_time_too_small')
+                                  )
+                              ),
+                'osd_delay' =>
+                    $this->dic->ui()
+                              ->factory()
+                              ->input()
+                              ->field()
+                              ->numeric(
+                                  $this->lng->txt('osd_delay'),
+                                  $this->lng->txt('osd_delay_desc')
+                              )
+                              ->withValue($values['osd_delay'] ?? null)
+                              ->withRequired(true),
+                'osd_play_sound' =>
+                    $this->dic->ui()
+                              ->factory()
+                              ->input()
+                              ->field()
+                              ->checkbox(
+                                  $this->lng->txt('osd_play_sound'),
+                                  $this->lng->txt('osd_play_sound_desc')
+                              )
+                              ->withValue($values['osd_play_sound'] ?? null)
             ],
             $this->lng->txt('enable_osd')
         )->withByline(
