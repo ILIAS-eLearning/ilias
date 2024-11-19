@@ -143,7 +143,7 @@ class Administration
     {
         $ids = $this->retrieveValueOrDefaultFromPost(
             'ids',
-            $this->container->refinery()->to()->listOf(
+            $this->container->refinery()->kindlyTo()->listOf(
                 $this->container->refinery()->kindlyTo()->int()
             )
         );
