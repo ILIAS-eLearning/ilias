@@ -244,31 +244,39 @@ class CertificateOverviewTable implements DataRetrieval
     {
         $table_rows = [];
 
-        $ownerCache = [];
+        $owner_cache = [];
+        $object_title_cache = [];
 
         foreach ($certificates as $certificate) {
             $refIds = ilObject::_getAllReferences($certificate->getObjId());
-            $objectTitle = ilObject::_lookupTitle($certificate->getObjId());
-            foreach ($refIds as $refId) {
-                if ($this->access->checkAccess('read', '', $refId)) {
-                    $objectTitle = $this->ui_renderer->render(
-                        $this->ui_factory->link()->standard($objectTitle, ilLink::_getLink($refId))
-                    );
-                    break;
+
+            if (!isset($object_title_cache[$certificate->getObjId()])) {
+                $object_title = ilObject::_lookupTitle($certificate->getObjId());
+                foreach ($refIds as $refId) {
+                    if ($this->access->checkAccess('read', '', $refId)) {
+                        $object_title = $this->ui_renderer->render(
+                            $this->ui_factory->link()->standard($object_title, ilLink::_getLink($refId))
+                        );
+                        break;
+                    }
                 }
+
+                $object_title_cache[$certificate->getObjId()] = $object_title;
             }
 
-            if (!isset($ownerCache[$certificate->getUserId()])) {
-                $ownerCache[$certificate->getUserId()] = ilObjUser::_lookupLogin($certificate->getUserId());
+
+
+            if (!isset($owner_cache[$certificate->getUserId()])) {
+                $owner_cache[$certificate->getUserId()] = ilObjUser::_lookupLogin($certificate->getUserId());
             }
 
             $table_rows[] = [
                 'id' => $certificate->getId(),
                 'certificate_id' => $certificate->getCertificateId()->asString(),
                 'issue_date' => $certificate->getAcquiredTimestamp(),
-                'object' => $objectTitle,
+                'object' => $object_title_cache[$certificate->getObjId()],
                 'obj_id' => (string) $certificate->getObjId(),
-                'owner' => $ownerCache[$certificate->getUserId()],
+                'owner' => $owner_cache[$certificate->getUserId()],
             ];
         }
 
