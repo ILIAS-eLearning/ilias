@@ -18,26 +18,13 @@
 
 declare(strict_types=1);
 
-// use Monolog\Formatter\LineFormatter;
-// use Monolog\Handler\StreamHandler;
-// use Monolog\Logger;
-
 /**
  * CAS authentication provider
  * @author Stefan Meyer <smeyer.ilias@gmx.de>
  */
 class ilAuthProviderCAS extends ilAuthProvider
 {
-    // private ilCASSettings $settings;
-    // /**
-    //  * @var string
-    //  */
-    // private $logPath;
-    //
-    // /**
-    //  * @var Logger
-    //  */
-    // private $logger;
+    private ilCASSettings $settings;
 
     public function __construct(ilAuthCredentials $credentials)
     {
@@ -55,22 +42,7 @@ class ilAuthProviderCAS extends ilAuthProvider
         $this->getLogger()->debug('Starting cas authentication attempt... ');
 
         try {
-            // If you need a logger, uncomment this, the use statements
-            // and variables above and remove   phpCAS::setLogger(null);
-            // from below.
-            // The logger essentially gives you a trace through the
-            // entire CAS-call-stack.
-            //
-            // $this->logPath = tempnam(sys_get_temp_dir(), 'phpCAS');
-            // $this->logger = new Logger('name');
-            // $handler = new StreamHandler($this->logPath);
-            // $format = "%message%\n";
-            // $formatter = new LineFormatter($format);
-            // $handler->setFormatter($formatter);
-            // $this->logger->pushHandler($handler);
-            // phpCAS::setLogger($this->logger);
-
-            phpCAS::setLogger(null);
+            phpCAS::setLogger($this->getLogger());
             // Caution: If you set this to "true", there might be output
             // and the redirect won't work and you get an ILIAS Whoopsy
             // Though, you may need to for debugging other issues.
