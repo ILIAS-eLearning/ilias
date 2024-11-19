@@ -187,7 +187,7 @@ class CertificateOverviewTable implements DataRetrieval
             [
                 'certificate_id' => $ui_table->column()->text($this->lng->txt('certificate_id')),
                 'issue_date' => $ui_table->column()->date($this->lng->txt('certificate_issue_date'), $date_format),
-                'object' => $ui_table->column()->text($this->lng->txt('obj')),
+                'object' => $ui_table->column()->link($this->lng->txt('obj')),
                 'obj_id' => $ui_table->column()->text($this->lng->txt('object_id')),
                 'owner' => $ui_table->column()->text($this->lng->txt('owner'))
             ],
@@ -249,9 +249,7 @@ class CertificateOverviewTable implements DataRetrieval
             $objectTitle = ilObject::_lookupTitle($certificate->getObjId());
             foreach ($refIds as $refId) {
                 if ($this->access->checkAccess('read', '', $refId)) {
-                    $objectTitle = $this->ui_renderer->render(
-                        $this->ui_factory->link()->standard($objectTitle, ilLink::_getLink($refId))
-                    );
+                    $objectTitle = $this->ui_factory->link()->standard($objectTitle, ilLink::_getLink($refId));
                     break;
                 }
             }
