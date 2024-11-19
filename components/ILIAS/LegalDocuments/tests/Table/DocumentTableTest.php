@@ -37,6 +37,7 @@ use ILIAS\LegalDocuments\ConsumerToolbox\UI;
 use ILIAS\LegalDocuments\Repository\DocumentRepository;
 use ILIAS\UI\Renderer;
 use ilLegalDocumentsAdministrationGUI;
+use ilObjUser;
 use PHPUnit\Framework\TestCase;
 use ILIAS\LegalDocuments\Table\DocumentTable;
 use DateTimeImmutable;
@@ -67,7 +68,8 @@ class DocumentTableTest extends TestCase
             $request,
             new Factory(),
             $this->mock(ilCtrl::class),
-            $this->mock(Renderer::class)
+            $this->mock(Renderer::class),
+            $this->mock(ilObjUser::class)
         ));
     }
 
@@ -95,7 +97,8 @@ class DocumentTableTest extends TestCase
             $request,
             new Factory(),
             $this->mock(ilCtrl::class),
-            $this->mock(Renderer::class)
+            $this->mock(Renderer::class),
+            $this->mock(ilObjUser::class)
         );
 
         $this->assertSame(

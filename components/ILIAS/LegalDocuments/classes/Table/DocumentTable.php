@@ -24,6 +24,7 @@ namespace ILIAS\LegalDocuments\Table;
 use Closure;
 use DateTimeImmutable;
 use Generator;
+use ilCalendarSettings;
 use ilCtrl;
 use ilCtrlInterface;
 use ilDatePresentation;
@@ -44,6 +45,7 @@ use ILIAS\UI\Component\Table\Ordering;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\URLBuilder;
 use ILIAS\UI\URLBuilderToken;
+use ilObjUser;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -59,6 +61,8 @@ class DocumentTable implements OrderingBinding
     private readonly ilCtrl|ilCtrlInterface $ctrl;
     private readonly Ordering $table;
     private readonly Renderer $ui_renderer;
+    private ilObjUser $user;
+
     /**
      * @var Document[]
      */
@@ -75,6 +79,7 @@ class DocumentTable implements OrderingBinding
         ?Factory                                     $data_factory = null,
         ?ilCtrl                                      $ctrl = null,
         ?Renderer                                    $ui_renderer = null,
+        ?ilObjUser                                   $user = null
     )
     {
         global $DIC;
@@ -82,6 +87,7 @@ class DocumentTable implements OrderingBinding
         $this->data_factory = $data_factory ?: new Factory();
         $this->ctrl = $ctrl ?: $DIC->ctrl();
         $this->ui_renderer = $ui_renderer ?: $DIC->ui()->renderer();
+        $this->user = $user ?: $DIC->user();
 
         $this->table = $this->buildTable();
         $this->records = $this->repository->all();
@@ -90,12 +96,19 @@ class DocumentTable implements OrderingBinding
     private function buildTable(): Ordering
     {
         $uiTable = $this->ui->create()->table();
+
+        if ((int) $this->user->getTimeFormat() === ilCalendarSettings::TIME_FORMAT_12) {
+            $date_format = $this->data_factory->dateFormat()->withTime12($this->user->getDateFormat());
+        } else {
+            $date_format = $this->data_factory->dateFormat()->withTime24($this->user->getDateFormat());
+        }
+
         $table = $uiTable->ordering(
             $this->ui->txt('tbl_docs_title'),
             [
                 'title' => $uiTable->column()->text($this->ui->txt('tbl_docs_head_title')),
-                'created' => $uiTable->column()->text($this->ui->txt('tbl_docs_head_created')),
-                'change' => $uiTable->column()->text($this->ui->txt('tbl_docs_head_last_change')),
+                'created' => $uiTable->column()->date($this->ui->txt('tbl_docs_head_created'), $date_format),
+                'change' => $uiTable->column()->date($this->ui->txt('tbl_docs_head_last_change'), $date_format),
                 'criteria' => $uiTable->column()->text($this->ui->txt('tbl_docs_head_criteria')),
             ],
             $this,
@@ -116,9 +129,6 @@ class DocumentTable implements OrderingBinding
     ): Generator
     {
         foreach ($this->buildTableRows($this->records) as $row) {
-            $row['created'] = $this->formatDateRow($row['created']);
-            $row['change'] = $this->formatDateRow($row['change']);
-
             yield $row_builder->buildOrderingRow((string) $row['id'], $row);
         }
     }
@@ -176,11 +186,6 @@ class DocumentTable implements OrderingBinding
     public function criterionName(Criterion $criterion): Component
     {
         return ($this->criterion_as_component)($criterion->content());
-    }
-
-    private function formatDateRow(DateTimeImmutable $date): string
-    {
-        return ilDatePresentation::formatDate(new ilDateTime($date->getTimestamp(), IL_CAL_UNIX));
     }
 
     public function getTotalRowCount(?array $filter_data, ?array $additional_parameters): ?int

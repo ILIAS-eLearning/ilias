@@ -75,7 +75,8 @@ class ProvideDocument
             $this->container->http()->request(),
             new Factory(),
             $this->container->ctrl(),
-            $this->container->ui()->renderer()
+            $this->container->ui()->renderer(),
+            $this->container->user()
         );
     }
 
