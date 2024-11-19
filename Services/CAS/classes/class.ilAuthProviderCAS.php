@@ -42,7 +42,8 @@ class ilAuthProviderCAS extends ilAuthProvider
         $this->getLogger()->debug('Starting cas authentication attempt... ');
 
         try {
-            phpCAS::setLogger($this->getLogger());
+            // Uncomment the following line to get trace-level loggin by CAS
+            //phpCAS::setLogger($this->getLogger());
             // Caution: If you set this to "true", there might be output
             // and the redirect won't work and you get an ILIAS Whoopsy
             // Though, you may need to for debugging other issues.
