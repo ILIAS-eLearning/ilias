@@ -244,15 +244,19 @@ class CertificateOverviewTable implements DataRetrieval
     {
         $table_rows = [];
 
+        $ref_id_cache = [];
         $owner_cache = [];
         $object_title_cache = [];
 
         foreach ($certificates as $certificate) {
-            $refIds = ilObject::_getAllReferences($certificate->getObjId());
+            if (!isset($ref_id_cache[$certificate->getObjId()])) {
+                $ref_id_cache[$certificate->getObjId()] = ilObject::_getAllReferences($certificate->getObjId());
+            }
+            $ref_ids = $ref_id_cache[$certificate->getObjId()];
 
             if (!isset($object_title_cache[$certificate->getObjId()])) {
                 $object_title = ilObject::_lookupTitle($certificate->getObjId());
-                foreach ($refIds as $refId) {
+                foreach ($ref_ids as $refId) {
                     if ($this->access->checkAccess('read', '', $refId)) {
                         $object_title = $this->ui_renderer->render(
                             $this->ui_factory->link()->standard($object_title, ilLink::_getLink($refId))
