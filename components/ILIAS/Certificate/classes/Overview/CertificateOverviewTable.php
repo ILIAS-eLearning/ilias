@@ -244,6 +244,8 @@ class CertificateOverviewTable implements DataRetrieval
     {
         $table_rows = [];
 
+        $ownerCache = [];
+
         foreach ($certificates as $certificate) {
             $refIds = ilObject::_getAllReferences($certificate->getObjId());
             $objectTitle = ilObject::_lookupTitle($certificate->getObjId());
@@ -256,13 +258,17 @@ class CertificateOverviewTable implements DataRetrieval
                 }
             }
 
+            if (!isset($ownerCache[$certificate->getUserId()])) {
+                $ownerCache[$certificate->getUserId()] = ilObjUser::_lookupLogin($certificate->getUserId());
+            }
+
             $table_rows[] = [
                 'id' => $certificate->getId(),
                 'certificate_id' => $certificate->getCertificateId()->asString(),
                 'issue_date' => $certificate->getAcquiredTimestamp(),
                 'object' => $objectTitle,
                 'obj_id' => (string) $certificate->getObjId(),
-                'owner' => ilObjUser::_lookupLogin($certificate->getUserId()),
+                'owner' => $ownerCache[$certificate->getUserId()],
             ];
         }
 
