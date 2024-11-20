@@ -16,6 +16,8 @@
  *
  *********************************************************************/
 
+declare(strict_types=1);
+
 use ILIAS\ResourceStorage\Services as IRSS;
 
 /**
@@ -38,7 +40,7 @@ class ilOrgUnitType
     protected array $orgus = [];
     protected array $orgus_ids = [];
     protected ilDBInterface $db;
-    protected \ILIAS\DI\LoggingServices  $log;
+    protected \ILIAS\DI\LoggingServices $log;
     protected ilObjUser $user;
     protected array $active_plugins;
     protected ilLanguage $lng;
@@ -775,7 +777,7 @@ class ilOrgUnitType
 
     public function removeIconFromIrss(string $identifier): void
     {
-        if($rid = $this->irss->manage()->find($identifier)) {
+        if ($rid = $this->irss->manage()->find($identifier)) {
             $this->irss->manage()->remove($rid, new ilOrgUnitTypeStakeholder());
         }
     }
@@ -783,9 +785,15 @@ class ilOrgUnitType
     public function getIconSrc(): string
     {
         $rid = $this->irss->manage()->find($this->getIconIdentifier());
-        if(!$rid) {
+        if (!$rid) {
             return '';
         }
         return $this->irss->consume()->src($rid)->getSrc();
+    }
+
+    public function deleteOrgUnitTypeAssignmentByRecId(int $rec_id): void
+    {
+        $sql = 'DELETE FROM orgu_types_adv_md_rec WHERE rec_id = ' . $this->db->quote($rec_id, 'integer');
+        $res = $this->db->manipulate($sql);
     }
 }
