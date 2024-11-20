@@ -21,7 +21,7 @@ function base_text_block()
 
     $panel = $f->panel()->standard(
         "Panel Title",
-        $f->legacy()->legacyContent("Some Content")
+        $f->legacy()->content("Some Content")
     );
 
     return $renderer->render($panel);

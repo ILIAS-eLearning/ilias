@@ -137,7 +137,7 @@ class CardTest extends ILIAS_UI_TestBase
     {
         $f = $this->getFactory();
         $c = $this->getBaseCard();
-        $content = $f->legacy()->legacyContent("Random Content");
+        $content = $f->legacy()->content("Random Content");
         $c = $c->withSections(array($content));
 
         $this->assertEquals($c->getSections(), array($content));
@@ -147,7 +147,7 @@ class CardTest extends ILIAS_UI_TestBase
     {
         $r = $this->getDefaultRenderer();
         $c = $this->getBaseCard();
-        $content = $this->getfactory()->legacy()->legacyContent("Random Content");
+        $content = $this->getfactory()->legacy()->content("Random Content");
 
         $c = $c->withSections(array($content));
 

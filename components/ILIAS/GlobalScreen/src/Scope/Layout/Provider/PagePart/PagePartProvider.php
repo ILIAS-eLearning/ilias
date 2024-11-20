@@ -21,7 +21,7 @@ namespace ILIAS\GlobalScreen\Scope\Layout\Provider\PagePart;
 
 use ILIAS\UI\Component\Breadcrumbs\Breadcrumbs;
 use ILIAS\UI\Component\Image\Image;
-use ILIAS\UI\Component\Legacy\LegacyContent;
+use ILIAS\UI\Component\Legacy\Content;
 use ILIAS\UI\Component\MainControls\Footer;
 use ILIAS\UI\Component\MainControls\MainBar;
 use ILIAS\UI\Component\MainControls\MetaBar;
@@ -35,9 +35,9 @@ use ILIAS\UI\Component\Toast\Container as TContainer;
 interface PagePartProvider
 {
     /**
-     * @return LegacyContent|null
+     * @return Content|null
      */
-    public function getContent(): ?LegacyContent;
+    public function getContent(): ?Content;
 
     /**
      * @return MetaBar|null

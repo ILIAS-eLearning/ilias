@@ -71,7 +71,7 @@ class SystemStylesGlobalScreenToolProvider extends AbstractDynamicToolProvider
             ->tool($id_generator('system_styles_tree'))
             ->withTitle($title)
             ->withSymbol($icon)
-            ->withContent($this->dic->ui()->factory()->legacy()->legacyContent($this->dic->ui()->renderer()->render($this->getUITree())));
+            ->withContent($this->dic->ui()->factory()->legacy()->content($this->dic->ui()->renderer()->render($this->getUITree())));
     }
 
     protected function getUITree(): Tree

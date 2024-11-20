@@ -28,10 +28,10 @@ use ILIAS\UI\Implementation\Component\SignalGeneratorInterface;
 use InvalidArgumentException;
 
 /**
- * Class LegacyContent
+ * Class Content
  * @package ILIAS\UI\Implementation\Component\Legacy
  */
-class LegacyContent implements C\Legacy\LegacyContent
+class Content implements C\Legacy\Content
 {
     use ComponentHelper;
     use JavaScriptBindable;

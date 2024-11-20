@@ -145,7 +145,7 @@ class ilObjStudyProgrammeAutoCategoriesGUI
                 continue;
             }
             [$title, $link] = $this->getItemPath($ref_id);
-            $usr = $this->getUserRepresentation($ac->getLastEditorId()) ?? $this->ui_factory->legacy()->legacyContent('-');
+            $usr = $this->getUserRepresentation($ac->getLastEditorId()) ?? $this->ui_factory->legacy()->content('-');
             $modal = $this->getModal($ref_id);
             $collected_modals[] = $modal;
             $actions = $this->getItemAction(
@@ -322,7 +322,7 @@ class ilObjStudyProgrammeAutoCategoriesGUI
         $modal = $this->ui_factory->modal()
             ->roundtrip(
                 $this->lng->txt('modal_categories_title'),
-                $this->ui_factory->legacy()->legacyContent($form->getHtml())
+                $this->ui_factory->legacy()->content($form->getHtml())
             )
             ->withActionButtons([$submit])
             ->withAdditionalOnLoadCode(

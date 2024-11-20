@@ -135,7 +135,7 @@ class ilCalendarSubscriptionGUI
 
         $roundtrip = $this->ui_factory->modal()->roundtrip(
             $this->lng->txt('cal_calendar_subscription_modal_title'),
-            $this->ui_factory->legacy()->legacyContent($tpl->get())
+            $this->ui_factory->legacy()->content($tpl->get())
         );
         echo $this->ui_renderer->render($roundtrip);
         exit;

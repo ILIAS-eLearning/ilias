@@ -51,7 +51,7 @@ class CalendarMainBarProvider extends AbstractStaticMainMenuProvider
                            ->withParent(StandardTopItemsProvider::getInstance()->getPersonalWorkspaceIdentification())
                            ->withPosition(30)
                            ->withSymbol($icon)
-                           ->withNonAvailableReason($this->dic->ui()->factory()->legacy()->legacyContent("{$this->dic->language()->txt('component_not_active')}"))
+                           ->withNonAvailableReason($this->dic->ui()->factory()->legacy()->content("{$this->dic->language()->txt('component_not_active')}"))
                            ->withAvailableCallable(
                                function () {
                                    $settings = ilCalendarSettings::_getInstance();

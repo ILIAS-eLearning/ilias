@@ -78,7 +78,7 @@ EOT;
 
         $p = $this->ui->factory()->panel()->secondary()->legacy(
             $this->lng->txt("book_object_selection"),
-            $this->ui->factory()->legacy()->legacyContent($tpl->get())
+            $this->ui->factory()->legacy()->content($tpl->get())
         );
         return $this->ui->renderer()->render($p);
     }

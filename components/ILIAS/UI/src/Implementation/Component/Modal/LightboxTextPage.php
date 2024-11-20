@@ -23,7 +23,7 @@ namespace ILIAS\UI\Implementation\Component\Modal;
 use ILIAS\UI\Component as C;
 use ILIAS\UI\Component\Modal\LightboxPage;
 use ILIAS\UI\Implementation\Component\ComponentHelper;
-use ILIAS\UI\Implementation\Component\Legacy\LegacyContent;
+use ILIAS\UI\Implementation\Component\Legacy\Content;
 use ILIAS\UI\Implementation\Component\SignalGenerator;
 use ILIAS\UI\Component\Modal\LightboxTextPage as ILightboxTextPage;
 
@@ -56,8 +56,8 @@ class LightboxTextPage implements LightboxPage, ILightboxTextPage
     /**
      * @inheritdoc
      */
-    public function getComponent(): C\Legacy\LegacyContent
+    public function getComponent(): C\Legacy\Content
     {
-        return new LegacyContent($this->text, new SignalGenerator());
+        return new Content($this->text, new SignalGenerator());
     }
 }

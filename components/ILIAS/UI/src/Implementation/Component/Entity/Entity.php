@@ -26,7 +26,7 @@ use ILIAS\UI\Component\Symbol\Symbol;
 use ILIAS\UI\Component\Symbol\Glyph\Glyph;
 use ILIAS\UI\Component\Button\Shy;
 use ILIAS\UI\Component\Button\Tag;
-use ILIAS\UI\Component\Legacy\LegacyContent;
+use ILIAS\UI\Component\Legacy\Content;
 use ILIAS\UI\Component\Listing\Property as PropertyListing;
 use ILIAS\UI\Component\Link\Standard as StandardLink;
 use ILIAS\UI\Implementation\Component\ComponentHelper;
@@ -36,15 +36,15 @@ abstract class Entity implements I\Entity
     use ComponentHelper;
 
     /**
-     * @var array<PropertyListing | StandardLink | LegacyContent>
+     * @var array<PropertyListing | StandardLink | Content>
      */
     protected array $blocking_conditions = [];
     /**
-     * @var array<PropertyListing | StandardLink | LegacyContent>
+     * @var array<PropertyListing | StandardLink | Content>
      */
     protected array $featured_props = [];
     /**
-     * @var array<PropertyListing | LegacyContent>
+     * @var array<PropertyListing | Content>
      */
     protected array $main_details = [];
     /**
@@ -56,11 +56,11 @@ abstract class Entity implements I\Entity
      */
     protected array $reactions = [];
     /**
-     * @var array<PropertyListing | StandardLink | LegacyContent>
+     * @var array<PropertyListing | StandardLink | Content>
      */
     protected array $availability = [];
     /**
-     * @var array<PropertyListing | LegacyContent>
+     * @var array<PropertyListing | Content>
      */
     protected array $details = [];
     /**
@@ -68,7 +68,7 @@ abstract class Entity implements I\Entity
      */
     protected array $actions = [];
     /**
-     * @var array<PropertyListing | LegacyContent>
+     * @var array<PropertyListing | Content>
      */
     protected array $personal_status = [];
 
@@ -104,14 +104,14 @@ abstract class Entity implements I\Entity
      * @inheritdoc
      */
     public function withBlockingAvailabilityConditions(
-        PropertyListing | StandardLink | LegacyContent ...$blocking_conditions
+        PropertyListing | StandardLink | Content ...$blocking_conditions
     ): self {
         $clone = clone $this;
         $clone->blocking_conditions = $blocking_conditions;
         return $clone;
     }
     /**
-     * @return array<PropertyListing | StandardLink | LegacyContent>
+     * @return array<PropertyListing | StandardLink | Content>
      */
     public function getBlockingAvailabilityConditions(): array
     {
@@ -122,14 +122,14 @@ abstract class Entity implements I\Entity
      * @inheritdoc
      */
     public function withFeaturedProperties(
-        PropertyListing | StandardLink | LegacyContent ...$featured_props
+        PropertyListing | StandardLink | Content ...$featured_props
     ): self {
         $clone = clone $this;
         $clone->featured_props = $featured_props;
         return $clone;
     }
     /**
-     * @return array<PropertyListing | StandardLink | LegacyContent>
+     * @return array<PropertyListing | StandardLink | Content>
      */
     public function getFeaturedProperties(): array
     {
@@ -140,14 +140,14 @@ abstract class Entity implements I\Entity
      * @inheritdoc
      */
     public function withMainDetails(
-        PropertyListing | LegacyContent ...$main_details
+        PropertyListing | Content ...$main_details
     ): self {
         $clone = clone $this;
         $clone->main_details = $main_details;
         return $clone;
     }
     /**
-     * @return array<PropertyListing | LegacyContent>
+     * @return array<PropertyListing | Content>
      */
     public function getMainDetails(): array
     {
@@ -203,14 +203,14 @@ abstract class Entity implements I\Entity
      * @inheritdoc
      */
     public function withAvailability(
-        PropertyListing | StandardLink | LegacyContent ...$availability
+        PropertyListing | StandardLink | Content ...$availability
     ): self {
         $clone = clone $this;
         $clone->availability = $availability;
         return $clone;
     }
     /**
-     * @return array<PropertyListing | StandardLink | LegacyContent>
+     * @return array<PropertyListing | StandardLink | Content>
      */
     public function getAvailability(): array
     {
@@ -221,14 +221,14 @@ abstract class Entity implements I\Entity
      * @inheritdoc
      */
     public function withDetails(
-        PropertyListing | LegacyContent ...$details
+        PropertyListing | Content ...$details
     ): self {
         $clone = clone $this;
         $clone->details = $details;
         return $clone;
     }
     /**
-     * @return array<PropertyListing | LegacyContent>
+     * @return array<PropertyListing | Content>
      */
     public function getDetails(): array
     {
@@ -256,14 +256,14 @@ abstract class Entity implements I\Entity
      * @inheritdoc
      */
     public function withPersonalStatus(
-        PropertyListing | LegacyContent ...$personal_status
+        PropertyListing | Content ...$personal_status
     ): self {
         $clone = clone $this;
         $clone->personal_status = $personal_status;
         return $clone;
     }
     /**
-     * @return array<PropertyListing | LegacyContent>
+     * @return array<PropertyListing | Content>
      */
     public function getPersonalStatus(): array
     {

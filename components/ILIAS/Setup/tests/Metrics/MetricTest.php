@@ -263,11 +263,11 @@ METRIC;
         $panel_f = new PF($listing_f);
         $signal = new SignalGenerator();
         $legacy_f = $this->createMock(\ILIAS\UI\Implementation\Component\Legacy\Factory::class);
-        $legacy = $legacy_f->legacyContent("<pre>string</pre>");
+        $legacy = $legacy_f->content("<pre>string</pre>");
 
         $legacy_f
             ->expects($this->once())
-            ->method("legacyContent")
+            ->method("content")
             ->willReturn($legacy);
 
         $factory

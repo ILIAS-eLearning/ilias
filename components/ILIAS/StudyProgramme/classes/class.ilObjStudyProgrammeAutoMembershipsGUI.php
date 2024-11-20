@@ -139,7 +139,7 @@ class ilObjStudyProgrammeAutoMembershipsGUI
 
         $modal = $this->ui_factory->modal()->roundtrip(
             $this->txt('modal_member_auto_select_title'),
-            $this->ui_factory->legacy()->legacyContent($form->getHtml())
+            $this->ui_factory->legacy()->content($form->getHtml())
         );
 
         $submit = $this->ui_factory->button()->primary($this->txt('add'), "#")->withOnLoadCode(
@@ -169,7 +169,7 @@ class ilObjStudyProgrammeAutoMembershipsGUI
         $data = [];
         foreach ($this->getObject()->getAutomaticMembershipSources() as $ams) {
             $title = $this->getTitleRepresentation($ams);
-            $usr = $this->getUserRepresentation($ams->getLastEditorId()) ?? $this->ui_factory->legacy()->legacyContent('-');
+            $usr = $this->getUserRepresentation($ams->getLastEditorId()) ?? $this->ui_factory->legacy()->content('-');
             $modal = $this->getModal($ams->getSourceType(), $ams->getSourceId(), $ams->isSearchRecursive());
             $collected_modals[] = $modal;
             $src_id = $ams->getSourceType() . '-' . $ams->getSourceId() . '-' . $ams->isSearchRecursive();
@@ -401,7 +401,7 @@ class ilObjStudyProgrammeAutoMembershipsGUI
 
         $modal = $this->ui_factory->modal()->roundtrip(
             $this->txt('modal_member_auto_select_title'),
-            $this->ui_factory->legacy()->legacyContent($form->getHtml())
+            $this->ui_factory->legacy()->content($form->getHtml())
         );
 
         $this->ctrl->setParameter($this, self::F_ORIGINAL_SOURCE_TYPE, $current_src_type);

@@ -75,7 +75,7 @@ class PopoverTest extends ILIAS_UI_TestBase
     public function testRenderStandard(): void
     {
         $factory = new I\Component\Popover\Factory(new I\Component\SignalGenerator());
-        $popover = $factory->standard($this->getFactory()->legacy()->legacyContent('myContent'));
+        $popover = $factory->standard($this->getFactory()->legacy()->content('myContent'));
         $expected = $this->normalizeHTML($this->getExpectedStandardHTML('myContent'));
         $actual = $this->normalizeHTML($this->getDefaultRenderer()->render($popover));
         $this->assertEquals($expected, $actual);
@@ -90,7 +90,7 @@ class PopoverTest extends ILIAS_UI_TestBase
     public function testRenderAsync(): void
     {
         $factory = new I\Component\Popover\Factory(new I\Component\SignalGenerator());
-        $popover = $factory->standard($this->getFactory()->legacy()->legacyContent('myContent'))->withAsyncContentUrl('/blub/');
+        $popover = $factory->standard($this->getFactory()->legacy()->content('myContent'))->withAsyncContentUrl('/blub/');
         $this->assertEquals('', $this->getDefaultRenderer()->render($popover));
     }
 

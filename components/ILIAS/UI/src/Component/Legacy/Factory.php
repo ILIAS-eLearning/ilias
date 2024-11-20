@@ -43,8 +43,8 @@ interface Factory
      *       using other UI Components.
      * ---
      * @param string $content the content of the legacy component
-     * @return \ILIAS\UI\Component\Legacy\LegacyContent
+     * @return \ILIAS\UI\Component\Legacy\Content
      */
-    public function legacyContent(string $content): LegacyContent;
+    public function content(string $content): Content;
 
 }

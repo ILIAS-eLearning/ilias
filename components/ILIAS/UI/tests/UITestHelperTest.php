@@ -51,7 +51,7 @@ class UITestHelperTest extends TestCase
     public function testRenderExample(): void
     {
         $helper = new UITestHelper();
-        $c = $helper->factory()->legacy()->legacyContent("hello world");
+        $c = $helper->factory()->legacy()->content("hello world");
         $this->assertEquals("hello world", $helper->renderer()->render($c));
     }
 }

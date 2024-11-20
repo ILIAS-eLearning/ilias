@@ -30,14 +30,14 @@ use ILIAS\MetaData\Copyright\NullCopyrightData;
 use ILIAS\MetaData\Copyright\Identifiers\NullHandler;
 use ILIAS\MetaData\Copyright\NullRenderer;
 use PHPUnit\Framework\MockObject\MockObject;
-use ILIAS\UI\Component\Legacy\LegacyContent;
-use ILIAS\UI\Implementation\Component\Legacy\LegacyContent as ILegacy;
+use ILIAS\UI\Component\Legacy\Content;
+use ILIAS\UI\Implementation\Component\Legacy\Content as ILegacy;
 use PHPUnit\Framework\MockObject\Rule\AnyInvokedCount;
 use ILIAS\MetaData\Copyright\CopyrightData;
 
 class CopyrightTest extends TestCase
 {
-    protected function getLegacyComponent(): MockObject|LegacyContent
+    protected function getLegacyComponent(): MockObject|Content
     {
         return $this->getMockBuilder(ILegacy::class)
                     ->disableOriginalConstructor()
@@ -50,7 +50,7 @@ class CopyrightTest extends TestCase
         $legacy_component = $this->getLegacyComponent();
         return new class ($legacy_component, $this->any()) extends NullRenderer {
             public function __construct(
-                protected MockObject|LegacyContent $legacy,
+                protected MockObject|Content $legacy,
                 protected AnyInvokedCount $any
             ) {
             }

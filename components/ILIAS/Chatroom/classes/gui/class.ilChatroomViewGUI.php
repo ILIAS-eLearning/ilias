@@ -251,7 +251,7 @@ class ilChatroomViewGUI extends ilChatroomGUIHandler
 
     private function legacy(string $html): Component
     {
-        return $this->uifactory->legacy()->legacyContent($html);
+        return $this->uifactory->legacy()->content($html);
     }
 
     /**

@@ -233,7 +233,7 @@ class MainBarTest extends ILIAS_UI_TestBase
                     )
             );
 
-        $toolslate = $sf->legacy('Help', $icon, new I\Legacy\LegacyContent('Help', new I\SignalGenerator()));
+        $toolslate = $sf->legacy('Help', $icon, new I\Legacy\Content('Help', new I\SignalGenerator()));
 
         $mb = $this->factory->mainBar()
             ->withAdditionalEntry('test1', $this->getButton())

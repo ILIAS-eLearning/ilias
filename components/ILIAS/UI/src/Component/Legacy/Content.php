@@ -29,7 +29,7 @@ use ILIAS\UI\Component\Layout\Alignment\Block;
  * Interface Legacy
  * @package ILIAS\UI\Component\Legacy
  */
-interface LegacyContent extends Component, JavaScriptBindable, Block
+interface Content extends Component, JavaScriptBindable, Block
 {
     /**
      * Get content as string stored in this component.

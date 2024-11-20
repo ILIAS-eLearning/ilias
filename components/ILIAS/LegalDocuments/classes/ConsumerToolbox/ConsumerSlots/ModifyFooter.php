@@ -84,7 +84,7 @@ final class ModifyFooter
             )
         );
 
-        return $this->ui->create()->legacy()->legacyContent($template->get());
+        return $this->ui->create()->legacy()->content($template->get());
     }
 
     /**

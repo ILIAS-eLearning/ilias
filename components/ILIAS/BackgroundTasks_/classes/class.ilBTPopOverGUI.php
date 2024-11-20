@@ -23,7 +23,7 @@ use ILIAS\BackgroundTasks\Implementation\UI\StateTranslator;
 use ILIAS\BackgroundTasks\Task\UserInteraction;
 use ILIAS\UI\Component\Button\Button;
 use ILIAS\UI\Component\Button\Shy;
-use ILIAS\UI\Component\Legacy\LegacyContent;
+use ILIAS\UI\Component\Legacy\Content;
 
 /**
  * Class ilBTPopOverGUI
@@ -140,14 +140,14 @@ class ilBTPopOverGUI
     }
 
 
-    private function getDefaultCardContent(Bucket $observer): LegacyContent
+    private function getDefaultCardContent(Bucket $observer): Content
     {
         return $this->getProgressbar($observer);
     }
 
 
     /**
-     * @return \ILIAS\UI\Component\Legacy\LegacyContent[]|\ILIAS\UI\Component\Button\Shy[]
+     * @return \ILIAS\UI\Component\Legacy\Content[]|\ILIAS\UI\Component\Button\Shy[]
      */
     public function getUserInteractionContent(Bucket $observer, string $redirect_uri): array
     {
@@ -157,7 +157,7 @@ class ilBTPopOverGUI
         $ctrl = $this->dic->ctrl();
 
         if (!$observer->getCurrentTask() instanceof UserInteraction) {
-            return [$factory->legacy()->legacyContent('')];
+            return [$factory->legacy()->content('')];
         }
         /** @var UserInteraction $userInteraction */
         $userInteraction = $observer->getCurrentTask();
@@ -193,7 +193,7 @@ class ilBTPopOverGUI
     }
 
 
-    private function getProgressbar(Bucket $observer): LegacyContent
+    private function getProgressbar(Bucket $observer): Content
     {
         $percentage = $observer->getOverallPercentage();
 
@@ -212,7 +212,7 @@ class ilBTPopOverGUI
                 break;
         }
 
-        return $this->dic->ui()->factory()->legacy()->legacyContent(" <div class='progress'>
+        return $this->dic->ui()->factory()->legacy()->content(" <div class='progress'>
                     <div class='progress-bar progress-bar-striped {$running}' role='progressbar' aria-valuenow='{$percentage}'
                         aria-valuemin='0' aria-valuemax='100' style='width:{$percentage}%'>
                         {$content}

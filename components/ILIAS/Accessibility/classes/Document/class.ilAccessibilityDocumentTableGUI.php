@@ -283,7 +283,7 @@ class ilAccessibilityDocumentTableGUI extends ilAccessibilityTableGUI
                 $typeGui->getIdentPresentation(),
                 ($this->isEditable ? $this->uiRenderer->render($dropDown) : '')
             ])] =
-                $this->uiFactory->legacy()->legacyContent(
+                $this->uiFactory->legacy()->content(
                     $this->uiRenderer->render(
                         $typeGui->getValuePresentation(
                             $criterion->getCriterionValue(),

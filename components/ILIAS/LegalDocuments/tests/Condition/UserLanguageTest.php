@@ -47,11 +47,11 @@ class UserLanguageTest extends TestCase
 
     public function testAsComponent(): void
     {
-        $legacy = $this->mock(Legacy\LegacyContent::class);
+        $legacy = $this->mock(Legacy\Content::class);
         $legacy_factory = $this->mock(Legacy\Factory::class);
         $legacy_factory
             ->expects($this->once())
-            ->method('legacyContent')
+            ->method('content')
             ->willReturn($legacy);
 
         $instance = new UserLanguage(

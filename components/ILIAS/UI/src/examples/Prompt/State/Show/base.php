@@ -51,7 +51,7 @@ function base()
 
 
     //show the response contents:
-    $txt_response = $factory->legacy()->legacyContent(
+    $txt_response = $factory->legacy()->content(
         '<pre>'
         . htmlentities($renderer->render($response))
         . '</pre>'

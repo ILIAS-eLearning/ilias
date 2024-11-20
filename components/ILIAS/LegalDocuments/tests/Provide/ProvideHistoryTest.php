@@ -53,11 +53,11 @@ class ProvideHistoryTest extends TestCase
     public function testTable(): void
     {
         $dummy_gui = new stdClass();
-        $legacy = $this->mock(Legacy\LegacyContent::class);
+        $legacy = $this->mock(Legacy\Content::class);
         $legacy_factory = $this->mock(Legacy\Factory::class);
         $legacy_factory
             ->expects($this->once())
-            ->method('legacyContent')
+            ->method('content')
             ->willReturn($legacy);
 
         $table = $this->mockMethod(LegacyTable::class, 'getHTML', [], 'table html');

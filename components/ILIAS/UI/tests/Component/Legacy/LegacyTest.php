@@ -45,15 +45,15 @@ class LegacyTest extends ILIAS_UI_TestBase
 
         $this->assertInstanceOf("ILIAS\\UI\\Factory", $f);
         $this->assertInstanceOf(
-            "ILIAS\\UI\\Component\\Legacy\\LegacyContent",
-            $f->legacy()->legacyContent("Legacy Content")
+            "ILIAS\\UI\\Component\\Legacy\\Content",
+            $f->legacy()->content("Legacy Content")
         );
     }
 
     public function testGetContent(): void
     {
         $f = $this->getUIFactory();
-        $g = $f->legacy()->legacyContent("Legacy Content");
+        $g = $f->legacy()->content("Legacy Content");
 
         $this->assertEquals("Legacy Content", $g->getContent());
     }
@@ -64,7 +64,7 @@ class LegacyTest extends ILIAS_UI_TestBase
         $f = $this->getUIFactory();
         $r = $this->getDefaultRenderer();
 
-        $g = $f->legacy()->legacyContent("Legacy Content");
+        $g = $f->legacy()->content("Legacy Content");
 
         $this->assertEquals("Legacy Content", $r->render($g));
     }
@@ -77,14 +77,14 @@ class LegacyTest extends ILIAS_UI_TestBase
         $f = $this->getUIFactory();
         $signal_name = 'Custom Signal';
 
-        $f->legacy()->legacyContent('')->withCustomSignal($signal_name, '');
+        $f->legacy()->content('')->withCustomSignal($signal_name, '');
     }
 
     public function testGetExistingCustomSignal(): void
     {
         $f = $this->getUIFactory();
         $signal_name = 'Custom Signal';
-        $g = $f->legacy()->legacyContent('')->withCustomSignal($signal_name, '');
+        $g = $f->legacy()->content('')->withCustomSignal($signal_name, '');
 
         $this->assertNotNull($g->getCustomSignal($signal_name));
     }
@@ -93,7 +93,7 @@ class LegacyTest extends ILIAS_UI_TestBase
     {
         $f = $this->getUIFactory();
         $signal_name = 'Custom Signal';
-        $g = $f->legacy()->legacyContent('');
+        $g = $f->legacy()->content('');
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Signal with name $signal_name is not registered");
@@ -106,7 +106,7 @@ class LegacyTest extends ILIAS_UI_TestBase
         $signal_name_1 = 'Custom Signal 1';
         $signal_name_2 = 'Custom Signal 2';
 
-        $g = $f->legacy()->legacyContent('')->withCustomSignal($signal_name_1, '')->withCustomSignal($signal_name_2, '');
+        $g = $f->legacy()->content('')->withCustomSignal($signal_name_1, '')->withCustomSignal($signal_name_2, '');
         $l = $g->getAllCustomSignals();
 
         $this->assertIsArray($l);
@@ -120,7 +120,7 @@ class LegacyTest extends ILIAS_UI_TestBase
         $signal_name_2 = 'Custom Signal 2';
         $custom_code_2 = 'custom_js2();';
 
-        $g = $f->legacy()->legacyContent('')
+        $g = $f->legacy()->content('')
             ->withCustomSignal($signal_name_1, $custom_code_1)
             ->withCustomSignal($signal_name_2, $custom_code_2);
         $signal_list = $g->getAllCustomSignals();

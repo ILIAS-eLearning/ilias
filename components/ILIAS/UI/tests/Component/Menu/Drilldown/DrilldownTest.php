@@ -34,7 +34,7 @@ class DrilldownTest extends ILIAS_UI_TestBase
     protected C\Symbol\Glyph\Glyph $glyph;
     protected C\Button\Standard $button;
     protected C\Divider\Horizontal $divider;
-    protected C\Legacy\LegacyContent $legacy;
+    protected C\Legacy\Content $legacy;
 
     public function getUIFactory(): NoUIFactory
     {
@@ -74,7 +74,7 @@ class DrilldownTest extends ILIAS_UI_TestBase
         $this->glyph = $glyph_factory->user('');
         $this->button = $button_factory->standard('', '');
         $this->divider = $divider_factory->horizontal();
-        $this->legacy = $this->getUIFactory()->legacy()->legacyContent('');
+        $this->legacy = $this->getUIFactory()->legacy()->content('');
     }
 
     public function testConstruction(): C\Menu\Drilldown

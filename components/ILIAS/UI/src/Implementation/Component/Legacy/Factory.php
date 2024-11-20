@@ -35,8 +35,8 @@ class Factory implements \ILIAS\UI\Component\Legacy\Factory
     /**
      * @inheritdoc
      */
-    public function legacyContent(string $content): C\Legacy\LegacyContent
+    public function content(string $content): C\Legacy\Content
     {
-        return new LegacyContent($content, $this->signal_generator);
+        return new Content($content, $this->signal_generator);
     }
 }

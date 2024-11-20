@@ -75,11 +75,11 @@ class ProvideDocumentTest extends TestCase
 
         $uri = 'http://myIlias/ilias.php?baseClass=iladministrationgui&cmdNode=2g:qo:gq&cmdClass=ilLegalDocumentsAdministrationGUI&cmd=documents&ref_id=50';
 
-        $legacy = $this->mock(Legacy\LegacyContent::class);
+        $legacy = $this->mock(Legacy\Content::class);
         $legacy_factory = $this->mock(Legacy\Factory::class);
         $legacy_factory
             ->expects($this->once())
-            ->method('legacyContent')
+            ->method('content')
             ->willReturn($legacy);
 
         $container = $this->mockTree(Container::class, [
@@ -107,11 +107,11 @@ class ProvideDocumentTest extends TestCase
 
         $uri = 'http://myIlias/ilias.php?baseClass=iladministrationgui&cmdNode=2g:qo:gq&cmdClass=ilLegalDocumentsAdministrationGUI&cmd=documents&ref_id=50';
 
-        $legacy = $this->mock(Legacy\LegacyContent::class);
+        $legacy = $this->mock(Legacy\Content::class);
         $legacy_factory = $this->mock(Legacy\Factory::class);
         $legacy_factory
             ->expects($this->once())
-            ->method('legacyContent')
+            ->method('content')
             ->willReturn($legacy);
 
         $container = $this->mockTree(Container::class, [

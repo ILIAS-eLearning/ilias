@@ -396,6 +396,19 @@ abstract class ilDashboardBlockGUI extends ilBlockGUI implements ilDesktopItemHa
         }
 
         if ($this->removeMultipleEnabled()) {
+<<<<<<< HEAD
+=======
+            $roundtrip_modal = $this->ui->factory()->modal()->roundtrip(
+                $this->getRemoveMultipleActionText(),
+                $this->ui->factory()->legacy()->content('PH')
+            );
+            $roundtrip_modal = $roundtrip_modal->withAsyncRenderUrl(
+                $this->ctrl->getLinkTarget(
+                    $this,
+                    'removeFromDeskRoundtrip'
+                ) . '&page=manage&replaceSignal=' . $roundtrip_modal->getReplaceSignal()->getId()
+            );
+>>>>>>> 636a31c90da (UI/Legacy: rename LegacyContent to Content)
             $this->addBlockCommand(
                 $this->ctrl->getLinkTarget($this, 'manage'),
                 $this->getRemoveMultipleActionText(),

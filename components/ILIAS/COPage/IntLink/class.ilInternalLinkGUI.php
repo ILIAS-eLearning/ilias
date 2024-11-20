@@ -953,7 +953,7 @@ class ilInternalLinkGUI
         $lng = $DIC->language();
 
         $ui = $DIC->ui();
-        $modal = $ui->factory()->modal()->roundtrip($lng->txt("link_link"), $ui->factory()->legacy()->legacyContent("<div id='ilIntLinkModalContent'></div>"));
+        $modal = $ui->factory()->modal()->roundtrip($lng->txt("link_link"), $ui->factory()->legacy()->content("<div id='ilIntLinkModalContent'></div>"));
         $modalt["show"] = $modal->getShowSignal()->getId();
         $modalt["close"] = $modal->getCloseSignal()->getId();
         $modalt["template"] = $ui->renderer()->renderAsync($modal);

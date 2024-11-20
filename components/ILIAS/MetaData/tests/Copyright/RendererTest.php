@@ -23,10 +23,10 @@ namespace ILIAS\MetaData\Copyright;
 use PHPUnit\Framework\TestCase;
 use ILIAS\UI\Component\Symbol\Icon\Icon;
 use ILIAS\UI\Component\Link\Link;
-use ILIAS\UI\Component\Legacy\LegacyContent;
+use ILIAS\UI\Component\Legacy\Content;
 use ILIAS\UI\Implementation\Component\Symbol\Icon\Icon as IIcon;
 use ILIAS\UI\Implementation\Component\Link\Link as ILink;
-use ILIAS\UI\Implementation\Component\Legacy\LegacyContent as ILegacy;
+use ILIAS\UI\Implementation\Component\Legacy\Content as ILegacy;
 use ILIAS\Filesystem\Filesystem as WebFiles;
 use ILIAS\UI\Factory;
 use ILIAS\ResourceStorage\Services as IRSS;
@@ -39,14 +39,14 @@ class RendererTest extends TestCase
     protected function getMockRenderer(
         Icon $icon,
         Link $link,
-        LegacyContent $legacy,
+        Content $legacy,
         string $src_from_irss
     ): Renderer {
         return new class ($icon, $link, $legacy, $src_from_irss) extends Renderer {
             public function __construct(
                 protected Icon $icon,
                 protected Link $link,
-                protected LegacyContent $legacy,
+                protected Content $legacy,
                 protected string $src_from_irss
             ) {
             }
@@ -70,7 +70,7 @@ class RendererTest extends TestCase
                 return $this->link;
             }
 
-            protected function textInLegacy(string $text): LegacyContent
+            protected function textInLegacy(string $text): Content
             {
                 /** @noinspection PhpUndefinedMethodInspection */
                 $this->legacy->checkParams($text);
@@ -101,7 +101,7 @@ class RendererTest extends TestCase
                     ->getMock();
     }
 
-    protected function getMockLegacy(): MockObject|LegacyContent
+    protected function getMockLegacy(): MockObject|Content
     {
         return $this->getMockBuilder(ILegacy::class)
                     ->disableOriginalConstructor()
@@ -252,7 +252,7 @@ class RendererTest extends TestCase
         $result = $renderer->toUIComponents($data);
         $this->assertSame(2, count($result));
         $this->assertInstanceOf(Icon::class, $result[0]);
-        $this->assertInstanceOf(LegacyContent::class, $result[1]);
+        $this->assertInstanceOf(Content::class, $result[1]);
     }
 
     public function testToUIComponentsWithLinkNoImage(): void

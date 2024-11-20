@@ -29,7 +29,7 @@ use ILIAS\UI\Component\MainControls\MetaBar;
 use ILIAS\GlobalScreen\Scope\Layout\Factory\BreadCrumbsModification;
 use ILIAS\UI\Component\Breadcrumbs\Breadcrumbs;
 use ILIAS\GlobalScreen\Scope\Layout\Factory\ContentModification;
-use ILIAS\UI\Component\Legacy\LegacyContent;
+use ILIAS\UI\Component\Legacy\Content;
 use ILIAS\GlobalScreen\ScreenContext\AdditionalData\Collection;
 use ILIAS\GlobalScreen\Scope\Layout\Provider\PagePart\PagePartProvider;
 use ILIAS\GlobalScreen\Scope\Layout\Builder\StandardPageBuilder;
@@ -124,9 +124,9 @@ class ilLSViewLayoutProvider extends AbstractModificationProvider implements Mod
         // away the header here.
         return $this->globalScreen()->layout()->factory()->content()
             ->withModification(
-                function (?LegacyContent $content) use ($html): ?LegacyContent {
+                function (?Content $content) use ($html): ?Content {
                     $ui = $this->dic->ui();
-                    return $ui->factory()->legacy()->legacyContent($html);
+                    return $ui->factory()->legacy()->content($html);
                 }
             )
             ->withHighPriority();

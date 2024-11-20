@@ -27,7 +27,7 @@ function with_actions()
 
     $panel = $f->panel()->standard(
         "Panel Title",
-        $f->legacy()->legacyContent("Some Content")
+        $f->legacy()->content("Some Content")
     )->withActions($actions);
 
     return $renderer->render($panel);

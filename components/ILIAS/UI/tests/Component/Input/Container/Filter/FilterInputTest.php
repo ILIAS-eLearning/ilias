@@ -101,8 +101,8 @@ class FilterInputTest extends ILIAS_UI_TestBase
     protected function buildLegacyFactory(): I\Legacy\Factory
     {
         $mock = $this->createMock(I\Legacy\Factory::class);
-        $mock->method('legacyContent')->willReturn(
-            new I\Legacy\LegacyContent('', new I\SignalGenerator())
+        $mock->method('content')->willReturn(
+            new I\Legacy\Content('', new I\SignalGenerator())
         );
         return $mock;
     }

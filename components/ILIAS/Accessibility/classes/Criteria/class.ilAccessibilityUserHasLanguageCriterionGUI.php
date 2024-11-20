@@ -100,9 +100,9 @@ class ilAccessibilityUserHasLanguageCriterionGUI implements ilAccessibilityCrite
         $lng = $config['lng'] ?? '';
 
         if (!is_string($lng) || 2 !== strlen($lng)) {
-            return $uifactory->legacy()->legacyContent('');
+            return $uifactory->legacy()->content('');
         }
 
-        return $uifactory->legacy()->legacyContent($this->lng->txt('meta_l_' . $lng));
+        return $uifactory->legacy()->content($this->lng->txt('meta_l_' . $lng));
     }
 }

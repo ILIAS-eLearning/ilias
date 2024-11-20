@@ -233,7 +233,7 @@ class ilPDNewsBlockGUI extends ilNewsForContextBlockGUI
 
         $panel = $this->ui->factory()->panel()->standard(
             $lng->txt("news_internal_news"),
-            $this->ui->factory()->legacy()->legacyContent($tpl->get())
+            $this->ui->factory()->legacy()->content($tpl->get())
         );
 
         return $this->ui->renderer()->render($panel);
