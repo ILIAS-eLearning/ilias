@@ -30,47 +30,6 @@ class ilTestEvaluationFactory
     ) {
     }
 
-    private function getPassScoringSettings(): int
-    {
-        return $this->test_obj->getPassScoring();
-    }
-
-    private function isRandomTest(): bool
-    {
-        return $this->test_obj->isRandomTest();
-    }
-
-    private function getTestQuestionCount(): bool
-    {
-        return $this->test_obj->getQuestionCountWithoutReloading();
-    }
-
-    private function getTestMarkSchema(): MarkSchema
-    {
-        return $this->test_obj->getMarkSchema();
-    }
-
-    private function getVisitTimeOfParticipant(int $active_id): array
-    {
-        return $this->test_obj->getVisitingTimeOfParticipant($active_id);
-    }
-
-    private function getQuestionCountAndPointsForPassOfParticipant(
-        int $active_id,
-        int $pass
-    ): array {
-        return ilObjTest::_getQuestionCountAndPointsForPassOfParticipant($active_id, $pass);
-    }
-
-    private function buildName(
-        int $usr_id,
-        string $firstname,
-        string $lastname,
-        string $title
-    ): string {
-        return $this->test_obj->buildName($usr_id, $firstname, $lastname, $title);
-    }
-
     /**
      * @return list<int>
      */
@@ -139,7 +98,7 @@ class ilTestEvaluationFactory
     public function getEvaluationData(): ilTestEvaluationData
     {
         $eval_data_rows = $this->retrieveEvaluationData($this->getAccessFilteredActiveIds());
-        $scoring_settings = $this->getPassScoringSettings();
+        $scoring_settings = $this->test_obj->getPassScoring();
         $participants = [];
         $current_user = null;
 
@@ -151,7 +110,7 @@ class ilTestEvaluationFactory
                 $user_eval_data = new ilTestEvaluationUserData($scoring_settings);
 
                 $user_eval_data->setName(
-                    $this->buildName($row['usr_id'], $row['firstname'], $row['lastname'], $row['title'])
+                    $this->test_obj->buildName($row['usr_id'], $row['firstname'], $row['lastname'], $row['title'])
                 );
 
                 if ($row['login'] !== null) {
@@ -164,7 +123,7 @@ class ilTestEvaluationFactory
                 $user_eval_data->setLastFinishedPass($row['last_finished_pass']);
 
 
-                $visiting_time = $this->getVisitTimeOfParticipant($row['active_fi']);
+                $visiting_time = $this->test_obj->getVisitingTimeOfParticipant($row['active_fi']);
                 $user_eval_data->setFirstVisit($visiting_time["first_access"]);
                 $user_eval_data->setLastVisit($visiting_time["last_access"]);
 
@@ -174,7 +133,7 @@ class ilTestEvaluationFactory
 
                 if ($row['questioncount'] == 0) {
                     list($count, $points) = array_values(
-                        $this->getQuestionCountAndPointsForPassOfParticipant($row['active_fi'], $row['pass'])
+                        $this->test_obj->getQuestionCountAndPointsForPassOfParticipant($row['active_fi'], $row['pass'])
                     );
                     $pass->setMaxPoints($points);
                     $pass->setQuestionCount($count);
@@ -216,8 +175,12 @@ class ilTestEvaluationFactory
     {
         foreach ($evaluation_data->getParticipantIds() as $active_id) {
             $user_eval_data = $evaluation_data->getParticipant($active_id);
-            $add_user_questions = $this->isRandomTest() ?
-                $this->retrieveQuestionsForParticipantPassesForRandomTests($active_id, $user_eval_data, $this->getTestQuestionCount()) :
+            $add_user_questions = $this->test_obj->isRandomTest() ?
+                $this->retrieveQuestionsForParticipantPassesForRandomTests(
+                    $active_id,
+                    $user_eval_data,
+                    $this->test_obj->getQuestionCountWithoutReloading()
+                ) :
                 $this->retrieveQuestionsForParticipantPassesForSequencedTests($active_id);
 
             foreach ($add_user_questions as $q) {
@@ -335,7 +298,7 @@ class ilTestEvaluationFactory
 
     private function addMarksToParticipants(ilTestEvaluationData $evaluation_data): ilTestEvaluationData
     {
-        $mark_schema = $this->getTestMarkSchema();
+        $mark_schema = $this->test_obj->getMarkSchema();
 
         foreach ($evaluation_data->getParticipantIds() as $active_id) {
             $user_eval_data = $evaluation_data->getParticipant($active_id);
