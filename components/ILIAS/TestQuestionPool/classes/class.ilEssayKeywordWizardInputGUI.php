@@ -42,7 +42,6 @@ class ilEssayKeywordWizardInputGUI extends ilSingleChoiceWizardInputGUI
      */
     public function checkInput(): bool
     {
-        $r = $this->refinery->kindlyTo();
         $data = $this->raw($this->getPostVar());
 
         if (!is_array($data)) {

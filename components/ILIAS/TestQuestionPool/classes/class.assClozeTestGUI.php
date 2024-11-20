@@ -139,7 +139,7 @@ JS;
         $this->object->setClozeText($cloze_text);
         $this->object->setTextgapRating($this->request_data_collector->raw('textgap_rating'));
         $this->object->setIdenticalScoring($this->request_data_collector->bool('identical_scoring') ?? false);
-        $this->object->setFixedTextLength($this->request_data_collector->int('fixedTextLength'));
+        $this->object->setFixedTextLength($this->request_data_collector->int('fixedTextLength') ?? 0);
         $this->writeAnswerSpecificPostData(new ilPropertyFormGUI());
         $this->saveTaxonomyAssignments();
         return 0;

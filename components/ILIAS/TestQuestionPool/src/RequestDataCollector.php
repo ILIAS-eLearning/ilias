@@ -192,10 +192,6 @@ class RequestDataCollector
                 $this->refinery->always([])
             ])
         );
-        return array_map(
-            fn(string $v): array => json_decode($v),
-            $this->questionpool_request->retrieveArrayOfStringsFromPost('matching')
-        );
     }
 
     public function getPostKeys(): array

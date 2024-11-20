@@ -408,7 +408,7 @@ class assTextQuestion extends assQuestion implements ilObjQuestionScoringAdjusta
 
     protected function getSolutionSubmit(): string
     {
-        $text = $this->questionpool_request->retrieveStringValueFromPost('TEXT', '');
+        $text = $this->questionpool_request->string('TEXT', '');
 
         $text = ilObjAdvancedEditing::_getRichTextEditor() === 'tinymce'
             ? ilUtil::stripSlashes($text, false)

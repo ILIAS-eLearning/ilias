@@ -268,6 +268,14 @@ class ilAssQuestionSkillAssignmentsTableGUI extends ilTable2GUI
 
     private function isSkillPointInputRequired(ilAssQuestionSkillAssignment $assignment): bool
     {
-        return !(!$this->areManipulationsEnabled() || $assignment->hasEvalModeBySolution());
+        if (!$this->areManipulationsEnabled()) {
+            return false;
+        }
+
+        if ($assignment->hasEvalModeBySolution()) {
+            return false;
+        }
+
+        return true;
     }
 }

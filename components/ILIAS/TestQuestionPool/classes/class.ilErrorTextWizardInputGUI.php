@@ -16,6 +16,7 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\QuestionPoolDIC;
 use ILIAS\TestQuestionPool\RequestValidationHelper;
 
 /**
@@ -46,7 +47,8 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
     public function __construct($a_title = "", $a_postvar = "")
     {
         parent::__construct($a_title, $a_postvar);
-        $this->request_helper = new RequestValidationHelper($this->refinery);
+        $local_dic = QuestionPoolDIC::dic();
+        $this->request_helper = $local_dic['request_validation_helper'];
     }
 
     public function setValue($a_value): void
@@ -210,7 +212,7 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
     */
     public function checkInput(): bool
     {
-        $r = $this->refinery->kindlyTo();
+        $kindlyTo = $this->refinery->kindlyTo();
         $data = $this->raw($this->getPostVar());
 
         if (!is_array($data)) {
@@ -232,8 +234,8 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
         }
 
         // check answers
-        $keys = $this->request_helper->transformArray($data, 'key', $r->string());
-        $values = $this->request_helper->transformArray($data, 'value', $r->string());
+        $keys = $this->request_helper->transformArray($data, 'key', $kindlyTo->string());
+        $values = $this->request_helper->transformArray($data, 'value', $kindlyTo->string());
         if (empty($keys) || empty($values)) {
             $this->setAlert($this->lng->txt('msg_input_is_required'));
             return false;

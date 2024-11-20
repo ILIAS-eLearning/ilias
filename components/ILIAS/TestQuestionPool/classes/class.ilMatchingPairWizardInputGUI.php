@@ -16,6 +16,7 @@
  *
  *********************************************************************/
 
+use ILIAS\TestQuestionPool\QuestionPoolDIC;
 use ILIAS\TestQuestionPool\RequestValidationHelper;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\Component\Symbol\Glyph\Factory as GlyphFactory;
@@ -49,7 +50,9 @@ class ilMatchingPairWizardInputGUI extends ilTextInputGUI
         parent::__construct($a_title, $a_postvar);
 
         global $DIC;
-        $this->request_helper = new RequestValidationHelper($this->refinery);
+        $local_dic = QuestionPoolDIC::dic();
+
+        $this->request_helper = $local_dic['request_validation_helper'];
         $this->glyph_factory = $DIC->ui()->factory()->symbol()->glyph();
         $this->renderer = $DIC->ui()->renderer();
     }

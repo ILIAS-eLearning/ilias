@@ -77,7 +77,7 @@ class RequestValidationHelper
 
     public function transformArray($data, string $key, Transformation $transformation): array
     {
-        if (!is_array($data) || !isset($data[$key]) || !is_array($data[$key])) {
+        if (!$this->inArray($data, $key)) {
             return [];
         }
 

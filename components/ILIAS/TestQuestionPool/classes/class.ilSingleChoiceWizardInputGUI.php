@@ -58,9 +58,11 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
         $this->validationRegexp = '';
 
         global $DIC;
+        $local_dic = QuestionPoolDIC::dic();
+
         $this->glyph_factory = $DIC->ui()->factory()->symbol()->glyph();
         $this->renderer = $DIC->ui()->renderer();
-        $this->request_helper = new RequestValidationHelper($this->refinery);
+        $this->request_helper = $local_dic['request_validation_helper'];
     }
 
     public function setValue($a_value): void

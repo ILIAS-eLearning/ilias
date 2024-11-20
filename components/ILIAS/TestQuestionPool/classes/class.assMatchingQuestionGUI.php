@@ -69,16 +69,16 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
         $this->object->flushTerms();
         $this->object->flushDefinitions();
 
-        $r = $this->refinery->kindlyTo();
+        $kindlyTo = $this->refinery->kindlyTo();
 
         $uploads = $this->request_data_collector->getProcessedUploads();
         $allowed_mime_types = ['image/jpeg', 'image/png', 'image/gif'];
 
         if ($this->request_data_collector->isset('terms')) {
             $terms = $this->request_data_collector->raw('terms');
-            $answers = $this->request_helper->transformArray($terms, 'answer', $r->string());
-            $terms_image_names = $this->request_helper->transformArray($terms, 'imagename', $r->string());
-            $terms_identifiers = $this->request_helper->transformArray($terms, 'identifier', $r->int());
+            $answers = $this->request_helper->transformArray($terms, 'answer', $kindlyTo->string());
+            $terms_image_names = $this->request_helper->transformArray($terms, 'imagename', $kindlyTo->string());
+            $terms_identifiers = $this->request_helper->transformArray($terms, 'identifier', $kindlyTo->int());
 
             foreach ($answers as $index => $answer) {
                 $filename = $terms_image_names[$index] ?? '';
@@ -110,9 +110,9 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
 
         if ($this->request_data_collector->isset('definitions')) {
             $definitions = $this->request_data_collector->raw('definitions');
-            $answers = $this->request_helper->transformArray($definitions, 'answer', $r->string());
-            $definitions_image_names = $this->request_helper->transformArray($definitions, 'imagename', $r->string());
-            $definitions_identifiers = $this->request_helper->transformArray($definitions, 'identifier', $r->int());
+            $answers = $this->request_helper->transformArray($definitions, 'answer', $kindlyTo->string());
+            $definitions_image_names = $this->request_helper->transformArray($definitions, 'imagename', $kindlyTo->string());
+            $definitions_identifiers = $this->request_helper->transformArray($definitions, 'identifier', $kindlyTo->int());
 
             foreach ($answers as $index => $answer) {
                 $filename = $definitions_image_names[$index] ?? '';
@@ -143,9 +143,9 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
 
         if ($this->request_data_collector->isset('pairs')) {
             $pairs = $this->request_data_collector->raw('pairs');
-            $points_of_pairs = $this->request_helper->transformArray($pairs, 'points', $r->float());
-            $pair_terms = $this->request_helper->transformArray($pairs, 'term', $r->int());
-            $pair_definitions = $this->request_helper->transformArray($pairs, 'definition', $r->int());
+            $points_of_pairs = $this->request_helper->transformArray($pairs, 'points', $kindlyTo->float());
+            $pair_terms = $this->request_helper->transformArray($pairs, 'term', $kindlyTo->int());
+            $pair_definitions = $this->request_helper->transformArray($pairs, 'definition', $kindlyTo->int());
 
             foreach ($points_of_pairs as $index => $points) {
                 $term_id = $pair_terms[$index] ?? 0;
