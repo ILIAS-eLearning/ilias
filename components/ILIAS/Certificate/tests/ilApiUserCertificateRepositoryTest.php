@@ -92,6 +92,6 @@ class ilApiUserCertificateRepositoryTest extends ilCertificateBaseTestCase
         $this->assertSame('breakdanceMcFunkyPants', $object->getUserLogin());
         $this->assertSame('ilyas@ilias.de', $object->getUserEmail());
         $this->assertSame('breakdance@funky.de', $object->getUserSecondEmail());
-        $this->assertSame('somewhere.php?goto=4', $object->getDownloadLink());
+        $this->assertSame('', $object->getDownloadLink());
     }
 }

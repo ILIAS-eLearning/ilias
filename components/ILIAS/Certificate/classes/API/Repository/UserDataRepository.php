@@ -92,9 +92,6 @@ FROM
 
             $link = '';
             if ([] !== $ilCtrlStack) {
-                $this->ctrl->setParameterByClass(ilUserCertificateApiGUI::class, 'certificate_id', $id);
-                $link = $this->ctrl->getLinkTargetByClass($ilCtrlStack, ilUserCertificateApiGUI::CMD_DOWNLOAD);
-                $this->ctrl->clearParametersByClass(ilUserCertificateApiGUI::class);
             }
 
             $dataObject = new UserCertificateDto(
