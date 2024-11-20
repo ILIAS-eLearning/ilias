@@ -19,6 +19,9 @@ declare(strict_types=1);
 
 use ILIAS\Test\Scoring\Marks\MarkSchema;
 
+/**
+ * @deprecated 11; Result/EvaluationData will be refined.
+ */
 class ilTestEvaluationFactory
 {
     public function __construct(
@@ -27,39 +30,39 @@ class ilTestEvaluationFactory
     ) {
     }
 
-    protected function getPassScoringSettings(): int
+    private function getPassScoringSettings(): int
     {
         return $this->test_obj->getPassScoring();
     }
 
-    protected function isRandomTest(): bool
+    private function isRandomTest(): bool
     {
         return $this->test_obj->isRandomTest();
     }
 
-    protected function getTestQuestionCount(): bool
+    private function getTestQuestionCount(): bool
     {
         return $this->test_obj->getQuestionCountWithoutReloading();
     }
 
-    protected function getTestMarkSchema(): MarkSchema
+    private function getTestMarkSchema(): MarkSchema
     {
         return $this->test_obj->getMarkSchema();
     }
 
-    protected function getVisitTimeOfParticipant(int $active_id): array
+    private function getVisitTimeOfParticipant(int $active_id): array
     {
         return $this->test_obj->getVisitingTimeOfParticipant($active_id);
     }
 
-    protected function getQuestionCountAndPointsForPassOfParticipant(
+    private function getQuestionCountAndPointsForPassOfParticipant(
         int $active_id,
         int $pass
     ): array {
         return ilObjTest::_getQuestionCountAndPointsForPassOfParticipant($active_id, $pass);
     }
 
-    protected function buildName(
+    private function buildName(
         int $usr_id,
         string $firstname,
         string $lastname,
@@ -69,9 +72,9 @@ class ilTestEvaluationFactory
     }
 
     /**
-     * @return int[]
+     * @return list<int>
      */
-    protected function getAccessFilteredActiveIds(): array
+    private function getAccessFilteredActiveIds(): array
     {
         if ($participants_list = $this->test_obj->getAccessFilteredParticipantList()) {
             return $participants_list->getAllActiveIds();
@@ -81,9 +84,9 @@ class ilTestEvaluationFactory
     }
 
     /**
-     * @param int[] $active_ids
+     * @param list<int> $active_ids
      */
-    protected function queryEvaluationData(array $active_ids): array
+    private function retrieveEvaluationData(array $active_ids): array
     {
         $query = '
         SELECT      tst_test_result.question_fi,
@@ -135,7 +138,7 @@ class ilTestEvaluationFactory
 
     public function getEvaluationData(): ilTestEvaluationData
     {
-        $eval_data_rows = $this->queryEvaluationData($this->getAccessFilteredActiveIds());
+        $eval_data_rows = $this->retrieveEvaluationData($this->getAccessFilteredActiveIds());
         $scoring_settings = $this->getPassScoringSettings();
         $participants = [];
         $current_user = null;
@@ -209,42 +212,29 @@ class ilTestEvaluationFactory
     }
 
 
-    protected function addQuestionsToParticipantPasses(ilTestEvaluationData $evaluation_data): ilTestEvaluationData
+    private function addQuestionsToParticipantPasses(ilTestEvaluationData $evaluation_data): ilTestEvaluationData
     {
-        $is_random_test = $this->isRandomTest();
-
         foreach ($evaluation_data->getParticipantIds() as $active_id) {
             $user_eval_data = $evaluation_data->getParticipant($active_id);
-
             $add_user_questions = $this->isRandomTest() ?
-                $this->getQuestionsForParticipantPassesForRandomTests($active_id, $user_eval_data, $this->getTestQuestionCount()) :
-                $this->getQuestionsForParticipantPassesForSequencedTests($active_id);
+                $this->retrieveQuestionsForParticipantPassesForRandomTests($active_id, $user_eval_data, $this->getTestQuestionCount()) :
+                $this->retrieveQuestionsForParticipantPassesForSequencedTests($active_id);
 
             foreach ($add_user_questions as $q) {
-
-                $original_id = $q['original_id'];
-                $question_id = $q['question_id'];
-                $max_points = $q['max_points'];
-                $sequence = $q['sequence'];
-                $pass = $q['pass'];
-                $title = $q['title'];
-
                 $user_eval_data->addQuestion(
-                    $original_id,
-                    $question_id,
-                    $max_points,
-                    $sequence,
-                    $pass
+                    $q['original_id'],
+                    $q['question_id'],
+                    $q['max_points'],
+                    $q['sequence'],
+                    $q['pass']
                 );
-
-                $evaluation_data->addQuestionTitle($question_id, $title);
+                $evaluation_data->addQuestionTitle($q['question_id'], $q['title']);
             }
         }
-
         return $evaluation_data;
     }
 
-    protected function getQuestionsForParticipantPassesForRandomTests(
+    private function retrieveQuestionsForParticipantPassesForRandomTests(
         int $active_id,
         ilTestEvaluationUserData $user_eval_data,
         int $question_count
@@ -292,7 +282,7 @@ class ilTestEvaluationFactory
         return $ret;
     }
 
-    protected function getQuestionsForParticipantPassesForSequencedTests(
+    private function retrieveQuestionsForParticipantPassesForSequencedTests(
         int $active_id
     ): array {
         $ret = [];
@@ -343,7 +333,7 @@ class ilTestEvaluationFactory
         return $ret;
     }
 
-    protected function addMarksToParticipants(ilTestEvaluationData $evaluation_data): ilTestEvaluationData
+    private function addMarksToParticipants(ilTestEvaluationData $evaluation_data): ilTestEvaluationData
     {
         $mark_schema = $this->getTestMarkSchema();
 
@@ -355,9 +345,6 @@ class ilTestEvaluationFactory
 
             if ($mark !== null) {
                 $user_eval_data->setMark($mark);
-                //$user_eval_data->setMarkOfficial($mark->getOfficialName());
-                //$user_eval_data->setPassed($mark->0getPassed() );
-
                 for ($i = 0;$i < $user_eval_data->getPassCount();$i++) {
                     $pass_data = $user_eval_data->getPass($i);
                     $mark = $mark_schema->getMatchingMark(
@@ -374,4 +361,27 @@ class ilTestEvaluationFactory
         return $evaluation_data;
     }
 
+    public function getAllActivesPasses(): array
+    {
+        $query = "
+            SELECT active_fi, pass
+            FROM tst_active actives
+            INNER JOIN tst_pass_result passes
+            ON active_fi = active_id
+            WHERE test_fi = %s
+        ";
+
+        $res = $this->db->queryF($query, ['integer'], [$this->test_obj->getTestId()]);
+
+        $passes = [];
+        while ($row = $this->db->fetchAssoc($res)) {
+            if (!isset($passes[$row['active_fi']])) {
+                $passes[$row['active_fi']] = [];
+            }
+
+            $passes[$row['active_fi']][] = $row['pass'];
+        }
+
+        return $passes;
+    }
 }

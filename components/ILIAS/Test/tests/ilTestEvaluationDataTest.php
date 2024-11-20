@@ -19,8 +19,7 @@
 declare(strict_types=1);
 
 /**
- * Class ilTestEvaluationDataTest
- * @author Marvin Beym <mbeym@databay.de>
+ * @deprecated 11; Result/EvaluationData will be refined.
  */
 class ilTestEvaluationDataTest extends ilTestBaseTestCase
 {
@@ -77,7 +76,7 @@ class ilTestEvaluationDataTest extends ilTestBaseTestCase
     public function testEvaluationFactory(): void
     {
         $records = [];
-        $records[7] = [
+        $records[] = [
             "question_fi" => 9,
             "result_points" => 1.2,
             "answered" => true,
@@ -105,6 +104,7 @@ class ilTestEvaluationDataTest extends ilTestBaseTestCase
             "title" => "",
             "login" => "root"
         ];
+        $records[] = null;
 
         $test_obj = $this->createMock(ilObjTest::class);
         $test_obj
@@ -112,40 +112,43 @@ class ilTestEvaluationDataTest extends ilTestBaseTestCase
             ->method('getPassScoring');
         $test_obj
             ->expects($this->once())
-            ->method('getAccessFilteredParticipantList');
+            ->method('getAccessFilteredParticipantList')
+            ->willReturn(null);
         $test_obj
             ->expects($this->once())
-            ->method('getTestParticipants');
-
-        $factory = new class ($test_obj, $records) extends ilTestEvaluationFactory {
-            public function __construct(
-                protected ilObjTest $test_obj,
-                protected array $records
-            ) {
-            }
-            protected function queryEvaluationData(array $active_ids): array
-            {
-                return $this->records;
-            }
-            protected function getVisitTimeOfParticipant(int $active_id): array
-            {
-                return [
+            ->method('getTestParticipants')
+            ->willReturn([7]);
+        $test_obj
+            ->expects($this->once())
+            ->method('getVisitingTimeOfParticipant')
+            ->willReturn(
+                [
                     'first_access' => new \DateTimeImmutable(),
                     'last_access' => new \DateTimeImmutable()
-                ];
-            }
-            protected function addQuestionsToParticipantPasses(ilTestEvaluationData $evaluation_data): ilTestEvaluationData
-            {
-                return $evaluation_data;
-            }
-        };
+                ]
+            );
 
+        $db = $this->createMock(ilDBInterface::class);
+        $db
+            ->expects($this->exactly(2))
+            ->method('fetchAssoc')
+            ->willReturnCallback(
+                function ($res) use (&$records) {
+                    return array_shift($records);
+                }
+            );
+
+        $factory = new ilTestEvaluationFactory($db, $test_obj);
         $data = $factory->getEvaluationData();
         $this->assertInstanceOf(ilTestEvaluationData::class, $data);
+
         $this->assertEquals(
             [7],
             $data->getParticipantIds()
         );
-        $this->assertInstanceOf(ilTestEvaluationUserData::class, $data->getParticipant(7));
+        $this->assertInstanceOf(
+            ilTestEvaluationUserData::class,
+            $data->getParticipant(7)
+        );
     }
 }

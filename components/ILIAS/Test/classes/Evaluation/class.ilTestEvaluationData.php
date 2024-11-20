@@ -20,6 +20,9 @@ declare(strict_types=1);
 use ILIAS\Test\Results\Data\StatusOfAttempt;
 use ILIAS\Test\Statistics\Statistics;
 
+/**
+ * @deprecated 11; Result/EvaluationData will be refined.
+ */
 class ilTestEvaluationData
 {
     public const FILTER_BY_NONE = '';
