@@ -140,6 +140,11 @@ class RequestDataCollector
         return $this->http->wrapper()->post()->keys();
     }
 
+    public function isMethod(string $method): bool
+    {
+        return strtolower($this->http->request()->getMethod()) === strtolower($method);
+    }
+
     /**
      * @return array<string>
      */
