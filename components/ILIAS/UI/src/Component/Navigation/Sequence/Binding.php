@@ -32,8 +32,8 @@ interface Binding
      * Data provided by a position for a certain index is relayed to getSegment.
      */
     public function getSequencePositions(
-        array $viewcontrol_values,
-        array $filter_values
+        mixed $viewcontrol_values,
+        mixed $filter_values
     ): array;
 
     /**
@@ -41,7 +41,7 @@ interface Binding
      */
     public function getSegment(
         mixed $position_data,
-        array $viewcontrol_values,
-        array $filter_values
+        mixed $viewcontrol_values,
+        mixed $filter_values
     ): Segment;
 }

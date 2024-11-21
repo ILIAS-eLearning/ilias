@@ -47,7 +47,7 @@ class Renderer extends AbstractComponentRenderer
 
     }
 
-    protected function renderLegacyContent(LegacyContent $component, RendererInterface $default_renderer): string
+    protected function renderLegacyContent(Content $component, RendererInterface $default_renderer): string
     {
         $component = $this->registerSignals($component);
         $this->bindJavaScript($component);

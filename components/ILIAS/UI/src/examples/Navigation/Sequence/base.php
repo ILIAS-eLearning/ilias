@@ -51,8 +51,8 @@ function base()
         }
 
         public function getSequencePositions(
-            array $viewcontrol_values,
-            array $filter_values
+            mixed $viewcontrol_values,
+            mixed $filter_values
         ): array {
             $chunks = $viewcontrol_values['chunks'] ?? [];
             $chunks[] = 'c0';
@@ -66,8 +66,8 @@ function base()
 
         public function getSegment(
             mixed $position_data,
-            array $viewcontrol_values,
-            array $filter_values
+            mixed $viewcontrol_values,
+            mixed $filter_values
         ): Segment {
             list($chunk, $title, $data) = $position_data;
 
