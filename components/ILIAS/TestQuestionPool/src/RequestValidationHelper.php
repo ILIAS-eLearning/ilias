@@ -38,7 +38,7 @@ class RequestValidationHelper
      */
     public function checkPointsInput($data, bool $required, string $key = 'points'): string|array
     {
-        if (!is_array($data) || !is_array($data[$key])) {
+        if (!is_array($data) || !$this->inArray($data, $key)) {
             return $required ? 'msg_input_is_required' : [];
         }
 
