@@ -112,7 +112,7 @@ class QuestionTable extends ilAssQuestionList implements Table\DataRetrieval
                 $tax = new ilObjTaxonomy($tax_entry['tax_id']);
                 $tax_tree = $tax->getTree();
                 $sortfield = $tax->getSortingMode() === ilObjTaxonomy::SORT_ALPHABETICAL ? 'title' : 'order_nr';
-                $children = $this->tax_node_reader($tax_tree, $sortfield, $tax_tree->readRootId());
+                $children = $this->taxNodeReader($tax_tree, $sortfield, $tax_tree->readRootId());
                 $nodes = implode('-', array_map(fn($node) => $node['obj_id'], $children));
 
                 $tax_id = $tax_entry['tax_id'] . '-0-' . $nodes;
@@ -186,7 +186,7 @@ class QuestionTable extends ilAssQuestionList implements Table\DataRetrieval
         $this->treeify($pointer[$hop], $stack);
     }
 
-    private function toNestedList(array $nodes)
+    private function toNestedList(array $nodes): string
     {
         $entries = [];
         foreach ($nodes as $k => $n) {
@@ -201,60 +201,75 @@ class QuestionTable extends ilAssQuestionList implements Table\DataRetrieval
         );
     }
 
-    private function tax_node_reader($tree, $sortfield, $node_id)
+    private function taxNodeReader($tree, $sortfield, $node_id): array
     {
         $ret = [];
-        $children = $tree->getChildsByTypeFilter(
-            $node_id,
-            array("taxn")
+        $nodes = $tree->getChildsByTypeFilter($node_id, ['taxn']);
+        usort(
+            $nodes,
+            fn($a, $b) => strcmp(
+                (string) $a[$sortfield],
+                (string) $b[$sortfield]
+            )
         );
-        $children = ilArrayUtil::sortArray($children, $sortfield, "asc", false);
-        foreach ($children as $child) {
-            $ret[] = [
-                'tax_id' => $child['tax_id'],
-                'obj_id' => $child['obj_id'],
-                'title' => $child['title'],
-                'depth' => $child['depth'],
-            ];
-            foreach ($this->tax_node_reader($tree, $sortfield, $child['obj_id']) as $c) {
+
+        foreach ($nodes as $node) {
+            $ret[] = $node;
+            foreach ($this->taxNodeReader($tree, $sortfield, $node['obj_id']) as $c) {
                 $ret[] = $c;
             }
         }
         return $ret;
     }
 
+    private function singleTaxonomyRepresentation(
+        int $tax_id,
+        array $stored_tax_data,
+        string $check_marker
+    ): string {
+        $tax = new ilObjTaxonomy($tax_id);
+        $tax_tree = $tax->getTree();
+        $sortfield = $tax->getSortingMode() === ilObjTaxonomy::SORT_ALPHABETICAL ? 'title' : 'order_nr';
+        $taxnodes = $this->taxNodeReader($tax_tree, $sortfield, $tax_tree->readRootId());
+
+        $nodes = [];
+        foreach ($taxnodes as $taxnode) {
+            $taxdata = array_filter(
+                $stored_tax_data,
+                fn($data_child) => $data_child['node_id'] === $taxnode['obj_id']
+            );
+
+            foreach (array_keys($taxdata) as $node_obj_id) {
+                $path = array_map(
+                    fn($n) => in_array($n['obj_id'], array_keys($stored_tax_data)) ? $check_marker . $n['title'] : $n['title'],
+                    $tax_tree->getPathFull($node_obj_id),
+                );
+                $path[0] = ilObject::_lookupTitle($tax_id);
+                $this->treeify($nodes, $path);
+            }
+        }
+        return $this->toNestedList($nodes);
+    }
+
     private function taxonomyRepresentation(array $taxonomy_data): string
     {
-        $taxonomies = [];
         $check = $this->ui_renderer->render(
             $this->ui_factory->symbol()->icon()->custom(ilUtil::getImagePath('standard/icon_checked.svg'), 'checked')
         );
 
+        $taxonomies = [];
         $taxs = $this->taxonomy->getUsageOfObject($this->parent_obj_id, true);
-        $nodes = [];
-
         foreach ($taxs as $tax_entry) {
-            $tax = new ilObjTaxonomy($tax_entry['tax_id']);
-            $tax_tree = $tax->getTree();
-            $sortfield = $tax->getSortingMode() === ilObjTaxonomy::SORT_ALPHABETICAL ? 'title' : 'order_nr';
-            $children = $this->tax_node_reader($tax_tree, $sortfield, $tax_tree->readRootId());
-            foreach ($children as $child) {
-                if (array_key_exists($child['tax_id'], $taxonomy_data)) {
-                    foreach ($taxonomy_data[$child['tax_id']] as $data_child) {
-                        if ($data_child['node_id'] === $child['obj_id']) {
-                            $path = array_map(
-                                fn($n) => in_array($n['obj_id'], array_keys($taxonomy_data[$child['tax_id']])) ? $check . $n['title'] : $n['title'],
-                                $tax_tree->getPathFull($data_child['node_id']),
-                            );
-                            $path[0] = ilObject::_lookupTitle($child['tax_id']);
-                            $this->treeify($nodes, $path);
-                        }
-                    }
-                }
+            $tax_id = $tax_entry['tax_id'];
+            if (!array_key_exists($tax_id, $taxonomy_data)) {
+                continue;
             }
+            $taxonomies[] = $this->singleTaxonomyRepresentation(
+                $tax_id,
+                $taxonomy_data[$tax_id],
+                $check
+            );
         }
-        $listing = $this->toNestedList($nodes);
-        $taxonomies[] = $listing;
         return implode('', $taxonomies);
     }
 
