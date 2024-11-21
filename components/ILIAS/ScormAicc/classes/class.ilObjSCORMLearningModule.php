@@ -565,7 +565,7 @@ class ilObjSCORMLearningModule extends ilObjSAHSLearningModule
         $fhandle = fopen($a_file, "r");
 
         //the top line is the field names
-        $fields = fgetcsv($fhandle, 2 ** 16, ';');
+        $fields = fgetcsv($fhandle, 2 ** 16, ';', '"', '\\');
         //lets check the import method
         fclose($fhandle);
 
@@ -599,10 +599,10 @@ class ilObjSCORMLearningModule extends ilObjSAHSLearningModule
         $fhandle = fopen($a_file, "r");
 
         $obj_id = $this->getID();
-        $fields = fgetcsv($fhandle, 2 ** 16, ';');
+        $fields = fgetcsv($fhandle, 2 ** 16, ';', '"', '\\');
         $users = array();
         $usersToDelete = array();
-        while (($csv_rows = fgetcsv($fhandle, 2 ** 16, ";")) !== false) {
+        while (($csv_rows = fgetcsv($fhandle, 2 ** 16, ";", '"', '\\')) !== false) {
             $user_id = 0;
             $data = array_combine($fields, $csv_rows);
             //no check the format - sufficient to import users
@@ -804,13 +804,13 @@ class ilObjSCORMLearningModule extends ilObjSAHSLearningModule
 
         $fhandle = fopen($a_file, "r");
 
-        $fields = fgetcsv($fhandle, 2 ** 16, ';');
+        $fields = fgetcsv($fhandle, 2 ** 16, ';', '"', '\\');
         $users = array();
         $a_last_access = array();
         $a_time = array();
         $a_package_attempts = array();
         $a_module_version = array();
-        while (($csv_rows = fgetcsv($fhandle, 2 ** 16, ";")) !== false) {
+        while (($csv_rows = fgetcsv($fhandle, 2 ** 16, ";", '"', '\\')) !== false) {
             $data = array_combine($fields, $csv_rows);
             if ($data['Userid']) {
                 $user_id = $this->parseUserId($data['Userid']);

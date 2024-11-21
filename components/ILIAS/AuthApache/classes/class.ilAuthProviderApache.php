@@ -65,7 +65,7 @@ final class ilAuthProviderApache extends ilAuthProvider implements ilAuthProvide
 
         $validIndicatorValues = array_filter(array_map(
             'trim',
-            str_getcsv($this->settings->get('apache_auth_indicator_value', ''))
+            str_getcsv($this->settings->get('apache_auth_indicator_value', ''), ',', '"', '\\')
         ));
         //TODO PHP8-REVIEW: $DIC->http()->request()->getServerParams()['apache_auth_indicator_name']
         if (
