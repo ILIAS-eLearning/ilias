@@ -3523,7 +3523,7 @@ common#:#auth_allow_local#:#ローカル認証を許可
 common#:#auth_cas#:#CAS
 common#:#auth_cas_allow_local_desc#:#ILIASのユーザ名とパスワードの認証でCASユーザをアクセス許可します。
 common#:#auth_cas_auth#:#CAS認証を設定
-common#:#auth_cas_auth_desc#:#CASはCURLサポート (7.5以降)付のPHP 4.3.1が必須です
+common#:#auth_cas_auth_desc#:#CASはCURLサポート 付のPHP %sが必須です
 common#:#auth_cas_port_desc#:#例 フルCASサーバーURIがhttps//auth.yourserver.comの場合は443。
 common#:#auth_cas_server_desc#:#例 フルCASサーバーURIがhttps//auth.yourserver.comの場合はauth.yourserver.com:443/cas/
 common#:#auth_cas_uri_desc#:#ローカルUR例　 フルCASサーバーURIがの場合はhttps//auth.yourserver.com:443/cas/

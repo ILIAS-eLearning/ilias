@@ -3523,7 +3523,7 @@ common#:#auth_allow_local#:#Leisti Lokalią Autorizaciją
 common#:#auth_cas#:#CAS
 common#:#auth_cas_allow_local_desc#:#Tai leidžia CAS vartotojams autorizuotis naudojant savo lokalų ILIAS vartotojo vardą ir lokalų slaptažodį.
 common#:#auth_cas_auth#:#Konfigūruoti CAS Autorizaciją
-common#:#auth_cas_auth_desc#:#CAS reikalauja PHP 4.3.1 ar naujesnio su CURL palaikymu (7.5 ar naujesnio)
+common#:#auth_cas_auth_desc#:#CAS reikalauja PHP %s ar naujesnio su CURL palaikymu
 common#:#auth_cas_port_desc#:#Pvz. 443 , jei pilnas CAS serverio URI yra https://auth.jususerveris.lt:443/cas/
 common#:#auth_cas_server_desc#:#Pvz. auth.jususerveris.lt , jei pilnas CAS serverio URI yra https://auth.jususerveris.lt:443/cas/
 common#:#auth_cas_uri_desc#:#Lokalus URI, pvz. cas , jei pilnas CAS serverio URI yra https://auth.jususerveris.lt:443/cas/

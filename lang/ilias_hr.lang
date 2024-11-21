@@ -3523,7 +3523,7 @@ common#:#auth_allow_local#:#Dopusti lokalnu provjeru autentičnosti
 common#:#auth_cas#:#CAS
 common#:#auth_cas_allow_local_desc#:#To omogućuje korisnicima CAS-a da se autentificiraju pomoću svog lokalnog ILIAS korisničkog imena i lokalne lozinke.
 common#:#auth_cas_auth#:#Konfiguriraj CAS autentifikaciju
-common#:#auth_cas_auth_desc#:#CAS zahtijeva PHP 4.3.1 ili noviji s podrškom za CURL (7,5 ili noviji)
+common#:#auth_cas_auth_desc#:#CAS zahtijeva PHP %s ili noviji s podrškom za CURL
 common#:#auth_cas_port_desc#:#Npr. 443 ako je puni URI poslužitelja CAS https://auth.yourserver.com:443/cas/
 common#:#auth_cas_server_desc#:#Npr. auth.yourserver.com ako je puni URI CAS poslužitelja https://auth.yourserver.com:443/cas/
 common#:#auth_cas_uri_desc#:#Lokalni URI, npr. cas ako je puni URI poslužitelja CAS https://auth.yourserver.com:443/cas/

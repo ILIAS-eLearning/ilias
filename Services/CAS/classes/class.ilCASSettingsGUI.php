@@ -49,6 +49,8 @@ class ilCASSettingsGUI
         $this->lng->loadLanguageModule('registration');
         $this->lng->loadLanguageModule('auth');
 
+        $this->renderer = $DIC->ui()->renderer();
+
         $this->ref_id = $a_auth_ref_id;
 
         $this->settings = ilCASSettings::getInstance();
@@ -87,7 +89,13 @@ class ilCASSettingsGUI
         $form->setFormAction($this->ctrl->getFormAction($this));
 
         $form->setTitle($this->lng->txt('auth_cas_auth'));
-        $form->setDescription($this->lng->txt("auth_cas_auth_desc"));
+
+        $dropInReplacementsUrl = 'https://github.com/ILIAS-eLearning/ILIAS/tree/release_8/src/HTTP#dropinreplacements';
+        $form->setDescription(sprintf(
+            $this->lng->txt("auth_cas_auth_desc"),
+            '7.1.0',
+            $this->renderer->render($f->link()->standard($dropInReplacementsUrl, $dropInReplacementsUrl))
+        ));
 
         // Form checkbox
         $check = new ilCheckboxInputGUI($this->lng->txt("active"), 'active');

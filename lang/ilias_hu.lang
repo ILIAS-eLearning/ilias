@@ -3538,7 +3538,7 @@ common#:#auth_allow_local#:#Helyi hitelesítés engedélyezése
 common#:#auth_cas#:#CAS
 common#:#auth_cas_allow_local_desc#:#A CAS felhasználók számára ez engedélyezi a helyi ILIAS-uk felhasználónevével és a helyi jelszavukkal való hitelesítésüket.
 common#:#auth_cas_auth#:#CAS-hitelesítés konfigurálása
-common#:#auth_cas_auth_desc#:#A CAS-nak 4.3.1 vagy magasabb PHP-ra van szüksége CURL támogatással (7.5 vagy magasabb)
+common#:#auth_cas_auth_desc#:#A CAS-nak %s vagy magasabb PHP-ra van szüksége CURL támogatással
 common#:#auth_cas_port_desc#:#Például 443, ha a teljes CAS szerver URI https://auth.yourserver.com:443/cas/
 common#:#auth_cas_server_desc#:#Például auth.yourserver.com, ha a teljes CAS szerver URI https://auth.yourserver.com:443/cas/
 common#:#auth_cas_uri_desc#:#Helyi URI, például cas, ha a teljes CAS szerver URI https://auth.yourserver.com:443/cas/
