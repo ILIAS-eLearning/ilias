@@ -5823,7 +5823,7 @@ common#:#upload_pending#:#Folyamatban
 common#:#upload_settings#:#Fájlok feltöltési beállításai
 common#:#upload_svg_rejection_message#:#Az SVG-fájl vélhetően rosszindulatú kódot tartalmaz, ezért nem dolgoztuk fel.
 common#:#upload_svg_rejection_message_base64#:#A fájl base64 kódolású részeket tartalmaz.
-common#:#upload_svg_rejection_message_elements#:#A fájl nem engedélyezettek vagy ismeretlen elemeket, attribútumokat tartalmaz. 
+common#:#upload_svg_rejection_message_elements#:#A fájl nem engedélyezettek vagy ismeretlen elemeket, attribútumokat tartalmaz.
 common#:#upload_svg_rejection_message_script#:#A fájl script-elemeket tartalmaz.
 common#:#uploaded_and_checked#:#A fájlt feltöltötte és sikeresen ellenőriztük. Elkezdheti importálását.
 common#:#uploading#:#Feltöltés…
@@ -10497,7 +10497,7 @@ irss#:#revisions#:#Elérhető felülvizsgálatok
 irss#:#rid_deleted#:#A fájl eltávolították
 irss#:#rids_appended#:#Az erőforrás(oka)t sikeresen hozzáadta
 irss#:#rids_deleted#:#Az erőforrás(oka)t sikeresen törölte
-irss#:#rids_updated#:#Az erőforrás(oka)t sikeresen frissítette 
+irss#:#rids_updated#:#Az erőforrás(oka)t sikeresen frissítette
 irss#:#sorting#:#Alapértelmezett rendezés
 irss#:#sorting_1#:#Cím szerint (Növekvő)
 irss#:#sorting_2#:#Cím szerint (Csökkenő)
@@ -17171,6 +17171,7 @@ ui#:#order_option_numerical_ascending#:#0 → 9
 ui#:#order_option_numerical_descending#:#9 → 0
 ui#:#presentation_table_collapse#:#becsukás
 ui#:#presentation_table_expand#:#kinyitás
+ui#:#table_posinput_col_title#:#Pozíció
 ui#:#ui_chars_max#:#Maximum:
 ui#:#ui_chars_min#:#Minimum:
 ui#:#ui_chars_remaining#:#Fennmaradó karakterek száma:
