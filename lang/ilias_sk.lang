@@ -3523,7 +3523,7 @@ common#:#auth_allow_local#:#Povolit lokální autentizaci
 common#:#auth_cas#:#CAS
 common#:#auth_cas_allow_local_desc#:#Umožní uživatelům CAS autentizaci s lokálním uživatelským jménem ILIAS a lokálním heslem
 common#:#auth_cas_auth#:#Konfigurace autentizace CAS
-common#:#auth_cas_auth_desc#:#CAS vyžaduje PHP %s nebo vyšší s podporou CURL
+common#:#auth_cas_auth_desc#:#CAS vyžaduje PHP 4.3.1 nebo vyšší s podporou CURL (7.5 a vyšší)
 common#:#auth_cas_port_desc#:#Např.443, když úplná URI vašeho CAS serveru je https://auth.yourserver.com:443/cas/
 common#:#auth_cas_server_desc#:#Např. auth.yourserver.com když úplná URI vašeho CAS serveru je https://auth.yourserver.com:443/cas/
 common#:#auth_cas_uri_desc#:#Lokální URI, např. cas, když úplná URI vašeho CAS serveru je https://auth.yourserver.com:443/cas/

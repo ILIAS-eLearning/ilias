@@ -3523,7 +3523,7 @@ common#:#auth_allow_local#:#Yerel Kimlik İzin
 common#:#auth_cas#:#CAS
 common#:#auth_cas_allow_local_desc#:#Bu CAS kullanıcıların kendi yerel ILIAS adınızı ve yerel bir şifre ile kimlik doğrulaması sağlar.
 common#:#auth_cas_auth#:#Yapılandırma CAS Doğrulama
-common#:#auth_cas_auth_desc#:#CAS CURL desteği ile PHP %s veya üstü gerektirir
+common#:#auth_cas_auth_desc#:#CAS CURL desteği (7.5 veya üstü) ile PHP 4.3.1 veya üstü gerektirir
 common#:#auth_cas_port_desc#:#Eg 443 tam CAS sunucu URI https://auth.yourserver.com:443/cas/ ise
 common#:#auth_cas_server_desc#:#Tam CAS sunucu tanım https://auth.yourserver.com:443/cas/ ise, Örnek auth.yourserver.com
 common#:#auth_cas_uri_desc#:#Tam CAS sunucu URI https://auth.yourserver.com:443/cas/ ise Yerel URI, örneğin cas

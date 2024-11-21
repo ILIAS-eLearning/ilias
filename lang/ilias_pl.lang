@@ -3523,7 +3523,7 @@ common#:#auth_allow_local#:#Zezwól na lokalną identyfikację
 common#:#auth_cas#:#CAS
 common#:#auth_cas_allow_local_desc#:#Zezwala użytkownikom CAS do identyfikacji ich lokalną nazwą użytkownika ILIAS i lokalnym hasłem.
 common#:#auth_cas_auth#:#Konfiguracja identyfikacji CAS
-common#:#auth_cas_auth_desc#:#CAS wymaga PHP %s lub nowszego ze wsparciem CURL
+common#:#auth_cas_auth_desc#:#CAS wymaga PHP 4.3.1 lub nowszego ze wsparciem CURL (7.5 lub nowszy)
 common#:#auth_cas_port_desc#:#Np. 443, jeśli pełen URI serwera CAS to https://auth.yourserver.com:443/cas/
 common#:#auth_cas_server_desc#:#Np. auth.yourserver.com, jeśli pełen URI serwera CAS to https://auth.yourserver.com:443/cas/
 common#:#auth_cas_uri_desc#:#Lokalny URI, np. jeśli pełen URI serwera CAS to https://auth.yourserver.com:443/cas/

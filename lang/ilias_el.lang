@@ -3524,7 +3524,7 @@ common#:#auth_allow_local#:#Επιτρέπεται η Τοπική Εγκυρό�
 common#:#auth_cas#:#CAS
 common#:#auth_cas_allow_local_desc#:#Επιτρέπει σε χρήστες CAS να επικυρωθούν με το τοπικό όνομα χρήστη και κωδικό του ILIAS.
 common#:#auth_cas_auth#:#Ρύθμιση επικύρωσης CAS
-common#:#auth_cas_auth_desc#:#Το CAS απαιτεί PHP %s ή νεώτερη με υποστήριξη CURL
+common#:#auth_cas_auth_desc#:#Το CAS απαιτεί PHP 4.3.1 ή νεώτερη με υποστήριξη CURL (7.5 ή νεώτερη)
 common#:#auth_cas_port_desc#:#Π.χ. 443 αν το πλήρες URI του διακομιστή CAS είναι https://auth.yourserver.com:443/cas/
 common#:#auth_cas_server_desc#:#Π.χ. auth.yourserver.com αν το πλήρες URI του διακομιστή CAS είνα https://auth.yourserver.com:443/cas/
 common#:#auth_cas_uri_desc#:#Τοπική URI, e.g. cas if the full CAS server URI is https://auth.yourserver.com:443/cas/

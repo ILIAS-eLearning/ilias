@@ -3537,7 +3537,7 @@ common#:#auth_allow_local#:#Dovoli lokalno avtentikacijo
 common#:#auth_cas#:#CAS
 common#:#auth_cas_allow_local_desc#:#Uporabnikom CAS omogoči prijavo/avtentikacijo z lokalnim uporabniškim imenom ILIAS in lokalnim geslom.
 common#:#auth_cas_auth#:#Konfiguriraj avtentikacijo CAS
-common#:#auth_cas_auth_desc#:#CAS zahteva PHP %s ali novejši s podporo za CURL
+common#:#auth_cas_auth_desc#:#CAS zahteva PHP 4.3.1 ali novejši s podporo za CURL (7.5 ali novejši)
 common#:#auth_cas_port_desc#:#Npr. 443, če je URI strežnika CAS "https://auth.yourserver.com:443/cas/"
 common#:#auth_cas_server_desc#:#Npr. "auth.yourserver.com", če je URI strežnika CAS "https://auth.yourserver.com:443/cas/"
 common#:#auth_cas_uri_desc#:#Lokalni URI-ji, npr. "cas", če je URI strežnika CAS "https://auth.yourserver.com:443/cas/"

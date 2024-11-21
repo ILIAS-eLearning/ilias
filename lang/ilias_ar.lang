@@ -3523,7 +3523,7 @@ common#:#auth_allow_local#:#السماح بالمصادقة المحلية
 common#:#auth_cas#:#CAS
 common#:#auth_cas_allow_local_desc#:#ILIAS بالمصادقة على اسم المستخدم وكلمة المرور المحلية لحساباتهم في CAS يسمح هذا لمستخدمي
 common#:#auth_cas_auth#:#CAS انشاء مصادقة
-common#:#auth_cas_auth_desc#:#  CURL او اعلى مع دعم  PHP %s CAS يحتاج
+common#:#auth_cas_auth_desc#:#  (7.5 or higher) CURL او اعلى مع دعم  PHP 4.3.1 CAS يحتاج
 common#:#auth_cas_port_desc#:#E.g. 443 if the full CAS server URI is https://auth.yourserver.com:443/cas/
 common#:#auth_cas_server_desc#:#E.g. auth.yourserver.com if the full CAS server URI is https://auth.yourserver.com:443/cas/
 common#:#auth_cas_uri_desc#:#Local URI, e.g. cas if the full CAS server URI is https://auth.yourserver.com:443/cas/

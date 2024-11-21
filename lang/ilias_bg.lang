@@ -3523,7 +3523,7 @@ common#:#auth_allow_local#:#Позволява локално удостовер
 common#:#auth_cas#:#CAS
 common#:#auth_cas_allow_local_desc#:#Това позволява на потребителите на CAS да се удостоверяват със своето локално потребителско име в ILIAS и локална парола.
 common#:#auth_cas_auth#:#Конфигуриране на CAS удостоверяване
-common#:#auth_cas_auth_desc#:#CAS изисква PHP %s или по-нова версия с поддръжка на CURL
+common#:#auth_cas_auth_desc#:#CAS изисква PHP 4.3.1 или по-нова версия с поддръжка на CURL (7.5 или по-нова версия)
 common#:#auth_cas_port_desc#:#Напр. 443, ако пълният URI на CAS сървъра е https://auth.yourserver.com:443/cas/
 common#:#auth_cas_server_desc#:#Напр. auth.yourserver.com, ако пълният URI на CAS сървъра е https://auth.yourserver.com:443/cas/
 common#:#auth_cas_uri_desc#:#Локален URI, например cas, ако пълният URI на сървъра CAS е https://auth.yourserver.com:443/cas/

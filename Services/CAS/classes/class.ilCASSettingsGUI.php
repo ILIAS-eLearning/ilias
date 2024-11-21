@@ -93,12 +93,13 @@ class ilCASSettingsGUI
 
         $form->setTitle($this->lng->txt('auth_cas_auth'));
 
-        $dropInReplacementsUrl = 'https://github.com/ILIAS-eLearning/ILIAS/tree/release_8/src/HTTP#dropinreplacements';
-        $dropInReplacementsLink = $this->factory->link()->standard($dropInReplacementsUrl, $dropInReplacementsUrl);
-        $form->setDescription(sprintf(
+        $drop_in_replacements_url = 'https://github.com/ILIAS-eLearning/ILIAS/tree/trunk/components/ILIAS/HTTP#dropinreplacements';
+        $drop_in_replacements_link = $this->factory->link()->standard(
             $this->lng->txt("auth_cas_auth_desc"),
-            '7.1.0',
-            $this->renderer->render($dropInReplacementsLink)
+            $drop_in_replacements_url
+        );
+        $form->setDescription($this->renderer->render(
+            $drop_in_replacements_link
         ));
 
         // Form checkbox

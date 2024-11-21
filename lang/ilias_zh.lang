@@ -3522,7 +3522,7 @@ common#:#auth_allow_local#:#允许本地身份验证
 common#:#auth_cas#:#CAS
 common#:#auth_cas_allow_local_desc#:#这允许CAS用户以他们的本地ILIAS用户名和一个本地密码进行身份验证。
 common#:#auth_cas_auth#:#配置CAS身份验证
-common#:#auth_cas_auth_desc#:#CAS 必需要求PHP %s 或更高版本，且要CURL支持
+common#:#auth_cas_auth_desc#:#CAS 必需要求PHP 4.3.1 或更高版本，且要CURL支持 (7.5 或更高版本)
 common#:#auth_cas_port_desc#:#假如使用443端口，则完整的CAS服务器URI是 https://auth.yourserver.com:443/cas/
 common#:#auth_cas_server_desc#:#假如使用auth.yourserver.com主机名，则完整的CAS服务器URI是 https://auth.yourserver.com:443/cas/
 common#:#auth_cas_uri_desc#:#本地URI，则完整的CAS服务URI是 https://auth.yourserver.com:443/cas/
