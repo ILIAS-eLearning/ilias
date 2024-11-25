@@ -20,6 +20,8 @@ declare(strict_types=1);
 
 namespace ILIAS\UI\Component\Table;
 
+use ILIAS\UI\Component\Input\ViewControl\ViewControl;
+use ILIAS\UI\Component\Input\Container\ViewControl\ViewControlInput;
 use Psr\Http\Message\ServerRequestInterface;
 use ILIAS\Data\Order;
 use ILIAS\Data\Range;
@@ -60,4 +62,12 @@ interface Data extends Table
      * Set an Id to enable the storage and identify the distinct table.
      */
     public function withId(string $id): static;
+
+    /**
+     * Consumers may add additional view controls
+     */
+    public function withAdditionalViewControl(
+        string $key,
+        ViewControlInput $view_control
+    ): self;
 }

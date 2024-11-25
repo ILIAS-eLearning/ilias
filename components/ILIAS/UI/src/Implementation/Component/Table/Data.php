@@ -183,7 +183,7 @@ class Data extends AbstractTable implements T\Data
     public function withAdditionalViewControl(
         string $key,
         ViewControlContainer\ViewControlInput $view_control
-    ) {
+    ): self {
         $clone = clone $this;
         $clone->additional_view_controls[$key] = $view_control;
         return $clone;
