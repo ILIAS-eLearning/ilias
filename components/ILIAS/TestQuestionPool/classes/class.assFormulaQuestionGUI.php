@@ -778,7 +778,7 @@ class assFormulaQuestionGUI extends assQuestionGUI
         $author = $this->request_data_collector->string('author');
         $question = $this->request_data_collector->string('question');
 
-        if (!$title || !$author || !$question) {
+        if (empty($title) || empty($author) || empty($question)) {
             $this->addErrorMessage($this->lng->txt('fill_out_all_required_fields'));
             return false;
         }

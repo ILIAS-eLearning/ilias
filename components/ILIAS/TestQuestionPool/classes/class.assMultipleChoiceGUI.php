@@ -629,9 +629,6 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
         return ilLegacyFormElementsUtil::prepareTextareaOutput($output, true);
     }
 
-    /**
-     * @throws ilException
-     */
     public function writeQuestionSpecificPostData(ilPropertyFormGUI $form): void
     {
         $this->object->setShuffle($this->request_data_collector->bool('shuffle'));
@@ -667,8 +664,10 @@ class assMultipleChoiceGUI extends assQuestionGUI implements ilGuiQuestionScorin
         // Delete all existing answers and create new answers from the form data
         $this->object->flushAnswers();
 
-        $choice = $this->request_data_collector->rawArray('choice');
-        $choice = $this->cleanupAnswerText($choice, !$this->object->isSingleline());
+        $choice = $this->cleanupAnswerText(
+            $this->request_data_collector->rawArray('choice'),
+            !$this->object->isSingleline()
+        );
 
         if (!$this->object->isSingleline()) {
             foreach ($choice['answer'] as $index => $answer) {

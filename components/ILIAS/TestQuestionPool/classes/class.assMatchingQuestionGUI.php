@@ -906,7 +906,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
         $author = $this->request_data_collector->string('author');
         $question = $this->request_data_collector->string('question');
 
-        return !(!$title || !$author || !$question);
+        return !empty($title) && !empty($author) && !empty($question);
     }
 
     public function getSpecificFeedbackOutput(array $userSolution): string

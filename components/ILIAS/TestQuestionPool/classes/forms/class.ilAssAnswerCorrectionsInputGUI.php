@@ -47,12 +47,10 @@ class ilAssAnswerCorrectionsInputGUI extends ilAnswerWizardInputGUI
 
     public function checkInput(): bool
     {
-        if (!$this->isHidePointsEnabled()) {
-            $points = $this->forms_helper->checkPointsInputEnoughPositive($this->raw($this->getPostVar()), true);
-            if (!is_array($points)) {
-                $this->setAlert($this->lng->txt($points));
-                return false;
-            }
+        $points = $this->forms_helper->checkPointsInputEnoughPositive($this->raw($this->getPostVar()), true);
+        if (!$this->isHidePointsEnabled() && !is_array($points)) {
+            $this->setAlert($this->lng->txt($points));
+            return false;
         }
 
         return true;

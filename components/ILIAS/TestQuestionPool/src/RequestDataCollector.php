@@ -41,7 +41,7 @@ class RequestDataCollector
     }
 
     /**
-     * @return UploadResult[]
+     * @return array<UploadResult>
      */
     public function getProcessedUploads(): array
     {
@@ -58,7 +58,7 @@ class RequestDataCollector
     }
 
     /**
-     * @param string[] $http_names An array of keys used as structure for the HTTP name (e.g. ['terms', 'image'] for $_FILES['terms']['image'])
+     * @param array<string> $http_names An array of keys used as structure for the HTTP name (e.g. ['terms', 'image'] for $_FILES['terms']['image'])
      * @param int $index
      * @return string|null
      */
@@ -118,7 +118,7 @@ class RequestDataCollector
     }
 
     /**
-     * @return string[]
+     * @return array<string>
      */
     public function getIds(): array
     {
@@ -158,7 +158,7 @@ class RequestDataCollector
     }
 
     /**
-     * @return int[]
+     * @return array<int>
      */
     public function getUnitIds(): array
     {
@@ -166,7 +166,7 @@ class RequestDataCollector
     }
 
     /**
-     * @return int[]
+     * @return array<int>
      */
     public function getUnitCategoryIds(): array
     {

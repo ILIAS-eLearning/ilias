@@ -45,7 +45,7 @@ class assClozeTestGUI extends assQuestionGUI implements ilGuiQuestionScoringAdju
             return this.each(function(i) {
                 var code_start = '[gap]';
                 var code_end = '[/gap]';
-                if (typeof tinyMCE != 'undefined' && typeof tinyMCE.get('cloze_text') != 'undefined') {
+                if (typeof tinyMCE !== 'undefined' && typeof tinyMCE.get('cloze_text') !== 'undefined') {
                     var ed =  tinyMCE.get('cloze_text');
                     il.ClozeHelper.internetExplorerTinyMCECursorFix(ed);
                     ed.selection.setContent(code_start + ed.selection.getContent() + code_end);

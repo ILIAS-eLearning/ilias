@@ -149,10 +149,5 @@ class ilImagemapCorrectionsInputGUI extends ilImagemapFileInputGUI
         $a_tpl->setCurrentBlock('prop_generic');
         $a_tpl->setVariable('PROP_GENERIC', $template->get());
         $a_tpl->parseCurrentBlock();
-
-        #global $DIC;
-        #$tpl = $DIC['tpl'];
-        #$tpl->addJavascript('assets/js/ServiceFormWizardInput.js');
-        #$tpl->addJavascript(assets/js/imagemap.js');
     }
 }
