@@ -17,7 +17,7 @@
  *********************************************************************/
 
 use ILIAS\TestQuestionPool\QuestionPoolDIC;
-use ILIAS\TestQuestionPool\RequestValidationHelper;
+use ILIAS\TestQuestionPool\ilTestLegacyFormsHelper;
 
 /**
 * This class represents a key value pair wizard property in a property form.
@@ -36,7 +36,7 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
     protected $key_name = "";
     protected $value_name = "";
 
-    protected RequestValidationHelper $request_helper;
+    protected ilTestLegacyFormsHelper $forms_helper;
 
     /**
     * Constructor
@@ -47,14 +47,13 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
     public function __construct($a_title = "", $a_postvar = "")
     {
         parent::__construct($a_title, $a_postvar);
-        $local_dic = QuestionPoolDIC::dic();
-        $this->request_helper = $local_dic['request_validation_helper'];
+        $this->forms_helper = new ilTestLegacyFormsHelper();
     }
 
     public function setValue($a_value): void
     {
-        $keys = $this->request_helper->transformArray($a_value, 'key', $this->refinery->kindlyTo()->string());
-        $points = $this->request_helper->transformPoints($a_value);
+        $keys = $this->forms_helper->transformArray($a_value, 'key', $this->refinery->kindlyTo()->string());
+        $points = $this->forms_helper->transformPoints($a_value);
 
         $this->values = [];
         foreach ($keys as $index => $key) {
@@ -221,7 +220,7 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
         }
 
         // check points
-        $points = $this->request_helper->checkPointsInput($data, $this->getRequired());
+        $points = $this->forms_helper->checkPointsInput($data, $this->getRequired());
         if (!is_array($points)) {
             $this->setAlert($this->lng->txt($points));
             return false;
@@ -234,8 +233,8 @@ class ilErrorTextWizardInputGUI extends ilTextInputGUI
         }
 
         // check answers
-        $keys = $this->request_helper->transformArray($data, 'key', $kindlyTo->string());
-        $values = $this->request_helper->transformArray($data, 'value', $kindlyTo->string());
+        $keys = $this->forms_helper->transformArray($data, 'key', $kindlyTo->string());
+        $values = $this->forms_helper->transformArray($data, 'value', $kindlyTo->string());
         if (empty($keys) || empty($values)) {
             $this->setAlert($this->lng->txt('msg_input_is_required'));
             return false;

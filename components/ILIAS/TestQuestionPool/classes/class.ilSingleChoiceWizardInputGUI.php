@@ -18,7 +18,7 @@
 
 use ILIAS\TestQuestionPool\QuestionPoolDIC;
 use ILIAS\TestQuestionPool\RequestDataCollector;
-use ILIAS\TestQuestionPool\RequestValidationHelper;
+use ILIAS\TestQuestionPool\ilTestLegacyFormsHelper;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\Component\Symbol\Glyph\Factory as GlyphFactory;
 
@@ -39,7 +39,7 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
     protected $showPoints = true;
     protected $hideImages = false;
 
-    protected RequestValidationHelper $request_helper;
+    protected ilTestLegacyFormsHelper $forms_helper;
     protected GlyphFactory $glyph_factory;
     protected Renderer $renderer;
 
@@ -62,15 +62,15 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
 
         $this->glyph_factory = $DIC->ui()->factory()->symbol()->glyph();
         $this->renderer = $DIC->ui()->renderer();
-        $this->request_helper = $local_dic['request_validation_helper'];
+        $this->forms_helper = new ilTestLegacyFormsHelper();
     }
 
     public function setValue($a_value): void
     {
         $this->values = [];
 
-        $answers = $this->request_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
-        $points = $this->request_helper->transformPoints($a_value);
+        $answers = $this->forms_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
+        $points = $this->forms_helper->transformPoints($a_value);
 
         foreach ($answers as $index => $value) {
             $answer = new ASS_AnswerBinaryStateImage(
@@ -234,10 +234,10 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
     protected function checkAnswersInput(array $data): array|string
     {
         $to_string = $this->refinery->kindlyTo()->string();
-        $answers = $this->request_helper->transformArray($data, 'answer', $to_string);
-        $image_names = $this->request_helper->transformArray($data, 'imagename', $to_string);
+        $answers = $this->forms_helper->transformArray($data, 'answer', $to_string);
+        $image_names = $this->forms_helper->transformArray($data, 'imagename', $to_string);
         foreach ($answers as $index => $value) {
-            if ($value === '' && !$this->request_helper->inArray($image_names, $index)) {
+            if ($value === '' && !$this->forms_helper->inArray($image_names, $index)) {
                 return 'msg_input_is_required';
             }
 
@@ -259,7 +259,7 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
         }
 
         // check points
-        $points = $this->request_helper->checkPointsInputEnoughPositive($data, true);
+        $points = $this->forms_helper->checkPointsInputEnoughPositive($data, true);
         if (!is_array($points)) {
             $this->setAlert($this->lng->txt($points));
             return false;
@@ -271,7 +271,7 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
             $this->setAlert($this->lng->txt($answers));
             return false;
         }
-        $image_names = $this->request_helper->transformArray($data, 'imagename', $this->refinery->kindlyTo()->string());
+        $image_names = $this->forms_helper->transformArray($data, 'imagename', $this->refinery->kindlyTo()->string());
 
 
         if (is_array($_FILES) && count($_FILES) && $this->getSingleline() && (!$this->hideImages)) {
@@ -293,7 +293,7 @@ class ilSingleChoiceWizardInputGUI extends ilTextInputGUI
 
                             case UPLOAD_ERR_NO_FILE:
                                 if (
-                                    $this->getRequired() && !$this->request_helper->inArray($image_names, $index)
+                                    $this->getRequired() && !$this->forms_helper->inArray($image_names, $index)
                                 ) {
                                     $this->setAlert($this->lng->txt('form_msg_file_no_upload'));
                                     return false;

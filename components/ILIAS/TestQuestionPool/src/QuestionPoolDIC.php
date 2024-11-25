@@ -51,8 +51,6 @@ class QuestionPoolDIC extends PimpleContainer
                 $DIC['refinery'],
                 $DIC['upload']
             );
-        $dic['request_validation_helper'] = static fn($c): RequestValidationHelper =>
-            new RequestValidationHelper($DIC['refinery']);
         $dic['question.repo.suggestedsolutions'] = static fn($c): SuggestedSolutionsDatabaseRepository =>
             new SuggestedSolutionsDatabaseRepository($DIC['ilDB']);
         $dic['question.general_properties.repository'] = static fn($c): GeneralQuestionPropertiesRepository =>

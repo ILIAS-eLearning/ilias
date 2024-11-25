@@ -20,11 +20,11 @@ declare(strict_types=1);
 
 use ILIAS\Data\Factory as DataFactory;
 use ILIAS\Refinery\Factory as Refinery;
-use ILIAS\TestQuestionPool\RequestValidationHelper;
+use ILIAS\TestQuestionPool\ilTestLegacyFormsHelper;
 
 class RequestValidationHelperTest extends assBaseTestCase
 {
-    private RequestValidationHelper $object;
+    private ilTestLegacyFormsHelper $object;
 
     protected function setUp(): void
     {
@@ -33,13 +33,13 @@ class RequestValidationHelperTest extends assBaseTestCase
         $lng_mock = $this->getMockBuilder(ILIAS\Language\Language::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $refinery = new Refinery(new DataFactory(), $lng_mock);
-        $this->object = new RequestValidationHelper($refinery);
+        $this->setGlobalVariable('refinery', new Refinery(new DataFactory(), $lng_mock));
+        $this->object = new ilTestLegacyFormsHelper();
     }
 
     public function testConstruct(): void
     {
-        $this->assertInstanceOf(RequestValidationHelper::class, $this->object);
+        $this->assertInstanceOf(ilTestLegacyFormsHelper::class, $this->object);
     }
 
     public function test_checkPointsFromRequest_shouldAbort_whenEmptyData(): void

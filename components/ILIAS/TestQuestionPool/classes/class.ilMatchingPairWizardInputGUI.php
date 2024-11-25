@@ -17,7 +17,7 @@
  *********************************************************************/
 
 use ILIAS\TestQuestionPool\QuestionPoolDIC;
-use ILIAS\TestQuestionPool\RequestValidationHelper;
+use ILIAS\TestQuestionPool\ilTestLegacyFormsHelper;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\Component\Symbol\Glyph\Factory as GlyphFactory;
 
@@ -35,7 +35,7 @@ class ilMatchingPairWizardInputGUI extends ilTextInputGUI
     protected $terms = [];
     protected $definitions = [];
 
-    protected RequestValidationHelper $request_helper;
+    protected ilTestLegacyFormsHelper $forms_helper;
     protected GlyphFactory $glyph_factory;
     protected Renderer $renderer;
 
@@ -50,9 +50,8 @@ class ilMatchingPairWizardInputGUI extends ilTextInputGUI
         parent::__construct($a_title, $a_postvar);
 
         global $DIC;
-        $local_dic = QuestionPoolDIC::dic();
 
-        $this->request_helper = $local_dic['request_validation_helper'];
+        $this->forms_helper = new ilTestLegacyFormsHelper();
         $this->glyph_factory = $DIC->ui()->factory()->symbol()->glyph();
         $this->renderer = $DIC->ui()->renderer();
     }
@@ -64,9 +63,9 @@ class ilMatchingPairWizardInputGUI extends ilTextInputGUI
         $this->definitions = [];
 
         $to_int = $this->refinery->kindlyTo()->int();
-        $points = $this->request_helper->transformPoints($a_value);
-        $terms = $this->request_helper->transformArray($a_value, 'term', $to_int);
-        $definitions = $this->request_helper->transformArray($a_value, 'definition', $to_int);
+        $points = $this->forms_helper->transformPoints($a_value);
+        $terms = $this->forms_helper->transformArray($a_value, 'term', $to_int);
+        $definitions = $this->forms_helper->transformArray($a_value, 'definition', $to_int);
 
         foreach ($terms as $index => $term) {
             $this->pairs[] = new assAnswerMatchingPair(
@@ -152,15 +151,15 @@ class ilMatchingPairWizardInputGUI extends ilTextInputGUI
         }
 
         // check points
-        $result_points = $this->request_helper->checkPointsInputEnoughPositive($data, true);
+        $result_points = $this->forms_helper->checkPointsInputEnoughPositive($data, true);
         if (!is_array($result_points)) {
             $this->setAlert($this->lng->txt($result_points));
             return false;
         }
 
         // check answers
-        $terms = $this->request_helper->transformArray($data, 'term', $to_int);
-        $definitions = $this->request_helper->transformArray($data, 'definition', $to_int);
+        $terms = $this->forms_helper->transformArray($data, 'term', $to_int);
+        $definitions = $this->forms_helper->transformArray($data, 'definition', $to_int);
         foreach ([$terms, $definitions] as $value) {
             if ($value < 1 && $this->getRequired()) {
                 $this->setAlert($this->lng->txt('msg_input_is_required'));

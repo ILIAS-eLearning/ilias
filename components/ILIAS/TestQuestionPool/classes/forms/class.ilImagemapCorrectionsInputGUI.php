@@ -33,8 +33,8 @@ class ilImagemapCorrectionsInputGUI extends ilImagemapFileInputGUI
 
     public function setAreasByArray($a_areas): void
     {
-        $points = $this->request_helper->transformPoints($a_areas, 'points');
-        $points_unchecked = $this->request_helper->transformPoints($a_areas, 'points_unchecked');
+        $points = $this->forms_helper->transformPoints($a_areas, 'points');
+        $points_unchecked = $this->forms_helper->transformPoints($a_areas, 'points_unchecked');
 
         foreach ($this->areas as $index => $name) {
             $points_unchecked[$index] = $points_unchecked[$index] && $this->getPointsUncheckedFieldEnabled()
@@ -53,7 +53,7 @@ class ilImagemapCorrectionsInputGUI extends ilImagemapFileInputGUI
             return false;
         }
 
-        $result = $this->request_helper->checkPointsInputEnoughPositive($data['coords'], $this->getRequired());
+        $result = $this->forms_helper->checkPointsInputEnoughPositive($data['coords'], $this->getRequired());
         if (!is_array($result)) {
             if ($result === 'msg_input_is_required') {
                 $this->setAlert($this->lng->txt('form_msg_area_missing_points'));

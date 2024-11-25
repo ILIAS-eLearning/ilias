@@ -82,9 +82,9 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
 
         $answer_type = $this->str('answer_type');
         $a_value = $this->cleanupAnswerText($a_value, $answer_type === 'multiLine');
-        $answers = $this->request_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
-        $imagename = $this->request_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->string());
-        $correctness = $this->request_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->bool());
+        $answers = $this->forms_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
+        $imagename = $this->forms_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->string());
+        $correctness = $this->forms_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->bool());
 
         foreach ($answers as $index => $value) {
             $answer = new ilAssKprimChoiceAnswer();
@@ -95,7 +95,7 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
             $answer->setImageFsDir($this->qstObject->getImagePath());
             $answer->setImageWebDir($this->qstObject->getImagePathWeb());
 
-            if ($this->request_helper->inArray($imagename, $index)) {
+            if ($this->forms_helper->inArray($imagename, $index)) {
                 $answer->setImageFile($imagename[$index]);
             }
 
@@ -126,7 +126,7 @@ class ilKprimChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
         }
 
         // check correctness
-        $correctness = $this->request_helper->transformArray($data, 'correctness', $this->refinery->kindlyTo()->bool());
+        $correctness = $this->forms_helper->transformArray($data, 'correctness', $this->refinery->kindlyTo()->bool());
         if (count($answers) !== count($correctness)) {
             $this->setAlert($this->lng->txt('msg_input_is_required'));
             return false;

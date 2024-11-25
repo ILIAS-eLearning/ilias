@@ -22,11 +22,18 @@ use ILIAS\Refinery\ConstraintViolationException;
 use ILIAS\Refinery\Factory as Refinery;
 use ILIAS\Refinery\Transformation;
 
-class RequestValidationHelper
+/**
+ * @deprecated This class is no longer needed when using the ks input components.
+ */
+class ilTestLegacyFormsHelper
 {
+    protected Refinery $refinery;
+
     public function __construct(
-        protected Refinery $refinery
+
     ) {
+        global $DIC;
+        $this->refinery = $DIC['refinery'];
     }
 
     /**

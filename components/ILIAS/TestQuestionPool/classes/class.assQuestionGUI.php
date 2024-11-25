@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 use ILIAS\TestQuestionPool\QuestionPoolDIC;
 use ILIAS\TestQuestionPool\RequestDataCollector;
-use ILIAS\TestQuestionPool\RequestValidationHelper;
+use ILIAS\TestQuestionPool\ilTestLegacyFormsHelper;
 use ILIAS\TestQuestionPool\Questions\QuestionAutosaveable;
 use ILIAS\TestQuestionPool\Questions\SuggestedSolution\SuggestedSolution;
 use ILIAS\TestQuestionPool\Questions\SuggestedSolution\SuggestedSolutionsDatabaseRepository;
@@ -151,7 +151,7 @@ abstract class assQuestionGUI
     private bool $previousSolutionPrefilled = false;
 
     protected ilPropertyFormGUI $editForm;
-    protected readonly RequestValidationHelper $request_helper;
+    protected readonly ilTestLegacyFormsHelper $forms_helper;
     protected readonly RequestDataCollector $request_data_collector;
     protected bool $parent_type_is_lm = false;
 
@@ -182,7 +182,7 @@ abstract class assQuestionGUI
         $this->refinery = $DIC['refinery'];
 
         $local_dic = QuestionPoolDIC::dic();
-        $this->request_helper = $local_dic['request_validation_helper'];
+        $this->forms_helper = new ilTestLegacyFormsHelper();
         $this->request_data_collector = $local_dic['request_data_collector'];
         $this->questionrepository = $local_dic['question.general_properties.repository'];
 

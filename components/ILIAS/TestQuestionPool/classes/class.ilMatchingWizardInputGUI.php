@@ -17,7 +17,7 @@
  *********************************************************************/
 
 use ILIAS\TestQuestionPool\QuestionPoolDIC;
-use ILIAS\TestQuestionPool\RequestValidationHelper;
+use ILIAS\TestQuestionPool\ilTestLegacyFormsHelper;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\Component\Symbol\Glyph\Factory as GlyphFactory;
 
@@ -41,7 +41,7 @@ class ilMatchingWizardInputGUI extends ilTextInputGUI
     protected $suffixes = [];
     protected $hideImages = false;
 
-    protected RequestValidationHelper $request_helper;
+    protected ilTestLegacyFormsHelper $forms_helper;
     protected GlyphFactory $glyph_factory;
     protected Renderer $renderer;
 
@@ -52,7 +52,7 @@ class ilMatchingWizardInputGUI extends ilTextInputGUI
         global $DIC;
         $local_dic = QuestionPoolDIC::dic();
 
-        $this->request_helper = $local_dic['request_validation_helper'];
+        $this->forms_helper = new ilTestLegacyFormsHelper();
         $this->glyph_factory = $DIC->ui()->factory()->symbol()->glyph();
         $this->renderer = $DIC->ui()->renderer();
 
@@ -149,9 +149,9 @@ class ilMatchingWizardInputGUI extends ilTextInputGUI
     {
         $this->values = [];
 
-        $answers = $this->request_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
-        $imagename = $this->request_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->string());
-        $identifier = $this->request_helper->transformArray($a_value, 'identifier', $this->refinery->kindlyTo()->int());
+        $answers = $this->forms_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
+        $imagename = $this->forms_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->string());
+        $identifier = $this->forms_helper->transformArray($a_value, 'identifier', $this->refinery->kindlyTo()->int());
 
         foreach ($answers as $index => $value) {
             $this->values[] = new assAnswerMatchingTerm(
@@ -176,12 +176,12 @@ class ilMatchingWizardInputGUI extends ilTextInputGUI
         }
 
         // check answers
-        $answers = $this->request_helper->transformArray($data, 'answer', $this->refinery->kindlyTo()->string());
-        $images = $this->request_helper->transformArray($data, 'imagename', $this->refinery->kindlyTo()->string());
+        $answers = $this->forms_helper->transformArray($data, 'answer', $this->refinery->kindlyTo()->string());
+        $images = $this->forms_helper->transformArray($data, 'imagename', $this->refinery->kindlyTo()->string());
         foreach ($answers as $index => $value) {
             if (
                 $value === ''
-                && !$this->request_helper->inArray($images, $index)
+                && !$this->forms_helper->inArray($images, $index)
                 && !isset($_FILES[$this->getPostVar()]['tmp_name']['image'][$index])
             ) {
                 $this->setAlert($this->lng->txt('msg_input_is_required'));
@@ -208,8 +208,8 @@ class ilMatchingWizardInputGUI extends ilTextInputGUI
 
                             case UPLOAD_ERR_NO_FILE:
                                 if (
-                                    !$this->request_helper->inArray($images, $index)
-                                    && !$this->request_helper->inArray($answers, $index)
+                                    !$this->forms_helper->inArray($images, $index)
+                                    && !$this->forms_helper->inArray($answers, $index)
                                     && $this->getRequired()
                                 ) {
                                     $this->setAlert($this->lng->txt('form_msg_file_no_upload'));

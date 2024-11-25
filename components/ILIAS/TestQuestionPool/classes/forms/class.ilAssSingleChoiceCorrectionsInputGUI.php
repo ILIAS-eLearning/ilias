@@ -32,7 +32,7 @@ class ilAssSingleChoiceCorrectionsInputGUI extends ilSingleChoiceWizardInputGUI
 
     public function setValue($a_value): void
     {
-        foreach ($this->request_helper->transformPoints($a_value) as $index => $value) {
+        foreach ($this->forms_helper->transformPoints($a_value) as $index => $value) {
             $this->values[$index]->setPoints($value);
         }
     }
@@ -41,7 +41,7 @@ class ilAssSingleChoiceCorrectionsInputGUI extends ilSingleChoiceWizardInputGUI
     {
         $data = $this->raw($this->getPostVar());
 
-        $result = $this->request_helper->checkPointsInputEnoughPositive($data, $this->getRequired());
+        $result = $this->forms_helper->checkPointsInputEnoughPositive($data, $this->getRequired());
         if (!is_array($result)) {
             $this->setAlert($this->lng->txt($result));
             return false;

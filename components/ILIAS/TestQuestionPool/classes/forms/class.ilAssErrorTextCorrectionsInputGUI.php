@@ -28,7 +28,7 @@ class ilAssErrorTextCorrectionsInputGUI extends ilErrorTextWizardInputGUI
 {
     public function setValue($a_value): void
     {
-        foreach ($this->request_helper->transformPoints($a_value) as $index => $points) {
+        foreach ($this->forms_helper->transformPoints($a_value) as $index => $points) {
             $this->values[$index] = $this->values[$index]->withPoints($points);
         }
     }
@@ -36,7 +36,7 @@ class ilAssErrorTextCorrectionsInputGUI extends ilErrorTextWizardInputGUI
     public function checkInput(): bool
     {
         $data = $this->raw($this->getPostVar());
-        $result = $this->request_helper->checkPointsInput($data, $this->getRequired());
+        $result = $this->forms_helper->checkPointsInput($data, $this->getRequired());
 
         if (!is_array($result)) {
             $this->setAlert($this->lng->txt($result));

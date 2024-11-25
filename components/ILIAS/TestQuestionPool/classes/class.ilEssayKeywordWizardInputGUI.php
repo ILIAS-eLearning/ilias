@@ -20,9 +20,9 @@ class ilEssayKeywordWizardInputGUI extends ilSingleChoiceWizardInputGUI
 {
     public function setValue($a_value): void
     {
-        $answers = $this->request_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
-        $points = $this->request_helper->transformPoints($a_value, 'points');
-        $points_unchecked = $this->request_helper->transformPoints($a_value, 'points_unchecked');
+        $answers = $this->forms_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
+        $points = $this->forms_helper->transformPoints($a_value, 'points');
+        $points_unchecked = $this->forms_helper->transformPoints($a_value, 'points_unchecked');
 
         $this->values = [];
         foreach ($answers as $index => $value) {
@@ -57,7 +57,7 @@ class ilEssayKeywordWizardInputGUI extends ilSingleChoiceWizardInputGUI
         }
 
         // check points
-        $result = $this->request_helper->checkPointsInputEnoughPositive($data, true);
+        $result = $this->forms_helper->checkPointsInputEnoughPositive($data, true);
         if (!is_array($result)) {
             $this->setAlert($this->lng->txt($result));
             return false;

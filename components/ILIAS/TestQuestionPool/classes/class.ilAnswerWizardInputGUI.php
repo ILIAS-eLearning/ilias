@@ -17,7 +17,7 @@
  *********************************************************************/
 
 use ILIAS\TestQuestionPool\QuestionPoolDIC;
-use ILIAS\TestQuestionPool\RequestValidationHelper;
+use ILIAS\TestQuestionPool\ilTestLegacyFormsHelper;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\Component\Symbol\Glyph\Factory as GlyphFactory;
 
@@ -38,7 +38,7 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
     protected $minvalue = false;
     protected $minvalueShouldBeGreater = false;
 
-    protected RequestValidationHelper $request_helper;
+    protected ilTestLegacyFormsHelper $forms_helper;
     protected GlyphFactory $glyph_factory;
     protected Renderer $renderer;
 
@@ -53,9 +53,8 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
         parent::__construct($a_title, $a_postvar);
 
         global $DIC;
-        $local_dic = QuestionPoolDIC::dic();
 
-        $this->request_helper = $local_dic['request_validation_helper'];
+        $this->forms_helper = new ilTestLegacyFormsHelper();
         $this->glyph_factory = $DIC->ui()->factory()->symbol()->glyph();
         $this->renderer = $DIC->ui()->renderer();
 
@@ -67,9 +66,9 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
     {
         $this->values = [];
 
-        $answers = $this->request_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
-        $images = $this->request_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->string());
-        $points = $this->request_helper->transformPoints($a_value);
+        $answers = $this->forms_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
+        $images = $this->forms_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->string());
+        $points = $this->forms_helper->transformPoints($a_value);
 
         foreach ($answers as $index => $value) {
             $answer = new ASS_AnswerBinaryStateImage(
@@ -80,7 +79,7 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
                 null,
                 -1
             );
-            if ($this->request_helper->inArray($images, $index)) {
+            if ($this->forms_helper->inArray($images, $index)) {
                 $answer->setImage($images[$index]);
             }
             $this->values[] = $answer;
@@ -235,7 +234,7 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
         }
 
         // check points
-        $points = $this->request_helper->checkPointsInputEnoughPositive($data, true);
+        $points = $this->forms_helper->checkPointsInputEnoughPositive($data, true);
         if (!is_array($points)) {
             $this->setAlert($this->lng->txt($points));
             return false;
@@ -251,7 +250,7 @@ class ilAnswerWizardInputGUI extends ilTextInputGUI
         }
 
         // check answers
-        $answers = $this->request_helper->transformArray($data, 'answer', $this->refinery->kindlyTo()->string());
+        $answers = $this->forms_helper->transformArray($data, 'answer', $this->refinery->kindlyTo()->string());
         foreach ($answers as $answer) {
             if ($answer === '') {
                 $this->setAlert($this->lng->txt('msg_input_is_required'));

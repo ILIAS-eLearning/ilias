@@ -40,7 +40,7 @@ class ilAssAnswerCorrectionsInputGUI extends ilAnswerWizardInputGUI
 
     public function setValue($a_value): void
     {
-        foreach ($this->request_helper->transformPoints($a_value) as $index => $value) {
+        foreach ($this->forms_helper->transformPoints($a_value) as $index => $value) {
             $this->values[$index]->setPoints($value);
         }
     }
@@ -48,7 +48,7 @@ class ilAssAnswerCorrectionsInputGUI extends ilAnswerWizardInputGUI
     public function checkInput(): bool
     {
         if (!$this->isHidePointsEnabled()) {
-            $points = $this->request_helper->checkPointsInputEnoughPositive($this->raw($this->getPostVar()), true);
+            $points = $this->forms_helper->checkPointsInputEnoughPositive($this->raw($this->getPostVar()), true);
             if (!is_array($points)) {
                 $this->setAlert($this->lng->txt($points));
                 return false;

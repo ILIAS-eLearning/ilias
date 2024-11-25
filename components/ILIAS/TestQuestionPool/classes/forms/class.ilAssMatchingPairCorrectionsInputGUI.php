@@ -39,7 +39,7 @@ class ilAssMatchingPairCorrectionsInputGUI extends ilMatchingPairWizardInputGUI
     }
     public function setValue($a_value): void
     {
-        foreach ($this->request_helper->transformPoints($a_value) as $index => $value) {
+        foreach ($this->forms_helper->transformPoints($a_value) as $index => $value) {
             $this->pairs[$index] = $this->pairs[$index]->withPoints($value);
         }
     }
@@ -47,7 +47,7 @@ class ilAssMatchingPairCorrectionsInputGUI extends ilMatchingPairWizardInputGUI
     public function checkInput(): bool
     {
         $data = $this->raw($this->getPostVar());
-        $result = $this->request_helper->checkPointsInput($data, $this->getRequired());
+        $result = $this->forms_helper->checkPointsInput($data, $this->getRequired());
 
         if (!is_array($result)) {
             $this->setAlert($this->lng->txt($result));

@@ -32,8 +32,8 @@ class ilAssMultipleChoiceCorrectionsInputGUI extends ilMultipleChoiceWizardInput
 
     public function setValue($a_value): void
     {
-        $points = $this->request_helper->transformPoints($a_value, 'points');
-        $points_unchecked = $this->request_helper->transformPoints($a_value, 'points_unchecked');
+        $points = $this->forms_helper->transformPoints($a_value, 'points');
+        $points_unchecked = $this->forms_helper->transformPoints($a_value, 'points_unchecked');
 
         foreach ($this->values as $index => $value) {
             $this->values[$index]->setPoints($points[$index] ?? 0.0);
@@ -45,13 +45,13 @@ class ilAssMultipleChoiceCorrectionsInputGUI extends ilMultipleChoiceWizardInput
     {
         $data = $this->raw($this->getPostVar());
 
-        $result = $this->request_helper->checkPointsInputEnoughPositive($data, $this->getRequired(), 'points');
+        $result = $this->forms_helper->checkPointsInputEnoughPositive($data, $this->getRequired(), 'points');
         if (!is_array($result)) {
             $this->setAlert($this->lng->txt($result));
             return false;
         }
 
-        $result = $this->request_helper->checkPointsInput($data, $this->getRequired(), 'points_unchecked');
+        $result = $this->forms_helper->checkPointsInput($data, $this->getRequired(), 'points_unchecked');
         if (!is_array($result)) {
             $this->setAlert($this->lng->txt($result));
             return false;

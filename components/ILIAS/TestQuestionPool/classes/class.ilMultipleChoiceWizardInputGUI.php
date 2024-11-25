@@ -31,17 +31,17 @@ class ilMultipleChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
     {
         $this->values = [];
 
-        $answers = $this->request_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
-        $points = $this->request_helper->transformPoints($a_value);
-        $points_unchecked = $this->request_helper->transformPoints($a_value, 'points_unchecked');
-        $images = $this->request_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->string());
+        $answers = $this->forms_helper->transformArray($a_value, 'answer', $this->refinery->kindlyTo()->string());
+        $points = $this->forms_helper->transformPoints($a_value);
+        $points_unchecked = $this->forms_helper->transformPoints($a_value, 'points_unchecked');
+        $images = $this->forms_helper->transformArray($a_value, 'imagename', $this->refinery->kindlyTo()->string());
 
         foreach ($answers as $index => $value) {
             $answer = new ASS_AnswerMultipleResponseImage($value, $points[$index] ?? 0.0, $index);
             $answer->setPointsChecked($points[$index] ?? 0.0);
             $answer->setPointsUnchecked($points_unchecked[$index] ?? 0.0);
 
-            if ($this->request_helper->inArray($images, $index)) {
+            if ($this->forms_helper->inArray($images, $index)) {
                 $answer->setImage($images[$index]);
             }
 
@@ -63,12 +63,12 @@ class ilMultipleChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
         }
 
         // check points
-        $points = $this->request_helper->checkPointsInputEnoughPositive($data, true);
+        $points = $this->forms_helper->checkPointsInputEnoughPositive($data, true);
         if (!is_array($points)) {
             $this->setAlert($this->lng->txt($points));
             return false;
         }
-        $points_unchecked = $this->request_helper->checkPointsInput($data, true, 'points_unchecked');
+        $points_unchecked = $this->forms_helper->checkPointsInput($data, true, 'points_unchecked');
         if (!is_array($points_unchecked)) {
             $this->setAlert($this->lng->txt($points_unchecked));
             return false;
@@ -80,7 +80,7 @@ class ilMultipleChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
             $this->setAlert($this->lng->txt($answers));
             return false;
         }
-        $images = $this->request_helper->transformArray($data, 'imagename', $this->refinery->kindlyTo()->string());
+        $images = $this->forms_helper->transformArray($data, 'imagename', $this->refinery->kindlyTo()->string());
 
         // check upload
         if (is_array($_FILES) && count($_FILES) && $this->getSingleline()) {
@@ -103,8 +103,8 @@ class ilMultipleChoiceWizardInputGUI extends ilSingleChoiceWizardInputGUI
 
                                 case UPLOAD_ERR_NO_FILE:
                                     if (
-                                        !$this->request_helper->inArray($images, $index)
-                                        && !$this->request_helper->inArray($answers, $index)
+                                        !$this->forms_helper->inArray($images, $index)
+                                        && !$this->forms_helper->inArray($answers, $index)
                                         && $this->getRequired()
                                     ) {
                                         $this->setAlert($this->lng->txt('form_msg_file_no_upload'));
