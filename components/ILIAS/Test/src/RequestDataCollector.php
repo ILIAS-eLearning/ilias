@@ -130,11 +130,9 @@ class RequestDataCollector
         return $this->http->request()->getParsedBody();
     }
 
-    public function getQueryKeys(): array
-    {
-        return $this->http->wrapper()->query()->keys();
-    }
-
+    /**
+     * @deprecated
+     */
     public function getPostKeys(): array
     {
         return $this->http->wrapper()->post()->keys();
@@ -148,20 +146,20 @@ class RequestDataCollector
     /**
      * @return array<string>
      */
-    public function retrieveArrayOfStrings(string $key): array
+    public function retrieveArrayOfStringsFromPost(string $key): array
     {
-        return $this->retrieveArray($key, $this->refinery->kindlyTo()->string());
+        return $this->retrieveArrayFromPost($key, $this->refinery->kindlyTo()->string());
     }
 
     /**
      * @return array<int>
      */
-    public function retrieveArrayOfInts(string $key): array
+    public function retrieveArrayOfIntsFromPost(string $key): array
     {
-        return $this->retrieveArray($key, $this->refinery->kindlyTo()->int());
+        return $this->retrieveArrayFromPost($key, $this->refinery->kindlyTo()->int());
     }
 
-    private function retrieveArray(string $key, Transformation $transformation): array
+    private function retrieveArrayFromPost(string $key, Transformation $transformation): array
     {
         return $this->http->wrapper()->post()->retrieve(
             $key,

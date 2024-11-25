@@ -627,7 +627,7 @@ class ilTestEvaluationGUI extends ilTestServiceGUI
             $this->ctrl->redirect($this, 'outUserResultsOverview');
         }
 
-        if ($pass === $this->object::_getResultPass($active_fi)) {
+        if ($pass === ilObjTest::_getResultPass($active_fi)) {
             $this->ctrl->redirect($this, 'outUserResultsOverview');
         }
 

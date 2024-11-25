@@ -1964,7 +1964,7 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
      */
     public function deleteDefaultsObject()
     {
-        $defaults_ids = $this->testrequest->retrieveArrayOfInts('chb_defaults');
+        $defaults_ids = $this->testrequest->retrieveArrayOfIntsFromPost('chb_defaults');
         if ($defaults_ids !== null && $defaults_ids !== []) {
             foreach ($defaults_ids as $test_default_id) {
                 $this->getTestObject()->deleteDefaults($test_default_id);
@@ -1989,7 +1989,7 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
      */
     public function applyDefaultsObject($confirmed = false): void
     {
-        $defaults = $this->testrequest->retrieveArrayOfInts('chb_defaults');
+        $defaults = $this->testrequest->retrieveArrayOfIntsFromPost('chb_defaults');
         if ($defaults !== []) {
             $this->tpl->setOnScreenMessage('info', $this->lng->txt('tst_defaults_apply_select_one'));
 

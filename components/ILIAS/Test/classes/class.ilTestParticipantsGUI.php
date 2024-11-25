@@ -122,17 +122,17 @@ class ilTestParticipantsGUI
         $filtered_user_ids = $filter_closure($user_ids);
 
         $users_count = 0;
-        $client_ips = $this->testrequest->retrieveArrayOfStrings('client_ip');
+        $client_ips = $this->testrequest->retrieveArrayOfStringsFromPost('client_ip');
         foreach ($filtered_user_ids as $user_id) {
             $this->test_obj->inviteUser($user_id, $client_ips[$users_count] ?? '');
             $users_count++;
         }
 
         $message = '';
-        if ($users_count) {
+        if ($users_count > 0) {
             $message = $this->lng->txt('tst_invited_selected_users');
         }
-        if (strlen($message)) {
+        if (strlen($message) > 0) {
             $this->main_tpl->setOnScreenMessage('info', $message, true);
         } else {
             $this->main_tpl->setOnScreenMessage('info', $this->lng->txt('tst_invited_nobody'), true);

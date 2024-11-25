@@ -96,7 +96,7 @@ class ilTestSkillLevelThresholdsGUI
             $valid = true;
 
             $table = $this->getPopulatedTable();
-            $elements = $table->getInputElements($this->request_data_collector->retrieveArrayOfStrings('rendered'));
+            $elements = $table->getInputElements($this->request_data_collector->retrieveArrayOfStringsFromPost('rendered'));
             foreach ($elements as $elm) {
                 if (!$elm->checkInput()) {
                     $valid = false;
