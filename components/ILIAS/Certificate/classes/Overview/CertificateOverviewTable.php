@@ -108,7 +108,12 @@ class CertificateOverviewTable implements DataRetrieval
 
         if (isset($ui_filter_data['issue_date']) && $ui_filter_data['issue_date'] !== '') {
             try {
-                $ui_filter_data['issue_date'] = new DateTime($ui_filter_data['issue_date']);
+                $date = new DateTime($ui_filter_data['issue_date']);
+                $date->setTime(
+                    (int) $date->format("H"),
+                    (int) $date->format("i"),
+                );
+                $ui_filter_data['issue_date'] = $date;
             } catch (Exception) {
                 $ui_filter_data['issue_date'] = null;
             }
