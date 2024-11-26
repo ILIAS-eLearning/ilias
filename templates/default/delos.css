@@ -19222,6 +19222,9 @@ img.il_ExplorerIcon {
 .ilExplorerContainer .jstree-default .jstree-anchor {
   height: auto;
 }
+.ilExplorerContainer .jstree-default .jstree-anchor .ilExp2NodeContent {
+  cursor: pointer;
+}
 
 .jstree-default .jstree-node, .jstree-default .jstree-anchor {
   line-height: inherit;
