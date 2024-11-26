@@ -673,12 +673,14 @@ AND  usr_id = ' . $this->database->quote($userId, 'integer');
             $column_name = $this->overviewTableColumnToDbColumn($key);
 
             if ($key === 'issue_date') {
-                /** @var null|DateTime $value */
-                $sql_filters[] = $this->database->equals(
-                    $column_name,
-                    (string) $value->getTimestamp(),
-                    ilDBConstants::T_INTEGER
-                );
+                /** @var DateTime $value */
+                $sql_filters[] = $column_name
+                    . ' >= '
+                    . $this->database->quote($value->getTimestamp(), ilDBConstants::T_INTEGER)
+                    . " AND "
+                    . $column_name
+                    . ' < '
+                    . $this->database->quote($value->getTimestamp() + 60, ilDBConstants::T_INTEGER);
             } else {
                 $sql_filters[] = $this->database->like($column_name, ilDBConstants::T_TEXT, "%$value%");
             }
