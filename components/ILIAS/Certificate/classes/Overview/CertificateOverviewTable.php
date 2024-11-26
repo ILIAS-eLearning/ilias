@@ -48,6 +48,7 @@ use ilUserCertificateRepository;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ILIAS\UI\Component\Table\Action\Action;
+use Throwable;
 
 class CertificateOverviewTable implements DataRetrieval
 {
@@ -108,17 +109,26 @@ class CertificateOverviewTable implements DataRetrieval
 
         if (isset($ui_filter_data['issue_date']) && $ui_filter_data['issue_date'] !== '') {
             try {
-                $date = new DateTime($ui_filter_data['issue_date']);
-                $date->setTime(
-                    (int) $date->format("H"),
-                    (int) $date->format("i"),
-                );
-                $ui_filter_data['issue_date'] = $date;
-            } catch (Exception) {
-                $ui_filter_data['issue_date'] = null;
+                $from = new DateTime($ui_filter_data['issue_date'][0]);
+            } catch (Throwable) {
+                $from = null;
             }
+
+            try {
+                $to = new DateTime($ui_filter_data['issue_date'][1]);
+            } catch (Throwable) {
+                $to = null;
+            }
+
+            $ui_filter_data['issue_date'] = [
+                "from" => $from,
+                "to" => $to
+            ];
         } else {
-            $ui_filter_data['issue_date'] = null;
+            $ui_filter_data['issue_date'] = [
+                "from" => null,
+                "to" => null
+            ];
         }
 
         $table_rows = $this->buildTableRows($this->repo->fetchCertificatesForOverview(
@@ -144,12 +154,26 @@ class CertificateOverviewTable implements DataRetrieval
 
         if (isset($ui_filter_data['issue_date']) && $ui_filter_data['issue_date'] !== '') {
             try {
-                $ui_filter_data['issue_date'] = new DateTime($ui_filter_data['issue_date']);
-            } catch (Exception) {
-                $ui_filter_data['issue_date'] = null;
+                $from = new DateTime($ui_filter_data['issue_date'][0]);
+            } catch (Throwable) {
+                $from = null;
             }
+
+            try {
+                $to = new DateTime($ui_filter_data['issue_date'][1]);
+            } catch (Throwable) {
+                $to = null;
+            }
+
+            $ui_filter_data['issue_date'] = [
+                "from" => $from,
+                "to" => $to
+            ];
         } else {
-            $ui_filter_data['issue_date'] = null;
+            $ui_filter_data['issue_date'] = [
+                "from" => null,
+                "to" => null
+            ];
         }
 
         return $this->repo->fetchCertificatesForOverviewCount($ui_filter_data);
@@ -158,6 +182,12 @@ class CertificateOverviewTable implements DataRetrieval
 
     private function buildFilter(): \ILIAS\UI\Component\Input\Container\Filter\Standard
     {
+        if ((int) $this->user->getTimeFormat() === ilCalendarSettings::TIME_FORMAT_12) {
+            $date_format = $this->data_factory->dateFormat()->withTime12($this->user->getDateFormat());
+        } else {
+            $date_format = $this->data_factory->dateFormat()->withTime24($this->user->getDateFormat());
+        }
+
         return $this->ui_service->filter()->standard(
             'certificates_overview_filter',
             $this->ctrl->getLinkTargetByClass(
@@ -166,7 +196,10 @@ class CertificateOverviewTable implements DataRetrieval
             ),
             [
                 'certificate_id' => $this->ui_factory->input()->field()->text($this->lng->txt('certificate_id')),
-                'issue_date' => $this->ui_factory->input()->field()->text($this->lng->txt('certificate_issue_date')),
+                'issue_date' => $this->ui_factory->input()->field()
+                    ->duration($this->lng->txt('certificate_issue_date'))
+                    ->withFormat($date_format)
+                    ->withUseTime(true),
                 'object' => $this->ui_factory->input()->field()->text($this->lng->txt('obj')),
                 'obj_id' => $this->ui_factory->input()->field()->text($this->lng->txt('object_id')),
                 'owner' => $this->ui_factory->input()->field()->text($this->lng->txt('owner')),
