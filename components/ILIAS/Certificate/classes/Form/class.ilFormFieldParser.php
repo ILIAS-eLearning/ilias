@@ -91,7 +91,7 @@ class ilFormFieldParser
             }
         }
 
-        $xsl = file_get_contents(__DIR__ . '/../../xml/xhtml2fo.xsl');
+        $xsl = file_get_contents(__DIR__ . '/../../xml/fo2xhtml.xsl');
         if ($content !== '' && (is_string($xsl) && $xsl !== '')) {
             $args = [
                 '/_xml' => $content,
@@ -105,6 +105,9 @@ class ilFormFieldParser
         // dirty hack: the php xslt processing seems not to recognize the following
         // replacements, so we do it in the code as well
         $content = str_replace(["&#xA0;", "&#160;"], "<br />", $content);
+        $content = preg_replace('~\x{00a0}~siu', '', $content);
+        $content = str_replace('<p></p>', '<br/>', $content);
+
 
         return [
             'pageformat' => $pagesize,
