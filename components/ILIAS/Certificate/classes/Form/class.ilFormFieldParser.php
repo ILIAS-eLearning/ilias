@@ -105,9 +105,6 @@ class ilFormFieldParser
         // dirty hack: the php xslt processing seems not to recognize the following
         // replacements, so we do it in the code as well
         $content = str_replace(["&#xA0;", "&#160;"], "<br />", $content);
-        $content = preg_replace('~\x{00a0}~siu', '', $content);
-        $content = str_replace('<p></p>', '<br/>', $content);
-
 
         return [
             'pageformat' => $pagesize,
