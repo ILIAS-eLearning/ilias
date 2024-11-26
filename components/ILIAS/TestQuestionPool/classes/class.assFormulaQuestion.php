@@ -364,7 +364,7 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
                     if (is_array($value)) {
                         $value = $value['value'];
                     }
-                    $input = $this->generateResultInputHTML($result, $value, $forsolution);
+                    $input = $this->generateResultInputHTML($result, (string) $value, $forsolution);
                 } elseif ($forsolution) {
                     $value = '';
                     if (!is_array($userdata)) {

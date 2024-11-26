@@ -199,7 +199,7 @@ class assTextSubsetGUI extends assQuestionGUI implements ilGuiQuestionScoringAdj
         $template = new ilTemplate("tpl.il_as_qpl_textsubset_output_solution.html", true, true, "components/ILIAS/TestQuestionPool");
         $solutiontemplate = new ilTemplate("tpl.il_as_tst_solution_output.html", true, true, "components/ILIAS/TestQuestionPool");
 
-        $available_answers = &$this->object->getAvailableAnswers();
+        $available_answers = $this->object->getAvailableAnswers();
         for ($i = 0; $i < $this->object->getCorrectAnswers(); $i++) {
             if (!array_key_exists($i, $user_solutions) || (strcmp($user_solutions[$i]["value1"], "") == 0)) {
             } else {

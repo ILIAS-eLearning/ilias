@@ -826,7 +826,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
         return $template->get();
     }
 
-    private function buildSolutionsArray(int $active_id, array|bool $user_post_solutions): array
+    private function buildSolutionsArray(int $active_id, array|bool $user_post_solutions, int $pass): array
     {
         if ($active_id === 0) {
             return [];
@@ -880,7 +880,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
         $template = new ilTemplate('tpl.il_as_qpl_matching_output.html', true, true, 'components/ILIAS/TestQuestionPool');
         $this->initializePlayerJS();
 
-        $solutions = $this->buildSolutionsArray($active_id, $user_post_solutions);
+        $solutions = $this->buildSolutionsArray($active_id, $user_post_solutions, $pass);
         $terms = $this->object->getTerms();
         $definitions = $this->object->getDefinitions();
         switch ($this->object->getShuffleMode()) {
@@ -907,7 +907,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
         }
 
         foreach ($definitions as $definition) {
-            $terms = $this->populateDefinition($definition, $solutions, $terms);
+            $terms = $this->populateDefinition($template, $definition, $solutions, $terms);
             $template->setCurrentBlock('droparea');
             $template->setVariable('ID_DROPAREA', $definition->getIdentifier());
             $template->setVariable('QUESTION_ID', $this->object->getId());
