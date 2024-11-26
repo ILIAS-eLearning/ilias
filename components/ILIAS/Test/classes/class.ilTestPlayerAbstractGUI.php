@@ -2762,7 +2762,7 @@ JS;
     protected function getNavigationUrlParameter(): string
     {
         $navigation_url = $this->testrequest->strVal('test_player_navigation_url');
-        if (strlen($navigation_url) !== 0) {
+        if ($navigation_url !== '') {
             $navigation_url_parts = parse_url($navigation_url);
             $ilias_url_parts = parse_url(ilUtil::_getHttpPath());
 

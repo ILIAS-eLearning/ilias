@@ -132,7 +132,7 @@ class ilTestParticipantsGUI
         if ($users_count > 0) {
             $message = $this->lng->txt('tst_invited_selected_users');
         }
-        if (strlen($message) !== 0) {
+        if ($message !== '') {
             $this->main_tpl->setOnScreenMessage('info', $message, true);
         } else {
             $this->main_tpl->setOnScreenMessage('info', $this->lng->txt('tst_invited_nobody'), true);

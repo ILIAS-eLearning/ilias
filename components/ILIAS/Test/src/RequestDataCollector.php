@@ -140,7 +140,7 @@ class RequestDataCollector
 
     public function isMethod(string $method): bool
     {
-        return strtolower($this->http->request()->getMethod()) === strtolower($method);
+        return $this->http->request()->getMethod() === $method;
     }
 
     /**

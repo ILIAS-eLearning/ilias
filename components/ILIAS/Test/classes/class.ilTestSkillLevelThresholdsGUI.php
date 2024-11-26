@@ -89,7 +89,7 @@ class ilTestSkillLevelThresholdsGUI
 
     private function saveSkillThresholdsCmd(): void
     {
-        if ($this->request_data_collector->isMethod('post')) {
+        if ($this->request_data_collector->isMethod('POST')) {
             $assignment_list = $this->buildSkillQuestionAssignmentList();
             $assignment_list->loadFromDb();
 
