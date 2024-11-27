@@ -310,6 +310,7 @@ class Administration
         }
 
         $repo = $this->config->legalDocuments()->document()->repository();
+
         return $this->refinery->kindlyTo()->int()->applyTo(new Ok($doc_id))->then($repo->find(...));
     }
 
