@@ -118,6 +118,7 @@ class DocumentTable implements OrderingBinding
         if ($this->edit_links) {
             $table = $table->withActions($this->buildTableActions());
         }
+
         return $table;
     }
 
