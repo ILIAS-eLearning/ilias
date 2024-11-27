@@ -133,7 +133,7 @@ class DocumentTable implements OrderingBinding
 
     /**
      * @param Document[] $documents
-     * @return array
+     * @return array{id: int, title: string, created: DateTimeImmutable, change: DateTimeImmutable, criteria: string}
      */
     private function buildTableRows(array $documents): array
     {
@@ -197,6 +197,9 @@ class DocumentTable implements OrderingBinding
         return $this->ui_renderer->render($this->table);
     }
 
+    /**
+     * @return array{deleteDocuments: Multi, editDocument: Single, addCriterion: Single, deleteDocument: Single}
+     */
     private function buildTableActions(): array
     {
         return [
