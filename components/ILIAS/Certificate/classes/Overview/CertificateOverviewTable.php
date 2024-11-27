@@ -62,6 +62,7 @@ class CertificateOverviewTable implements DataRetrieval
     private readonly Renderer $ui_renderer;
     private readonly ilAccessHandler $access;
     private readonly ilObjUser $user;
+    private readonly \DateTimeZone $user_timezone;
 
     public function __construct(
         ?Factory $ui_factory = null,
@@ -86,6 +87,7 @@ class CertificateOverviewTable implements DataRetrieval
         $this->ui_renderer = $ui_renderer ?: $DIC->ui()->renderer();
         $this->access = $access ?: $DIC->access();
         $this->user = $user ?: $DIC->user();
+        $this->user_timezone = new \DateTimeZone($this->user->getTimeZone());
 
         $this->filter = $this->buildFilter();
         $this->table = $this->buildTable();
@@ -107,13 +109,13 @@ class CertificateOverviewTable implements DataRetrieval
 
         if (isset($ui_filter_data['issue_date']) && $ui_filter_data['issue_date'] !== '') {
             try {
-                $from = new DateTimeImmutable($ui_filter_data['issue_date'][0]);
+                $from = new DateTimeImmutable($ui_filter_data['issue_date'][0], $this->user_timezone);
             } catch (Throwable) {
                 $from = null;
             }
 
             try {
-                $to = new DateTimeImmutable($ui_filter_data['issue_date'][1]);
+                $to = new DateTimeImmutable($ui_filter_data['issue_date'][1], $this->user_timezone);
             } catch (Throwable) {
                 $to = null;
             }
@@ -137,12 +139,10 @@ class CertificateOverviewTable implements DataRetrieval
             $order_direction
         ));
 
-        $user_timezone = new \DateTimeZone($this->user->getTimeZone());
-
         foreach ($table_rows as $row) {
             $row['issue_date'] = (new DateTimeImmutable())
                 ->setTimestamp($row['issue_date'])
-                ->setTimezone($user_timezone);
+                ->setTimezone($this->user_timezone);
             yield $row_builder->buildDataRow((string) $row['id'], $row);
         }
     }
@@ -156,13 +156,13 @@ class CertificateOverviewTable implements DataRetrieval
 
         if (isset($ui_filter_data['issue_date']) && $ui_filter_data['issue_date'] !== '') {
             try {
-                $from = new DateTimeImmutable($ui_filter_data['issue_date'][0]);
+                $from = new DateTimeImmutable($ui_filter_data['issue_date'][0], $this->user_timezone);
             } catch (Throwable) {
                 $from = null;
             }
 
             try {
-                $to = new DateTimeImmutable($ui_filter_data['issue_date'][1]);
+                $to = new DateTimeImmutable($ui_filter_data['issue_date'][1], $this->user_timezone);
             } catch (Throwable) {
                 $to = null;
             }
