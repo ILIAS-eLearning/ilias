@@ -177,6 +177,7 @@ class DocumentTable implements OrderingBinding
                 'criteria' => $this->ui_renderer->render($criterion_components),
             ];
         }
+
         return $table_rows;
     }
 
