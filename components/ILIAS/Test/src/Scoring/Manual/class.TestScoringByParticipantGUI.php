@@ -423,7 +423,7 @@ class TestScoringByParticipantGUI extends \ilTestServiceGUI
                     true,
                     false
                 );
-                if ($aresult_output) {
+                if ($aresult_output !== null) {
                     $cust = new \ilCustomInputGUI($this->lng->txt('autosavecontent'));
                     $cust->setHtml($aresult_output);
                     $form->addItem($cust);

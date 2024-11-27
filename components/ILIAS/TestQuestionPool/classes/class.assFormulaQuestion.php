@@ -592,7 +592,7 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
             "
 		DELETE FROM il_qpl_qst_fq_var
 		WHERE question_fi = %s",
-            ["integer"],
+            ['integer'],
             [$this->getId()]
         );
 
@@ -617,7 +617,7 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
         // save results
         $affectedRows = $this->db->manipulateF(
             "DELETE FROM il_qpl_qst_fq_res WHERE question_fi = %s",
-            ["integer"],
+            ['integer'],
             [$this->getId()]
         );
 
@@ -635,16 +635,16 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
             }
 
             $this->db->insert("il_qpl_qst_fq_res", [
-                "result_id" => ["integer", $next_id],
-                "question_fi" => ["integer", $this->getId()],
+                "result_id" => ['integer', $next_id],
+                "question_fi" => ['integer', $this->getId()],
                 "result" => ["text", $result->getResult()],
                 "range_min" => ["float", $result->getRangeMin()],
                 "range_max" => ["float", $result->getRangeMax()],
                 "tolerance" => ["float", $result->getTolerance()],
-                "unit_fi" => ["integer", (int) $tmp_result_unit],
+                "unit_fi" => ['integer', (int) $tmp_result_unit],
                 "formula" => ["clob", $formula],
-                "resprecision" => ["integer", $result->getPrecision()],
-                "rating_simple" => ["integer", ($result->getRatingSimple()) ? 1 : 0],
+                "resprecision" => ['integer', $result->getPrecision()],
+                "rating_simple" => ['integer', ($result->getRatingSimple()) ? 1 : 0],
                 "rating_sign" => ["float", ($result->getRatingSimple()) ? 0 : $result->getRatingSign()],
                 "rating_value" => ["float", ($result->getRatingSimple()) ? 0 : $result->getRatingValue()],
                 "rating_unit" => ["float", ($result->getRatingSimple()) ? 0 : $result->getRatingUnit()],
@@ -658,7 +658,7 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
         // save result units
         $affectedRows = $this->db->manipulateF(
             "DELETE FROM il_qpl_qst_fq_res_unit WHERE question_fi = %s",
-            ["integer"],
+            ['integer'],
             [$this->getId()]
         );
         foreach ($this->results as $result) {
@@ -1237,20 +1237,20 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
         if ($maxStep > 0) {
             $data = $this->db->queryF(
                 "SELECT value1, value2 FROM tst_solutions WHERE active_fi = %s AND pass = %s AND question_fi = %s AND step = %s",
-                ["integer", "integer", "integer",'integer'],
+                ['integer', 'integer', 'integer','integer'],
                 [$active_id, $pass, $this->getId(), $maxStep]
             );
         } else {
             $data = $this->db->queryF(
                 "SELECT value1, value2 FROM tst_solutions WHERE active_fi = %s AND pass = %s AND question_fi = %s",
-                ["integer", "integer", "integer"],
+                ['integer', 'integer', 'integer'],
                 [$active_id, $pass, $this->getId()]
             );
         }
 
         while ($row = $this->db->fetchAssoc($data)) {
-            if (strstr($row["value1"], '$r') && $row["value2"] != null) {
-                $result->addKeyValue(str_replace('$r', "", $row["value1"]), $row["value2"]);
+            if (strstr($row['value1'], '$r') && $row['value2'] != null) {
+                $result->addKeyValue(str_replace('$r', "", $row['value1']), $row['value2']);
             }
         }
 
@@ -1437,18 +1437,18 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
         $solutions = parent::getSolutionValues($active_id, $pass, $authorized);
         $user_solution = [];
         foreach ($solutions as $idx => $solution_value) {
-            if (preg_match("/^(\\\$v\\d+)$/", $solution_value["value1"], $matches)) {
-                $user_solution[$matches[1]] = $solution_value["value2"];
-            } elseif (preg_match("/^(\\\$r\\d+)$/", $solution_value["value1"], $matches)) {
+            if (preg_match('/^(\\\$v\\d+)$/', $solution_value['value1'], $matches)) {
+                $user_solution[$matches[1]] = $solution_value['value2'];
+            } elseif (preg_match('/^(\\\$r\\d+)$/', $solution_value['value1'], $matches)) {
                 if (!array_key_exists($matches[1], $user_solution)) {
                     $user_solution[$matches[1]] = array();
                 }
-                $user_solution[$matches[1]]["value"] = $solution_value["value2"];
-            } elseif (preg_match("/^(\\\$r\\d+)_unit$/", $solution_value["value1"], $matches)) {
+                $user_solution[$matches[1]]['value'] = $solution_value['value2'];
+            } elseif (preg_match('/^(\\\$r\\d+)_unit$/', $solution_value['value1'], $matches)) {
                 if (!array_key_exists($matches[1], $user_solution)) {
                     $user_solution[$matches[1]] = array();
                 }
-                $user_solution[$matches[1]]["unit"] = $solution_value["value2"];
+                $user_solution[$matches[1]]['unit'] = $solution_value['value2'];
             }
         }
         return $user_solution;

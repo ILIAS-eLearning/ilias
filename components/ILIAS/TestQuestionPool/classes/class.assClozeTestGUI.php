@@ -858,7 +858,6 @@ JS;
         bool $show_autosave_title = false,
         bool $show_inline_feedback = false,
     ): ?string {
-
         $template = new ilTemplate("tpl.il_as_qpl_cloze_question_output_solution.html", true, true, "components/ILIAS/TestQuestionPool");
         $output = $this->object->getClozeTextForHTMLOutput();
         $assClozeGapCombinationObject = new assClozeGapCombination();

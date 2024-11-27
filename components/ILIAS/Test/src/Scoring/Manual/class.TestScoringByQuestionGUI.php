@@ -364,7 +364,6 @@ class TestScoringByQuestionGUI extends TestScoringByParticipantGUI
         int $active_id,
         int $attempt
     ): ?StandardPanel {
-
         $autosave_content = $question_gui->getAutoSavedSolutionOutput(
             $active_id,
             $attempt,
@@ -373,7 +372,7 @@ class TestScoringByQuestionGUI extends TestScoringByParticipantGUI
             false,
             $this->object->getShowSolutionFeedback(),
         );
-        if (!$autosave_content) {
+        if ($autosave_content === null) {
             return null;
         }
 

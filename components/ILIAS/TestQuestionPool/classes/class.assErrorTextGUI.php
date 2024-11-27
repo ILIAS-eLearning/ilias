@@ -236,7 +236,7 @@ class assErrorTextGUI extends assQuestionGUI implements ilGuiQuestionScoringAdju
         bool $show_question_text = true,
         bool $show_inline_feedback = true
     ): string {
-        $user_solutions = $this->getUsersSolutionFromPreviewOrDatabase((int) $active_id, $pass);
+        $user_solutions = $this->getUsersSolutionFromPreviewOrDatabase($active_id, $pass);
         return $this->renderSolutionOutput(
             $user_solutions,
             $active_id,
@@ -272,7 +272,7 @@ class assErrorTextGUI extends assQuestionGUI implements ilGuiQuestionScoringAdju
         $selections = [
             'user' => $user_solutions ?
                 $user_solutions :
-                $this->getUsersSolutionFromPreviewOrDatabase((int) $active_id, $pass)
+                $this->getUsersSolutionFromPreviewOrDatabase($active_id, $pass)
         ];
         $selections['best'] = $this->object->getBestSelection();
 
@@ -308,7 +308,7 @@ class assErrorTextGUI extends assQuestionGUI implements ilGuiQuestionScoringAdju
         $feedback = '';
         if ($show_feedback) {
             if (!$this->isTestPresentationContext()) {
-                $fb = $this->getGenericFeedbackOutput((int) $active_id, $pass);
+                $fb = $this->getGenericFeedbackOutput($active_id, $pass);
                 $feedback .= mb_strlen($fb) ? $fb : '';
             }
 
