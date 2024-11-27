@@ -38,6 +38,7 @@ use ILIAS\LegalDocuments\Value\Document;
 use ILIAS\UI\Component\Component;
 use ILIAS\UI\Component\Table\Action\Single;
 use ILIAS\UI\Component\Table\OrderingBinding;
+use ILIAS\UI\Component\Table\OrderingRow;
 use ILIAS\UI\Component\Table\OrderingRowBuilder;
 use ILIAS\UI\Component\Table\Action\Multi;
 use ILIAS\UI\Component\Table\Ordering;
@@ -126,60 +127,51 @@ class DocumentTable implements OrderingBinding
         OrderingRowBuilder $row_builder,
         array $visible_column_ids
     ): Generator {
-        foreach ($this->buildTableRows($this->records) as $row) {
-            yield $row_builder->buildOrderingRow((string) $row['id'], $row);
+        foreach ($this->records as $document) {
+            yield $this->buildTableRow($row_builder, $document);
         }
     }
 
-    /**
-     * @param Document[] $documents
-     * @return array{id: int, title: string, created: DateTimeImmutable, change: DateTimeImmutable, criteria: string}
-     */
-    private function buildTableRows(array $documents): array
+    private function buildTableRow(OrderingRowBuilder $row_builder, Document $document): OrderingRow
     {
-        $table_rows = [];
+        $criterion_components = [];
+        foreach ($document->criteria() as $criterion) {
+            $criterion_components[] = $this->ui->create()->legacy('<div style="display: flex; gap: 1rem;">');
+            $criterion_components[] = $this->criterionName($criterion);
 
-        foreach ($documents as $document) {
-            $criterion_components = [];
-            foreach ($document->criteria() as $criterion) {
-                $criterion_components[] = $this->ui->create()->legacy('<div style="display: flex; gap: 1rem;">');
-                $criterion_components[] = $this->criterionName($criterion);
+            if ($this->edit_links) {
+                $delete_modal = $this->ui->create()->modal()->interruptive(
+                    $this->ui->txt('doc_detach_crit_confirm_title'),
+                    $this->ui->txt('doc_sure_detach_crit'),
+                    $this->edit_links->deleteCriterion($document, $criterion)
+                );
 
-                if ($this->edit_links) {
-                    $delete_modal = $this->ui->create()->modal()->interruptive(
-                        $this->ui->txt('doc_detach_crit_confirm_title'),
-                        $this->ui->txt('doc_sure_detach_crit'),
-                        $this->edit_links->deleteCriterion($document, $criterion)
-                    );
+                $dropdown = $this->ui->create()->dropdown()->standard([
+                    $this->ui->create()->button()->shy(
+                        $this->ui->txt('edit'),
+                        $this->edit_links->editCriterion($document, $criterion)
+                    ),
+                    $this->ui->create()->button()->shy(
+                        $this->ui->txt('delete'),
+                        ''
+                    )->withOnClick($delete_modal->getShowSignal())
+                ]);
 
-                    $dropdown = $this->ui->create()->dropdown()->standard([
-                        $this->ui->create()->button()->shy(
-                            $this->ui->txt('edit'),
-                            $this->edit_links->editCriterion($document, $criterion)
-                        ),
-                        $this->ui->create()->button()->shy(
-                            $this->ui->txt('delete'),
-                            ''
-                        )->withOnClick($delete_modal->getShowSignal())
-                    ]);
-
-                    $criterion_components[] = $delete_modal;
-                    $criterion_components[] = $dropdown;
-                }
-
-                $criterion_components[] = $this->ui->create()->legacy('</div>');
+                $criterion_components[] = $delete_modal;
+                $criterion_components[] = $dropdown;
             }
 
-            $table_rows[] = [
-                'id' => $document->id(),
-                'title' => $this->ui_renderer->render($this->modal->create($document->content())),
-                'created' => $document->meta()->creation()->time(),
-                'change' => $document->meta()->lastModification()->time(),
-                'criteria' => $this->ui_renderer->render($criterion_components),
-            ];
+            $criterion_components[] = $this->ui->create()->legacy('</div>');
         }
 
-        return $table_rows;
+        $table_row = [
+            'id' => $document->id(),
+            'title' => $this->ui_renderer->render($this->modal->create($document->content())),
+            'created' => $document->meta()->creation()->time(),
+            'change' => $document->meta()->lastModification()->time(),
+            'criteria' => $this->ui_renderer->render($criterion_components),
+        ];
+        return $row_builder->buildOrderingRow((string) $document->id(), $table_row);
     }
 
     public function criterionName(Criterion $criterion): Component
