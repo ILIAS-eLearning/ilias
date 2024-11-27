@@ -237,6 +237,7 @@ class DocumentTable implements OrderingBinding
                 $row_id_token
             );
         }
+
         return $this->ui->create()->table()->action()->single(
             $title,
             $url_builder->withParameter($action_parameter_token, $cmd),
