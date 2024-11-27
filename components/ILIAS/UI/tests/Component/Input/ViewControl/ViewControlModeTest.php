@@ -90,10 +90,8 @@ class ViewControlModeTest extends ViewControlTestBase
 
         $expected = $this->brutallyTrimHTML('
             <div class="il-viewcontrol il-viewcontrol-mode l-bar__element">
-                <div>
-                    <button class="btn btn-default" aria-pressed="false" data-action="#" id="id_1">A</button>
-                    <button class="btn btn-default" aria-pressed="false" data-action="#" id="id_2">B</button>
-                </div>
+                <button class="btn btn-default" aria-pressed="false" data-action="#" id="id_1">A</button>
+                <button class="btn btn-default" aria-pressed="false" data-action="#" id="id_2">B</button>
                 <div class="il-viewcontrol-value" role="none">
                     <input type="hidden" name="" value="" />
                 </div>
