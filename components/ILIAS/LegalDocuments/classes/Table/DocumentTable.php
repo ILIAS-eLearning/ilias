@@ -18,7 +18,6 @@
 
 declare(strict_types=1);
 
-
 namespace ILIAS\LegalDocuments\Table;
 
 use Closure;
@@ -69,19 +68,18 @@ class DocumentTable implements OrderingBinding
     private array $records;
 
     public function __construct(
-        private readonly Closure                     $criterion_as_component,
-        private readonly DocumentRepository          $repository,
-        private readonly UI                          $ui,
-        private readonly DocumentModal               $modal,
-        private readonly object                      $gui,
-        private readonly ?EditLinks                  $edit_links = null,
+        private readonly Closure $criterion_as_component,
+        private readonly DocumentRepository $repository,
+        private readonly UI $ui,
+        private readonly DocumentModal $modal,
+        private readonly object $gui,
+        private readonly ?EditLinks $edit_links = null,
         ServerRequestInterface|RequestInterface|null $request = null,
-        ?Factory                                     $data_factory = null,
-        ?ilCtrl                                      $ctrl = null,
-        ?Renderer                                    $ui_renderer = null,
-        ?ilObjUser                                   $user = null
-    )
-    {
+        ?Factory $data_factory = null,
+        ?ilCtrl $ctrl = null,
+        ?Renderer $ui_renderer = null,
+        ?ilObjUser $user = null
+    ) {
         global $DIC;
         $this->request = $request ?: $DIC->http()->request();
         $this->data_factory = $data_factory ?: new Factory();
@@ -125,9 +123,8 @@ class DocumentTable implements OrderingBinding
 
     public function getRows(
         OrderingRowBuilder $row_builder,
-        array              $visible_column_ids
-    ): Generator
-    {
+        array $visible_column_ids
+    ): Generator {
         foreach ($this->buildTableRows($this->records) as $row) {
             yield $row_builder->buildOrderingRow((string) $row['id'], $row);
         }

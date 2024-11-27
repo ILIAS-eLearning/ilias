@@ -68,7 +68,7 @@ class Administration
         ?Factory $refinery = null
     ) {
         $this->confirmation = $confirmation ?? fn() => new Confirmation($this->container->language());
-        $this->http_wrapper = $http_wrapper ?? $this->container->http()->wrapper(); 
+        $this->http_wrapper = $http_wrapper ?? $this->container->http()->wrapper();
         $this->refinery = $refinery ?? $this->container->refinery();
     }
 
