@@ -20,9 +20,7 @@ declare(strict_types=1);
 
 namespace ILIAS\Certificate\Overview;
 
-use DateTime;
 use DateTimeImmutable;
-use Exception;
 use Generator;
 use ilAccessHandler;
 use ilCalendarSettings;
@@ -102,32 +100,32 @@ class CertificateOverviewTable implements DataRetrieval
         ?array $additional_parameters
     ): Generator {
         /**
-         * @var array{certificate_id: null|string, issue_date: null|DateTime, object: null|string, owner: null|string} $filter_data
+         * @var array{certificate_id: null|string, issue_date: null|DateTimeImmutable, object: null|string, owner: null|string} $filter_data
          */
         $ui_filter_data = $this->ui_service->filter()->getData($this->filter);
         [$order_field, $order_direction] = $order->join([], fn($ret, $key, $value) => [$key, $value]);
 
         if (isset($ui_filter_data['issue_date']) && $ui_filter_data['issue_date'] !== '') {
             try {
-                $from = new DateTime($ui_filter_data['issue_date'][0]);
+                $from = new DateTimeImmutable($ui_filter_data['issue_date'][0]);
             } catch (Throwable) {
                 $from = null;
             }
 
             try {
-                $to = new DateTime($ui_filter_data['issue_date'][1]);
+                $to = new DateTimeImmutable($ui_filter_data['issue_date'][1]);
             } catch (Throwable) {
                 $to = null;
             }
 
             $ui_filter_data['issue_date'] = [
-                "from" => $from,
-                "to" => $to
+                'from' => $from,
+                'to' => $to
             ];
         } else {
             $ui_filter_data['issue_date'] = [
-                "from" => null,
-                "to" => null
+                'from' => null,
+                'to' => null
             ];
         }
 
@@ -139,8 +137,12 @@ class CertificateOverviewTable implements DataRetrieval
             $order_direction
         ));
 
+        $user_timezone = new \DateTimeZone($this->user->getTimeZone());
+
         foreach ($table_rows as $row) {
-            $row['issue_date'] = DateTimeImmutable::createFromMutable((new DateTime())->setTimestamp($row['issue_date']));
+            $row['issue_date'] = (new DateTimeImmutable())
+                ->setTimestamp($row['issue_date'])
+                ->setTimezone($user_timezone);
             yield $row_builder->buildDataRow((string) $row['id'], $row);
         }
     }
@@ -148,31 +150,31 @@ class CertificateOverviewTable implements DataRetrieval
     public function getTotalRowCount(?array $filter_data, ?array $additional_parameters): ?int
     {
         /**
-         * @var array{certificate_id: null|string, issue_date: null|DateTime, object: null|string, owner: null|string} $filter_data
+         * @var array{certificate_id: null|string, issue_date: null|DateTimeImmutable, object: null|string, owner: null|string} $filter_data
          */
         $ui_filter_data = $this->ui_service->filter()->getData($this->filter);
 
         if (isset($ui_filter_data['issue_date']) && $ui_filter_data['issue_date'] !== '') {
             try {
-                $from = new DateTime($ui_filter_data['issue_date'][0]);
+                $from = new DateTimeImmutable($ui_filter_data['issue_date'][0]);
             } catch (Throwable) {
                 $from = null;
             }
 
             try {
-                $to = new DateTime($ui_filter_data['issue_date'][1]);
+                $to = new DateTimeImmutable($ui_filter_data['issue_date'][1]);
             } catch (Throwable) {
                 $to = null;
             }
 
             $ui_filter_data['issue_date'] = [
-                "from" => $from,
-                "to" => $to
+                'from' => $from,
+                'to' => $to
             ];
         } else {
             $ui_filter_data['issue_date'] = [
-                "from" => null,
-                "to" => null
+                'from' => null,
+                'to' => null
             ];
         }
 
@@ -219,7 +221,6 @@ class CertificateOverviewTable implements DataRetrieval
         } else {
             $date_format = $this->data_factory->dateFormat()->withTime24($this->user->getDateFormat());
         }
-
         return $ui_table->data(
             $this->lng->txt('certificates'),
             [

@@ -653,7 +653,7 @@ AND  usr_id = ' . $this->database->quote($userId, 'integer');
 
     /**
      * @return ilUserCertificate[]
-     * @var array{certificate_id: null|string, issue_date: null|DateTime, object: null|string, owner: null|string} $filter
+     * @var array{certificate_id: null|string, issue_date: null|DateTimeImmutable, object: null|string, owner: null|string} $filter
      */
     public function fetchCertificatesForOverview(
         string $user_language,
@@ -712,7 +712,7 @@ AND  usr_id = ' . $this->database->quote($userId, 'integer');
     }
 
     /**
-     * @param array{from: null|DateTime, to: null|DateTime} $duration
+     * @param array{from: null|DateTimeImmutable, to: null|DateTimeImmutable} $duration
      */
     private function getIssueDateSqlFilter(string $column_name, array $duration): ?string
     {
@@ -749,7 +749,7 @@ AND  usr_id = ' . $this->database->quote($userId, 'integer');
     }
 
     /**
-     * @var array{certificate_id: null|string, issue_date: array{from: null|DateTime, to: null|DateTime}, object: null|string, owner: null|string} $filter
+     * @var array{certificate_id: null|string, issue_date: array{from: null|DateTimeImmutable, to: null|DateTimeImmutable}, object: null|string, owner: null|string} $filter
      */
     public function fetchCertificatesForOverviewCount(array $filter, ?Range $range = null): int
     {
