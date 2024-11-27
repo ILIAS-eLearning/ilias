@@ -19,6 +19,7 @@
 declare(strict_types=1);
 
 use Pimple\Container;
+use GuzzleHttp\Psr7\Uri as GuzzlURI;
 
 class ilStudyProgrammeDIC
 {
@@ -57,6 +58,59 @@ class ilStudyProgrammeDIC
             );
         };
 
+        $dic['ilStudyProgrammeAssignmentsTable'] = function ($dic) use ($DIC, $prg) {
+
+            $endpoint_url = (new \ILIAS\Data\Factory())->uri(
+                GuzzlURI::withQueryValue(
+                    $DIC['http']->request()->getUri(),
+                    'cmd',
+                    ilObjStudyProgrammeMembersGUI::TABLE_COMMAND
+                )
+                ->__toString()
+            );
+            $url_builder = new \ILIAS\UI\URLBuilder($endpoint_url);
+
+            return new ilStudyProgrammeAssignmentsTable(
+                $dic['ui.factory'],
+                $DIC->refinery(),
+                $dic['ilStudyProgrammeAssignmentsTableQuery'],
+                $dic['ilStudyProgrammeUserTable'],
+                $dic['filter.assignment'],
+                $DIC['http']->wrapper(),
+                $url_builder,
+                $dic['permissionhelper'],
+                $DIC['lng'],
+                (int) $DIC['ilUser']->getId(),
+                $prg->getId(),
+                $prg->hasLPChildren(),
+                $prg->isCertificateActive()
+            );
+        };
+
+        $dic['ilStudyProgrammeAssignmentsTableActions'] = static fn($dic): ilStudyProgrammeAssignmentsTableActions =>
+            new ilStudyProgrammeAssignmentsTableActions(
+                $dic['ui.factory'],
+                $dic['ui.renderer'],
+                $DIC->refinery(),
+                $DIC['ilCtrl'],
+                $DIC['lng'],
+                $prg,
+                $dic['repo.assignment'],
+                $dic['ilStudyProgrammeAssignmentsTableQuery'],
+                $dic['permissionhelper'],
+                $dic['PRGMessages'],
+                $DIC['ilUser']
+            );
+
+        $dic['ilStudyProgrammeAssignmentsTableQuery'] = static fn($dic): ilStudyProgrammeAssignmentsTableQuery =>
+            new ilStudyProgrammeAssignmentsTableQuery(
+                $DIC->http(),
+                $DIC->refinery(),
+                $dic['DataFactory'],
+                ['prg_ass', $prg->getId()]
+            );
+
+
         $dic['model.Settings.ilStudyProgrammeSettingsRepository'] = function ($dic) use ($DIC) {
             return new ilStudyProgrammeSettingsDBRepository(
                 $DIC['ilDB']
@@ -71,11 +125,15 @@ class ilStudyProgrammeDIC
                 ilExportFieldsInfo::_getInstanceByType('prg')
             );
         };
-        $dic['filter.assignment'] = function ($dic) use ($DIC): ilPRGAssignmentFilter {
-            return new ilPRGAssignmentFilter(
-                $DIC['lng']
-            );
-        };
+
+        $dic['filter.assignment'] = static fn($dic): ilPRGAssignmentFilter =>
+             new ilPRGAssignmentFilter(
+                 $DIC['lng'],
+                 $DIC['ui.factory'],
+                 $DIC->uiService()->filter(),
+                 'prg_ass_filter_' . $prg->getId(),
+             );
+
 
         $dic['Log'] = static fn($dic) =>
             ilLoggerFactory::getLogger('prg');
@@ -229,6 +287,8 @@ class ilStudyProgrammeDIC
                 $DIC->http()->wrapper(),
                 $DIC->refinery(),
                 $DIC['ui.factory'],
+                $DIC['ui.renderer'],
+                $DIC['http']->request(),
             );
         $dic['ilObjStudyProgrammeAutoMembershipsGUI'] = static fn($dic) =>
             new ilObjStudyProgrammeAutoMembershipsGUI(
@@ -400,6 +460,17 @@ class ilStudyProgrammeDIC
                 $dic['repo.assignment'],
                 $dic['model.Settings.ilStudyProgrammeSettingsRepository'],
                 $dic['current_user']->getId()
+            );
+
+        $dic['certhelper'] = static fn($dic): ilPRGCertificateHelper =>
+            new ilPRGCertificateHelper(
+                $dic['Log'],
+                new ilCertificateTypeClassMap(),
+                new ilCertificateTemplateDatabaseRepository(
+                    $DIC['ilDB']
+                ),
+                new ilCertificateCron(),
+                new ilUserCertificateRepository()
             );
 
         return $dic;

@@ -18,21 +18,15 @@
 
 declare(strict_types=1);
 
-trait ilPRGCertificateHelper
+class ilPRGCertificateHelper
 {
-    protected \ilLogger $log;
-    protected \ilCertificateTemplateRepository $certificate_template_repository;
-    protected \ilCertificateTypeClassMap $certificate_type_class_map;
-    protected \ilCertificateCron $certificate_cron;
-    protected ilUserCertificateRepository $user_certificate_repository;
-
-    public function init(): void
+    public function __construct(): void
     {
-        global $DIC;
-        $this->log = $DIC['ilLog'];
-        $this->certificate_type_class_map = new ilCertificateTypeClassMap();
-        $this->certificate_template_repository = new ilCertificateTemplateDatabaseRepository($DIC->database());
-        $this->certificate_cron = new ilCertificateCron();
+        private \ilLogger $log,
+        private \ilCertificateTemplateRepository $certificate_template_repository,
+        private \ilCertificateTypeClassMap $certificate_type_class_map,
+        private \ilCertificateCron $certificate_cron,
+        private ilUserCertificateRepository $user_certificate_repository
     }
 
     public function updateCertificateForPrg(
@@ -62,8 +56,7 @@ trait ilPRGCertificateHelper
         int $node_id,
         int $usr_id,
     ): void {
-        $user_certificate_repository = new ilUserCertificateRepository();
-        $user_certificate_repository->deleteUserCertificatesForObject($usr_id, $node_id);
+        $this->user_certificate_repository->deleteUserCertificatesForObject($usr_id, $node_id);
     }
 
     private function processEntry(

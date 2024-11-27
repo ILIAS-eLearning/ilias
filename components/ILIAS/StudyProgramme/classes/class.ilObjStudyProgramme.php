@@ -66,6 +66,8 @@ class ilObjStudyProgramme extends ilContainer
     protected ?ilObjectFactoryWrapper $object_factory = null;
     protected ilObjectCustomIconFactory $custom_icon_factory;
     protected ilLogger $logger;
+    protected ilPRGAssignmentFilter $ass_filter;
+    protected ?ilPRGCertificateHelper $cert_helper = null;
 
     /**
      * ATTENTION: After using the constructor the object won't be in the cache.
@@ -80,10 +82,11 @@ class ilObjStudyProgramme extends ilContainer
         $this->auto_categories_repository = $dic['model.AutoCategories.ilStudyProgrammeAutoCategoriesRepository'];
         $this->auto_memberships_repository = $dic['model.AutoMemberships.ilStudyProgrammeAutoMembershipsRepository'];
         $this->membersourcereader_factory = $dic['model.AutoMemberships.ilStudyProgrammeMembershipSourceReaderFactory'];
-
         $this->settings_repository = $dic['model.Settings.ilStudyProgrammeSettingsRepository'];
         $this->assignment_repository = $dic['repo.assignment'];
         $this->events = $dic['ilStudyProgrammeEvents'];
+        $this->logger = $dic['Log'];
+        $this->cert_helper = $dic['certhelper'];
 
         parent::__construct($id, $call_by_reference);
 
@@ -92,20 +95,18 @@ class ilObjStudyProgramme extends ilContainer
         $this->clearLPChildrenCache();
 
         global $DIC;
-        $tree = $DIC['tree'];
-        $ilUser = $DIC['ilUser'];
         $this->webdir = $DIC->filesystem()->web();
-        $this->tree = $tree;
-        $this->ilUser = $ilUser;
+        $this->tree = $DIC['tree'];
+        $this->ilUser = $DIC['ilUser'];
         $this->db = $DIC['ilDB'];
         $this->lng = $DIC['lng'];
-        $this->logger = ilLoggerFactory::getLogger($this->type);
+        $this->custom_icon_factory = $DIC['object.customicons.factory'];
 
         $this->object_factory = ilObjectFactoryWrapper::singleton();
 
-        $this->custom_icon_factory = $DIC['object.customicons.factory'];
 
         self::initStudyProgrammeCache();
+        $this->ass_filter = ilStudyProgrammeDIC::specificDicFor($this)['filter.assignment'];
     }
 
     public static function initStudyProgrammeCache(): void
@@ -1122,11 +1123,10 @@ class ilObjStudyProgramme extends ilContainer
      */
     public function hasAssignments(): bool
     {
-        $filter = new ilPRGAssignmentFilter($this->lng);
         $count = $this->assignment_repository->countAllForNodeIsContained(
             $this->getId(),
             null,
-            $filter
+            $this->ass_filter
         );
         return $count > 0;
 
@@ -1173,7 +1173,7 @@ class ilObjStudyProgramme extends ilContainer
      */
     public function hasRelevantProgresses(): bool
     {
-        $filter = new ilPRGAssignmentFilter($this->lng);
+        $filter = $this->ass_filter;
         $filter = $filter->withValues([
             'prg_status_hide_irrelevant' => true
         ]);
@@ -1552,7 +1552,7 @@ class ilObjStudyProgramme extends ilContainer
     /**
      * @throws ilException
      */
-    public static function setProgressesCompletedIfParentIsProgrammeInLPCompletedMode(
+    protected static function setProgressesCompletedIfParentIsProgrammeInLPCompletedMode(
         int $ref_id,
         int $obj_id,
         int $user_id
@@ -1858,6 +1858,29 @@ class ilObjStudyProgramme extends ilContainer
         }
         $this->assignment_repository->store($assignment);
         $this->refreshLPStatus($assignment->getUserId());
+    }
+
+
+    private function getCertificateHelper() : ilPRGCertificateHelper {
+        if (! $this->cert_helper) {
+            $dic = ilStudyProgrammeDIC::dic();
+            $this->cert_helper = $dic['certhelper'];
+        }
+        return $this->cert_helper;
+    }
+
+    public function updateCertificate(
+        int $node_id,
+        int $usr_id
+    ): bool {
+        return $this->getCertificateHelper()->updateCertificateForPrg($node_id, $usr_id);
+    }
+
+    public function removeCertificate(
+        int $node_id,
+        int $usr_id
+    ): void {
+        return $this->getCertificateHelper()->removeCertificateForUser($node_id, $usr_id);
     }
 
     public function canBeCompleted(ilPRGProgress $progress): bool
