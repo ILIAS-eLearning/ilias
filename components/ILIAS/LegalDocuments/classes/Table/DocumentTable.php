@@ -63,11 +63,6 @@ class DocumentTable implements OrderingBinding
     private readonly Renderer $ui_renderer;
     private ilObjUser $user;
 
-    /**
-     * @var Document[]
-     */
-    private array $records;
-
     public function __construct(
         private readonly Closure $criterion_as_component,
         private readonly DocumentRepository $repository,
@@ -89,7 +84,6 @@ class DocumentTable implements OrderingBinding
         $this->user = $user ?: $DIC->user();
 
         $this->table = $this->buildTable();
-        $this->records = $this->repository->all();
     }
 
     private function buildTable(): Ordering
@@ -127,7 +121,7 @@ class DocumentTable implements OrderingBinding
         OrderingRowBuilder $row_builder,
         array $visible_column_ids
     ): Generator {
-        foreach ($this->records as $document) {
+        foreach ($this->repository->all() as $document) {
             yield $this->buildTableRow($row_builder, $document);
         }
     }
