@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace ILIAS\Certificate\Overview;
 
+use DateInterval;
 use DateTimeImmutable;
 use Generator;
 use ilAccessHandler;
@@ -116,6 +117,7 @@ class CertificateOverviewTable implements DataRetrieval
 
             try {
                 $to = new DateTimeImmutable($ui_filter_data['issue_date'][1], $this->user_timezone);
+                $to = $to->add(new DateInterval('PT59S'));
             } catch (Throwable) {
                 $to = null;
             }
@@ -163,6 +165,7 @@ class CertificateOverviewTable implements DataRetrieval
 
             try {
                 $to = new DateTimeImmutable($ui_filter_data['issue_date'][1], $this->user_timezone);
+                $to = $to->add(new DateInterval('PT59S'));
             } catch (Throwable) {
                 $to = null;
             }
