@@ -140,7 +140,8 @@ class CertificateOverviewTable implements DataRetrieval
 
             try {
                 $to = new DateTimeImmutable($filter_data['issue_date'][1], $this->user_timezone);
-                $to = $to->add(new DateInterval('PT59S'));
+                $seconds_to_add = 59 - (int) $to->format('s');
+                $to = $to->modify("+$seconds_to_add seconds");
             } catch (Throwable) {
                 $to = null;
             }
