@@ -582,7 +582,7 @@ class ilObject
         }
 
         if ($this->obj_definition->isOrgUnitPermissionType($this->type)) {
-            ilOrgUnitGlobalSettings::getInstance()->saveDefaultPositionActivationStatus($this->id);
+            ilOrgUnitObjectPositionSetting::getFor($this->id)->initFromGlobalSettings();
         }
 
         // the line ($this->read();) messes up meta data handling: meta data,

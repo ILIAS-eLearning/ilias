@@ -249,11 +249,9 @@ class ilObjectServiceSettingsGUI
             }
         }
         if (in_array(self::ORGU_POSITION_ACCESS, $services)) {
-            $position_settings = ilOrgUnitGlobalSettings::getInstance()->getObjectPositionSettingsByType(
-                ilObject::_lookupType($obj_id)
-            );
+            $position_settings = ilOrgUnitObjectPositionSetting::getFor($obj_id);
             if (
-                $position_settings->isActive()
+                $position_settings->isGloballyEnabled()
             ) {
                 $lia = new ilCheckboxInputGUI(
                     $GLOBALS['DIC']->language()->txt('obj_orgunit_positions'),
@@ -262,11 +260,9 @@ class ilObjectServiceSettingsGUI
                 $lia->setInfo($GLOBALS['DIC']->language()->txt('obj_orgunit_positions_info'));
                 $lia->setValue("1");
                 $lia->setChecked(
-                    ilOrgUnitGlobalSettings::getInstance()->isPositionAccessActiveForObject($obj_id)
+                    $position_settings->isActive()
                 );
-                if (!$position_settings->isChangeableForObject()) {
-                    $lia->setDisabled(true);
-                }
+                $lia->setDisabled(!$position_settings->isChangeable());
                 $form->addItem($lia);
             }
         }
