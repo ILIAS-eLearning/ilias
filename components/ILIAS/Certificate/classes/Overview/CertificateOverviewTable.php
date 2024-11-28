@@ -105,33 +105,9 @@ class CertificateOverviewTable implements DataRetrieval
         /**
          * @var array{certificate_id: null|string, issue_date: null|DateTimeImmutable, object: null|string, owner: null|string} $filter_data
          */
-        $ui_filter_data = $this->ui_service->filter()->getData($this->filter);
         [$order_field, $order_direction] = $order->join([], fn($ret, $key, $value) => [$key, $value]);
 
-        if (isset($ui_filter_data['issue_date']) && $ui_filter_data['issue_date'] !== '') {
-            try {
-                $from = new DateTimeImmutable($ui_filter_data['issue_date'][0], $this->user_timezone);
-            } catch (Throwable) {
-                $from = null;
-            }
-
-            try {
-                $to = new DateTimeImmutable($ui_filter_data['issue_date'][1], $this->user_timezone);
-                $to = $to->add(new DateInterval('PT59S'));
-            } catch (Throwable) {
-                $to = null;
-            }
-
-            $ui_filter_data['issue_date'] = [
-                'from' => $from,
-                'to' => $to
-            ];
-        } else {
-            $ui_filter_data['issue_date'] = [
-                'from' => null,
-                'to' => null
-            ];
-        }
+        $ui_filter_data = $this->mapUiFilterData($this->ui_service->filter()->getData($this->filter));
 
         $table_rows = $this->buildTableRows($this->repo->fetchCertificatesForOverview(
             $this->user->getLanguage(),
@@ -149,37 +125,43 @@ class CertificateOverviewTable implements DataRetrieval
         }
     }
 
-    public function getTotalRowCount(?array $filter_data, ?array $additional_parameters): ?int
+    /**
+     * @param array{certificate_id: null|string, issue_date: string[], object: null|string, owner: null|string} $filter_data
+     * @return array{certificate_id: null|string, issue_date: array{from: null|DateTimeImmutable, to: null|DateTimeImmutable}, object: null|string, owner: null|string} $filter_data
+     */
+    private function mapUiFilterData(array $filter_data): array
     {
-        /**
-         * @var array{certificate_id: null|string, issue_date: null|DateTimeImmutable, object: null|string, owner: null|string} $filter_data
-         */
-        $ui_filter_data = $this->ui_service->filter()->getData($this->filter);
-
-        if (isset($ui_filter_data['issue_date']) && $ui_filter_data['issue_date'] !== '') {
+        if (isset($filter_data['issue_date']) && $filter_data['issue_date'] !== '') {
             try {
-                $from = new DateTimeImmutable($ui_filter_data['issue_date'][0], $this->user_timezone);
+                $from = new DateTimeImmutable($filter_data['issue_date'][0], $this->user_timezone);
             } catch (Throwable) {
                 $from = null;
             }
 
             try {
-                $to = new DateTimeImmutable($ui_filter_data['issue_date'][1], $this->user_timezone);
+                $to = new DateTimeImmutable($filter_data['issue_date'][1], $this->user_timezone);
                 $to = $to->add(new DateInterval('PT59S'));
             } catch (Throwable) {
                 $to = null;
             }
 
-            $ui_filter_data['issue_date'] = [
+            $filter_data['issue_date'] = [
                 'from' => $from,
                 'to' => $to
             ];
         } else {
-            $ui_filter_data['issue_date'] = [
+            $filter_data['issue_date'] = [
                 'from' => null,
                 'to' => null
             ];
         }
+
+        return $filter_data;
+    }
+
+    public function getTotalRowCount(?array $filter_data, ?array $additional_parameters): ?int
+    {
+        $ui_filter_data = $this->mapUiFilterData($this->ui_service->filter()->getData($this->filter));
 
         return $this->repo->fetchCertificatesForOverviewCount($ui_filter_data);
     }
