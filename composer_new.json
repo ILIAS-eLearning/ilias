@@ -49,6 +49,8 @@
 		"ext-xml": "*",
 		"ext-zip": "*",
 		"ext-imagick": "*",
+		"firebase/php-jwt": "*",
+		"celtic/lti": "^5.0.0",
 	},
 	"require-dev": {
 	},
