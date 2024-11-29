@@ -1,3 +1,19 @@
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
+
 (function () {
 	'use strict';
 
@@ -439,7 +455,7 @@
 				$aggregates.insertAfter($item).show();
 				$item.hide();
 			}
-			$aggregates.find(':focusable').first().focus();
+			$aggregates.find('a,button,input').first().focus();
 		};
 
 
@@ -454,7 +470,7 @@
 			if($parent_slate.length){
 				$parent_slate.siblings().show();
 				$parent_slate.show();
-				$parent_slate.find(':focusable').first().focus();
+				$parent_slate.find('a,button,input').first().focus();
 			}
 			$item.show().append($aggregates);
 			$aggregates.hide();
