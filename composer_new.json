@@ -49,6 +49,7 @@
 		"ext-xml": "*",
 		"ext-zip": "*",
 		"ext-imagick": "*",
+		"league/commonmark": "2.5.3"
 	},
 	"require-dev": {
 	},
