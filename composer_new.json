@@ -49,6 +49,7 @@
 		"ext-xml": "*",
 		"ext-zip": "*",
 		"ext-imagick": "*",
+		"league/flysystem": "3.28.0"
 	},
 	"require-dev": {
 	},
