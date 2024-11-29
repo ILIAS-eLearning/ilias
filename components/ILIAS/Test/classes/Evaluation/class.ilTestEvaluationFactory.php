@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -45,7 +46,7 @@ class ilTestEvaluationFactory
     /**
      * @param list<int> $active_ids
      */
-    private function retrieveEvaluationData(array $active_ids): array
+    private function retrieveEvaluationData(array $active_ids): \Generator
     {
         $query = '
         SELECT      tst_test_result.question_fi,
@@ -90,9 +91,8 @@ class ilTestEvaluationFactory
         $ret = [];
         $result = $this->db->query($query);
         while ($row = $this->db->fetchAssoc($result)) {
-            $ret[] = $row;
+            yield $row;
         }
-        return $ret;
     }
 
     public function getEvaluationData(): ilTestEvaluationData
