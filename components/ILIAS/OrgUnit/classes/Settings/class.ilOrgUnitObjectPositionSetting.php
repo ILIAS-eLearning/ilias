@@ -26,7 +26,7 @@ class ilOrgUnitObjectPositionSetting
 {
     protected ilDBInterface $db;
     private ?bool $active = null;
-    private array $settings_cache = [];
+    private ?ilOrgUnitObjectTypePositionSetting $settings_cache = null;
 
     public function __construct(
         private int $obj_id
@@ -51,12 +51,6 @@ class ilOrgUnitObjectPositionSetting
         }
 
         if ($this->active === null) { //implicit: isGloballyEnabled && isChangeable
-            //the object was not properly initialized with position settings;
-            //init?
-            //$this->initFromGlobalSettings();
-            //throw?
-            //throw new \LogicException('no position settings for obj '.$this->obj_id);
-            //silently ignore?
             return (bool) $this->getGlobalSettingsForThisObjectType()->getActivationDefault();
         }
 
@@ -79,25 +73,14 @@ class ilOrgUnitObjectPositionSetting
         return $this->getGlobalSettingsForThisObjectType()?->isChangeableForObject() ?? false;
     }
 
-    public function initFromGlobalSettings(): void
-    {
-        if ($this->isGloballyEnabled() && $this->isChangeable()) {
-            $this->setActive(
-                (bool) $this->getGlobalSettingsForThisObjectType()->getActivationDefault()
-            );
-            $this->update();
-        }
-    }
-
     public function setActive(bool $status): void
     {
         $this->active = $status;
-        //this->update();
     }
 
     public function update(): void
     {
-        if ($this->active !== null) {
+        if ($this->isGloballyEnabled() && $this->isChangeable() && $this->active !== null) {
             $this->db->replace('orgu_obj_pos_settings', [
                 'obj_id' => ['integer', $this->obj_id],
             ], [
@@ -126,16 +109,16 @@ class ilOrgUnitObjectPositionSetting
 
     private function getGlobalSettingsForThisObjectType(): ?ilOrgUnitObjectTypePositionSetting
     {
-        $type = \ilObject::_lookupType($this->obj_id);
-        if (!array_key_exists($type, $this->settings_cache)) {
+        if ($this->settings_cache === null) {
             $global_settings = ilOrgUnitGlobalSettings::getInstance();
+            $type = \ilObject::_lookupType($this->obj_id);
             if (array_key_exists($type, $global_settings->getPositionSettings())) {
-                $this->settings_cache[$type] = $global_settings->getObjectPositionSettingsByType($type);
+                $this->settings_cache = $global_settings->getObjectPositionSettingsByType($type);
             } else {
-                $this->settings_cache[$type] = null;
+                $this->settings_cache = null;
             }
         }
-        return $this->settings_cache[$type];
+        return $this->settings_cache;
     }
 
 

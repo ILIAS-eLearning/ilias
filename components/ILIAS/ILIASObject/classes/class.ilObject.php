@@ -581,10 +581,6 @@ class ilObject
             $this->getObjectProperties()->storePropertyIsOnline($property_is_online);
         }
 
-        if ($this->obj_definition->isOrgUnitPermissionType($this->type)) {
-            ilOrgUnitObjectPositionSetting::getFor($this->id)->initFromGlobalSettings();
-        }
-
         // the line ($this->read();) messes up meta data handling: meta data,
         // that is not saved at this time, gets lost, so we query for the dates alone
         $sql =
