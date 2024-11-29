@@ -250,7 +250,7 @@
         })
         .on('click', trigger_selector, onWidgetClick);
 
-      document.addEventListener('click', clearAllDropDowns, true);
+      document.addEventListener('click', clearAllDropDowns);
     },
   };
 
