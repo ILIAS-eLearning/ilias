@@ -25,6 +25,7 @@ declare(strict_types=1);
 class ilOrgUnitObjectPositionSetting
 {
     protected ilDBInterface $db;
+    private static array $instances = [];
     private ?bool $active = null;
     private ?ilOrgUnitObjectTypePositionSetting $settings_cache = null;
 
@@ -37,20 +38,23 @@ class ilOrgUnitObjectPositionSetting
 
     public static function getFor(int $obj_id): self
     {
-        return new self($obj_id);
+        if (! array_key_exists($obj_id, self::$instances)) {
+            self::$instances[$obj_id] = new self($obj_id);
+        }
+        return self::$instances[$obj_id];
     }
 
     public function isActive(): bool
     {
-        if (! $this->isGloballyEnabled()) {
+        if (! $this->isActiveForOwnType()) {
             return false;
         }
 
-        if (! $this->isChangeable()) { //implicit: && isGloballyEnabled == true
+        if (! $this->isChangeable()) { //implicit: && isActiveForOwnType == true
             return true;
         }
 
-        if ($this->active === null) { //implicit: isGloballyEnabled && isChangeable
+        if ($this->active === null) { //implicit: isActiveForOwnType && isChangeable
             return (bool) $this->getGlobalSettingsForThisObjectType()->getActivationDefault();
         }
 
@@ -60,7 +64,7 @@ class ilOrgUnitObjectPositionSetting
     /**
      * convenience wrapper for specific objects to check on global settings
      */
-    public function isGloballyEnabled(): bool
+    public function isActiveForOwnType(): bool
     {
         return $this->getGlobalSettingsForThisObjectType()?->isActive() ?? false;
     }
@@ -80,7 +84,7 @@ class ilOrgUnitObjectPositionSetting
 
     public function update(): void
     {
-        if ($this->isGloballyEnabled() && $this->isChangeable() && $this->active !== null) {
+        if ($this->isActiveForOwnType() && $this->isChangeable() && $this->active !== null) {
             $this->db->replace('orgu_obj_pos_settings', [
                 'obj_id' => ['integer', $this->obj_id],
             ], [

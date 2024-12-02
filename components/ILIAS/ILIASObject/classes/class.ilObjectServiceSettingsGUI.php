@@ -251,7 +251,7 @@ class ilObjectServiceSettingsGUI
         if (in_array(self::ORGU_POSITION_ACCESS, $services)) {
             $position_settings = ilOrgUnitObjectPositionSetting::getFor($obj_id);
             if (
-                $position_settings->isGloballyEnabled()
+                $position_settings->isActiveForOwnType()
             ) {
                 $lia = new ilCheckboxInputGUI(
                     $GLOBALS['DIC']->language()->txt('obj_orgunit_positions'),
