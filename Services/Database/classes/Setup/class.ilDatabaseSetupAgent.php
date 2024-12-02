@@ -125,7 +125,7 @@ class ilDatabaseSetupAgent implements Setup\Agent
     public function getNamedObjectives(?Setup\Config $config = null): array
     {
         return [
-            'resetDBSteps' => new Setup\ObjectiveConstructor(
+            'resetFailedSteps' => new Setup\ObjectiveConstructor(
                 'reset null-states in il_db_steps',
                 static fn (): Setup\Objective => new ilDatabaseResetStepsObjective()
             )

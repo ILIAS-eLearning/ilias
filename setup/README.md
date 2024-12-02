@@ -91,7 +91,7 @@ of already performed steps when resuming the setup:
 
 You may reset the records for those steps by running:
 ```
-php setup/setup.php achieve database.resetDBSteps
+php setup/setup.php achieve database.resetFailedSteps
 ```
 However, be sure to understand the cause for the failing steps and tend to it before 
 resetting and re-running the update.

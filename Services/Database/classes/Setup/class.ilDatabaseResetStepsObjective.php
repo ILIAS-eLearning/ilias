@@ -32,8 +32,6 @@ class ilDatabaseResetStepsObjective extends Setup\Objective\AdminConfirmedObject
             "circumstances in your environment, e.g. inconsistent data in the DB,\n" .
             "missing or unexpected files, etc.. Please double-check for the cause\n" .
             "and only continue if you are certain about and fine with the consequences.\n" .
-            "Deleting the steps means: remove all steps for the class/component in question\n" .
-            "so that _all_ steps for this class may run again.\n" .
             "Continue?"
         );
     }
@@ -70,11 +68,7 @@ class ilDatabaseResetStepsObjective extends Setup\Objective\AdminConfirmedObject
     {
         $environment = parent::achieve($environment);
         $db = $environment->getResource(Setup\Environment::RESOURCE_DATABASE);
-        $db->manipulate(
-            'DELETE FROM il_db_steps WHERE class IN (
-                SELECT class FROM il_db_steps WHERE finished IS NULL
-            );'
-        );
+        $db->manipulate('DELETE FROM il_db_steps WHERE finished IS NULL');
         return $environment;
     }
 
