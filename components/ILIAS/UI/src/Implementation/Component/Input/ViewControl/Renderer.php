@@ -33,6 +33,7 @@ class Renderer extends AbstractComponentRenderer
     public const DEFAULT_SORTATION_DROPDOWN_LABEL = 'label_sortation';
     public const DEFAULT_DROPDOWN_LABEL_OFFSET = 'label_pagination_offset';
     public const DEFAULT_DROPDOWN_LABEL_LIMIT = 'label_pagination_limit';
+    public const DEFAULT_MODE_LABEL = 'label_modeviewcontrol';
 
     public function render(Component\Component $component, RendererInterface $default_renderer): string
     {
@@ -387,9 +388,11 @@ class Renderer extends AbstractComponentRenderer
         $ui_factory = $this->getUIFactory();
 
         $container_submit_signal = $component->getOnChangeSignal();
-        $set_value = $component->getValue() ?? '';
+        $options = $component->getOptions();
+        $set_value = $component->getValue() ?? array_keys($options)[0];
+
         $out = [];
-        foreach ($component->getOptions() as $opt_value => $opt_label) {
+        foreach ($options as $opt_value => $opt_label) {
             $out[] = $ui_factory->button()->standard($opt_label, '#')
                 ->withEngagedState($opt_value === $set_value)
                 ->withOnLoadCode(static fn($id): string =>
@@ -413,6 +416,7 @@ class Renderer extends AbstractComponentRenderer
         $tpl->setVariable('BUTTONS', $default_renderer->render($out));
         $tpl->setVariable('VALUE', $set_value);
         $tpl->setVariable("NAME", $component->getName());
+        $tpl->setVariable("ARIA_LABEL", $this->txt(self::DEFAULT_MODE_LABEL));
 
         $id = $this->bindJavaScript($component);
         return $tpl->get();

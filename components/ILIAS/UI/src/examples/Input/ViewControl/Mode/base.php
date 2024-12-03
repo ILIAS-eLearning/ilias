@@ -25,7 +25,7 @@ function base()
         [
             'm1' => 'some mode',
             'm2' => 'other mode',
-            'x' => '...'
+            'x' => '...',
         ]
     );
 

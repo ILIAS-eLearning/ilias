@@ -35,6 +35,14 @@ class Mode extends ViewControlInput implements VCInterface\Mode
         Refinery $refinery,
         protected array $options
     ) {
+        $keys = array_keys($options);
+        $this->checkArgListElements('options', $keys, 'string');
+        $this->checkArgListElements('options', $options, 'string');
+        $this->setAdditionalTransformation(
+            $refinery->custom()->transformation(
+                static fn($v) => $v ?? array_keys($options)[0]
+            )
+        );
         parent::__construct($data_factory, $refinery);
     }
 
@@ -46,5 +54,12 @@ class Mode extends ViewControlInput implements VCInterface\Mode
     public function getOptions(): array
     {
         return $this->options;
+    }
+
+    public function withAriaLabel(string $label): self
+    {
+        $clone = clone $this;
+        $clone->label = $label;
+        return $clone;
     }
 }
