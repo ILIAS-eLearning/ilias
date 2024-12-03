@@ -8,6 +8,7 @@
     "test": "tests"
   },
   "dependencies": {
+    "mathjax": "^3.2.2"
   },
   "devDependencies": {
   },
