@@ -55,7 +55,7 @@ abstract class ViewControl extends Container implements I\ViewControl
         array $controls
     ) {
         parent::__construct($name_source);
-        $this->setInputGroup($view_control_factory->group($controls)->withDedicatedName('view_control'));
+        $this->setInputGroup($view_control_factory->group($controls));
         $this->submit_signal = $signal_generator->create();
         $this->stored_input = new Input\ArrayInputData([]);
     }

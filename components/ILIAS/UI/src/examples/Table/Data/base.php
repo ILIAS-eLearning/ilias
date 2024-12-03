@@ -171,7 +171,7 @@ function base()
                 }
                 $record['achieve'] = $icon;
 
-                if ($additional_parameters['anon_mail'] === 'hide') {
+                if (in_array('hide', $additional_viewcontrol_data)) {
                     $record['email'] = '-';
                 }
 
@@ -244,7 +244,7 @@ function base()
             ->withOrder(new Order('achieve', Order::DESC))
 
             ->withAdditionalViewControl(
-                'anon_mail',
+                //'anon_mail',
                 $f->input()->viewControl()->mode([
                     'show' => 'show mails',
                     'hide' => 'anon mails'

@@ -29,6 +29,11 @@ use ILIAS\Language\Language;
 
 class Factory implements VCInterface\Factory
 {
+    public const NAME_FIELDSELECTION = 'sel';
+    public const NAME_SORTATION = 'sort';
+    public const NAME_PAGINATION = 'pag';
+    public const NAME_MODE = 'mode';
+
     public function __construct(
         protected FieldFactory $field_factory,
         protected DataFactory $data_factory,
@@ -40,33 +45,33 @@ class Factory implements VCInterface\Factory
 
     public function fieldSelection(array $options): FieldSelection
     {
-        return new FieldSelection(
+        return (new FieldSelection(
             $this->data_factory,
             $this->refinery,
             $this->signal_generator,
             $options
-        );
+        ))->withDedicatedName(self::NAME_FIELDSELECTION);
     }
 
     public function sortation(array $options): Sortation
     {
-        return new Sortation(
+        return (new Sortation(
             $this->field_factory,
             $this->data_factory,
             $this->refinery,
             $this->signal_generator,
             $options
-        );
+        ))->withDedicatedName(self::NAME_SORTATION);
     }
 
     public function pagination(): Pagination
     {
-        return new Pagination(
+        return (new Pagination(
             $this->field_factory,
             $this->data_factory,
             $this->refinery,
             $this->signal_generator
-        );
+        ))->withDedicatedName(self::NAME_PAGINATION);
     }
 
     public function group(array $view_controls): Group
@@ -89,10 +94,10 @@ class Factory implements VCInterface\Factory
 
     public function mode(array $options): VCInterface\Mode
     {
-        return new Mode(
+        return (new Mode(
             $this->data_factory,
             $this->refinery,
             $options
-        );
+        ))->withDedicatedName(self::NAME_MODE);
     }
 }

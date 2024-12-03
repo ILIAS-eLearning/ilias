@@ -44,11 +44,13 @@ class Data extends AbstractTable implements T\Data
     public const STORAGE_ID_PREFIX = self::class . '_';
     public const VIEWCONTROL_KEY_PAGINATION = 'range';
     public const VIEWCONTROL_KEY_ORDERING = 'order';
-    public const VIEWCONTROL_KEY_FIELDSELECTION = 'selected_optional';
+    public const VIEWCONTROL_KEY_FIELDSELECTION = 'selection';
+    public const VIEWCONTROL_KEY_ADDITIONAL = 'additional';
 
-    protected ?array $filter = null;
-    protected ?array $additional_parameters = [];
-    protected array $additional_view_controls = [];
+    protected mixed $filter = null;
+    protected mixed $additional_parameters = null;
+    protected mixed $additional_viewcontrol_data = null;
+    protected ?ViewControlContainer\ViewControlInput $additional_view_control = null;
 
     /**
      * @param array<string, Column> $columns
@@ -172,20 +174,22 @@ class Data extends AbstractTable implements T\Data
             self::VIEWCONTROL_KEY_PAGINATION => $this->getViewControlPagination($total_count),
             self::VIEWCONTROL_KEY_ORDERING => $this->getViewControlOrdering($total_count),
             self::VIEWCONTROL_KEY_FIELDSELECTION => $this->getViewControlFieldSelection(),
+            $this->additional_view_control
         ];
         $view_controls = array_filter($view_controls);
-        $view_controls = array_merge($view_controls, $this->additional_view_controls);
-
-        return $this->view_control_container_factory->standard($view_controls);
+        $vc = $this->view_control_container_factory->standard($view_controls);
+        if ($this->getId() !== null) {
+            $vc = $vc->withDedicatedName('vc' . $this->getId());
+        }
+        return $vc;
     }
 
-
     public function withAdditionalViewControl(
-        string $key,
         ViewControlContainer\ViewControlInput $view_control
     ): self {
         $clone = clone $this;
-        $clone->additional_view_controls[$key] = $view_control;
+        $clone->additional_view_control = $view_control
+            ->withDedicatedName(self::VIEWCONTROL_KEY_ADDITIONAL);
         return $clone;
     }
 

@@ -38,7 +38,7 @@ class Factory implements V\Factory
     {
         return new Standard(
             $this->signal_generator,
-            new Input\FormInputNameSource(),
+            new Input\ViewControl\ViewControlNameSource(),
             $this->view_control_factory,
             $controls
         );

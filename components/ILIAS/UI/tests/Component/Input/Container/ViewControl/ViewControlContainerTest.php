@@ -25,7 +25,7 @@ use ILIAS\UI\Implementation\Component as I;
 use ILIAS\UI\Implementation\Component\Input\ViewControl as Control;
 use ILIAS\UI\Implementation\Component\Input\ArrayInputData;
 use ILIAS\UI\Implementation\Component\Input\Container\ViewControl as VC;
-use ILIAS\UI\Implementation\Component\Input\FormInputNameSource;
+use ILIAS\UI\Implementation\Component\Input\ViewControl\ViewControlNameSource;
 use ILIAS\Data;
 use ILIAS\Refinery\Factory as Refinery;
 use Psr\Http\Message\ServerRequestInterface;
@@ -90,12 +90,12 @@ class ViewControlContainerTest extends ILIAS_UI_TestBase
             $c_factory->pagination()
         ];
 
-        $name_source = new FormInputNameSource();
+        $name_source = new ViewControlNameSource();
         $vc = $this->buildContainerFactory()->standard($controls);
         $this->assertSameSize($controls, $vc->getInputs());
 
         $named = array_map(
-            fn($input) => $input->withNameFrom($name_source, 'view_control'),
+            fn($input) => $input->withNameFrom($name_source, 'vc0'),
             $vc->getInputs()
         );
 
@@ -109,9 +109,9 @@ class ViewControlContainerTest extends ILIAS_UI_TestBase
             ->expects($this->once())
             ->method("getQueryParams")
             ->willReturn([
-                'view_control/input_0' => ['a1', 'a3'],
-                'view_control/input_1/input_2' => 'a2',
-                'view_control/input_1/input_3' => 'DESC'
+                'vc0/sel' => ['a1', 'a3'],
+                'vc0/sort/asp' => 'a2',
+                'vc0/sort/dir' => 'DESC'
             ]);
 
         $c_factory = $this->buildVCFactory();
@@ -189,9 +189,9 @@ class ViewControlContainerTest extends ILIAS_UI_TestBase
 
         $this->assertEquals(
             [
-                'view_control/input_0' => ['a1', 'a3'],
-                'view_control/input_1/input_2' => 'a2',
-                'view_control/input_1/input_3' => 'DESC'
+                'vc0/sel' => ['a1', 'a3'],
+                'vc0/sort/asp' => 'a2',
+                'vc0/sort/dir' => 'DESC'
             ],
             $data
         );

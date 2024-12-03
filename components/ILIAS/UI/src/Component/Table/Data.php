@@ -67,7 +67,6 @@ interface Data extends Table
      * Consumers may add additional view controls
      */
     public function withAdditionalViewControl(
-        string $key,
         ViewControlInput $view_control
     ): self;
 }

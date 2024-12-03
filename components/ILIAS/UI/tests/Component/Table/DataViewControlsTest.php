@@ -226,14 +226,15 @@ class DataViewControlsTest extends TableTestBase
             ->withId($table_id)
             ->withRequest(
                 $this->getRequestMock([
-                    'view_control/input_0/input_1' => 0,
-                    'view_control/input_0/input_2' => 10,
-                    'view_control/input_3/input_4' => 'f2',
-                    'view_control/input_3/input_5' => 'DESC',
-                    'view_control/input_6' => ['f2']
+                    'vc' . $table_id . '/pag/offset' => 0,
+                    'vc' . $table_id . '/pag/limit' => 10,
+                    'vc' . $table_id . '/sort/asp' => 'f2',
+                    'vc' . $table_id . '/sort/dir' => 'DESC',
+                    'vc' . $table_id . '/sel' => ['f2']
                 ])
             );
         list($table, $view_controls) = $table->applyViewControls([], []);
+
         //applied values from viewcontrols
         $this->assertEquals(new Range(0, 10), $table->getRange());
         $this->assertEquals(new Order('f2', Order::DESC), $table->getOrder());
@@ -268,7 +269,6 @@ class DataViewControlsTest extends TableTestBase
         $total_count = 200;
         $table = $factory->data('Table', $columns, $this->getDataRetrieval($total_count))
             ->withAdditionalViewControl(
-                'additional_control',
                 $this->getViewControlFactory()->mode([
                     'mode1' => 'a mode',
                     'mode2' => 'another mode'
@@ -277,42 +277,24 @@ class DataViewControlsTest extends TableTestBase
             ->withId('testing_data_table_id')
             ->withRequest(
                 $this->getRequestMock([
-                    'view_control/input_0/input_1' => 0,
-                    'view_control/input_0/input_2' => 10,
-                    'view_control/input_3/input_4' => 'f2',
-                    'view_control/input_3/input_5' => 'DESC',
-                    'view_control/input_6' => 'mode2'
+                    'vctesting_data_table_id/additional' => 'mode2'
                 ])
             );
 
-        $additional_parameters = ['existing' => true];
-        list($table, $view_controls) = $table->applyViewControls([], $additional_parameters);
+        list($table, $view_controls) = $table->applyViewControls([], []);
 
         $this->assertEquals(
             [
                 C\Table\Data::VIEWCONTROL_KEY_PAGINATION,
                 C\Table\Data::VIEWCONTROL_KEY_ORDERING,
-                'additional_control'
+                0
             ],
             array_keys($view_controls->getInputs())
         );
-        $this->assertEquals(
-            [
-                'additional_control' => 'mode2',
-                'existing' => true,
-            ],
-            $table->getAdditionalParameters()
-        );
 
-        //applied values from session with empty request
-        $table = $table->withRequest($this->getRequestMock([]));
-        list($table, $view_controls) = $table->applyViewControls([], $additional_parameters);
         $this->assertEquals(
-            [
-                'additional_control' => 'mode2',
-                'existing' => true,
-            ],
-            $table->getAdditionalParameters()
+            ['mode2'],
+            $table->getAdditionalViewControlData()
         );
     }
 }
