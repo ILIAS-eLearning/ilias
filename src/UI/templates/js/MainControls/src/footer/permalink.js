@@ -37,3 +37,19 @@ export const copyText = text => {
 
   return success ? Promise.resolve() : Promise.reject(new Error('Unable to copy text.'));
 };
+
+export const showTooltip = (node, delay) => {
+  const main = (Array.from(document.getElementsByTagName('main')).find(n => !n.hidden) || document.body).getBoundingClientRect();
+  node.parentNode.classList.add('c-tooltip--visible');
+  const r = node.getBoundingClientRect();
+
+  if (main.left > r.left) {
+    node.style.transform = 'translateX(calc(' + (main.left - r.left) + 'px - 50%))';
+  } else if (main.right < r.right) {
+    node.style.transform = 'translateX(calc(' + (main.right - r.right) + 'px - 50%))';
+  }
+
+  setTimeout(() => {
+    node.parentNode.classList.remove('c-tooltip--visible');
+  }, delay);
+};

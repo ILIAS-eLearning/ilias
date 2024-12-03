@@ -15,7 +15,7 @@
 
 import { describe, it, beforeEach, afterEach } from 'mocha';
 import { expect } from 'chai';
-import { copyText } from '../../../../src/UI/templates/js/MainControls/src/footer/permalink';
+import { copyText, showTooltip } from '../../../../src/UI/templates/js/MainControls/src/footer/permalink';
 
 const expectOneCall = () => {
   const expected = [];
@@ -104,4 +104,57 @@ describe('Test permalink copy to clipboard', () => {
 
     return copyText('foo').then(finish);
   });
+});
+
+describe('Test permanentlink show tooltip', () => {
+  const saved = {};
+  beforeEach(() => {
+    saved.setTimeout = globalThis.setTimeout;
+    saved.document = globalThis.document;
+  });
+  afterEach(() => {
+    globalThis.setTimeout = saved.setTimeout;
+    globalThis.document = saved.document;
+  });
+
+  const testTooltip = (mainRect, nodeRect, expectTransform = null) => () => {
+    const {callOnce, finish} = expectOneCall();
+    let callTimeout = null;
+    globalThis.document = {
+      getElementsByTagName: callOnce(tag => {
+        expect(tag).to.be.equal('main');
+        return [
+          {getBoundingClientRect: callOnce(() => mainRect)}
+        ];
+      }),
+    };
+
+    globalThis.setTimeout = callOnce((proc, delay) => {
+      callTimeout = proc;
+      expect(delay).to.be.equal(4321);
+    });
+
+    const isTooltipClass = name => expect(name).to.be.equal('c-tooltip--visible');
+    const node = {
+      parentNode: {
+        classList: {
+          add: callOnce(isTooltipClass),
+          remove: callOnce(isTooltipClass),
+        },
+      },
+      getBoundingClientRect: callOnce(() => nodeRect),
+      style: {transform: null},
+    };
+    showTooltip(node, 4321);
+
+    expect(callTimeout).not.to.be.equal(null);
+    expect(node.style.transform).to.be.equal(expectTransform);
+
+    callTimeout();
+    finish();
+  };
+
+  it('Show tooltip', testTooltip({left: 0, right: 10}, {left: 1, right: 9}));
+  it('Show tooltip left aligned', testTooltip({left: 5, right: 10}, {left: 3, right: 9}, 'translateX(calc(2px - 50%))'));
+  it('Show tooltip right aligned', testTooltip({left: 0, right: 7}, {left: 1, right: 9}, 'translateX(calc(-2px - 50%))'));
 });

@@ -446,10 +446,7 @@ class Renderer extends AbstractComponentRenderer
                 $perm_url = $this->jsonEncode((string) $perm_url);
 
                 return "document.getElementById($id).addEventListener('click', e => il.Footer.permalink.copyText($perm_url)
-                            .then(() => {
-                                e.target.parentNode.classList.add('c-tooltip--visible');
-                                setTimeout(() => e.target.parentNode.classList.remove('c-tooltip--visible'), 5000);
-                            }));";
+                            .then(() => il.Footer.permalink.showTooltip(e.target.nextElementSibling, 5000)));";
             };
             $button = $this->getUIFactory()->button()->shy($this->txt('copy_perma_link'), '')->withAdditionalOnLoadCode($code);
             $tpl->setVariable('PERMANENT', $default_renderer->render($button));
