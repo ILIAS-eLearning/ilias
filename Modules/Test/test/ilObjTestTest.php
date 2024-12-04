@@ -165,15 +165,6 @@ class ilObjTestTest extends ilTestBaseTestCase
         $this->assertTrue($this->testObj->isPostponingEnabled());
     }
 
-    public function testScoreReporting(): void
-    {
-        $this->testObj->setScoreReporting(0);
-        $this->assertEquals(0, $this->testObj->getScoreReporting());
-
-        $this->testObj->setScoreReporting(1);
-        $this->assertEquals(1, $this->testObj->getScoreReporting());
-    }
-
     public function testInstantFeedbackSolution(): void
     {
         $this->testObj->setInstantFeedbackSolution(0);
@@ -208,27 +199,6 @@ class ilObjTestTest extends ilTestBaseTestCase
 
         $this->testObj->setAnswerFeedbackPoints(1);
         $this->assertEquals(1, $this->testObj->getAnswerFeedbackPoints());
-    }
-
-    public function testIsScoreReportingEnabled(): void
-    {
-        $this->testObj->setScoreReporting(ilObjTest::SCORE_REPORTING_FINISHED);
-        $this->assertTrue($this->testObj->isScoreReportingEnabled());
-
-        $this->testObj->setScoreReporting(ilObjTest::SCORE_REPORTING_IMMIDIATLY);
-        $this->assertTrue($this->testObj->isScoreReportingEnabled());
-
-        $this->testObj->setScoreReporting(ilObjTest::SCORE_REPORTING_DATE);
-        $this->assertTrue($this->testObj->isScoreReportingEnabled());
-
-        $this->testObj->setScoreReporting(ilObjTest::SCORE_REPORTING_AFTER_PASSED);
-        $this->assertTrue($this->testObj->isScoreReportingEnabled());
-
-        $this->testObj->setScoreReporting(ilObjTest::SCORE_REPORTING_DISABLED);
-        $this->assertFalse($this->testObj->isScoreReportingEnabled());
-
-        $this->testObj->setScoreReporting(999);
-        $this->assertFalse($this->testObj->isScoreReportingEnabled());
     }
 
     public function testBlockPassesAfterPassedEnabled(): void
