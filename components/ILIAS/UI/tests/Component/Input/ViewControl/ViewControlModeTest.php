@@ -106,4 +106,17 @@ class ViewControlModeTest extends ViewControlTestBase
         $this->expectException(\LogicException::class);
         $this->buildVCFactory()->mode([])->getOnChangeSignal();
     }
+
+    public function testViewControlModeWithoutOptions(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $vc = $this->buildVCFactory()->mode([]);
+    }
+
+    public function testViewControlModeWithWrongOptions(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $vc = $this->buildVCFactory()->mode([1,2,3]);
+    }
+
 }

@@ -38,9 +38,12 @@ class Mode extends ViewControlInput implements VCInterface\Mode
         $keys = array_keys($options);
         $this->checkArgListElements('options', $keys, 'string');
         $this->checkArgListElements('options', $options, 'string');
+        if (count($options) < 2) {
+            throw new \InvalidArgumentException('ModeViewControls must contain more than one option.');
+        }
         $this->setAdditionalTransformation(
             $refinery->custom()->transformation(
-                static fn($v) => $v ?? array_keys($options)[0]
+                static fn($v) => $v ?? array_key_first($options)
             )
         );
         parent::__construct($data_factory, $refinery);

@@ -143,7 +143,8 @@ interface Factory
      *      are not.
      * rules:
      *   usage:
-     *      1: Exactly one Button MUST always be active/engaged.
+     *      1: Mode view control MUST contain more than one option.
+     *      2: Exactly one Button MUST always be active/engaged.
      *   accessibility:
      *      1: The HTML container enclosing the buttons of the Mode View Control MUST carry the role-attribute "group".
      *      2: The HTML container enclosing the buttons of the Mode View Control MUST set an aria-label describing the element.

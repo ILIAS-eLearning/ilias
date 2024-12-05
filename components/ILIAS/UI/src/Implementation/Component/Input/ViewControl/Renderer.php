@@ -389,7 +389,7 @@ class Renderer extends AbstractComponentRenderer
 
         $container_submit_signal = $component->getOnChangeSignal();
         $options = $component->getOptions();
-        $set_value = $component->getValue() ?? array_keys($options)[0];
+        $set_value = $component->getValue() ?? array_key_first($options);
 
         $out = [];
         foreach ($options as $opt_value => $opt_label) {
