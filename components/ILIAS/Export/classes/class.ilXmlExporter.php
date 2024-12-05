@@ -129,7 +129,7 @@ abstract class ilXmlExporter
         foreach ($svs as $k => $sv) {
             if (!$found) {
                 if (version_compare($sv["min"], ILIAS_VERSION_NUMERIC, "<=")
-                    && ($sv["max"] == "" || version_compare($sv["max"], ILIAS_VERSION_NUMERIC, ">="))) {
+                    && (!isset($sv["max"]) || $sv["max"] == "" || version_compare($sv["max"], ILIAS_VERSION_NUMERIC, ">="))) {
                     $rsv = $sv;
                     $rsv["schema_version"] = $k;
                     $found = true;
