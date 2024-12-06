@@ -8,6 +8,7 @@
     "test": "tests"
   },
   "dependencies": {
+    "@uppy/tus": "^4.1.4",
   },
   "devDependencies": {
   },
