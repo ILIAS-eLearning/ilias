@@ -65,7 +65,7 @@ class AttemptOverview
         return $this->exam_id;
     }
 
-    public function getStartedDate(): \DateTimeImmutable
+    public function getStartedDate(): ?\DateTimeImmutable
     {
         return $this->attempt_started_date;
     }
@@ -85,14 +85,14 @@ class AttemptOverview
         return $this->nr_of_answered_questions > 0;
     }
 
-    public function getMark(): string
+    public function getMark(): ?string
     {
-        return $this->mark->getShortName();
+        return $this->mark?->getShortName();
     }
 
     public function hasPassingMark(): bool
     {
-        return $this->mark->getPassed();
+        return $this->mark?->getPassed() ?? false;
     }
 
     public function getReachedPoints(): float
