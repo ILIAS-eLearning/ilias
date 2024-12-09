@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace ILIAS\UI\examples\Input\Field\ColorPicker;
+namespace ILIAS\UI\examples\Input\Field\ColorSelect;
 
 /**
  * ---
  * description: >
- *   Base example showing how to plug a colorpicker into a form
+ *   Base example showing how to plug a Colour Select Field into a form.
  *
  * expected output: >
  *   ILIAS shows the rendered Component.
@@ -22,7 +22,7 @@ function base()
     $request = $DIC->http()->request();
 
     //Step 1: Define the input field
-    $color_input = $ui->input()->field()->colorpicker("Color", "click to select a color");
+    $color_input = $ui->input()->field()->colorSelect("Color", "click to select a color");
 
     //Step 2: Define the form and attach the field.
     $form = $ui->input()->container()->form()->standard('#', ['color' => $color_input]);
