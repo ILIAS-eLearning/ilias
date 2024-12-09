@@ -54,7 +54,7 @@ function base()
         }
     };
 
-    $table = $f->table()->data('TimeSpan Columns', $columns, $data_retrieval)
+    $table = $f->table()->data($data_retrieval, 'TimeSpan Columns', $columns)
         ->withRequest($DIC->http()->request());
     return $r->render($table);
 }

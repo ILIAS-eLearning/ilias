@@ -53,7 +53,7 @@ function base()
         }
     };
 
-    $table = $f->table()->data('eMail Columns', $columns, $data_retrieval)
+    $table = $f->table()->data($data_retrieval, 'eMail Columns', $columns)
         ->withRequest($DIC->http()->request());
     return $r->render($table);
 }

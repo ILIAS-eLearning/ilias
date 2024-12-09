@@ -16,8 +16,7 @@ declare(strict_types=1);
  * https://www.ilias.de
  * https://github.com/ILIAS-eLearning
  *
- ********************************************************************
- */
+ *********************************************************************/
 
 namespace ILIAS\components\ILIAS\Glossary\Table;
 
@@ -89,7 +88,7 @@ class GlossaryAutoLinkTable
         }
 
         $table = $this->ui_fac->table()
-                              ->data($this->lng->txt("cont_auto_glossaries"), $columns, $data_retrieval)
+                              ->data($data_retrieval, $this->lng->txt("cont_auto_glossaries"), $columns)
                               ->withId(
                                   self::class . "_" .
                                   $this->glossary->getRefId()

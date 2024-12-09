@@ -53,7 +53,7 @@ function base()
         }
     };
 
-    $table = $f->table()->data('Date Columns', $columns, $data_retrieval)
+    $table = $f->table()->data($data_retrieval, 'Date Columns', $columns)
         ->withRequest($DIC->http()->request());
     return $r->render($table);
 }

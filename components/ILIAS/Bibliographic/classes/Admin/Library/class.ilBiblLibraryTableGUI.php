@@ -1,17 +1,5 @@
 <?php
 
-use ILIAS\UI\Component\Table\DataRetrieval;
-use ILIAS\UI\Component\Table\DataRowBuilder;
-use ILIAS\Data\Range;
-use ILIAS\Data\Order;
-use Psr\Http\Message\ServerRequestInterface AS HttpRequest;
-use ILIAS\UI\Factory as UIFactory;
-use ILIAS\UI\Renderer AS UIRenderer;
-use ILIAS\Data\Factory as DataFactory;
-use ILIAS\UI\URLBuilder;
-use ILIAS\UI\Component\Table\Data AS DataTable;
-use ILIAS\UI\URLBuilderToken;
-
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -28,6 +16,17 @@ use ILIAS\UI\URLBuilderToken;
  *
  *********************************************************************/
 
+use ILIAS\UI\Component\Table\DataRetrieval;
+use ILIAS\UI\Component\Table\DataRowBuilder;
+use ILIAS\Data\Range;
+use ILIAS\Data\Order;
+use Psr\Http\Message\ServerRequestInterface as HttpRequest;
+use ILIAS\UI\Factory as UIFactory;
+use ILIAS\UI\Renderer as UIRenderer;
+use ILIAS\Data\Factory as DataFactory;
+use ILIAS\UI\URLBuilder;
+use ILIAS\UI\Component\Table\Data as DataTable;
+use ILIAS\UI\URLBuilderToken;
 
 class ilBiblLibraryTableGUI implements DataRetrieval
 {
@@ -66,9 +65,9 @@ class ilBiblLibraryTableGUI implements DataRetrieval
     private function buildTable(): DataTable
     {
         return $this->ui_factory->table()->data(
+            $this,
             $this->lng->txt('bibl_settings_libraries'),
             $this->getColumns(),
-            $this
         )->withActions(
             $this->getActions()
         )->withRange(
