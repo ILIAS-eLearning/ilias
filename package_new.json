@@ -10,6 +10,7 @@
   "dependencies": {
   },
   "devDependencies": {
+    "eslint-plugin-import": "^2.31.0",
   },
   "scripts": {
     "test": "mocha --recursive"
