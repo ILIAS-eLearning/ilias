@@ -172,8 +172,6 @@ class TileTest extends TestCase
         $badge_image_path = '/file-path';
         $badge_image_name = 'Dummy image';
         $badge_image_rid_name = '43242-324234-324234-234233';
-        $badge_image = $this->getMockBuilder(ilBadgeImage::class)->disableOriginalConstructor()->getMock();
-
         $badge = $this->getMockBuilder(ilBadge::class)->disableOriginalConstructor()->getMock();
         $modal_content = $this->getMockBuilder(ModalContent::class)->disableOriginalConstructor()->getMock();
         $container = $this->getMockBuilder(Container::class)->disableOriginalConstructor()->getMock();
@@ -200,8 +198,6 @@ class TileTest extends TestCase
         $badge->method('getImagePath')->willReturn($badge_image_path);
         $badge->method('getImage')->willReturn($badge_image_name);
         $badge->method('getImageRid')->willReturn($badge_image_rid_name);
-        # $badge_image->method('getImageFromBadge')->willReturn(new \ILIAS\UI\Implementation\Component\Image\Image($badge_image_name, $badge_image_path, ''));
-
         $modal_content->method('badge')->willReturn($badge);
 
         $tile = new Tile($container, $parent, $modal, $sign_file, $format_date);
