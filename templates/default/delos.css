@@ -7915,8 +7915,15 @@ div.alert ul > li:before {
 .modal.il-modal-lightbox-dark .modal-content .modal-header {
   border-bottom-color: white;
 }
+.modal.il-modal-lightbox-dark .modal-content .modal-title {
+  padding: 0px;
+}
+.modal.il-modal-lightbox-dark .modal-content .carousel-inner {
+  padding: 0px;
+}
 .modal.il-modal-lightbox-dark .modal-content .carousel-control {
   color: white;
+  width: 15%;
 }
 .modal.il-modal-lightbox-dark .close {
   color: white;
@@ -8333,12 +8340,9 @@ div.alert ul > li:before {
   padding-bottom: 3px;
 }
 
+.il-audio-container > audio,
 .il-audio-container > button {
   width: 100%;
-}
-
-.il-audio-player {
-  background: #2c2c2c;
 }
 
 .webui-popover-content {
@@ -16617,6 +16621,7 @@ select[size] {
 
 .form-control {
   display: block;
+  width: 100%;
   height: 28px;
   padding: 3px 9px;
   font-size: 0.75rem;
@@ -16669,6 +16674,10 @@ select[size] {
 }
 textarea .form-control {
   height: auto;
+}
+
+select.form-control {
+  width: auto;
 }
 
 .form-control.form-control-sm.il-input-tag-container {

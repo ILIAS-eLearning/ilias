@@ -119,8 +119,15 @@ $il-modal-dark-carousel-color: $il-main-bg !default;
 			.modal-header {
 				border-bottom-color: $il-modal-light-color;
 			}
+			.modal-title {
+				padding: 0px;
+			}
+			.carousel-inner {
+				padding: 0px;
+			}
 			.carousel-control {
 				color: $il-modal-dark-carousel-color;
+				width: 15%;
 			}
 		}
 		.close {

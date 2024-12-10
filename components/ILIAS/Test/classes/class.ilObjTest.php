@@ -18,7 +18,6 @@
 
 declare(strict_types=1);
 
-use ILIAS\Test\Participants\Participant;
 use ILIAS\Test\Participants\ParticipantRepository;
 use ILIAS\Test\TestDIC;
 use ILIAS\Test\RequestDataCollector;
@@ -43,7 +42,7 @@ use ILIAS\Test\Settings\MainSettings\SettingsIntroduction;
 use ILIAS\Test\Settings\MainSettings\SettingsFinishing;
 use ILIAS\Test\Settings\ScoreReporting\ScoreSettingsRepository;
 use ILIAS\Test\Settings\ScoreReporting\ScoreSettingsDatabaseRepository;
-use ILIAS\Test\Settings\ScoreReporting\SettingsResultSummary;
+use ILIAS\Test\Settings\ScoreReporting\ScoreReportingTypes;
 use ILIAS\Test\Settings\ScoreReporting\ScoreSettings;
 use ILIAS\TestQuestionPool\Import\TestQuestionsImportTrait;
 use ILIAS\TestQuestionPool\Questions\GeneralQuestionPropertiesRepository;
@@ -750,26 +749,9 @@ class ilObjTest extends ilObject
         return $this->getMainSettings()->getParticipantFunctionalitySettings()->getPostponedQuestionsMoveToEnd();
     }
 
-    public function getScoreReporting(): int
-    {
-        return $this->getScoreSettings()->getResultSummarySettings()->getScoreReporting();
-    }
-
     public function isScoreReportingEnabled(): bool
     {
-        switch ($this->getScoreSettings()->getResultSummarySettings()->getScoreReporting()) {
-            case SettingsResultSummary::SCORE_REPORTING_FINISHED:
-            case SettingsResultSummary::SCORE_REPORTING_IMMIDIATLY:
-            case SettingsResultSummary::SCORE_REPORTING_DATE:
-            case SettingsResultSummary::SCORE_REPORTING_AFTER_PASSED:
-
-                return true;
-
-            case SettingsResultSummary::SCORE_REPORTING_DISABLED:
-            default:
-
-                return false;
-        }
+        return $this->getScoreSettings()->getResultSummarySettings()->getScoreReporting()->isReportingEnabled();
     }
 
     public function getAnswerFeedbackPoints(): bool
@@ -2640,12 +2622,15 @@ class ilObjTest extends ilObject
             }
 
             for ($i = 0;$i < $user_data->getPassCount();$i++) {
-                $pass_data = $user_data->getPass($i);
+                $attempt_data = $user_data->getPass($i);
+                if ($attempt_data === null) {
+                    continue;
+                }
                 $mark = $this->getMarkSchema()->getMatchingMark(
-                    $pass_data->getReachedPointsInPercent()
+                    $attempt_data->getReachedPointsInPercent()
                 );
                 if ($mark !== null) {
-                    $pass_data->setMark($mark);
+                    $attempt_data->setMark($mark);
                 }
             }
 
@@ -3241,7 +3226,11 @@ class ilObjTest extends ilObject
                     $access_settings = $access_settings->withFixedParticipants((bool) $metadata["entry"]);
                     break;
                 case "score_reporting":
-                    $result_summary_settings = $result_summary_settings->withScoreReporting((int) $metadata["entry"]);
+                    if ($metadata['entry'] !== null) {
+                        $result_summary_settings = $result_summary_settings->withScoreReporting(
+                            ScoreReportingTypes::tryFrom((int) $metadata['entry']) ?? ScoreReportingTypes::SCORE_REPORTING_DISABLED
+                        );
+                    }
                     break;
                 case "shuffle_questions":
                     $question_behaviour_settings = $question_behaviour_settings->withShuffleQuestions((bool) $metadata["entry"]);
@@ -3267,10 +3256,14 @@ class ilObjTest extends ilObject
                     )->withPassword($metadata["entry"]);
                     break;
                 case 'ip_range_from':
-                    $access_settings = $access_settings->withIpRangeFrom($metadata['entry']);
+                    if ($metadata['entry'] !== '') {
+                        $access_settings = $access_settings->withIpRangeFrom($metadata['entry']);
+                    }
                     break;
                 case 'ip_range_to':
-                    $access_settings = $access_settings->withIpRangeTo($metadata['entry']);
+                    if ($metadata['entry'] !== '') {
+                        $access_settings = $access_settings->withIpRangeTo($metadata['entry']);
+                    }
                     break;
                 case "pass_scoring":
                     $scoring_settings = $scoring_settings->withPassScoring((int) $metadata["entry"]);
@@ -3680,7 +3673,7 @@ class ilObjTest extends ilObject
 
         $a_xml_writer->xmlStartTag("qtimetadatafield");
         $a_xml_writer->xmlElement("fieldlabel", null, "score_reporting");
-        $a_xml_writer->xmlElement("fieldentry", null, sprintf("%d", $this->getScoreSettings()->getResultSummarySettings()->getScoreReporting()));
+        $a_xml_writer->xmlElement("fieldentry", null, sprintf("%d", $this->getScoreSettings()->getResultSummarySettings()->getScoreReporting()->value));
         $a_xml_writer->xmlEndTag("qtimetadatafield");
 
         $a_xml_writer->xmlStartTag("qtimetadatafield");
@@ -4143,14 +4136,17 @@ class ilObjTest extends ilObject
     public function marksEditable(): bool
     {
         $total = $this->evalTotalPersons();
-        if ($total === 0) {
+        $results_summary_settings = $this->getScoreSettings()->getResultSummarySettings();
+        if ($total === 0
+            || !$results_summary_settings->getScoreReporting()->isReportingEnabled() === null) {
             return true;
         }
 
-        $reporting_date = $this->getScoreSettings()->getResultSummarySettings()->getReportingDate();
-        if ($reporting_date !== null) {
-            return $reporting_date <= new DateTimeImmutable('now', new DateTimeZone('UTC'));
+        if ($results_summary_settings->getScoreReporting() === ScoreReportingTypes::SCORE_REPORTING_DATE) {
+            return $results_summary_settings->getReportingDate()
+                >= new DateTimeImmutable('now', new DateTimeZone('UTC'));
         }
+
         return false;
     }
 
@@ -5911,7 +5907,7 @@ class ilObjTest extends ilObject
             'ScoreCutting' => $score_settings->getScoringSettings()->getScoreCutting(),
             'CountSystem' => $score_settings->getScoringSettings()->getCountSystem(),
 
-            'ScoreReporting' => $score_settings->getResultSummarySettings()->getScoreReporting(),
+            'ScoreReporting' => $score_settings->getResultSummarySettings()->getScoreReporting()->value,
             'ReportingDate' => $score_settings->getResultSummarySettings()->getReportingDate(),
             'pass_deletion_allowed' => (int) $score_settings->getResultSummarySettings()->getPassDeletionAllowed(),
             'show_grading_status' => (int) $score_settings->getResultSummarySettings()->getShowGradingStatusEnabled(),
@@ -5958,11 +5954,11 @@ class ilObjTest extends ilObject
      */
     public function applyDefaults($test_defaults): bool
     {
-        $testsettings = unserialize($test_defaults['defaults']);
-        $unserialized_marks = unserialize($test_defaults['marks']);
-
-        if ($unserialized_marks instanceof MarkSchema) {
-            $unserialized_marks = $unserialized_marks->getMarkSteps();
+        $testsettings = unserialize($test_defaults['defaults'], ['allowed_classes' => [DateTimeImmutable::class]]);
+        try {
+            $unserialized_marks = unserialize($test_defaults['marks'], ['allowed_classes' => [Mark::class]]);
+        } catch (Exception $e) {
+            return false;
         }
 
         $this->mark_schema = $this->getMarkSchema()->withMarkSteps($unserialized_marks);
@@ -6047,6 +6043,12 @@ class ilObjTest extends ilObject
 
         $this->getMainSettingsRepository()->store($main_settings);
 
+        $score_reporting = ScoreReportingTypes::SCORE_REPORTING_DISABLED;
+        if ($testsettings['ScoreReporting'] !== null) {
+            $score_reporting = ScoreReportingTypes::tryFrom($testsettings['ScoreReporting'])
+                ?? ScoreReportingTypes::SCORE_REPORTING_DISABLED;
+        }
+
         $reporting_date = $testsettings['ReportingDate'];
         if (is_string($reporting_date)) {
             $reporting_date = new DateTimeImmutable($testsettings['ReportingDate'], new DateTimeZone('UTC'));
@@ -6065,7 +6067,7 @@ class ilObjTest extends ilObject
                 ->withPassDeletionAllowed((bool) $testsettings['pass_deletion_allowed'])
                 ->withShowGradingStatusEnabled((bool) $testsettings['show_grading_status'])
                 ->withShowGradingMarkEnabled((bool) $testsettings['show_grading_mark'])
-                ->withScoreReporting((int) $testsettings['ScoreReporting'])
+                ->withScoreReporting($score_reporting)
                 ->withReportingDate($reporting_date)
             )
             ->withResultDetailsSettings(
@@ -6548,7 +6550,7 @@ class ilObjTest extends ilObject
         $found_participants = $data->getParticipants();
         $results = ['overview' => [], 'questions' => []];
         if ($found_participants !== []) {
-            $results['overview']['tst_stat_result_mark_median'] = $data->getStatistics()->getEvaluationDataOfMedianUser()?->getMark()->getShortName() ?? '';
+            $results['overview']['tst_stat_result_mark_median'] = $data->getStatistics()->getEvaluationDataOfMedianUser()?->getMark()?->getShortName() ?? '';
             $results['overview']['tst_stat_result_rank_median'] = $data->getStatistics()->rankMedian();
             $results['overview']['tst_stat_result_total_participants'] = $data->getStatistics()->count();
             $results['overview']['tst_stat_result_median'] = $data->getStatistics()->median();
@@ -6564,7 +6566,7 @@ class ilObjTest extends ilObject
             $total_passed_max = 0;
             $total_passed_time = 0;
             foreach ($found_participants as $userdata) {
-                if ($userdata->getMark()->getPassed()) {
+                if ($userdata->getMark()?->getPassed()) {
                     $total_passed++;
                     $total_passed_reached += $userdata->getReached();
                     $total_passed_max += $userdata->getMaxpoints();

@@ -828,7 +828,7 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
     protected function sortDefinitionsBySolution(array $solutions, array $definitions): array
     {
         $neworder = [];
-        foreach (array_key($solutions) as $definition_id) {
+        foreach (array_keys($solutions) as $definition_id) {
             $neworder[] = $this->object->getDefinitionWithIdentifier($definition_id);
         }
 
@@ -878,19 +878,21 @@ class assMatchingQuestionGUI extends assQuestionGUI implements ilGuiQuestionScor
         }
 
         foreach ($definitions as $definition) {
-            $terms = $this->populateDefinition($definition, $solutions, $terms);
+            $terms = $this->populateDefinition($template, $definition, $solutions, $terms);
             $template->setCurrentBlock('droparea');
             $template->setVariable('ID_DROPAREA', $definition->getIdentifier());
             $template->setVariable('QUESTION_ID', $this->object->getId());
             $template->parseCurrentBlock();
         }
 
-        foreach ($terms as $term) {
-            $this->populateTerm($term);
-            $template->setCurrentBlock('draggable');
-            $template->setVariable('ID_DRAGGABLE', $term->getIdentifier());
-            $template->parseCurrentBlock();
-        }
+        $template->setVariable(
+            'TERMS_PRESENTATION_SOURCE',
+            array_reduce(
+                $terms,
+                fn(string $c, assAnswerMatchingTerm $v) => $c . $this->buildTermHtml($v),
+                ''
+            )
+        );
 
         $template->setVariable('QUESTIONTEXT', $this->object->getQuestionForHTMLOutput());
 

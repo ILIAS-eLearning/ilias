@@ -196,6 +196,8 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
                     $this->redirectAfterMissingWrite();
                 }
 
+                $this->ctrl->saveParameterByClass(ilAssQuestionPreviewGUI::class, 'q_id');
+                $this->ctrl->saveParameterByClass(ilAssQuestionHintRequestGUI::class, 'q_id');
                 $this->ctrl->saveParameter($this, 'q_id');
                 $gui = new ilAssQuestionPreviewGUI(
                     $this->ctrl,
@@ -236,6 +238,7 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
                 $gui->initPreviewSettings($this->object->getRefId());
                 $gui->initPreviewSession($this->user->getId(), $this->fetchAuthoringQuestionIdParamater());
                 $gui->initHintTracking();
+                $this->ctrl->clearParameterByClass(self::class, 'q_id');
                 $this->tabs_gui->setBackTarget(
                     $this->lng->txt('backtocallingpool'),
                     $this->ctrl->getLinkTargetByClass(self::class, self::DEFAULT_CMD)
@@ -1603,16 +1606,16 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
             );
         }
         if ($with_read_access) {
-            $this->tabs_gui->addTarget(
+            $this->tabs_gui->addTab(
                 'info_short',
+                $this->lng->txt('info_short'),
                 $this->ctrl->getLinkTargetByClass(
                     [
                         ilRepositoryGUI::class,
                         self::class,
                         ilInfoScreenGUI::class
                     ]
-                ),
-                ['']
+                )
             );
         }
 
@@ -1729,6 +1732,7 @@ class ilObjQuestionPoolGUI extends ilObjectGUI implements ilCtrlBaseClassInterfa
             $this->error->raiseError($this->lng->txt('msg_no_perm_read'));
         }
 
+        $this->tabs_gui->activateTab('info_short');
         $info = new ilInfoScreenGUI($this);
         $info->enablePrivateNotes();
         $info->addMetaDataSections($this->object->getId(), 0, $this->object->getType());

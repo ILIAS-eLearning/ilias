@@ -1397,15 +1397,12 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
     {
         $new_object->saveToDb();
 
-        $test_def_id = $this->getDidacticTemplateVar("tstdef");
+        $test_def_id = $this->getDidacticTemplateVar('tstdef');
         if ($test_def_id !== 0) {
             $test_defaults = $new_object->getTestDefaults($test_def_id);
-            $new_object->applyDefaults($test_defaults);
-        }
-
-        $template_id = $this->getDidacticTemplateVar("tsttpl");
-        if ($template_id) {
-            $new_object->setTemplate($template_id);
+            if (!$new_object->applyDefaults($test_defaults)) {
+                $this->tpl->setOnScreenMessage('failure', $this->lng->txt('tst_defaults_apply_not_possible'));
+            }
         }
 
         $new_object->saveToDb();
@@ -1422,7 +1419,7 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
         }
 
         // always send a message
-        $this->tpl->setOnScreenMessage('success', $this->lng->txt("object_added"), true);
+        $this->tpl->setOnScreenMessage('success', $this->lng->txt('object_added'), true);
         $this->ctrl->setParameter($this, 'ref_id', $new_object->getRefId());
         $this->ctrl->redirectByClass(SettingsMainGUI::class);
     }
@@ -1990,10 +1987,9 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
      */
     public function applyDefaultsObject($confirmed = false): void
     {
-        $defaults = $this->testrequest->retrieveArrayOfIntsFromPost('chb_defaults');
-        if ($defaults !== []) {
+        $defaults_id = $this->testrequest->retrieveArrayOfIntsFromPost('chb_defaults');
+        if ($defaults_id === []) {
             $this->tpl->setOnScreenMessage('info', $this->lng->txt('tst_defaults_apply_select_one'));
-
             $this->defaultsObject();
             return;
         }
@@ -2005,7 +2001,11 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
             return;
         }
 
-        $default_settings = unserialize($defaults[0]['defaults'], ['allowed_classes' => false]);
+        $defaults = $this->getTestObject()->getTestDefaults($defaults_id[0]);
+        $default_settings = unserialize(
+            $defaults['defaults'],
+            ['allowed_classes' => [DateTimeImmutable::class]]
+        );
 
         if (isset($default_settings['isRandomTest'])) {
             if ($default_settings['isRandomTest']) {
@@ -2052,13 +2052,14 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
 
         if ($question_set_type_setting_switched && !$this->getTestObject()->getOfflineStatus()) {
             $this->getTestObject()->setOfflineStatus(true);
-
             $info = $this->lng->txt('tst_set_offline_due_to_switched_question_set_type_setting');
-
             $this->tpl->setOnScreenMessage('info', $info, true);
         }
 
-        $this->getTestObject()->applyDefaults($defaults);
+        if (!$this->getTestObject()->applyDefaults($defaults)) {
+            $this->tpl->setOnScreenMessage('failure', $this->lng->txt('tst_defaults_apply_not_possible'));
+            $this->ctrl->redirect($this, 'defaults');
+        }
 
         $this->tpl->setOnScreenMessage('success', $this->lng->txt('tst_defaults_applied'), true);
 
@@ -2184,25 +2185,11 @@ class ilObjTestGUI extends ilObjectGUI implements ilCtrlBaseClassInterface, ilDe
         }
 
         $info->addSection($this->lng->txt('tst_score_reporting'));
-        $score_reporting_text = '';
-        switch ($this->getTestObject()->getScoreReporting()) {
-            case SettingsResultSummary::SCORE_REPORTING_FINISHED:
-                $score_reporting_text = $this->lng->txt('tst_report_after_test');
-                break;
-            case SettingsResultSummary::SCORE_REPORTING_IMMIDIATLY:
-                $score_reporting_text = $this->lng->txt('tst_report_after_first_question');
-                break;
-            case SettingsResultSummary::SCORE_REPORTING_DATE:
-                $score_reporting_text = $this->lng->txt('tst_report_after_date');
-                break;
-            case SettingsResultSummary::SCORE_REPORTING_AFTER_PASSED:
-                $score_reporting_text = $this->lng->txt('tst_report_after_passed');
-                break;
-            default:
-                $score_reporting_text = $this->lng->txt('tst_report_never');
-                break;
-        }
-        $info->addProperty($this->lng->txt('tst_score_reporting'), $score_reporting_text);
+        $info->addProperty(
+            $this->lng->txt('tst_score_reporting'),
+            $this->getTestObject()->getScoreSettings()->getResultSummarySettings()
+                ->getScoreReporting()->getTranslatedValue($this->lng)
+        );
         $reporting_date = $this->getTestObject()
             ->getScoreSettings()
             ->getResultSummarySettings()

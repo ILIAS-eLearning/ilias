@@ -75,10 +75,15 @@ class assOrderingQuestion extends assQuestion implements ilObjQuestionScoringAdj
 
     public function isComplete(): bool
     {
+        $elements_list = $this->getOrderingElementList()->getElements();
+        if ($elements_list === [] && $this->element_list_for_deferred_saving !== null) {
+            $elements_list = $this->element_list_for_deferred_saving->getElements();
+        }
         $elements = array_filter(
-            $this->getOrderingElementList()->getElements(),
+            $elements_list,
             fn($element) => trim($element->getContent()) != ''
         );
+
         $has_at_least_two_elements = count($elements) > 1;
 
         $complete = $this->getAuthor()
@@ -970,48 +975,39 @@ class assOrderingQuestion extends assQuestion implements ilObjQuestionScoringAdj
         return $ordering_element_input;
     }
 
-
-    /**
-     * @param array $userSolutionPost
-     * @return ilAssOrderingElementList
-     * @throws ilTestException
-     */
-    public function fetchSolutionListFromFormSubmissionData($userSolutionPost): ilAssOrderingElementList
+    public function fetchSolutionListFromFormSubmissionData(array $user_solution_post): ilAssOrderingElementList
     {
-        $orderingGUI = $this->buildNestedOrderingElementInputGui();
-        $orderingGUI->setContext(ilAssNestedOrderingElementsInputGUI::CONTEXT_USER_SOLUTION_SUBMISSION);
-        $orderingGUI->setValueByArray($userSolutionPost);
+        $ordering_gui = $this->buildNestedOrderingElementInputGui();
+        $ordering_gui->setContext(ilAssNestedOrderingElementsInputGUI::CONTEXT_USER_SOLUTION_SUBMISSION);
+        $ordering_gui->setValueByArray($user_solution_post);
 
-        if (!$orderingGUI->checkInput()) {
+        if (!$ordering_gui->checkInput()) {
             throw new ilTestException('error on validating user solution post');
         }
 
-        $solutionOrderingElementList = ilAssOrderingElementList::buildInstance($this->getId());
+        $solution_ordering_element_list = ilAssOrderingElementList::buildInstance($this->getId());
 
-        $storedElementList = $this->getOrderingElementList();
+        $stored_element_list = $this->getOrderingElementList();
 
-        foreach ($orderingGUI->getElementList($this->getId()) as $submittedElement) {
-            $solutionElement = $storedElementList->getElementByRandomIdentifier(
-                $submittedElement->getRandomIdentifier()
+        foreach ($ordering_gui->getElementList($this->getId()) as $submitted_element) {
+            $solution_element = $stored_element_list->getElementByRandomIdentifier(
+                $submitted_element->getRandomIdentifier()
             )->getClone();
 
-            $solutionElement->setPosition($submittedElement->getPosition());
+            $solution_element->setPosition($submitted_element->getPosition());
 
             if ($this->isOrderingTypeNested()) {
-                $solutionElement->setIndentation($submittedElement->getIndentation());
+                $solution_element->setIndentation($submitted_element->getIndentation());
             }
 
-            $solutionOrderingElementList->addElement($solutionElement);
+            $solution_ordering_element_list->addElement($solution_element);
         }
 
-        return $solutionOrderingElementList;
+        return $solution_ordering_element_list;
     }
 
     private ?ilAssOrderingElementList $postSolutionOrderingElementList = null;
 
-    /**
-     * @return ilAssOrderingElementList
-     */
     public function getSolutionListFromPostSubmit(): ilAssOrderingElementList
     {
         if ($this->postSolutionOrderingElementList === null) {
@@ -1024,25 +1020,19 @@ class assOrderingQuestion extends assQuestion implements ilObjQuestionScoringAdj
         return $this->postSolutionOrderingElementList;
     }
 
-    /**
-     * @param $user_order
-     * @param $nested_solution
-     * @return int
-     */
-    protected function calculateReachedPointsForSolution(ilAssOrderingElementList $solutionOrderingElementList): float
+    protected function calculateReachedPointsForSolution(ilAssOrderingElementList $solution_ordering_element_list): float
     {
-        $reachedPoints = $this->getPoints();
+        $reached_points = $this->getPoints();
 
-        foreach ($this->getOrderingElementList() as $correctElement) {
-            $userElement = $solutionOrderingElementList->getElementByPosition($correctElement->getPosition());
-
-            if (!$correctElement->isSameElement($userElement)) {
-                $reachedPoints = 0;
+        foreach ($this->getOrderingElementList() as $correct_element) {
+            $user_element = $solution_ordering_element_list->getElementByPosition($correct_element->getPosition());
+            if (!$correct_element->isSameElement($user_element)) {
+                $reached_points = 0;
                 break;
             }
         }
 
-        return $reachedPoints;
+        return $reached_points;
     }
 
     public function getOperators(string $expression): array

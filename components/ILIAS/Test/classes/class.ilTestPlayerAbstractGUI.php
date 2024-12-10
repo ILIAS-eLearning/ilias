@@ -863,7 +863,7 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
      */
     public function autosaveCmd(): void
     {
-        if (count($this->testrequest->getPostKeys()) > 0) {
+        if ($this->testrequest->getPostKeys() === []) {
             echo '';
             exit;
         }
@@ -1109,12 +1109,19 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
             $this->object->getTitle() . ' - ' . $this->lng->txt('final_statement')
         );
 
-        $template = new ilTemplate('tpl.il_as_tst_final_statement.html', true, true, 'components/ILIAS/Test');
-        $this->ctrl->setParameter($this, 'skipfinalstatement', 1);
-        $template->setVariable('FORMACTION', $this->ctrl->getFormAction($this, ilTestPlayerCommands::AFTER_TEST_PASS_FINISHED));
-        $template->setVariable('FINALSTATEMENT', $this->object->prepareTextareaOutput($this->object->getFinalStatement(), true));
-        $template->setVariable('BUTTON_CONTINUE', $this->lng->txt('btn_next'));
-        $this->tpl->setVariable($this->getContentBlockName(), $template->get());
+        $this->ctrl->setParameterByClass(static::class, 'skipfinalstatement', 1);
+        $this->tpl->setVariable(
+            $this->getContentBlockName(),
+            $this->ui_renderer->render([
+                $this->ui_factory->legacy(
+                    $this->object->prepareTextareaOutput($this->object->getFinalStatement(), true)
+                ),
+                $this->ui_factory->button()->standard(
+                    $this->lng->txt('btn_next'),
+                    $this->ctrl->getLinkTargetByClass(static::class, ilTestPlayerCommands::AFTER_TEST_PASS_FINISHED)
+                )
+            ])
+        );
     }
 
     protected function prepareTestPage($presentationMode, $sequenceElement, $question_id)
@@ -1334,9 +1341,9 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
             )
         );
 
-        $this->help->setScreenIdComponent("tst");
-        $this->help->setScreenId("assessment");
-        $this->help->setSubScreenId("question");
+        $this->help->setScreenIdComponent('tst');
+        $this->help->setScreenId('assessment');
+        $this->help->setSubScreenId('question');
 
         $sequence_element = $this->getCurrentSequenceElement();
 
@@ -2206,7 +2213,7 @@ abstract class ilTestPlayerAbstractGUI extends ilTestServiceGUI
             $this->registerForcedFeedbackNavUrl($this->getNavigationUrlParameter());
         }
         // fau.
-        $this->ctrl->redirect($this, ilTestPlayerCommands::SHOW_QUESTION);
+        $this->ctrl->redirectByClass(static::class, ilTestPlayerCommands::SHOW_QUESTION);
     }
 
     protected function nextQuestionCmd()
@@ -2750,7 +2757,7 @@ JS;
 
     protected function getInstantResponseParameter(): bool
     {
-        return $this->testrequest->bool('instresp') ?? false;
+        return $this->testrequest->isInstanceResponseRequested();
     }
 
     protected function getNextCommandParameter()
@@ -2804,11 +2811,11 @@ JS;
 
     protected function saveNavigationPreventConfirmation(): void
     {
-        if ($this->testrequest->bool('save_on_navigation_prevent_confirmation')) {
+        if ($this->testrequest->retrieveBoolFromPost('save_on_navigation_prevent_confirmation')) {
             ilSession::set('save_on_navigation_prevent_confirmation', true);
         }
 
-        if ($this->testrequest->bool(self::FOLLOWUP_QST_LOCKS_PREVENT_CONFIRMATION_PARAM)) {
+        if ($this->testrequest->retrieveBoolFromPost(self::FOLLOWUP_QST_LOCKS_PREVENT_CONFIRMATION_PARAM)) {
             ilSession::set(self::FOLLOWUP_QST_LOCKS_PREVENT_CONFIRMATION_PARAM, true);
         }
     }
