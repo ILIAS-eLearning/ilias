@@ -19,12 +19,24 @@
 declare(strict_types=1);
 
 use ILIAS\Cron\Schedule\CronJobScheduleType;
+use ILIAS\Cron\CronJob;
 
-abstract class ilCronJob
+abstract class ilCronJob implements CronJob
 {
     protected ?CronJobScheduleType $schedule_type = null;
     protected ?int $schedule_value = null;
     protected ?Closure $date_time_provider = null;
+
+    public function __construct(
+        protected readonly string $component,
+        protected readonly \ILIAS\Language\Language $lng,
+    ) {
+    }
+
+    public function getComponent(): string
+    {
+        return $this->component;
+    }
 
     private function checkWeeklySchedule(DateTimeImmutable $last_run, DateTimeImmutable $now): bool
     {

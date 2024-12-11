@@ -67,5 +67,11 @@ class Authentication implements Component\Component
             new Component\Resource\Endpoint($this, "sessioncheck.php");
         $contribute[Component\Resource\PublicAsset::class] = fn() =>
             new Component\Resource\ComponentJS($this, "session_reminder.js");
+
+        $contribute[\ILIAS\Cron\CronJob::class] = static fn() =>
+            new \ilAuthDestroyExpiredSessionsCron(
+                'components\\' . self::class,
+                $use[\ILIAS\Language\Language::class]
+            );
     }
 }

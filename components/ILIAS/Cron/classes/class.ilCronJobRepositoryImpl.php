@@ -29,7 +29,8 @@ class ilCronJobRepositoryImpl implements ilCronJobRepository
         private readonly ilSetting $setting,
         private readonly ilLogger $logger,
         private readonly ilComponentRepository $componentRepository,
-        private readonly ilComponentFactory $componentFactory
+        private readonly ilComponentFactory $componentFactory,
+        private readonly ILIAS\Language\Language $lng
     ) {
     }
 
@@ -94,7 +95,10 @@ class ilCronJobRepositoryImpl implements ilCronJobRepository
                 $refl = new ReflectionClass($a_class);
                 $job = $refl->newInstanceWithoutConstructor();
             } else {
-                $job = new $a_class();
+                $job = new $a_class(
+                    $a_component,
+                    $this->lng
+                );
             }
 
             if ($job instanceof ilCronJob && $job->getId() === $a_id) {
@@ -151,6 +155,12 @@ class ilCronJobRepositoryImpl implements ilCronJobRepository
         if ($job) {
             $this->createDefaultEntry($job, $a_component, $a_class, $a_path);
         }
+    }
+
+    public function unregisterAllJobs(): void
+    {
+        $query = 'TRUNCATE cron_job;';
+        $res = $this->db->manipulate($query);
     }
 
     public function unregisterJob(string $a_component, array $a_xml_job_ids): void

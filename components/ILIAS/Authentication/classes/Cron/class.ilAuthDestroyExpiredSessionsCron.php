@@ -20,13 +20,11 @@ declare(strict_types=1);
 
 class ilAuthDestroyExpiredSessionsCron extends ilCronJob
 {
-    protected ilLanguage $lng;
-
-    public function __construct()
-    {
-        global $DIC;
-
-        $this->lng = $DIC->language();
+    public function __construct(
+        string $component,
+        \ILIAS\Language\Language $lng,
+    ) {
+        parent::__construct($component, $lng);
         $this->lng->loadLanguageModule('auth');
     }
 

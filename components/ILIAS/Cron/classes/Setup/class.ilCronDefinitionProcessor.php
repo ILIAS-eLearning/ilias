@@ -34,6 +34,7 @@ class ilCronDefinitionProcessor implements ilComponentDefinitionProcessor
         ilComponentFactory $componentFactory
     ) {
         $this->has_cron = [];
+        //throw new Exception("CRON JOB DEFINITION", 1);
 
         $this->cronRepository = new ilCronJobRepositoryImpl(
             $this->db,

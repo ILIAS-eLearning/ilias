@@ -766,7 +766,8 @@ class ilInitialisation
                 $c->settings(),
                 $c->logger()->cron(),
                 $c['component.repository'],
-                $c['component.factory']
+                $c['component.factory'],
+                $c['lng']
             );
         };
 
