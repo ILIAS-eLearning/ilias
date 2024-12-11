@@ -55,14 +55,18 @@ class ilObjectXMLParser extends ilSaxParser
                 ++$this->curr_obj;
 
                 $this->addProperty('type', (string) $a_attribs['type']);
-                $this->addProperty(
-                    'obj_id',
-                    is_numeric($a_attribs['obj_id']) ? (int) $a_attribs["obj_id"] : ilUtil::__extractId(
-                        $a_attribs["obj_id"] ?? '',
-                        IL_INST_ID
-                    )
-                );
-                $this->addProperty('offline', $a_attribs['offline']);
+                if (array_key_exists('obj_id', $a_attribs)) {
+                    $this->addProperty(
+                        'obj_id',
+                        is_numeric($a_attribs['obj_id']) ? (int) $a_attribs["obj_id"] : ilUtil::__extractId(
+                            $a_attribs["obj_id"] ?? '',
+                            IL_INST_ID
+                        )
+                    );
+                }
+                $this->addProperty('offline', $a_attribs['offline'] ?? true);
+
+
                 break;
 
             case 'ImportId':
@@ -75,8 +79,8 @@ class ilObjectXMLParser extends ilSaxParser
 
             case 'References':
                 $this->time_target = [];
-                $this->ref_id = $a_attribs["ref_id"];
-                $this->parent_id = $a_attribs['parent_id'];
+                $this->ref_id = $a_attribs["ref_id"] ?? 0;
+                $this->parent_id = $a_attribs['parent_id'] ?? 0;
                 break;
 
             case 'TimeTarget':
@@ -84,21 +88,25 @@ class ilObjectXMLParser extends ilSaxParser
                 break;
 
             case 'Timing':
-                $this->time_target['timing_visibility'] = $a_attribs['visibility'];
+                if (isset($a_attribs['visibility'])) {
+                    $this->time_target['timing_visibility'] = $a_attribs['visibility'];
+                }
                 if (isset($a_attribs['starting_time'])) {
                     $this->time_target['starting_time'] = $a_attribs['starting_time'];
                 }
                 if (isset($a_attribs['ending_time'])) {
                     $this->time_target['ending_time'] = $a_attribs['ending_time'];
                 }
-
-                if ($a_attribs['ending_time'] < $a_attribs['starting_time']) {
-                    throw new ilObjectXMLException('Starting time must be earlier than ending time.');
+                if (isset($a_attribs['ending_time']) && isset($a_attribs['starting_time'])) {
+                    // Validate timing if both times are present
+                    if ($a_attribs['ending_time'] < $a_attribs['starting_time']) {
+                        throw new ilObjectXMLException('Starting time must be earlier than ending time.');
+                    }
                 }
                 break;
 
             case 'Suggestion':
-                $this->time_target['changeable'] = $a_attribs['changeable'];
+                $this->time_target['changeable'] = $a_attribs['changeable'] ?? false;
 
                 if (isset($a_attribs['starting_time'])) {
                     $this->time_target['suggestion_start'] = $a_attribs['starting_time'];
@@ -147,7 +155,9 @@ class ilObjectXMLParser extends ilSaxParser
                 break;
 
             case 'References':
-                $this->addReference($this->ref_id, $this->parent_id, $this->time_target);
+                if ($this->ref_id !== 0 && $this->parent_id !== 0) {
+                    $this->addReference($this->ref_id, $this->parent_id, $this->time_target);
+                }
                 break;
         }
 
