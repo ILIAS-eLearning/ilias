@@ -9,6 +9,8 @@
  * https://www.ilias.de
  * https://github.com/ILIAS-eLearning
  *****************************************************************************/
+
+
 class ilObjectXMLParser extends ilSaxParser
 {
     public array $object_data = [];
@@ -64,7 +66,10 @@ class ilObjectXMLParser extends ilSaxParser
                         )
                     );
                 }
-                $this->addProperty('offline', $a_attribs['offline'] ?? true);
+                if (isset($a_attribs['offline'])) {
+                    $this->addProperty('offline', $a_attribs['offline']);
+                }
+
 
 
                 break;
