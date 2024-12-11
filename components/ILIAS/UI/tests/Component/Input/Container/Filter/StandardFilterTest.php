@@ -188,13 +188,11 @@ class StandardFilterTest extends ILIAS_UI_TestBase
                 </button>
             </div>
             <div class="il-filter-bar-toggle">
-                <div class="il-toggle-item">
-                    <button class="il-toggle-button on" id="id_4" aria-pressed="false">
-                        <span class="il-toggle-label-on">toggle_on</span>
-                        <span class="il-toggle-label-off">toggle_off</span>
-                        <span class="il-toggle-switch"></span>
-                    </button>
-                </div>
+                <button class="il-toggle-button on" id="id_4" aria-pressed="false">
+                    <span class="il-toggle-label-on">toggle_on</span>
+                    <span class="il-toggle-label-off">toggle_off</span>
+                    <span class="il-toggle-switch"></span>
+                </button>
             </div>
         </div>
         <div class="il-filter-inputs-active clearfix" id="active_inputs_id_1" aria-labelledby="opener_id_1" data-active-inputs-expanded="1">
@@ -326,13 +324,11 @@ EOT;
                 </button>
             </div>
             <div class="il-filter-bar-toggle">
-                <div class="il-toggle-item">
-                    <button class="il-toggle-button off" id="id_4" aria-pressed="false">
-                        <span class="il-toggle-label-on">toggle_on</span>
-                        <span class="il-toggle-label-off">toggle_off</span>
-                        <span class="il-toggle-switch"></span>
-                    </button>
-                </div>
+                <button class="il-toggle-button off" id="id_4" aria-pressed="false">
+                    <span class="il-toggle-label-on">toggle_on</span>
+                    <span class="il-toggle-label-off">toggle_off</span>
+                    <span class="il-toggle-switch"></span>
+                </button>
             </div>
         </div>
         <div class="il-filter-inputs-active clearfix" id="active_inputs_id_1" aria-labelledby="opener_id_1" data-active-inputs-expanded="1">
@@ -464,13 +460,11 @@ EOT;
                 </button>
             </div>
             <div class="il-filter-bar-toggle">
-                <div class="il-toggle-item">
-                    <button class="il-toggle-button on" id="id_4" aria-pressed="false">
-                        <span class="il-toggle-label-on">toggle_on</span>
-                        <span class="il-toggle-label-off">toggle_off</span>
-                        <span class="il-toggle-switch"></span>
-                    </button>
-                </div>
+               <button class="il-toggle-button on" id="id_4" aria-pressed="false">
+                    <span class="il-toggle-label-on">toggle_on</span>
+                    <span class="il-toggle-label-off">toggle_off</span>
+                    <span class="il-toggle-switch"></span>
+                </button>
             </div>
         </div>
         <div class="il-filter-inputs-active clearfix" id="active_inputs_id_1" aria-labelledby="opener_id_1" data-active-inputs-expanded="0">
@@ -602,13 +596,11 @@ EOT;
                 </button>
             </div>
             <div class="il-filter-bar-toggle">
-                <div class="il-toggle-item">
-                    <button class="il-toggle-button off" id="id_4" aria-pressed="false">
-                        <span class="il-toggle-label-on">toggle_on</span>
-                        <span class="il-toggle-label-off">toggle_off</span>
-                        <span class="il-toggle-switch"></span>
-                    </button>
-                </div>
+                <button class="il-toggle-button off" id="id_4" aria-pressed="false">
+                    <span class="il-toggle-label-on">toggle_on</span>
+                    <span class="il-toggle-label-off">toggle_off</span>
+                    <span class="il-toggle-switch"></span>
+                </button>
             </div>
         </div>
         <div class="il-filter-inputs-active clearfix" id="active_inputs_id_1" aria-labelledby="opener_id_1" data-active-inputs-expanded="0">
