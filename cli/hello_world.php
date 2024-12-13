@@ -16,7 +16,7 @@
  *
  *********************************************************************/
 
-require_once(__DIR__ . "/../artifacts/bootstrap.php");
+require_once(__DIR__ . "/../artifacts/bootstrap_setup.php");
 
 // This calls a simple entrypoint, for testing and documentation purpose. This
 // should just print a simple hello and will work when bootstrapping works.
