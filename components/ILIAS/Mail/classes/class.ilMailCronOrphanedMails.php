@@ -36,20 +36,18 @@ class ilMailCronOrphanedMails extends ilCronJob
 {
     private GlobalHttpState $http;
     private Refinery $refinery;
-    private ilLanguage $lng;
     private ilSetting $settings;
     private ilDBInterface $db;
     private ilObjUser $user;
     private bool $initDone = false;
     private ilCronManager $cron_manager;
 
-    private function init(): void
+    public function init(): void
     {
         global $DIC;
 
         if (!$this->initDone) {
             $this->settings = $DIC->settings();
-            $this->lng = $DIC->language();
             $this->db = $DIC->database();
             $this->user = $DIC->user();
             $this->http = $DIC->http();
@@ -91,13 +89,11 @@ class ilMailCronOrphanedMails extends ilCronJob
 
     public function getTitle(): string
     {
-        $this->init();
         return $this->lng->txt('mail_orphaned_mails');
     }
 
     public function getDescription(): string
     {
-        $this->init();
         return $this->lng->txt('mail_orphaned_mails_desc');
     }
 
