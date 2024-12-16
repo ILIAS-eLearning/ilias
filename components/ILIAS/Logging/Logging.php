@@ -36,5 +36,11 @@ class Logging implements Component\Component
             new \ilLoggingSetupAgent(
                 $pull[\ILIAS\Refinery\Factory::class]
             );
+        $contribute[\ILIAS\Cron\CronJob::class] = static fn() =>
+            new \ilLoggerCronCleanErrorFiles(
+                'components\\' . self::class,
+                $use[\ILIAS\Language\Language::class],
+                true
+            );
     }
 }
