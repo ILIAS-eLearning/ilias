@@ -1,9 +1,5 @@
 <?php
 
-declare(strict_types=0);
-
-use ILIAS\Cron\Schedule\CronJobScheduleType;
-
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -20,6 +16,10 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
  *
  *********************************************************************/
 
+declare(strict_types=0);
+
+use ILIAS\Cron\Schedule\CronJobScheduleType;
+
 class ilTimingsCronReminder extends ilCronJob
 {
     private static array $objects_information;
@@ -29,21 +29,16 @@ class ilTimingsCronReminder extends ilCronJob
     private int $now;
 
     protected ilLogger $log;
-    protected ilLanguage $lng;
     protected ilLanguage $user_lang;
     protected ilDBInterface $db;
     protected ilObjectDataCache $obj_data_cache;
 
-    /**
-     * Constructor
-     */
-    public function __construct()
+    public function init(): void
     {
-        global $DIC;
-
-        $this->log = $DIC->logger()->crs();
-        $this->lng = $DIC->language();
         $this->lng->loadLanguageModule('crs');
+        $this->log = $this->logger_factory->getLogger('crs');
+
+        global $DIC;
         $this->db = $DIC->database();
         $this->obj_data_cache = $DIC['ilObjDataCache'];
 
