@@ -28,14 +28,13 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
  */
 class ilLTICronOutcomeService extends ilCronJob
 {
-    private ilLanguage $lng;
     private ilCronJobRepository $cronRepo;
 
-    public function __construct()
+    public function init(): void
     {
+        $this->lng->loadLanguageModule('lti');
+
         global $DIC;
-        $this->lng = $DIC->language();
-        $this->lng->loadLanguageModule("lti");
         $this->cronRepo = $DIC->cron()->repository();
     }
 
