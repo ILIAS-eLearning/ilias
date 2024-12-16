@@ -26,13 +26,9 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
  */
 class ilBookingPrefBookCron extends ilCronJob
 {
-    protected ilLanguage $lng;
-
-    public function __construct()
+    public function init(): void
     {
-        global $DIC;
-
-        $this->lng = $DIC->language();
+        $this->lng->loadLanguageModule('book');
     }
 
     public function getId(): string

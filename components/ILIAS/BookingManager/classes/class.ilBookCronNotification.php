@@ -25,15 +25,14 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
 class ilBookCronNotification extends ilCronJob
 {
     protected \ILIAS\BookingManager\InternalRepoService $repo;
-    protected ilLanguage $lng;
     protected ilLogger $book_log;
 
-    public function __construct()
+    public function init(): void
     {
+        $this->lng->loadLanguageModule('dateplaner');
+        $this->lng->loadLanguageModule('book');
+
         global $DIC;
-
-        $this->lng = $DIC->language();
-
         $this->book_log = ilLoggerFactory::getLogger("book");
         $this->repo = $DIC->bookingManager()
             ->internal()
@@ -47,18 +46,12 @@ class ilBookCronNotification extends ilCronJob
 
     public function getTitle(): string
     {
-        $lng = $this->lng;
-
-        $lng->loadLanguageModule("book");
-        return $lng->txt("book_notification");
+        return $this->lng->txt("book_notification");
     }
 
     public function getDescription(): string
     {
-        $lng = $this->lng;
-
-        $lng->loadLanguageModule("book");
-        return $lng->txt("book_notification_info");
+        return $this->lng->txt("book_notification_info");
     }
 
     public function getDefaultScheduleType(): CronJobScheduleType
