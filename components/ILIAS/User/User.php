@@ -21,7 +21,6 @@ declare(strict_types=1);
 namespace ILIAS;
 
 use ILIAS\User\Setup\Agent;
-
 use ILIAS\Setup\Agent as SetupAgent;
 use ILIAS\Refinery\Factory as Refinery;
 
@@ -41,5 +40,30 @@ class User implements Component\Component
             new Agent(
                 $pull[Refinery::class]
             );
+        $contribute[\ILIAS\Cron\CronJob::class] = static fn() =>
+            new \ilCronDeleteInactiveUserAccounts(
+                self::class,
+                $use[\ILIAS\Language\Language::class],
+                $use[\ILIAS\Logging\LoggerFactory::class]
+            );
+        $contribute[\ILIAS\Cron\CronJob::class] = static fn() =>
+            new \ilCronDeleteInactivatedUserAccounts(
+                self::class,
+                $use[\ILIAS\Language\Language::class],
+                $use[\ILIAS\Logging\LoggerFactory::class]
+            );
+        $contribute[\ILIAS\Cron\CronJob::class] = static fn() =>
+            new \ilUserCronCheckAccounts(
+                self::class,
+                $use[\ILIAS\Language\Language::class],
+                $use[\ILIAS\Logging\LoggerFactory::class]
+            );
+        $contribute[\ILIAS\Cron\CronJob::class] = static fn() =>
+            new \ilCronDeleteNeverLoggedInUserAccounts(
+                self::class,
+                $use[\ILIAS\Language\Language::class],
+                $use[\ILIAS\Logging\LoggerFactory::class]
+            );
+
     }
 }

@@ -42,7 +42,6 @@ class ilCronDeleteInactiveUserAccounts extends ilCronJob
     private array $include_roles;
     private ilCronDeleteInactiveUserReminderMail $cron_delete_reminder_mail;
     private ilSetting $settings;
-    private Language $lng;
     private ilComponentLogger $log;
     private ilRbacReview $rbac_review;
     private ilObjectDataCache $objectDataCache;
@@ -51,8 +50,11 @@ class ilCronDeleteInactiveUserAccounts extends ilCronJob
     private ilCronJobRepository $cronRepository;
     private \ilGlobalTemplateInterface $main_tpl;
 
-    public function __construct()
+    public function init(): void
     {
+        $this->lng->loadLanguageModule('usr');
+        $this->log = $this->logger_factory->getRootLogger();
+
         /** @var ILIAS\DI\Container $DIC */
         global $DIC;
 
@@ -65,14 +67,6 @@ class ilCronDeleteInactiveUserAccounts extends ilCronJob
         }
         if (isset($DIC['http'])) {
             $this->http = $DIC['http'];
-        }
-
-        if (isset($DIC['lng'])) {
-            $this->lng = $DIC['lng'];
-        }
-
-        if (isset($DIC['ilLog'])) {
-            $this->log = $DIC['ilLog'];
         }
 
         if (isset($DIC['refinery'])) {
@@ -259,7 +253,7 @@ class ilCronDeleteInactiveUserAccounts extends ilCronJob
         if ($this->reminder_period > 0) {
             $timestamp_for_deletion = $timestamp_last_login - $grace_period_over;
             $account_will_be_deleted_on = $this->calculateDeletionData($timestamp_for_deletion);
-            if(
+            if (
                 $this->cron_delete_reminder_mail->sendReminderMailIfNeeded(
                     $user,
                     $this->reminder_period,
