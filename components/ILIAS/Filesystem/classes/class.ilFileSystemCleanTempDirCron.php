@@ -28,28 +28,18 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
 class ilFileSystemCleanTempDirCron extends ilCronJob
 {
     protected Filesystem $filesystem;
-
-    protected ilLanguage $language;
-
     protected ilLogger $logger;
 
-    /**
-     * @inheritDoc
-     */
-    public function __construct()
+    public function init(): void
     {
+        $this->logger = $this->logger_factory->getRootLogger();
+
         /**
          * @var $DIC Container
          */
         global $DIC;
-        if ($DIC->offsetExists('lng')) {
-            $this->language = $DIC['lng'];
-        }
         if ($DIC->offsetExists('filesystem')) {
             $this->filesystem = $DIC->filesystem()->temp();
-        }
-        if ($DIC->offsetExists('ilLoggerFactory')) {
-            $this->logger = $DIC->logger()->root();
         }
     }
 
@@ -64,12 +54,12 @@ class ilFileSystemCleanTempDirCron extends ilCronJob
 
     public function getTitle(): string
     {
-        return $this->language->txt('file_system_clean_temp_dir_cron');
+        return $this->lng->txt('file_system_clean_temp_dir_cron');
     }
 
     public function getDescription(): string
     {
-        return $this->language->txt("file_system_clean_temp_dir_cron_info");
+        return $this->lng->txt("file_system_clean_temp_dir_cron_info");
     }
 
     public function hasAutoActivation(): bool
