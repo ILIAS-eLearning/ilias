@@ -26,14 +26,11 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
  */
 class ilSurveyCronNotification extends ilCronJob
 {
-    protected ilLanguage $lng;
     protected ilTree $tree;
 
-    public function __construct()
+    public function init(): void
     {
         global $DIC;
-
-        $this->lng = $DIC->language();
         if (isset($DIC["tree"])) {
             $this->tree = $DIC->repositoryTree();
         }
