@@ -28,13 +28,12 @@ class ilCleanCOPageHistoryCronjob extends ilCronJob
 {
     protected HistoryManager $history_manager;
     protected ilSetting $settings;
-    protected ilLanguage $lng;
 
-    public function __construct()
+    public function init(): void
     {
-        global $DIC;
+        $this->lng->loadLanguageModule("copg");
 
-        $this->lng = $DIC->language();
+        global $DIC;
         $this->settings = $DIC->settings();
         $this->history_manager = $DIC
             ->copage()
@@ -50,18 +49,12 @@ class ilCleanCOPageHistoryCronjob extends ilCronJob
 
     public function getTitle(): string
     {
-        $lng = $this->lng;
-
-        $lng->loadLanguageModule("copg");
-        return $lng->txt("copg_history_cleanup_cron");
+        return $this->lng->txt("copg_history_cleanup_cron");
     }
 
     public function getDescription(): string
     {
-        $lng = $this->lng;
-
-        $lng->loadLanguageModule("copg");
-        return $lng->txt("copg_history_cleanup_cron_info");
+        return $this->lng->txt("copg_history_cleanup_cron_info");
     }
 
     public function getDefaultScheduleType(): CronJobScheduleType
