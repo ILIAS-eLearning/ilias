@@ -41,32 +41,24 @@ class ilForumCronNotification extends ilCronJob
     /** @var array<int, ilObjCourse|ilObjGroup|null> */
     private static array $container_by_frm_ref_id = [];
 
-    private readonly ilLanguage $lng;
-    private readonly ilSetting $settings;
+    private ilSetting $settings;
     private ilLogger $logger;
     private ilTree $tree;
     private int $num_sent_messages = 0;
-    private readonly ilDBInterface $ilDB;
-    private readonly ilForumNotificationCache $notificationCache;
-    private readonly \ILIAS\Refinery\Factory $refinery;
-    private readonly ilCronManager $cronManager;
+    private ilDBInterface $ilDB;
+    private ilForumNotificationCache $notificationCache;
+    private \ILIAS\Refinery\Factory $refinery;
+    private ilCronManager $cronManager;
 
-    public function __construct(
-        ?ilDBInterface $database = null,
-        ?ilForumNotificationCache $notificationCache = null,
-        ?ilLanguage $lng = null,
-        ?ilSetting $settings = null,
-        ?\ILIAS\Refinery\Factory $refinery = null,
-        ?ilCronManager $cronManager = null
-    ) {
+    public function init(): void
+    {
+        $this->logger = $this->logger_factory->getLogger('frm');
         global $DIC;
-
-        $this->settings = $settings ?? new ilSetting('frma');
-        $this->lng = $lng ?? $DIC->language();
-        $this->ilDB = $database ?? $DIC->database();
-        $this->notificationCache = $notificationCache ?? new ilForumNotificationCache();
-        $this->refinery = $refinery ?? $DIC->refinery();
-        $this->cronManager = $cronManager ?? $DIC->cron()->manager();
+        $this->settings = new ilSetting('frma');
+        $this->ilDB = $DIC->database();
+        $this->notificationCache = new ilForumNotificationCache();
+        $this->refinery = $DIC->refinery();
+        $this->cronManager = $DIC->cron()->manager();
     }
 
     public function getId(): string
@@ -119,8 +111,6 @@ class ilForumCronNotification extends ilCronJob
     public function run(): ilCronJobResult
     {
         global $DIC;
-
-        $this->logger = $DIC->logger()->frm();
         $this->tree = $DIC->repositoryTree();
 
         $status = ilCronJobResult::STATUS_NO_ACTION;
