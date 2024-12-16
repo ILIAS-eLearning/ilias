@@ -47,6 +47,7 @@ function without_data(): string
     };
 
     $table = $factory->table()->data(
+        $empty_retrieval,
         'Empty Data Table',
         [
             'col1' => $factory->table()->column()->text('Column 1')
@@ -54,7 +55,6 @@ function without_data(): string
             'col2' => $factory->table()->column()->number('Column 2')
                 ->withIsSortable(false),
         ],
-        $empty_retrieval
     );
 
     return $renderer->render($table->withRequest($request));

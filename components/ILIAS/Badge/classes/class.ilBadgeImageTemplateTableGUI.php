@@ -217,7 +217,7 @@ class ilBadgeImageTemplateTableGUI
         $data_retrieval = $this->buildDataRetrievalObject($f, $r);
 
         $table = $f->table()
-                   ->data($this->lng->txt('badge_image_templates'), $columns, $data_retrieval)
+                   ->data($data_retrieval, $this->lng->txt('badge_image_templates'), $columns)
                    ->withActions($actions)
                    ->withRequest($request);
 

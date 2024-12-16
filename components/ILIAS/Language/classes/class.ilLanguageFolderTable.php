@@ -63,9 +63,9 @@ class ilLanguageFolderTable implements DataTableInterface\DataRetrieval
     public function getTable(): DataTable\Data
     {
         return $this->ui_factory->table()->data(
+            $this,
             '',
             $this->getColums(),
-            $this
         )->withActions($this->getActions());
     }
 

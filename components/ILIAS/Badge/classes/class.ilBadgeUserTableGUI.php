@@ -339,7 +339,7 @@ class ilBadgeUserTableGUI
             $title = $parent . $this->lng->txt('users');
         }
         $table = $f->table()
-                   ->data($title, $columns, $data_retrieval)
+                   ->data($data_retrieval, $title, $columns)
                    ->withActions($actions)
                    ->withRequest($request);
 

@@ -25,7 +25,7 @@ use ILIAS\Data\URI;
 use ILIAS\Test\Utilities\TitleColumnsBuilder;
 use ILIAS\Test\RequestDataCollector;
 use ILIAS\UI\Component\Table\Action\Action;
-use ILIAS\UI\Component\Table\OrderingBinding;
+use ILIAS\UI\Component\Table\OrderingRetrieval;
 use ILIAS\UI\Component\Table\OrderingRowBuilder;
 use ILIAS\UI\Component\Table\Ordering as OrderingTable;
 use ILIAS\UI\Component\Table\Column\Column;
@@ -36,7 +36,7 @@ use ilTestRandomQuestionSetSourcePoolDefinitionList as PoolDefinitionList;
 use ilTestRandomQuestionSetConfigGUI as ConfigGUI;
 use Psr\Http\Message\ServerRequestInterface;
 
-class RandomQuestionSetSourcePoolDefinitionListTable implements OrderingBinding
+class RandomQuestionSetSourcePoolDefinitionListTable implements OrderingRetrieval
 {
     protected URI $target;
     protected URLBuilder $url_builder;
@@ -119,10 +119,10 @@ class RandomQuestionSetSourcePoolDefinitionListTable implements OrderingBinding
     {
         return $this->ui_factory->table()
             ->ordering(
+                $this,
+                $this->getTarget(ConfigGUI::CMD_SAVE_SRC_POOL_DEF_LIST),
                 $this->lng->txt('tst_src_quest_pool_def_list_table'),
                 $this->getColumns(),
-                $this,
-                $this->getTarget(ConfigGUI::CMD_SAVE_SRC_POOL_DEF_LIST)
             )
             ->withActions($this->getActions())
             ->withRequest($this->request)

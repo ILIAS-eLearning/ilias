@@ -58,9 +58,9 @@ class Factory implements T\Factory
      * @inheritdoc
      */
     public function data(
+        T\DataRetrieval $data_retrieval,
         string $title,
         array $columns,
-        T\DataRetrieval $data_retrieval
     ): T\Data {
         return new Data(
             $this->signal_generator,
@@ -95,10 +95,10 @@ class Factory implements T\Factory
      * @inheritdoc
      */
     public function ordering(
+        T\OrderingRetrieval $ordering_retrieval,
+        URI $target_url,
         string $title,
         array $columns,
-        T\OrderingBinding $binding,
-        URI $target_url
     ): T\Ordering {
         return new Ordering(
             $this->signal_generator,
@@ -107,7 +107,7 @@ class Factory implements T\Factory
             $this->ordering_row_builder,
             $title,
             $columns,
-            $binding,
+            $ordering_retrieval,
             $target_url,
             $this->storage
         );
