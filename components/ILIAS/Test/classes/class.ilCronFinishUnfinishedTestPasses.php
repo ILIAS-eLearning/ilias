@@ -30,12 +30,10 @@ use ILIAS\Test\Logging\TestLogger;
  */
 class ilCronFinishUnfinishedTestPasses extends ilCronJob
 {
-    protected readonly TestLogger $logger;
-
-    protected readonly ilLanguage $lng;
-    protected readonly ilDBInterface $db;
-    protected readonly ilObjUser $user;
-    protected readonly ilObjectDataCache $obj_data_cache;
+    protected TestLogger $logger;
+    protected ilDBInterface $db;
+    protected ilObjUser $user;
+    protected ilObjectDataCache $obj_data_cache;
     protected int $now;
     protected array $unfinished_passes;
     protected array $test_ids;
@@ -43,15 +41,15 @@ class ilCronFinishUnfinishedTestPasses extends ilCronJob
     protected ilTestProcessLockerFactory $processLockerFactory;
     protected TestResultRepository $test_pass_result_repository;
 
-    public function __construct()
+    public function init(): void
     {
+        $this->lng->loadLanguageModule('assessment');
+
         /** @var ILIAS\DI\Container $DIC */
         global $DIC;
 
         $this->logger = TestDIC::dic()['logging.logger'];
-        $this->lng = $DIC['lng'];
         $this->user = $DIC['ilUser'];
-        $this->lng->loadLanguageModule('assessment');
         $this->db = $DIC->database();
         $this->obj_data_cache = $DIC['ilObjDataCache'];
         $this->now = time();

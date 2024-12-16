@@ -19,6 +19,7 @@
 declare(strict_types=1);
 
 use ILIAS\Cron\Schedule\CronJobScheduleType;
+use ILIAS\Logging\LoggerFactory;
 
 /**
  * Class ilCronFinishUnfinishedTestPassesTest
@@ -40,7 +41,15 @@ class ilCronFinishUnfinishedTestPassesTest extends ilTestBaseTestCase
             define("ILIAS_LOG_ENABLED", false);
         }
 
-        $this->test_obj = new ilCronFinishUnfinishedTestPasses();
+        $logger_factory = $this->getMockBuilder(LoggerFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->test_obj = new ilCronFinishUnfinishedTestPasses(
+            'components\ILIAS\Test',
+            $GLOBALS['lng'],
+            $logger_factory
+        );
     }
 
     public function test_instantiateObject_shouldReturnInstance(): void
@@ -63,8 +72,16 @@ class ilCronFinishUnfinishedTestPassesTest extends ilTestBaseTestCase
             ->willReturn('testString')
         ;
 
+        $logger_factory = $this->getMockBuilder(LoggerFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
         $this->setGlobalVariable('lng', $lng_mock);
-        $test_obj = new ilCronFinishUnfinishedTestPasses();
+        $test_obj = new ilCronFinishUnfinishedTestPasses(
+            'components\ILIAS\Test',
+            $GLOBALS['lng'],
+            $logger_factory
+        );
 
         $this->assertEquals('testString', $test_obj->getTitle());
     }
@@ -79,8 +96,16 @@ class ilCronFinishUnfinishedTestPassesTest extends ilTestBaseTestCase
             ->willReturn('testString')
         ;
 
+        $logger_factory = $this->getMockBuilder(LoggerFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
         $this->setGlobalVariable('lng', $lng_mock);
-        $test_obj = new ilCronFinishUnfinishedTestPasses();
+        $test_obj = new ilCronFinishUnfinishedTestPasses(
+            'components\ILIAS\Test',
+            $GLOBALS['lng'],
+            $logger_factory
+        );
 
         $this->assertEquals('testString', $test_obj->getDescription());
     }
