@@ -26,16 +26,14 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
  */
 class ilConsultationHourCron extends ilCronJob
 {
-    protected ilLanguage $lng;
     protected ilDBInterface $db;
     protected ilSetting $setting;
 
-    public function __construct()
+    public function init(): void
     {
-        global $DIC;
-
-        $this->lng = $DIC->language();
         $this->lng->loadLanguageModule('dateplaner');
+
+        global $DIC;
         $this->db = $DIC->database();
         $this->setting = $DIC->settings();
     }
