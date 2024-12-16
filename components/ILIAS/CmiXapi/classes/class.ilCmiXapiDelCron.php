@@ -39,19 +39,15 @@ class ilCmiXapiDelCron extends ilCronJob
 
     private \ILIAS\DI\Container $dic;
 
-    public function __construct()
+    public function init(): void
     {
-        global $DIC; /* @var \ILIAS\DI\Container $DIC */
-        $this->dic = $DIC;
-
-        $DIC->language()->loadLanguageModule('cmix');
-
-        $this->log = ilLoggerFactory::getLogger('cmix');
+        $this->lng->loadLanguageModule('cmix');
+        $this->log = $this->logger_factory->getLogger('cmix');
 
         $settings = new ilSetting(self::JOB_ID);
         $lrsTypeId = $settings->get('lrs_type_id', '0');
 
-        if($lrsTypeId) {
+        if ($lrsTypeId) {
             $this->lrsType = new ilCmiXapiLrsType((int) $lrsTypeId);
         } else {
             $this->lrsType = null;
@@ -67,12 +63,12 @@ class ilCmiXapiDelCron extends ilCronJob
 
     public function getTitle(): string
     {
-        return $this->dic->language()->txt("cron_xapi_del");
+        return $this->lng->txt("cron_xapi_del");
     }
 
     public function getDescription(): string
     {
-        return $this->dic->language()->txt("cron_xapi_del_desc");
+        return $this->lng->txt("cron_xapi_del_desc");
     }
 
     /**
@@ -224,7 +220,7 @@ class ilCmiXapiDelCron extends ilCronJob
         $deletedObjectData = array();
         $allDone = true;
         foreach ($newDeletedObjects as $deletedObject) {
-            $this->log->debug("delete for " . (string)$deletedObject['obj_id']);
+            $this->log->debug("delete for " . (string) $deletedObject['obj_id']);
             // set object to updated
             $this->model->setXapiObjAsUpdated($deletedObject['obj_id']);
             // delete data
@@ -239,7 +235,7 @@ class ilCmiXapiDelCron extends ilCronJob
             // entry in xxcf_users is already deleted from ilXapiCmi5StatementsDeleteRequest
             // delete in obj_id from xxcf_data_settings
             if ($done) {
-                $this->log->debug("deleted data for object: " . (string)$deletedObject['obj_id']);
+                $this->log->debug("deleted data for object: " . (string) $deletedObject['obj_id']);
                 $deletedObjectData[] = $deletedObject['obj_id'];
                 $this->model->deleteXapiObjectEntry($deletedObject['obj_id']);
             } else {

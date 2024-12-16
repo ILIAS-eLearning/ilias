@@ -40,14 +40,10 @@ class ilXapiResultsCronjob extends ilCronJob
 
     private \ILIAS\DI\Container $dic;
 
-    public function __construct()
+    public function init(): void
     {
-        global $DIC; /* @var \ILIAS\DI\Container $DIC */
-        $this->dic = $DIC;
-
-        $DIC->language()->loadLanguageModule('cmix');
-
-        $this->log = ilLoggerFactory::getLogger('cmix');
+        $this->lng->loadLanguageModule('cmix');
+        $this->log = $this->logger_factory->getLogger('cmix');
 
         $this->initThisRunTS();
         $this->readLastRunTS();
@@ -88,12 +84,12 @@ class ilXapiResultsCronjob extends ilCronJob
 
     public function getTitle(): string
     {
-        return $this->dic->language()->txt("cron_xapi_results_evaluation");
+        return $this->lng->txt("cron_xapi_results_evaluation");
     }
 
     public function getDescription(): string
     {
-        return $this->dic->language()->txt("cron_xapi_results_evaluation_desc");
+        return $this->lng->txt("cron_xapi_results_evaluation_desc");
     }
 
     public function hasAutoActivation(): bool
