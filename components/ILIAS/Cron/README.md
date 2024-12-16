@@ -21,27 +21,32 @@ described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
 ## Implementing and Configuring a Cron-Job
 
 To give more control of if and when cron-jobs are executed to administrators a 2nd implementation of cron-jobs
-has been added to ILIAS 4.4+. All existing cron-jobs have been migrated and thus moved to their respective modules
-and services. The top-level directory "cron/" will probably be kept because of cron.php but should otherwise be empty
-at some point.
+has been added to ILIAS 4.4+. All existing cron-jobs have been migrated and thus moved to their respective component.
+The top-level directory "cron/" was removed.
 
 ### Providing a Cron-Job
 
-A module or service has to "announce" its cron-jobs to the system by adding them to their respective
-module.xml or service.xml.
-
-- The job id has to be unique.
-- An optional path can be added if the module/service directory layout differs from the ILIAS standard.
-
+A component has to contribute its cron-jobs to the system in its Component-class:
 ```php
-<?xml version = "1.0" encoding = "UTF-8"?>
-<service xmlns="http://www.w3.org" version="$Id$"
-   id="trac">
-   ...
-   <crons>
-      <cron id="lp_object_statistics" class="ilLPCronObjectStatistics" />
-   </crons>
-</service>
+class MyComponent implements Component\Component
+{
+    public function init(
+        array | \ArrayAccess &$define,
+        array | \ArrayAccess &$implement,
+        array | \ArrayAccess &$use,
+        array | \ArrayAccess &$contribute,
+        array | \ArrayAccess &$seek,
+        array | \ArrayAccess &$provide,
+        array | \ArrayAccess &$pull,
+        array | \ArrayAccess &$internal,
+    ): void {
+        $contribute[\ILIAS\Cron\CronJob::class] = static fn() =>
+            new \MyComponentCronJob(
+                'components\\' . self::class,
+                $use[\ILIAS\Language\Language::class]
+            );
+    }
+}
 ```
 
 There are 3 basic concepts: cron-job, schedule and cron-result. Using them as intended should make testing
@@ -176,7 +181,7 @@ So as mentioned above the cron-tab can safely be set to every few minutes.
 In order to execute the cron job manager, the following command MUST be used:
 
 ```shell
-/usr/bin/php [PATH_TO_ILIAS]/cron/cron.php run-jobs <user> <client_id> run-jobs
+/usr/bin/php [PATH_TO_ILIAS]/cli/cron.php run-jobs <user> <client_id>
 ```
 
 The `<user>` MUST be a valid (but arbitrary) user account of the ILIAS installation.
