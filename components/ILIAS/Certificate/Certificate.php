@@ -36,5 +36,12 @@ class Certificate implements Component\Component
             new \ilCertificatSetupAgent(
                 $pull[\ILIAS\Refinery\Factory::class]
             );
+
+        $contribute[\ILIAS\Cron\CronJob::class] = static fn() =>
+            new \ilCertificateCron(
+                'components\\' . self::class,
+                $use[\ILIAS\Language\Language::class],
+                $use[\ILIAS\Logging\LoggerFactory::class]
+            );
     }
 }

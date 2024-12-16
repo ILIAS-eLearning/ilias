@@ -26,33 +26,23 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
  */
 class ilCertificateCron extends ilCronJob
 {
-    protected ?ilLanguage $lng;
-    private ?Container $dic;
+    private ?Container $dic = null;
 
     public function __construct(
+        string $component,
+        \ILIAS\Language\Language $lng,
+        \ILIAS\Logging\LoggerFactory $logger_factory,
         private ?ilCertificateQueueRepository $queueRepository = null,
         private ?ilCertificateTemplateRepository $templateRepository = null,
         private ?ilUserCertificateRepository $userRepository = null,
         private ?ilCertificateValueReplacement $valueReplacement = null,
         private ?ilLogger $logger = null,
         ?Container $dic = null,
-        ?ilLanguage $language = null,
         private ?ilCertificateObjectHelper $objectHelper = null,
         private ?ilSetting $settings = null,
         private ?ilCronManager $cronManager = null,
     ) {
-        if (null === $dic) {
-            global $DIC;
-            $dic = $DIC;
-        }
-        $this->dic = $dic;
-
-        if ($dic && isset($dic['lng'])) {
-            $language = $dic->language();
-            $language->loadLanguageModule('certificate');
-        }
-
-        $this->lng = $language;
+        parent::__construct($component, $lng, $logger_factory);
     }
 
     public function getTitle(): string
@@ -67,6 +57,8 @@ class ilCertificateCron extends ilCronJob
 
     public function init(): void
     {
+        $this->lng->loadLanguageModule('certificate');
+
         if (null === $this->dic) {
             global $DIC;
             $this->dic = $DIC;
