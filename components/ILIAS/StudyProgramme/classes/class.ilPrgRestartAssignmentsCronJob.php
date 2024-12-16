@@ -31,18 +31,15 @@ class ilPrgRestartAssignmentsCronJob extends ilCronJob
     private const ACTING_USR_ID = ilPRGAssignment::AUTO_ASSIGNED_BY_RESTART;
 
     protected ilComponentLogger $log;
-    protected ilLanguage $lng;
     protected ilPRGAssignmentDBRepository $assignment_repo;
     protected ilPrgCronJobAdapter $adapter;
 
     protected array $prgs = [];
 
-    public function __construct()
+    public function init(): void
     {
-        global $DIC;
-        $this->log = $DIC['ilLog'];
-        $this->lng = $DIC['lng'];
         $this->lng->loadLanguageModule('prg');
+        $this->log = $this->logger_factory->getLogger('prg');
 
         $dic = ilStudyProgrammeDIC::dic();
         $this->assignment_repo = $dic['repo.assignment'];
