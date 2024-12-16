@@ -11,7 +11,10 @@ use ILIAS\UI\Component\Chart\Bar\YAxis;
 /**
  * ---
  * expected output: >
- *   ILIAS shows the rendered Component.
+ *   ILIAS shows a column-chart with an x-scale of 100 on the right;
+ *   The left is labeled with three coloured rectanlges and captions "Dataset 1","Dataset 2","Dataset 3".
+ *   The y-bar is sectioned in three parts, each part consisting of three columns,
+ *   one for each dataset (set 2 of Item 2 has a value of 0, thus not showing a bar).
  * ---
  */
 function custom()

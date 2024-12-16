@@ -12,7 +12,10 @@ use ILIAS\UI\Component\Chart\Bar\YAxis;
 /**
  * ---
  * expected output: >
- *   ILIAS shows the rendered Component.
+ *   ILIAS shows a column-chart with an x-scale of -4 to +14.
+ *   On the top, labels identify the colors for datasets (1.1., 1.2, 2).
+ *   The bars of dataset 1.1 and 1.2 are "stacked" on top of each other,
+ *   while dataset 2 is displayed next to them.
  * ---
  */
 function partly_stacked()

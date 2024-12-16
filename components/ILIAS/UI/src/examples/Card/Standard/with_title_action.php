@@ -7,7 +7,9 @@ namespace ILIAS\UI\examples\Card\Standard;
 /**
  * ---
  * expected output: >
- *   ILIAS shows the rendered Component.
+ *   ILIAS shows a ILIAS-Logo. The size of the logo depends on the browser/desktop size and will change accordingly.
+ *   A title will be displayed below the logo.
+ *   The title is clickable and will link to ilias.de.
  * ---
  */
 function with_title_action()
