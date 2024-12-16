@@ -36,5 +36,11 @@ class Search implements Component\Component
             new Component\Resource\ComponentJS($this, "SearchMainMenu.js");
         $contribute[Component\Resource\PublicAsset::class] = fn() =>
             new Component\Resource\ComponentJS($this, "Search.js");
+        $contribute[\ILIAS\Cron\CronJob::class] = static fn() =>
+            new \ilLuceneIndexer(
+                self::class,
+                $use[\ILIAS\Language\Language::class],
+                $use[\ILIAS\Logging\LoggerFactory::class]
+            );
     }
 }
