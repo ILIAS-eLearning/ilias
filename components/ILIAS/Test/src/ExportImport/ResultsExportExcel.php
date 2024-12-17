@@ -44,16 +44,12 @@ class ResultsExportExcel implements Exporter
         private readonly \ilLanguage $lng,
         private readonly \ilObjUser $current_user,
         private readonly \ilObjTest $test_obj,
-        private string $filename = '',
+        private readonly string $filename = '',
         private readonly bool $scoredonly = true,
     ) {
         $this->user_date_format = $this->current_user->getDateTimeFormat();
         $this->aggregated_data = $test_obj->getAggregatedResultsData();
         $this->worksheet = new \ilExcel();
-
-        if (!str_contains($this->filename, '.xlsx')) {
-            $this->filename .= '.xlsx';
-        }
     }
 
     public function withFilterByActiveId(int $active_id): self
@@ -124,6 +120,13 @@ class ResultsExportExcel implements Exporter
     public function write(): ?string
     {
         $path = \ilFileUtils::ilTempnam() . $this->filename;
+
+        $this->worksheet->setFormat(\ilExcel::FORMAT_XML);
+        $extension = '.' . strtolower(\ilExcel::FORMAT_XML);
+        if (!str_ends_with($path, $extension)) {
+            $path .= $extension;
+        }
+
         $this->worksheet->writeToFile($path);
         return $path;
     }
