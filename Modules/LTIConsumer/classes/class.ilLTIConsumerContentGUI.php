@@ -92,7 +92,7 @@ class ilLTIConsumerContentGUI
                 // - Force secure to require HTTPS (needed for samesite = None)
                 // see https://web.dev/articles/samesite-cookie-recipes?hl=en#unsafe-requests
 
-                setcookie('PHPSESSID', session_id(), [
+                setcookie(session_name(), session_id(), [
                     'expires' => 0,
                     'path' => rtrim(IL_COOKIE_PATH, '/') . '/Modules/LTIConsumer/ltiauth.php',
                     'domain' => IL_COOKIE_DOMAIN,
