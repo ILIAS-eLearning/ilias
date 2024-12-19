@@ -84,6 +84,23 @@ class ilLTIConsumerContentGUI
                     $this->dic->toolbar()->addText($this->getStartButtonTxt11());
                 }
             } else {
+
+                // Set an addititional PHPSESSID cookie for LTI 1.3 authentication
+                // - The standard cookie does not work with LTI tools on different domains because it has samesite = Lax
+                // - The additional cookie sets samesite to None so that it is sent with the POST request from the LTI tool
+                // - Limit the additional cookie to the path of the ltiauth.php script
+                // - Force secure to require HTTPS (needed for samesite = None)
+                // see https://web.dev/articles/samesite-cookie-recipes?hl=en#unsafe-requests
+
+                setcookie('PHPSESSID', session_id(), [
+                    'expires' => 0,
+                    'path' => rtrim(IL_COOKIE_PATH, '/') . '/Modules/LTIConsumer/ltiauth.php',
+                    'domain' => IL_COOKIE_DOMAIN,
+                    'secure' => true,
+                    'httponly' => true,
+                    'samesite' => 'None'
+                ]);
+
                 if ($this->object->isLaunchMethodEmbedded() && (ilSession::get('lti13_login_data') == null)) {
                     $tpl = new ilTemplate('tpl.lti_content.html', true, true, 'Modules/LTIConsumer');
                     $tpl->setVariable("EMBEDDED_IFRAME_SRC", $this->dic->ctrl()->getLinkTarget(
