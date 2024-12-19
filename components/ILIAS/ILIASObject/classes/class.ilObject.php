@@ -991,7 +991,7 @@ class ilObject
         $result = $db->query($sql);
         $row = $db->fetchAssoc($result);
 
-        return $row["deleted"];
+        return $row["deleted"] ?? null;
     }
 
     /**
