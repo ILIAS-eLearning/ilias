@@ -101,14 +101,17 @@ class Renderer extends AbstractComponentRenderer
                     });"
             );
         }
+        $component = $component->withAdditionalOnLoadCode(
+            fn($id) => "
+                document.querySelector('#$id ul.dropdown-menu').addEventListener(
+                    'click',
+                    (event) => event.stopPropagation()
+                )"
+        );
 
         $component = $component->withAdditionalOnLoadCode(
-            fn($id) => "$('#{$id} > .dropdown-menu')
-                .on('click', (event) =>  event.stopPropagation());"
-        );
-        $component = $component->withAdditionalOnLoadCode(
             fn($id) =>
-            "il.UI.dropdown.init(document.getElementById(\"$id\"));"
+            "il.UI.dropdown.init(document.getElementById('$id'));"
         );
 
         $id = $this->bindJavaScript($component);
