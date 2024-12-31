@@ -75,7 +75,8 @@ class Factory
                     $this->db,
                     $this->tpl,
                     $this->file_delivery,
-                    $test_obj
+                    $test_obj,
+                    $this->logger
                 );
 
             case Types::XML:

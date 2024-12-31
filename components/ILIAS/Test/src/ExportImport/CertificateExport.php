@@ -23,6 +23,8 @@ namespace ILIAS\Test\ExportImport;
 use ILIAS\Language\Language;
 use ILIAS\UI\Factory as UIFactory;
 use ILIAS\FileDelivery\Services as FileDeliveryServices;
+use ILIAS\Filesystem\Stream\Stream;
+use ILIAS\Test\Logging\TestLogger;
 
 class CertificateExport implements Exporter
 {
@@ -31,7 +33,8 @@ class CertificateExport implements Exporter
         private readonly \ilDBInterface $db,
         private \ilGlobalTemplateInterface $tpl,
         private FileDeliveryServices $file_delivery,
-        private readonly \ilObjTest $object
+        private readonly \ilObjTest $object,
+        private readonly TestLogger $logger
     ) {
     }
 
@@ -46,7 +49,7 @@ class CertificateExport implements Exporter
             null,
             true
         );
-        $this->file_delivery->deliver();
+        $this->file_delivery->delivery()->deliver(new Stream(fopen($path, 'rb')), 'certificates.zip');
     }
 
     public function write(): ?string
@@ -70,7 +73,7 @@ class CertificateExport implements Exporter
             $this->object->buildStatisticsAccessFilteredParticipantList()
         );
 
-        $certificate_repo = new \ilUserCertificateRepository($this->db, $this->logger);
+        $certificate_repo = new \ilUserCertificateRepository($this->db);
         $pdf_generator = new \ilPdfGenerator($certificate_repo);
 
         $total_users = $this->object->evalTotalPersonsArray();
