@@ -166,6 +166,7 @@ class ilCronManagerImpl implements ilCronManager
 
             $ts_in = $this->getMicrotime();
             try {
+                $job->init();
                 $result = $job->run();
             } catch (Throwable $e) {
                 $result = new ilCronJobResult();

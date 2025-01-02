@@ -42,7 +42,7 @@ class MyComponent implements Component\Component
     ): void {
         $contribute[\ILIAS\Cron\CronJob::class] = static fn() =>
             new \MyComponentCronJob(
-                'components\\' . self::class,
+                self::class,
                 $use[\ILIAS\Language\Language::class]
             );
     }

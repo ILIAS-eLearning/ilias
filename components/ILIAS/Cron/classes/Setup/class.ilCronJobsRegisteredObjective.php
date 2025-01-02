@@ -57,6 +57,8 @@ class ilCronjobsRegisteredObjective implements Setup\Objective
     public function getPreconditions(Setup\Environment $environment): array
     {
         return [
+            new \ilSettingsFactoryExistsObjective(),
+            new \ilComponentFactoryExistsObjective(),
             new \ilDatabaseUpdatedObjective()
         ];
     }
@@ -82,15 +84,28 @@ class ilCronjobsRegisteredObjective implements Setup\Objective
             public function loadLanguageModule(string $a_module): void
             {
             }
+            public function getLangKey(): string
+            {
+            }
+            public function toJS($key): void
+            {
+            }
         };
 
+        $mock_logger_factory = new class () implements \ILIAS\Logging\LoggerFactory {
+        };
+
+        $registry = new ILIAS\Cron\CronRegistry($this->cronjobs);
+
         $repo = new ilCronJobRepositoryImpl(
+            $registry,
             $db,
             $settings_factory->settingsFor(),
             new ILIAS\components\Logging\NullLogger(),
             $component_repository,
             $component_factory,
-            $mock_lng
+            $mock_lng,
+            $mock_logger_factory
         );
 
         $repo->unregisterAllJobs();

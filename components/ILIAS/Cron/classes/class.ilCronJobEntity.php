@@ -50,16 +50,24 @@ class ilCronJobEntity
      */
     public function __construct(private readonly ilCronJob $job, array $record, private readonly bool $isPlugin = false)
     {
-        $this->mapRecord($record);
+        $job->init();
+        $this->mapRecord($job, $record);
     }
 
     /**
      * @param array<string, mixed> $record
      */
-    private function mapRecord(array $record): void
+    private function mapRecord(ilCronJob $job, array $record): void
     {
-        $this->jobId = (string) $record['job_id'];
-        $this->component = (string) $record['component'];
+        if (! array_key_exists('job_id', $record)) {
+            //TODO: remove!
+            var_dump($record);
+            die();
+        }
+        //$this->jobId = (string) $record['job_id'];
+        //$this->component = (string) $record['component'];
+        $this->jobId = $job->getId();
+        $this->component = $job->getComponent();
         $this->scheduleType = is_numeric($record['schedule_type']) ? CronJobScheduleType::tryFrom((int) $record['schedule_type']) : null;
         $this->scheduleValue = (int) $record['schedule_value'];
         $this->jobStatus = (int) $record['job_status'];

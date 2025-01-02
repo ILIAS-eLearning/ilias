@@ -23,8 +23,6 @@ use ILIAS\Refinery;
 
 class ilCronJobSetupAgent implements Setup\Agent
 {
-    use Setup\Agent\HasNoNamedObjective;
-
     public function __construct(
         private array $cronjobs
     ) {
@@ -61,11 +59,23 @@ class ilCronJobSetupAgent implements Setup\Agent
 
     public function getStatusObjective(Setup\Metrics\Storage $storage): Setup\Objective
     {
-        return new ilCronJobsMetricsCollectedObjective($storage);
+        return new Setup\Objective\NullObjective();
     }
 
     public function getMigrations(): array
     {
         return [];
+    }
+
+    public function getNamedObjectives(?Setup\Config $config = null): array
+    {
+        return [
+            'registerCronJobs' => new Setup\ObjectiveConstructor(
+                'registers cron jobs',
+                fn(): Setup\Objective => new ilCronjobsRegisteredObjective(
+                    $this->cronjobs
+                )
+            )
+        ];
     }
 }

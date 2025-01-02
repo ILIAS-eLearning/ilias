@@ -27,8 +27,7 @@ interface ilCronJobRepository
     public function getJobInstance(
         string $a_id,
         string $a_component,
-        string $a_class,
-        bool $isCreationContext = false
+        string $a_class
     ): ?ilCronJob;
 
     /**

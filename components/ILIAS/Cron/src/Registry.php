@@ -20,19 +20,7 @@ declare(strict_types=1);
 
 namespace ILIAS\Cron;
 
-interface CronJob
+interface Registry
 {
-    public function getComponent(): string;
-    public function getId(): string;
-    public function getTitle(): string;
-    public function getDescription(): string;
-    public function getScheduleType(): ?Schedule\CronJobScheduleType;
-    public function getScheduleValue(): ?int;
-    public function run(): \ilCronJobResult;
-
-    /**
-     * initialize further dependencies of the job;
-     * once the jobs are properly constructed via Component,this is obsolete.
-     */
-    public function init(): void;
+    public function getAllJobs(): array;
 }

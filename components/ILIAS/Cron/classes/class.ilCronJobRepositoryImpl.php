@@ -19,64 +19,34 @@
 declare(strict_types=1);
 
 use ILIAS\Cron\Schedule\CronJobScheduleType;
+use ILIAS\Cron\Registry;
 
 class ilCronJobRepositoryImpl implements ilCronJobRepository
 {
     private const TYPE_PLUGINS = 'Plugins';
 
     public function __construct(
+        private readonly Registry $registry,
         private readonly ilDBInterface $db,
         private readonly ilSetting $setting,
         private readonly ilLogger $logger,
         private readonly ilComponentRepository $componentRepository,
         private readonly ilComponentFactory $componentFactory,
-        private readonly ILIAS\Language\Language $lng
+        private readonly ILIAS\Language\Language $lng,
+        private readonly ILIAS\Logging\LoggerFactory $logger_factory
     ) {
     }
 
     public function getJobInstanceById(string $id): ?ilCronJob
     {
-        // plugin
-        if (str_starts_with($id, 'pl__')) {
-            $parts = explode('__', $id);
-            $pl_name = $parts[1];
-            $job_id = $parts[2];
 
-            foreach ($this->componentRepository->getPlugins() as $pl) {
-                if ($pl->getName() !== $pl_name || !$pl->isActive()) {
-                    continue;
-                }
-
-                $plugin = $this->componentFactory->getPlugin($pl->getId());
-                if (!$plugin instanceof ilCronJobProvider) {
-                    continue;
-                }
-
-                try {
-                    $job = $plugin->getCronJobInstance($job_id);
-
-                    // should never happen but who knows...
-                    $jobs_data = $this->getCronJobData($job_id);
-                    if ($jobs_data === []) {
-                        // as job is not 'imported' from xml
-                        $this->createDefaultEntry($job, $pl_name, self::TYPE_PLUGINS, '');
-                    }
-
-                    return $job;
-                } catch (OutOfBoundsException) {
-                    // Maybe a job was removed from plugin, renamed etc.
-                }
-                break;
-            }
-        } else {
-            $jobs_data = $this->getCronJobData($id);
-            if ($jobs_data !== [] && $jobs_data[0]['job_id'] === $id) {
-                return $this->getJobInstance(
-                    $jobs_data[0]['job_id'],
-                    $jobs_data[0]['component'],
-                    $jobs_data[0]['class']
-                );
-            }
+        $jobs_data = $this->getCronJobData($id);
+        if ($jobs_data !== [] && $jobs_data[0]['job_id'] === $id) {
+            return $this->getJobInstance(
+                $jobs_data[0]['job_id'],
+                $jobs_data[0]['component'],
+                $jobs_data[0]['class']
+            );
         }
 
         $this->logger->info('CRON - job ' . $id . ' seems invalid or is inactive');
@@ -87,19 +57,15 @@ class ilCronJobRepositoryImpl implements ilCronJobRepository
     public function getJobInstance(
         string $a_id,
         string $a_component,
-        string $a_class,
-        bool $isCreationContext = false
+        string $a_class
     ): ?ilCronJob {
+
         if (class_exists($a_class)) {
-            if ($isCreationContext) {
-                $refl = new ReflectionClass($a_class);
-                $job = $refl->newInstanceWithoutConstructor();
-            } else {
-                $job = new $a_class(
-                    $a_component,
-                    $this->lng
-                );
-            }
+            $job = new $a_class(
+                $a_component,
+                $this->lng,
+                $this->logger_factory
+            );
 
             if ($job instanceof ilCronJob && $job->getId() === $a_id) {
                 return $job;
@@ -151,7 +117,8 @@ class ilCronJobRepositoryImpl implements ilCronJobRepository
             return;
         }
 
-        $job = $this->getJobInstance($a_id, $a_component, $a_class, true);
+        //$job = $this->getJobInstance($a_id, $a_component, $a_class, true);
+        $job = $this->getJobInstance($a_id, $a_component, $a_class);
         if ($job) {
             $this->createDefaultEntry($job, $a_component, $a_class, $a_path);
         }
@@ -401,21 +368,11 @@ class ilCronJobRepositoryImpl implements ilCronJobRepository
     {
         $collection = new ilCronJobEntities();
 
-        foreach ($this->getCronJobData() as $item) {
-            $job = $this->getJobInstance(
-                $item['job_id'],
-                $item['component'],
-                $item['class']
-            );
-            if ($job) {
-                $collection->add(new ilCronJobEntity($job, $item));
-            }
+        foreach ($this->registry->getAllJobs() as $job) {
+            $job_data = $this->getCronJobData($job->getId());
+            $entity = new ilCronJobEntity($job, array_shift($job_data));
+            $collection->add($entity);
         }
-
-        foreach ($this->getPluginJobs() as $item) {
-            $collection->add(new ilCronJobEntity($item[0], $item[1], true));
-        }
-
         return $collection;
     }
 }

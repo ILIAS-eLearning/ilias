@@ -30,7 +30,16 @@ abstract class ilCronJob implements CronJob
     public function __construct(
         protected readonly string $component,
         protected readonly \ILIAS\Language\Language $lng,
+        protected readonly \ILIAS\Logging\LoggerFactory $logger_factory,
     ) {
+    }
+
+    /**
+     * init is called when actually using the job;
+     * once the jobs are properly constructed via Component,this is obsolete.
+     */
+    public function init(): void
+    {
     }
 
     public function getComponent(): string
