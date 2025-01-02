@@ -91,6 +91,7 @@ class AllModernComponents implements \ILIAS\Component\EntryPoint
         protected \ILIAS\UI\Implementation\Component\Progress\Factory $ui_progress_factory,
         protected \ILIAS\UI\Implementation\Component\Progress\State\Factory $ui_progress_state_factory,
         protected \ILIAS\UI\Implementation\Component\Progress\State\Bar\Factory $ui_progress_state_bar_factory,
+        protected \ILIAS\Cron\Registry $cron_registry,
     ) {
     }
 
@@ -165,6 +166,8 @@ class AllModernComponents implements \ILIAS\Component\EntryPoint
         $DIC['ui.factory.input.field'] = fn() => $this->ui_factory_input_field;
         $DIC['ui.factory'] = fn() => $this->ui_factory;
         $DIC['ui.renderer'] = fn() => $this->ui_renderer;
+
+        $DIC['cron.registry'] = fn() => $this->cron_registry;
     }
 
     public function getName(): string

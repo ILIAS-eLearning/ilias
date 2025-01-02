@@ -762,12 +762,14 @@ class ilInitialisation
     {
         $c['cron.repository'] = static function (\ILIAS\DI\Container $c): ilCronJobRepository {
             return new ilCronJobRepositoryImpl(
+                $c['cron.registry'],
                 $c->database(),
                 $c->settings(),
                 $c->logger()->cron(),
                 $c['component.repository'],
                 $c['component.factory'],
-                $c['lng']
+                $c['lng'],
+                $c['ilLoggerFactory']
             );
         };
 
