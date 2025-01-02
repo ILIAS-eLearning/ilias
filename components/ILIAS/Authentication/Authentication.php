@@ -70,8 +70,9 @@ class Authentication implements Component\Component
 
         $contribute[\ILIAS\Cron\CronJob::class] = static fn() =>
             new \ilAuthDestroyExpiredSessionsCron(
-                'components\\' . self::class,
-                $use[\ILIAS\Language\Language::class]
+                self::class,
+                $use[\ILIAS\Language\Language::class],
+                $use[\ILIAS\Logging\LoggerFactory::class]
             );
     }
 }
