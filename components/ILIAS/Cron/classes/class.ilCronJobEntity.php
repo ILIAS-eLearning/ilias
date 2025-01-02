@@ -19,6 +19,7 @@
 declare(strict_types=1);
 
 use ILIAS\Cron\Schedule\CronJobScheduleType;
+use ILIAS\Cron\CronJob;
 
 class ilCronJobEntity
 {
@@ -48,7 +49,7 @@ class ilCronJobEntity
      * @param array<string, mixed> $record
      * @param bool $isPlugin
      */
-    public function __construct(private readonly ilCronJob $job, array $record, private readonly bool $isPlugin = false)
+    public function __construct(private readonly CronJob $job, array $record, private readonly bool $isPlugin = false)
     {
         $job->init();
         $this->mapRecord($job, $record);
@@ -57,7 +58,7 @@ class ilCronJobEntity
     /**
      * @param array<string, mixed> $record
      */
-    private function mapRecord(ilCronJob $job, array $record): void
+    private function mapRecord(CronJob $job, array $record): void
     {
         if (! array_key_exists('job_id', $record)) {
             //TODO: remove!

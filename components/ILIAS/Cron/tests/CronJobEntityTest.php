@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use ILIAS\Cron\Schedule\CronJobScheduleType;
+use ILIAS\Cron\CronJob;
 
 /**
  * Class CronJobEntityTest
@@ -36,7 +37,47 @@ class CronJobEntityTest extends TestCase
         int $schedule_value = 5,
         bool $is_plugin = false
     ): ilCronJobEntity {
-        $job_instance ??= $this->createMock(ilCronJob::class);
+        $job_instance ??= new class (
+            $schedule_type,
+            $schedule_value
+        ) implements CronJob {
+            public function __construct(
+                private $schedule_type,
+                private $schedule_value
+            ) {
+            }
+            public function getId(): string
+            {
+                return 'phpunit';
+            }
+            public function getComponent(): string
+            {
+                return 'phpunit';
+            }
+            public function getTitle(): string
+            {
+                return 'phpunit';
+            }
+            public function getDescription(): string
+            {
+                return 'phpunit';
+            }
+            public function getScheduleType(): ?CronJobScheduleType
+            {
+                return $this->schedule_type;
+            }
+            public function getScheduleValue(): ?int
+            {
+                return $this->schedule_value;
+            }
+            public function run(): \ilCronJobResult
+            {
+                return new \ilCronJobResult();
+            }
+            public function init(): void
+            {
+            }
+        };
 
         if ($schedule_type === null) {
             $schedule_type = CronJobScheduleType::SCHEDULE_TYPE_IN_MINUTES->value;
@@ -91,9 +132,14 @@ class CronJobEntityTest extends TestCase
      */
     public function testCollectionCanBeFilteredAndSliced(ilCronJobEntities $entities): void
     {
-        $this->assertCount(0, $entities->filter(static function (ilCronJobEntity $entity): bool {
-            return $entity->getJobId() !== 'phpunit';
-        }));
+        $this->assertCount(
+            0,
+            $entities->filter(
+                static function (ilCronJobEntity $entity): bool {
+                    return $entity->getJobId() !== 'phpunit';
+                }
+            )
+        );
 
         $this->assertCount(1, $entities->slice(1, 1));
     }

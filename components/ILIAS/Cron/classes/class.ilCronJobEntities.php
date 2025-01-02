@@ -20,11 +20,11 @@ declare(strict_types=1);
 
 class ilCronJobEntities implements ilCronJobCollection
 {
-    private readonly ArrayIterator $jobs;
+    private array $jobs;
 
     public function __construct(ilCronJobEntity ...$jobs)
     {
-        $this->jobs = new ArrayIterator($jobs);
+        $this->jobs = $jobs;
     }
 
     /**
@@ -32,27 +32,28 @@ class ilCronJobEntities implements ilCronJobCollection
      */
     public function getIterator(): ArrayIterator
     {
-        return $this->jobs;
+        return new ArrayIterator($this->jobs);
     }
 
     public function count(): int
     {
-        return iterator_count($this);
+        return count($this->jobs);
     }
 
     public function add(ilCronJobEntity $job): void
     {
-        $this->jobs->append($job);
+        $this->jobs[] = $job;
     }
 
     public function filter(callable $callable): ilCronJobCollection
     {
-        return new static(...array_filter(iterator_to_array($this), $callable));
+
+        return new static(...array_filter($this->jobs, $callable));
     }
 
     public function slice(int $offset, ?int $length = null): ilCronJobCollection
     {
-        return new static(...array_slice(iterator_to_array($this), $offset, $length, true));
+        return new static(...array_slice($this->jobs, $offset, $length, true));
     }
 
     /**
@@ -60,6 +61,6 @@ class ilCronJobEntities implements ilCronJobCollection
      */
     public function toArray(): array
     {
-        return iterator_to_array($this);
+        return $this->jobs;
     }
 }
