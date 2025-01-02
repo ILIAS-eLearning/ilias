@@ -27,20 +27,10 @@ class ilLoggerCronCleanErrorFiles extends ilCronJob
     protected ilSetting $settings;
     protected ilLoggingErrorSettings $error_settings;
 
-    public function __construct(
-        string $component,
-        \ILIAS\Language\Language $lng,
-        bool $registration = false
-    ) {
-        parent::__construct($component, $lng);
-        $this->lng->loadLanguageModule('logging');
-        if (!$registration) {
-            $this->additionalConstruct();
-        }
-    }
-
-    private function additionalConstruct()
+    public function init(): void
     {
+        $this->lng->loadLanguageModule('logging');
+
         global $DIC;
         $this->settings = new ilSetting('log');
         $this->error_settings = ilLoggingErrorSettings::getInstance();
