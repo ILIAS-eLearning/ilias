@@ -43,7 +43,8 @@ class MyComponent implements Component\Component
         $contribute[\ILIAS\Cron\CronJob::class] = static fn() =>
             new \MyComponentCronJob(
                 self::class,
-                $use[\ILIAS\Language\Language::class]
+                $use[\ILIAS\Language\Language::class],
+                $use[\ILIAS\Logging\LoggerFactory::class],
             );
     }
 }
@@ -66,6 +67,7 @@ Several abstract methods have to be implemented to make a new cron-job usable:
 - `getDefaultScheduleType()`: see Schedule
 - `getDefaultScheduleValue()`: see Schedule
 - `run()`: process the cron-job
+- `init()`: called in ilCronJobEntity; may be used to initialize further dependencies
 
 ### ilCronJobResult
 
