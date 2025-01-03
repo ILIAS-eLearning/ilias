@@ -47,7 +47,6 @@ class ilCronJobEntities implements ilCronJobCollection
 
     public function filter(callable $callable): ilCronJobCollection
     {
-
         return new static(...array_filter($this->jobs, $callable));
     }
 

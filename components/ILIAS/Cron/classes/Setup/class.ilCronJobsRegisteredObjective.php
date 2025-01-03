@@ -76,26 +76,11 @@ class ilCronjobsRegisteredObjective implements Setup\Objective
         /** @var ilSettingsFactory $settings_factory */
         $settings_factory = $environment->getResource(Setup\Environment::RESOURCE_SETTINGS_FACTORY);
 
-        $mock_lng = new class () implements \ILIAS\Language\Language {
-            public function txt(string $a_topic, string $a_default_lang_fallback_mod = ""): string
-            {
-                return '';
-            }
-            public function loadLanguageModule(string $a_module): void
-            {
-            }
-            public function getLangKey(): string
-            {
-            }
-            public function toJS($key): void
-            {
-            }
-        };
-
         $mock_logger_factory = new class () implements \ILIAS\Logging\LoggerFactory {
         };
 
         $registry = new ILIAS\Cron\CronRegistry($this->cronjobs);
+        $language = new ilSetupLanguage('en');
 
         $repo = new ilCronJobRepositoryImpl(
             $registry,
@@ -104,7 +89,7 @@ class ilCronjobsRegisteredObjective implements Setup\Objective
             new ILIAS\components\Logging\NullLogger(),
             $component_repository,
             $component_factory,
-            $mock_lng,
+            $language,
             $mock_logger_factory
         );
 
