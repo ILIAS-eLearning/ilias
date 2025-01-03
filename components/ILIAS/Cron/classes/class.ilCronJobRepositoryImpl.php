@@ -39,7 +39,6 @@ class ilCronJobRepositoryImpl implements ilCronJobRepository
 
     public function getJobInstanceById(string $id): ?ilCronJob
     {
-
         $jobs_data = $this->getCronJobData($id);
         if ($jobs_data !== [] && $jobs_data[0]['job_id'] === $id) {
             return $this->getJobInstance(
@@ -116,8 +115,6 @@ class ilCronJobRepositoryImpl implements ilCronJobRepository
         if (!$this->db->tableExists('cron_job')) {
             return;
         }
-
-        //$job = $this->getJobInstance($a_id, $a_component, $a_class, true);
         $job = $this->getJobInstance($a_id, $a_component, $a_class);
         if ($job) {
             $this->createDefaultEntry($job, $a_component, $a_class, $a_path);

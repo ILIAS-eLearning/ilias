@@ -18,10 +18,12 @@
 
 declare(strict_types=1);
 
-chdir(__DIR__);
-chdir('..');
+require_once __DIR__ . '/../vendor/composer/vendor/autoload.php';
+require_once __DIR__ . '/../artifacts/bootstrap_default.php';
 
-require_once './vendor/composer/vendor/autoload.php';
+ilContext::init(ilContext::CONTEXT_CRON);
+
+entry_point('ILIAS Legacy Initialisation Adapter');
 
 $cron = new ILIAS\Cron\CLI\App(
     new ILIAS\Cron\CLI\Commands\RunActiveJobsCommand()

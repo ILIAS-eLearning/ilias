@@ -60,15 +60,9 @@ class ilCronJobEntity
      */
     private function mapRecord(CronJob $job, array $record): void
     {
-        if (! array_key_exists('job_id', $record)) {
-            //TODO: remove!
-            var_dump($record);
-            die();
-        }
-        //$this->jobId = (string) $record['job_id'];
-        //$this->component = (string) $record['component'];
         $this->jobId = $job->getId();
         $this->component = $job->getComponent();
+
         $this->scheduleType = is_numeric($record['schedule_type']) ? CronJobScheduleType::tryFrom((int) $record['schedule_type']) : null;
         $this->scheduleValue = (int) $record['schedule_value'];
         $this->jobStatus = (int) $record['job_status'];
