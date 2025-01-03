@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Test\Results\Data\StatusOfAttempt;
 use ILIAS\Test\Scoring\Marks\MarkSchema;
 
 /**
@@ -150,6 +151,12 @@ class ilTestEvaluationFactory
                 $attempt->setExamId((string) $row['exam_id']);
                 $attempt->setRequestedHintsCount($row['hint_count']);
                 $attempt->setDeductedHintPoints($row['hint_points']);
+
+                $attempt->setStatusOfAttempt(
+                    !isset($row['finalized_by']) || $row['finalized_by'] === null
+                    ? StatusOfAttempt::RUNNING
+                    : StatusOfAttempt::from($row['finalized_by'])
+                );
             }
 
             if ($row['question_fi'] !== null) {
