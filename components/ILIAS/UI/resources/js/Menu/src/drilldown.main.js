@@ -31,12 +31,13 @@ export default class Drilldown {
 
   /**
    * @param {jQuery} $
+   * @param {Document} document
    * @param {DrilldownPersistence} persistence
    * @param {DrilldownModel} model
    * @param {DrilldownMapping} mapping
    * @param {string} backSignal
    */
-  constructor($, persistence, model, mapping, backSignal) {
+  constructor($, document, persistence, model, mapping, backSignal) {
     this.#persistence = persistence;
     this.#model = model;
     this.#mapping = mapping;

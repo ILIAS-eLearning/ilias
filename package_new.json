@@ -3,6 +3,7 @@
   "version": "9.0.0",
   "description": "ILIAS open source e-Learning",
   "browser": "js/index.js",
+  "type": "module",
   "directories": {
     "doc": "docs",
     "test": "tests"
@@ -12,7 +13,7 @@
   "devDependencies": {
   },
   "scripts": {
-    "test": "mocha --recursive"
+    "test": "node --test \"./components/ILIAS/**/tests/**/*.js\""
   },
   "repository": {
     "type": "git",
