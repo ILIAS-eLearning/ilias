@@ -3,17 +3,14 @@
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
- *
  * ILIAS is licensed with the GPL-3.0,
  * see https://www.gnu.org/licenses/gpl-3.0.en.html
  * You should have received a copy of said license along with the
  * source code, too.
- *
  * If this is not the case or you just want to try ILIAS, you'll find
  * us at:
  * https://www.ilias.de
  * https://github.com/ILIAS-eLearning
- *
  *********************************************************************/
 
 use ILIAS\Badge\ilBadgeImage;
@@ -100,7 +97,7 @@ class ilBadgeManagementGUI
      * @param list<string> $splittable_user_ids
      * @return array{0: list<int>, 1: int}
      */
-    private function splitBadgeAndUserIdsFromString(array $splittable_user_ids): array
+    private function splitBadgeAndUserIdsFromString(array $splittable_user_ids) : array
     {
         $user_ids = [];
         $badge_id = null;
@@ -126,7 +123,7 @@ class ilBadgeManagementGUI
         return [$user_ids, $badge_id];
     }
 
-    public function executeCommand(): void
+    public function executeCommand() : void
     {
         $ilCtrl = $this->ctrl;
 
@@ -204,7 +201,7 @@ class ilBadgeManagementGUI
         }
     }
 
-    protected function setTabs(string $a_active): void
+    protected function setTabs(string $a_active) : void
     {
         $ilTabs = $this->tabs;
         $lng = $this->lng;
@@ -225,13 +222,13 @@ class ilBadgeManagementGUI
         $ilTabs->activateSubTab($a_active);
     }
 
-    protected function hasWrite(): bool
+    protected function hasWrite() : bool
     {
         $ilAccess = $this->access;
         return $ilAccess->checkAccess('write', '', $this->parent_ref_id);
     }
 
-    protected function listBadges(): void
+    protected function listBadges() : void
     {
         $ilToolbar = $this->toolbar;
         $lng = $this->lng;
@@ -292,7 +289,7 @@ class ilBadgeManagementGUI
             }
         }
 
-        $table = new ilBadgeTableGUI($this->parent_obj_id, $this->parent_obj_type);
+        $table = new ilBadgeTableGUI($this->parent_obj_id, $this->parent_obj_type, $this->hasWrite());
         $table->renderTable();
     }
 
@@ -301,7 +298,7 @@ class ilBadgeManagementGUI
     // badge (CRUD)
     //
 
-    protected function addBadge(ilPropertyFormGUI $a_form = null): void
+    protected function addBadge(ilPropertyFormGUI $a_form = null) : void
     {
         $ilCtrl = $this->ctrl;
         $tpl = $this->tpl;
@@ -331,7 +328,7 @@ class ilBadgeManagementGUI
         string $a_mode,
         ilBadgeType $a_type,
         string $a_type_unique_id
-    ): ilPropertyFormGUI {
+    ) : ilPropertyFormGUI {
         $lng = $this->lng;
         $ilCtrl = $this->ctrl;
 
@@ -428,7 +425,7 @@ class ilBadgeManagementGUI
      * @throws ilCtrlException
      * @throws IllegalStateException
      */
-    protected function saveBadge(): void
+    protected function saveBadge() : void
     {
         $ilCtrl = $this->ctrl;
         $lng = $this->lng;
@@ -485,7 +482,7 @@ class ilBadgeManagementGUI
         $this->addBadge($form);
     }
 
-    protected function editBadge(ilPropertyFormGUI $a_form = null): void
+    protected function editBadge(ilPropertyFormGUI $a_form = null) : void
     {
         $ilCtrl = $this->ctrl;
         $tpl = $this->tpl;
@@ -519,7 +516,7 @@ class ilBadgeManagementGUI
         ilPropertyFormGUI $a_form,
         ilBadge $a_badge,
         ilBadgeType $a_type
-    ): void {
+    ) : void {
         $a_form->getItemByPostVar('act')->setChecked($a_badge->isActive());
         $a_form->getItemByPostVar('title')->setValue($a_badge->getTitle());
         $a_form->getItemByPostVar('desc')->setValue($a_badge->getDescription());
@@ -544,7 +541,7 @@ class ilBadgeManagementGUI
      * @throws ilCtrlException
      * @throws IllegalStateException
      */
-    protected function updateBadge(): void
+    protected function updateBadge() : void
     {
         $ilCtrl = $this->ctrl;
         $lng = $this->lng;
@@ -601,7 +598,7 @@ class ilBadgeManagementGUI
         $this->editBadge($form);
     }
 
-    protected function confirmDeleteBadges(): void
+    protected function confirmDeleteBadges() : void
     {
         $ilCtrl = $this->ctrl;
         $lng = $this->lng;
@@ -641,7 +638,7 @@ class ilBadgeManagementGUI
         $tpl->setContent($confirmation_gui->getHTML());
     }
 
-    protected function deleteBadges(): void
+    protected function deleteBadges() : void
     {
         $ilCtrl = $this->ctrl;
         $lng = $this->lng;
@@ -658,8 +655,6 @@ class ilBadgeManagementGUI
             $this->tpl->setOnScreenMessage('failure', $lng->txt('badge_select_one'), true);
         }
 
-
-
         $ilCtrl->redirect($this, 'listBadges');
     }
 
@@ -671,7 +666,7 @@ class ilBadgeManagementGUI
     /**
      * @return int[]
      */
-    protected function getBadgesFromMultiAction(): array
+    protected function getBadgesFromMultiAction() : array
     {
         $ilCtrl = $this->ctrl;
 
@@ -684,7 +679,7 @@ class ilBadgeManagementGUI
         return $badge_ids;
     }
 
-    protected function copyBadges(): void
+    protected function copyBadges() : void
     {
         $ilCtrl = $this->ctrl;
 
@@ -699,7 +694,7 @@ class ilBadgeManagementGUI
         $ilCtrl->redirect($this, 'listBadges');
     }
 
-    protected function clearClipboard(): void
+    protected function clearClipboard() : void
     {
         $ilCtrl = $this->ctrl;
 
@@ -710,7 +705,7 @@ class ilBadgeManagementGUI
     /**
      * @return ilBadge[]
      */
-    protected function getValidBadgesFromClipboard(): array
+    protected function getValidBadgesFromClipboard() : array
     {
         $res = [];
 
@@ -726,7 +721,7 @@ class ilBadgeManagementGUI
         return $res;
     }
 
-    protected function pasteBadges(): void
+    protected function pasteBadges() : void
     {
         $ilCtrl = $this->ctrl;
 
@@ -743,7 +738,7 @@ class ilBadgeManagementGUI
         $ilCtrl->redirect($this, 'listBadges');
     }
 
-    protected function toggleBadges(bool $a_status): void
+    protected function toggleBadges(bool $a_status) : void
     {
         $ilCtrl = $this->ctrl;
         $lng = $this->lng;
@@ -771,12 +766,12 @@ class ilBadgeManagementGUI
         $ilCtrl->redirect($this, 'listBadges');
     }
 
-    protected function activateBadges(): void
+    protected function activateBadges() : void
     {
         $this->toggleBadges(true);
     }
 
-    protected function deactivateBadges(): void
+    protected function deactivateBadges() : void
     {
         $this->toggleBadges(false);
     }
@@ -786,7 +781,7 @@ class ilBadgeManagementGUI
     // users
     //
 
-    protected function listUsers(): void
+    protected function listUsers() : void
     {
         $lng = $this->lng;
         $ilCtrl = $this->ctrl;
@@ -814,7 +809,7 @@ class ilBadgeManagementGUI
         $tbl->renderTable();
     }
 
-    protected function awardBadgeUserSelection(): void
+    protected function awardBadgeUserSelection() : void
     {
         $ilCtrl = $this->ctrl;
         $ilTabs = $this->tabs;
@@ -865,7 +860,7 @@ class ilBadgeManagementGUI
         $tbl->renderTable();
     }
 
-    protected function assignBadge(): void
+    protected function assignBadge() : void
     {
         $ilCtrl = $this->ctrl;
         $ilUser = $this->user;
@@ -897,7 +892,7 @@ class ilBadgeManagementGUI
         $ilCtrl->redirect($this, 'listUsers');
     }
 
-    protected function confirmDeassignBadge(): void
+    protected function confirmDeassignBadge() : void
     {
         $ilCtrl = $this->ctrl;
         $lng = $this->lng;
@@ -946,7 +941,7 @@ class ilBadgeManagementGUI
         $tpl->setContent($confirmation_gui->getHTML());
     }
 
-    protected function deassignBadge(): void
+    protected function deassignBadge() : void
     {
         $ilCtrl = $this->ctrl;
         $lng = $this->lng;

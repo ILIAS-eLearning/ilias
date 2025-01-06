@@ -3,17 +3,14 @@
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
- *
  * ILIAS is licensed with the GPL-3.0,
  * see https://www.gnu.org/licenses/gpl-3.0.en.html
  * You should have received a copy of said license along with the
  * source code, too.
- *
  * If this is not the case or you just want to try ILIAS, you'll find
  * us at:
  * https://www.ilias.de
  * https://github.com/ILIAS-eLearning
- *
  *********************************************************************/
 
 declare(strict_types=1);
@@ -35,7 +32,6 @@ use ILIAS\UI\Component\Table\DataRowBuilder;
 use Generator;
 use ILIAS\UI\Component\Table\DataRetrieval;
 use ILIAS\UI\URLBuilderToken;
-use ILIAS\DI\Container;
 use ILIAS\Filesystem\Stream\Streams;
 
 class ilBadgeImageTemplateTableGUI
@@ -48,7 +44,7 @@ class ilBadgeImageTemplateTableGUI
     private readonly ilLanguage $lng;
     private readonly ilGlobalTemplateInterface $tpl;
 
-    public function __construct()
+    public function __construct(protected bool $has_write = false)
     {
         global $DIC;
         $this->lng = $DIC->language();
@@ -60,7 +56,7 @@ class ilBadgeImageTemplateTableGUI
         $this->http = $DIC->http();
     }
 
-    private function buildDataRetrievalObject(Factory $f, Renderer $r): DataRetrieval
+    private function buildDataRetrievalObject(Factory $f, Renderer $r) : DataRetrieval
     {
         return new class ($f, $r) implements DataRetrieval {
             public function __construct(
@@ -72,7 +68,7 @@ class ilBadgeImageTemplateTableGUI
             /**
              * @return list<array{id: int, image: string, title: string, title_sortable: string, image_sortable: string}>
              */
-            private function getBadgeImageTemplates(): array
+            private function getBadgeImageTemplates() : array
             {
                 $modal_container = new ModalBuilder();
                 $rows = [];
@@ -128,7 +124,7 @@ class ilBadgeImageTemplateTableGUI
                 Order $order,
                 ?array $filter_data,
                 ?array $additional_parameters
-            ): Generator {
+            ) : Generator {
                 $records = $this->getRecords($range, $order);
                 foreach ($records as $record) {
                     $row_id = (string) $record['id'];
@@ -139,14 +135,14 @@ class ilBadgeImageTemplateTableGUI
             public function getTotalRowCount(
                 ?array $filter_data,
                 ?array $additional_parameters
-            ): ?int {
+            ) : ?int {
                 return \count($this->getRecords());
             }
 
             /**
              * @return list<array{id: int, image: string, title: string, title_sortable: string, image_sortable: string}>
              */
-            private function getRecords(Range $range = null, Order $order = null): array
+            private function getRecords(Range $range = null, Order $order = null) : array
             {
                 $rows = $this->getBadgeImageTemplates();
 
@@ -157,7 +153,7 @@ class ilBadgeImageTemplateTableGUI
                     );
                     usort(
                         $rows,
-                        static function (array $left, array $right) use ($order_field): int {
+                        static function (array $left, array $right) use ($order_field) : int {
                             if (\in_array($order_field, ['image', 'title'], true)) {
                                 return \ilStr::strCmp(
                                     $left[$order_field . '_sortable'],
@@ -189,24 +185,29 @@ class ilBadgeImageTemplateTableGUI
         URLBuilder $url_builder,
         URLBuilderToken $action_parameter_token,
         URLBuilderToken $row_id_token
-    ): array {
+    ) : array {
         $f = $this->factory;
-        return [
-            'badge_image_template_edit' => $f->table()->action()->single(
-                $this->lng->txt('edit'),
-                $url_builder->withParameter($action_parameter_token, 'badge_image_template_editImageTemplate'),
-                $row_id_token
-            ),
-            'badge_image_template_delete' =>
-                $f->table()->action()->standard(
-                    $this->lng->txt('delete'),
-                    $url_builder->withParameter($action_parameter_token, 'badge_image_template_delete'),
+        if($this->has_write) {
+            return [
+                'badge_image_template_edit' => $f->table()->action()->single(
+                    $this->lng->txt('edit'),
+                    $url_builder->withParameter($action_parameter_token, 'badge_image_template_editImageTemplate'),
                     $row_id_token
-                )
-        ];
+                ),
+                'badge_image_template_delete' =>
+                    $f->table()->action()->standard(
+                        $this->lng->txt('delete'),
+                        $url_builder->withParameter($action_parameter_token, 'badge_image_template_delete'),
+                        $row_id_token
+                    )
+            ];
+        } else {
+            return [];
+        }
+
     }
 
-    public function renderTable(): void
+    public function renderTable() : void
     {
         $f = $this->factory;
         $r = $this->renderer;

@@ -3,17 +3,14 @@
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
- *
  * ILIAS is licensed with the GPL-3.0,
  * see https://www.gnu.org/licenses/gpl-3.0.en.html
  * You should have received a copy of said license along with the
  * source code, too.
- *
  * If this is not the case or you just want to try ILIAS, you'll find
  * us at:
  * https://www.ilias.de
  * https://github.com/ILIAS-eLearning
- *
  *********************************************************************/
 
 declare(strict_types=1);
@@ -34,7 +31,6 @@ use ILIAS\UI\Component\Table\DataRowBuilder;
 use Generator;
 use ILIAS\UI\Component\Table\DataRetrieval;
 use ILIAS\UI\URLBuilderToken;
-use ILIAS\DI\Container;
 use ilBadge;
 use ilBadgeAuto;
 use ILIAS\Filesystem\Stream\Streams;
@@ -52,7 +48,7 @@ class ilBadgeTableGUI
     private readonly ilLanguage $lng;
     private readonly ilGlobalTemplateInterface $tpl;
 
-    public function __construct(int $parent_obj_id, string $parent_obj_type)
+    public function __construct(int $parent_obj_id, string $parent_obj_type, protected bool $has_write = false)
     {
         global $DIC;
 
@@ -71,7 +67,7 @@ class ilBadgeTableGUI
     /**
      * @return array<string, Column>
      */
-    private function buildColumns(): array
+    private function buildColumns() : array
     {
         $column = $this->factory->table()->column();
         $lng = $this->lng;
@@ -84,7 +80,7 @@ class ilBadgeTableGUI
         ];
     }
 
-    private function buildDataRetrievalObject(Factory $f, Renderer $r, int $p, string $type): DataRetrieval
+    private function buildDataRetrievalObject(Factory $f, Renderer $r, int $p, string $type) : DataRetrieval
     {
         return new class ($f, $r, $p, $type) implements DataRetrieval {
             private ilBadgeImage $badge_image_service;
@@ -116,7 +112,7 @@ class ilBadgeTableGUI
              *     title_sortable: string
              * }>
              */
-            private function getBadges(): array
+            private function getBadges() : array
             {
                 $rows = [];
                 $modal_container = new ModalBuilder();
@@ -165,9 +161,9 @@ class ilBadgeTableGUI
                             : $badge->getTypeInstance()->getCaption(),
                         'manual' => !$badge->getTypeInstance() instanceof ilBadgeAuto,
                         'image' => $images['rendered'] ? ($modal_container->renderShyButton(
-                            $images['rendered'],
-                            $modal
-                        ) . ' ') : '',
+                                $images['rendered'],
+                                $modal
+                            ) . ' ') : '',
                         // Just an boolean-like indicator for sorting
                         'image_sortable' => $images['rendered'] ? 'A' . $badge->getId() : 'Z' . $badge->getId(),
                         'title' => implode('', [
@@ -188,22 +184,22 @@ class ilBadgeTableGUI
                 Order $order,
                 ?array $filter_data,
                 ?array $additional_parameters
-            ): Generator {
+            ) : Generator {
                 $records = $this->getRecords($range, $order);
                 foreach ($records as $record) {
                     $row_id = (string) $record['id'];
                     yield $row_builder->buildDataRow($row_id, $record)
-                        ->withDisabledAction(
-                            'award_revoke_badge',
-                            !$record['manual'] || !$record['active']
-                        );
+                                      ->withDisabledAction(
+                                          'award_revoke_badge',
+                                          !$record['manual'] || !$record['active']
+                                      );
                 }
             }
 
             public function getTotalRowCount(
                 ?array $filter_data,
                 ?array $additional_parameters
-            ): ?int {
+            ) : ?int {
                 return \count($this->getRecords());
             }
 
@@ -219,7 +215,7 @@ class ilBadgeTableGUI
              *     title: string,
              *     title_sortable: string}>
              */
-            private function getRecords(Range $range = null, Order $order = null): array
+            private function getRecords(Range $range = null, Order $order = null) : array
             {
                 $rows = $this->getBadges();
 
@@ -230,7 +226,7 @@ class ilBadgeTableGUI
                     );
                     usort(
                         $rows,
-                        static function (array $left, array $right) use ($order_field): int {
+                        static function (array $left, array $right) use ($order_field) : int {
                             if (\in_array($order_field, ['title', 'type', 'image'], true)) {
                                 if (\in_array($order_field, ['title', 'image'], true)) {
                                     $order_field .= '_sortable';
@@ -266,43 +262,48 @@ class ilBadgeTableGUI
         URLBuilder $url_builder,
         URLBuilderToken $action_parameter_token,
         URLBuilderToken $row_id_token,
-    ): array {
+    ) : array {
         $f = $this->factory;
 
-        return [
-            'badge_table_activate' =>
-                $f->table()->action()->multi(
-                    $this->lng->txt('activate'),
-                    $url_builder->withParameter($action_parameter_token, 'badge_table_activate'),
+        if ($this->has_write) {
+            return [
+                'badge_table_activate' =>
+                    $f->table()->action()->multi(
+                        $this->lng->txt('activate'),
+                        $url_builder->withParameter($action_parameter_token, 'badge_table_activate'),
+                        $row_id_token
+                    ),
+                'badge_table_deactivate' =>
+                    $f->table()->action()->multi(
+                        $this->lng->txt('deactivate'),
+                        $url_builder->withParameter($action_parameter_token, 'badge_table_deactivate'),
+                        $row_id_token
+                    ),
+                'badge_table_edit' => $f->table()->action()->single(
+                    $this->lng->txt('edit'),
+                    $url_builder->withParameter($action_parameter_token, 'badge_table_edit'),
                     $row_id_token
                 ),
-            'badge_table_deactivate' =>
-                $f->table()->action()->multi(
-                    $this->lng->txt('deactivate'),
-                    $url_builder->withParameter($action_parameter_token, 'badge_table_deactivate'),
-                    $row_id_token
-                ),
-            'badge_table_edit' => $f->table()->action()->single(
-                $this->lng->txt('edit'),
-                $url_builder->withParameter($action_parameter_token, 'badge_table_edit'),
-                $row_id_token
-            ),
-            'badge_table_delete' =>
-                $f->table()->action()->standard(
-                    $this->lng->txt('delete'),
-                    $url_builder->withParameter($action_parameter_token, 'badge_table_delete'),
-                    $row_id_token
-                ),
-            'award_revoke_badge' =>
-                $f->table()->action()->single(
-                    $this->lng->txt('badge_award_revoke'),
-                    $url_builder->withParameter($action_parameter_token, 'award_revoke_badge'),
-                    $row_id_token
-                )
-        ];
+                'badge_table_delete' =>
+                    $f->table()->action()->standard(
+                        $this->lng->txt('delete'),
+                        $url_builder->withParameter($action_parameter_token, 'badge_table_delete'),
+                        $row_id_token
+                    ),
+                'award_revoke_badge' =>
+                    $f->table()->action()->single(
+                        $this->lng->txt('badge_award_revoke'),
+                        $url_builder->withParameter($action_parameter_token, 'award_revoke_badge'),
+                        $row_id_token
+                    )
+            ];
+        } else {
+            return [];
+        }
+
     }
 
-    public function renderTable(): void
+    public function renderTable() : void
     {
         $f = $this->factory;
         $r = $this->renderer;

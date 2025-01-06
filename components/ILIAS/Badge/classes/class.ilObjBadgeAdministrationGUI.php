@@ -260,7 +260,7 @@ class ilObjBadgeAdministrationGUI extends ilObjectGUI
         $this->assertActive();
         $this->tabs_gui->setTabActive('types');
 
-        $tpl = new ilBadgeTypesTableGUI();
+        $tpl = new ilBadgeTypesTableGUI($this->access->checkAccess("write", "", $this->object->getRefId()));
         $tpl->renderTable();
     }
 
@@ -344,7 +344,7 @@ class ilObjBadgeAdministrationGUI extends ilObjectGUI
             );
         }
 
-        $template_table = new ilBadgeImageTemplateTableGUI();
+        $template_table = new ilBadgeImageTemplateTableGUI($this->access->checkAccess("write", "", $this->object->getRefId()));
         $template_table->renderTable();
     }
 
@@ -654,7 +654,7 @@ class ilObjBadgeAdministrationGUI extends ilObjectGUI
         $this->assertActive();
         $this->tabs_gui->setTabActive('obj_badges');
 
-        $tbl = new ilObjectBadgeTableGUI($this);
+        $tbl = new ilObjectBadgeTableGUI($this, $this->access->checkAccess("write", "", $this->object->getRefId()));
         $tbl->renderTable();
     }
 
