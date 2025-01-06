@@ -11,6 +11,7 @@
   "dependencies": {
   },
   "devDependencies": {
+    "jsdom": "^25.0.1",
   },
   "scripts": {
     "test": "node --test \"./components/ILIAS/**/tests/**/*.js\""
