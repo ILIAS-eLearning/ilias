@@ -56,7 +56,7 @@ class ilBadgeImageTemplateTableGUI
         $this->http = $DIC->http();
     }
 
-    private function buildDataRetrievalObject(Factory $f, Renderer $r) : DataRetrieval
+    private function buildDataRetrievalObject(Factory $f, Renderer $r): DataRetrieval
     {
         return new class ($f, $r) implements DataRetrieval {
             public function __construct(
@@ -68,7 +68,7 @@ class ilBadgeImageTemplateTableGUI
             /**
              * @return list<array{id: int, image: string, title: string, title_sortable: string, image_sortable: string}>
              */
-            private function getBadgeImageTemplates() : array
+            private function getBadgeImageTemplates(): array
             {
                 $modal_container = new ModalBuilder();
                 $rows = [];
@@ -124,7 +124,7 @@ class ilBadgeImageTemplateTableGUI
                 Order $order,
                 ?array $filter_data,
                 ?array $additional_parameters
-            ) : Generator {
+            ): Generator {
                 $records = $this->getRecords($range, $order);
                 foreach ($records as $record) {
                     $row_id = (string) $record['id'];
@@ -135,14 +135,14 @@ class ilBadgeImageTemplateTableGUI
             public function getTotalRowCount(
                 ?array $filter_data,
                 ?array $additional_parameters
-            ) : ?int {
+            ): ?int {
                 return \count($this->getRecords());
             }
 
             /**
              * @return list<array{id: int, image: string, title: string, title_sortable: string, image_sortable: string}>
              */
-            private function getRecords(Range $range = null, Order $order = null) : array
+            private function getRecords(Range $range = null, Order $order = null): array
             {
                 $rows = $this->getBadgeImageTemplates();
 
@@ -153,7 +153,7 @@ class ilBadgeImageTemplateTableGUI
                     );
                     usort(
                         $rows,
-                        static function (array $left, array $right) use ($order_field) : int {
+                        static function (array $left, array $right) use ($order_field): int {
                             if (\in_array($order_field, ['image', 'title'], true)) {
                                 return \ilStr::strCmp(
                                     $left[$order_field . '_sortable'],
@@ -185,9 +185,9 @@ class ilBadgeImageTemplateTableGUI
         URLBuilder $url_builder,
         URLBuilderToken $action_parameter_token,
         URLBuilderToken $row_id_token
-    ) : array {
+    ): array {
         $f = $this->factory;
-        if($this->has_write) {
+        if ($this->has_write) {
             return [
                 'badge_image_template_edit' => $f->table()->action()->single(
                     $this->lng->txt('edit'),
@@ -207,7 +207,7 @@ class ilBadgeImageTemplateTableGUI
 
     }
 
-    public function renderTable() : void
+    public function renderTable(): void
     {
         $f = $this->factory;
         $r = $this->renderer;

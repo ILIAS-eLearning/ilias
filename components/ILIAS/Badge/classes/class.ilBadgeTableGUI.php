@@ -67,7 +67,7 @@ class ilBadgeTableGUI
     /**
      * @return array<string, Column>
      */
-    private function buildColumns() : array
+    private function buildColumns(): array
     {
         $column = $this->factory->table()->column();
         $lng = $this->lng;
@@ -80,7 +80,7 @@ class ilBadgeTableGUI
         ];
     }
 
-    private function buildDataRetrievalObject(Factory $f, Renderer $r, int $p, string $type) : DataRetrieval
+    private function buildDataRetrievalObject(Factory $f, Renderer $r, int $p, string $type): DataRetrieval
     {
         return new class ($f, $r, $p, $type) implements DataRetrieval {
             private ilBadgeImage $badge_image_service;
@@ -112,7 +112,7 @@ class ilBadgeTableGUI
              *     title_sortable: string
              * }>
              */
-            private function getBadges() : array
+            private function getBadges(): array
             {
                 $rows = [];
                 $modal_container = new ModalBuilder();
@@ -161,9 +161,9 @@ class ilBadgeTableGUI
                             : $badge->getTypeInstance()->getCaption(),
                         'manual' => !$badge->getTypeInstance() instanceof ilBadgeAuto,
                         'image' => $images['rendered'] ? ($modal_container->renderShyButton(
-                                $images['rendered'],
-                                $modal
-                            ) . ' ') : '',
+                            $images['rendered'],
+                            $modal
+                        ) . ' ') : '',
                         // Just an boolean-like indicator for sorting
                         'image_sortable' => $images['rendered'] ? 'A' . $badge->getId() : 'Z' . $badge->getId(),
                         'title' => implode('', [
@@ -184,7 +184,7 @@ class ilBadgeTableGUI
                 Order $order,
                 ?array $filter_data,
                 ?array $additional_parameters
-            ) : Generator {
+            ): Generator {
                 $records = $this->getRecords($range, $order);
                 foreach ($records as $record) {
                     $row_id = (string) $record['id'];
@@ -199,7 +199,7 @@ class ilBadgeTableGUI
             public function getTotalRowCount(
                 ?array $filter_data,
                 ?array $additional_parameters
-            ) : ?int {
+            ): ?int {
                 return \count($this->getRecords());
             }
 
@@ -215,7 +215,7 @@ class ilBadgeTableGUI
              *     title: string,
              *     title_sortable: string}>
              */
-            private function getRecords(Range $range = null, Order $order = null) : array
+            private function getRecords(Range $range = null, Order $order = null): array
             {
                 $rows = $this->getBadges();
 
@@ -226,7 +226,7 @@ class ilBadgeTableGUI
                     );
                     usort(
                         $rows,
-                        static function (array $left, array $right) use ($order_field) : int {
+                        static function (array $left, array $right) use ($order_field): int {
                             if (\in_array($order_field, ['title', 'type', 'image'], true)) {
                                 if (\in_array($order_field, ['title', 'image'], true)) {
                                     $order_field .= '_sortable';
@@ -262,7 +262,7 @@ class ilBadgeTableGUI
         URLBuilder $url_builder,
         URLBuilderToken $action_parameter_token,
         URLBuilderToken $row_id_token,
-    ) : array {
+    ): array {
         $f = $this->factory;
 
         if ($this->has_write) {
@@ -303,7 +303,7 @@ class ilBadgeTableGUI
 
     }
 
-    public function renderTable() : void
+    public function renderTable(): void
     {
         $f = $this->factory;
         $r = $this->renderer;

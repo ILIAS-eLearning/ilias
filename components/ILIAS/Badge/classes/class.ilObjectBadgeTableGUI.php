@@ -57,10 +57,10 @@ class ilObjectBadgeTableGUI
     private readonly ilObjBadgeAdministrationGUI $parent_obj;
     private readonly ilAccessHandler $access;
 
-    public function __construct(ilObjBadgeAdministrationGUI $parentObj,
+    public function __construct(
+        ilObjBadgeAdministrationGUI $parentObj,
         protected bool $has_write = false
-    )
-    {
+    ) {
         global $DIC;
 
         $this->lng = $DIC->language();
