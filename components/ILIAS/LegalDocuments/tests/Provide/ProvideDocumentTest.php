@@ -31,8 +31,7 @@ use ILIAS\LegalDocuments\ConditionDefinition;
 use ILIAS\LegalDocuments\Value\Criterion;
 use ILIAS\LegalDocuments\Value\Document;
 use ILIAS\LegalDocuments\EditLinks;
-use ILIAS\LegalDocuments\Table\EditableDocumentTable;
-use ILIAS\UI\Component\Legacy;
+use ILIAS\UI\Component\Legacy\Legacy;
 use ILIAS\LegalDocuments\Legacy\Table as LegacyTable;
 use ILIAS\LegalDocuments\Table as TableInterface;
 use ILIAS\LegalDocuments\Table\DocumentTable;
@@ -75,17 +74,10 @@ class ProvideDocumentTest extends TestCase
 
         $uri = 'http://myIlias/ilias.php?baseClass=iladministrationgui&cmdNode=2g:qo:gq&cmdClass=ilLegalDocumentsAdministrationGUI&cmd=documents&ref_id=50';
 
-        $legacy = $this->mock(Legacy\Content::class);
-        $legacy_factory = $this->mock(Legacy\Factory::class);
-        $legacy_factory
-            ->expects($this->once())
-            ->method('content')
-            ->willReturn($legacy);
-
         $container = $this->mockTree(Container::class, [
             'ui' => [
-                'factory' => $this->mockMethod(UIFactory::class, 'legacy', [], $legacy_factory),
-                'mainTemplate' => $this->mock(ilGlobalTemplateInterface::class),
+                'factory' => [],
+                'mainTemplate' => [],
             ],
             'language' => [],
             'http' => ['request' => ['getUri' => ['__toString' => $uri]]],
@@ -107,17 +99,10 @@ class ProvideDocumentTest extends TestCase
 
         $uri = 'http://myIlias/ilias.php?baseClass=iladministrationgui&cmdNode=2g:qo:gq&cmdClass=ilLegalDocumentsAdministrationGUI&cmd=documents&ref_id=50';
 
-        $legacy = $this->mock(Legacy\Content::class);
-        $legacy_factory = $this->mock(Legacy\Factory::class);
-        $legacy_factory
-            ->expects($this->once())
-            ->method('content')
-            ->willReturn($legacy);
-
         $container = $this->mockTree(Container::class, [
             'ui' => [
-                'factory' => $this->mockMethod(UIFactory::class, 'legacy', [], $legacy_factory),
-                'mainTemplate' => $this->mock(ilGlobalTemplateInterface::class),
+                'factory' => ['table' => ['action' => ['multi' => []]]],
+                'mainTemplate' => [],
             ],
             'language' => [],
             'http' => ['request' => ['getUri' => ['__toString' => $uri]]],

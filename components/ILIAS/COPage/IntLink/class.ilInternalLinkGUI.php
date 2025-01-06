@@ -941,7 +941,7 @@ class ilInternalLinkGUI
         $mt = self::getModalTemplate();
         $tpl->addOnLoadCode('il.IntLink.setModalTemplate("' . addslashes(json_encode($mt["template"])) . '");');
 
-        $html = "<div id='ilIntLinkModal' data-show-signal='".$mt["show"]."' data-close-signal='".$mt["close"]."'></div>";
+        $html = "<div id='ilIntLinkModal' data-show-signal='" . $mt["show"] . "' data-close-signal='" . $mt["close"] . "'></div>";
 
         return $html;
     }
