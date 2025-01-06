@@ -368,10 +368,22 @@ class ilObjectBadgeTableGUI
             if ($action === 'obj_badge_delete') {
                 $items = [];
                 if (\is_array($ids) && \count($ids) > 0) {
+                    if($ids === ['ALL_OBJECTS']) {
+                        $filter = [
+                            'type' => '',
+                            'title' => '',
+                            'object' => ''
+                        ];
+                        $ids = [];
+                        foreach (ilBadge::getObjectInstances($filter) as $badge_item) {
+                            $ids[] = $badge_item['id'];
+                        }
+                    }
+
                     foreach ($ids as $id) {
                         $badge = new ilBadge((int) $id);
                         $items[] = $f->modal()->interruptiveItem()->keyValue(
-                            $id,
+                            (string) $id,
                             (string) $badge->getId(),
                             $badge->getTitle()
                         );
