@@ -1658,6 +1658,9 @@ class ilObjTest extends ilObject
         $result_array = [];
         if ($this->isRandomTest()) {
             $active_id = $this->getActiveIdOfUser($this->user->getId());
+            if ($active_id === null) {
+                $active_id = 0;
+            }
             $this->loadQuestions($active_id, $pass);
             if (count($this->questions) == 0) {
                 return $result_array;
