@@ -316,12 +316,13 @@ class ilPDSelectedItemsBlockGUI extends ilBlockGUI implements ilDesktopItemHandl
                 $group->setItems([]);
                 foreach ($items as $item) {
                     if ($this->rbacsystem->checkAccess('leave', $item['ref_id'])) {
-                        if (
-                            $item['type'] !== 'crs' ||
-                            ilParticipants::getInstance($item['ref_id'])->checkLastAdmin([$this->user->getId()])
-                        ) {
-                            $group->pushItem($item);
+                        if ($item['type'] === 'crs' && !ilObjCourse::mayLeave($item['obj_id'], $this->user->getId())) {
+                            continue;
                         }
+                        if ($item['type'] === 'grp' && !ilObjGroup::mayLeave($item['obj_id'], $this->user->getId())) {
+                            continue;
+                        }
+                        $group->pushItem($item);
                     }
                 }
             }
