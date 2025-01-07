@@ -165,6 +165,7 @@ class ilTestEvaluationFactory
             }
 
             if ($current_attempt !== $row['pass']) {
+                $current_attempt = $row['pass'];
                 $attempt = new \ilTestEvaluationPassData();
                 $attempt->setPass($row['pass']);
                 $attempt->setReachedPoints($row['points']);
