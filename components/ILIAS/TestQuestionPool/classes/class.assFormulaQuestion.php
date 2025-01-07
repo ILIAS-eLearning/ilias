@@ -387,6 +387,7 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
 
                 $units = "";
                 $result_units = $this->getResultUnits($resObj);
+
                 if (count($result_units) > 0) {
                     if ($forsolution) {
                         if (is_array($userdata)) {
@@ -403,12 +404,14 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
                     } else {
                         $units = '<select name="result_' . $result . '_unit">';
                         $units .= '<option value="-1">' . $this->lng->txt("select_unit") . '</option>';
+
                         foreach ($result_units as $unit) {
                             $units .= '<option value="' . $unit->getId() . '"';
                             if (array_key_exists($result, $userdata) &&
                                 is_array($userdata[$result]) &&
-                                array_key_exists('unit', $userdata[$result])) {
-                                if ($userdata[$result]["unit"] == $unit->getId()) {
+                                array_key_exists('value', $userdata[$result]) &&
+                                array_key_exists('unit', $userdata[$result]['value'])) {
+                                if ((int) $userdata[$result]['value']['unit'] == $unit->getId()) {
                                     $units .= ' selected="selected"';
                                 }
                             }
@@ -455,7 +458,7 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
                     $user_value = '';
                     if (is_array($userdata) && is_array($userdata[$result])) {
                         if (isset($userdata[$result]["unit"]) && $userdata[$result]["unit"] > 0) {
-                            $resunit = $this->getUnitrepository()->getUnit($userdata[$result]["unit"]);
+                            $resunit = $this->getUnitrepository()->getUnit((int) $userdata[$result]["unit"]);
                         }
 
                         if (isset($userdata[$result]["value"])) {
@@ -806,28 +809,17 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
             $pass = $this->getSolutionMaxPass($active_id);
         }
         $solutions = $this->getSolutionValues($active_id, $pass, $authorized_solution);
-        $user_solution = [];
-        foreach ($solutions as $solution_value) {
-            if (preg_match('/^(\$v\d+)$/', $solution_value['value1'], $matches)) {
-                $user_solution[$matches[1]] = $solution_value['value2'];
-                $var_obj = $this->getVariable($solution_value['value1']);
-                $var_obj->setValue($solution_value['value2']);
-                continue;
-            }
 
-            if (preg_match('/^(\$r\d+)$/', $solution_value['value1'], $matches)) {
-                if (!array_key_exists($matches[1], $user_solution)) {
-                    $user_solution[$matches[1]] = [];
-                }
-                $user_solution[$matches[1]]['value'] = $solution_value['value2'];
-                continue;
+        foreach ($solutions as $key => $value) {
+            if (preg_match("/^(\\\$v\\d+)$/", $key, $matches)) {
+                $varObj = $this->getVariable($key);
+                $varObj->setValue($value);
             }
-
-            if (preg_match('/^(\$r\d+)_unit$/', $solution_value['value1'], $matches)) {
-                if (!array_key_exists($matches[1], $user_solution)) {
-                    $user_solution[$matches[1]] = [];
+            if (preg_match("/^(\\\$r\\d+)_unit$/", $key, $matches)) {
+                if (!array_key_exists($matches[1], $solutions)) {
+                    $solutions[$matches[1]] = [];
                 }
-                $user_solution[$matches[1]]['unit'] = $solution_value['value2'];
+                $solutions[$matches[1]]["unit"] = $value;
             }
         }
 
@@ -836,8 +828,8 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
             $points += $result->getReachedPoints(
                 $this->getVariables(),
                 $this->getResults(),
-                $user_solution[$result->getResult()]['value'] ?? '',
-                $user_solution[$result->getResult()]['unit'] ?? '',
+                $solutions[$result->getResult()]['value'] ?? '',
+                $solutions[$result->getResult()]['unit'] ?? '',
                 $this->unitrepository->getUnits()
             );
         }
@@ -893,11 +885,12 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
         }
 
         $answer = $this->getSolutionSubmit();
+
         $this->getProcessLocker()->executeUserSolutionUpdateLockOperation(
             function () use ($answer, $active_id, $pass, $authorized) {
                 foreach ($answer as $key => $value) {
                     $matches = null;
-                    if (preg_match('/^result_(\$r\d+)$/', $key, $matches) !== false) {
+                    if (preg_match('/^result_(\$r\d+)$/', $key, $matches) > 0) {
                         $queryResult = "SELECT solution_id FROM tst_solutions WHERE active_fi = %s AND pass = %s AND question_fi = %s AND authorized = %s  AND " . $this->db->like('value1', 'clob', $matches[1]);
 
                         if ($this->getStep() !== null) {
@@ -1120,12 +1113,12 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
                 $check_unit = false;
                 if (array_key_exists($result_name, $available_units) &&
                     $available_units[$result_name] !== null) {
-                    $check_unit = in_array($user_solution[$result_name]['unit'], $available_units[$result_name]);
+                    $check_unit = in_array($user_solution[$result_name]['value']['unit'], $available_units[$result_name]);
                 }
 
                 if ($check_unit == true) {
                     //get unit-factor
-                    $unit_factor = assFormulaQuestionUnit::lookupUnitFactor($user_solution[$result_name]['unit']);
+                    $unit_factor = assFormulaQuestionUnit::lookupUnitFactor((int) $user_solution[$result_name]['value']['unit']);
                 }
 
                 try {
@@ -1434,17 +1427,17 @@ class assFormulaQuestion extends assQuestion implements iQuestionCondition, Ques
 
     public function getSolutionValues($active_id, $pass = null, bool $authorized = true): array
     {
-        $solutions = parent::getSolutionValues($active_id, $pass, $authorized);
         $user_solution = [];
+        $solutions = parent::getSolutionValues($active_id, $pass, $authorized);
         foreach ($solutions as $idx => $solution_value) {
-            if (preg_match('/^(\\\$v\\d+)$/', $solution_value['value1'], $matches)) {
+            if (preg_match("/^(\\\$v\\d+)$/", $solution_value['value1'], $matches)) {
                 $user_solution[$matches[1]] = $solution_value['value2'];
-            } elseif (preg_match('/^(\\\$r\\d+)$/', $solution_value['value1'], $matches)) {
+            } elseif (preg_match("/^(\\\$r\\d+)$/", $solution_value['value1'], $matches)) {
                 if (!array_key_exists($matches[1], $user_solution)) {
                     $user_solution[$matches[1]] = array();
                 }
                 $user_solution[$matches[1]]['value'] = $solution_value['value2'];
-            } elseif (preg_match('/^(\\\$r\\d+)_unit$/', $solution_value['value1'], $matches)) {
+            } elseif (preg_match("/^(\\\$r\\d+)_unit$/", $solution_value['value1'], $matches)) {
                 if (!array_key_exists($matches[1], $user_solution)) {
                     $user_solution[$matches[1]] = array();
                 }
