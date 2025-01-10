@@ -223,9 +223,9 @@ class Factory implements I\Factory
     /**
      * @inheritDoc
      */
-    public function colorpicker(string $label, ?string $byline = null): I\ColorPicker
+    public function colorSelect(string $label, ?string $byline = null): I\ColorSelect
     {
-        return new ColorPicker($this->data_factory, $this->refinery, $label, $byline);
+        return new ColorSelect($this->data_factory, $this->refinery, $label, $byline);
     }
 
     /**
