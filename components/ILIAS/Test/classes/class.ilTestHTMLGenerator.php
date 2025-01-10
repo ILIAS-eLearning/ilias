@@ -152,7 +152,7 @@ class ilTestHTMLGenerator
     {
         $fname = '';
         if (ilStyleDefinition::getCurrentSkin() !== 'default') {
-            $fname = './Customizing/global/skin/' .
+            $fname = './Customizing/skin/' .
                     ilStyleDefinition::getCurrentSkin() . '/' . $module_path . basename($a_filename);
         }
 
