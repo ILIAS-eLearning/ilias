@@ -19,7 +19,7 @@
 declare(strict_types=1);
 
 /**
- * @ilCtrl_Calls ilAchievementsGUI: ilPersonalSkillsGUI, ilBadgeProfileGUI, ilLearningHistoryGUI, ilLPPersonalGUI
+ * @ilCtrl_Calls ilAchievementsGUI: ilPersonalSkillsGUI, ilBadgeProfileGUI, ilLearningHistoryGUI, ilLPPersonalGUI, ilLearningProgressGUI
  */
 class ilAchievementsGUI
 {
