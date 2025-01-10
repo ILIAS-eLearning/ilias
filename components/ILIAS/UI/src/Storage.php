@@ -15,7 +15,7 @@
  * https://github.com/ILIAS-eLearning
  */
 
-namespace ILIAS\UI\Component\Table;
+namespace ILIAS\UI;
 
 /**
  * @author Thibeau Fuhrer <thibeau@sr.solutions>
