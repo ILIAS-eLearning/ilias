@@ -7,10 +7,8 @@ namespace ILIAS\UI\examples\Card\Standard;
 /**
  * ---
  * expected output: >
- *   ILIAS shows a ILIAS-Logo. The size of the logo depends on the browser/desktop size and will change accordingly.
- *   A title will be displayed below the logo.
- *   Additionally, a descriptive listing consisting of two entries is repeated
- *   three times below the title.
+ *   ILIAS shows a base ILIAS-Logo. Additionally, a descriptive listing consisting of two entries is repeated three
+ *   times below the title.
  * ---
  */
 function with_sections()

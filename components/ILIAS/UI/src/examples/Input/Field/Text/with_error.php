@@ -14,7 +14,6 @@ namespace ILIAS\UI\examples\Input\Field\Text;
  *   ILIAS shows a text field titled "Basic Input". You can enter numbers and letters into the field.
  *   Below the field, a color-coded error message "Some error" is displayed.
  *   The error is also marked by a colored line on the left of the field's label.
- *   Clicking "Save" will reload the page.
  * ---
  */
 function with_error()
