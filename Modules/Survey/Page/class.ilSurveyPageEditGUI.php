@@ -836,7 +836,7 @@ class ilSurveyPageEditGUI
      */
     protected function editHeading(int $a_id): void
     {
-        $this->callEditor("editHeadingObject", "q_id", $a_id);
+        $this->callEditor("editHeading", "q_id", $a_id);
     }
 
     /**
