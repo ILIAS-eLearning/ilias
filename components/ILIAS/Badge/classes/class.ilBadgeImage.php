@@ -28,6 +28,7 @@ use ILIAS\FileUpload\Exception\IllegalStateException;
 use ilGlobalTemplateInterface;
 use ilWACSignedPath;
 use ilFSStorageBadgeImageTemplate;
+use ILIAS\Badge;
 
 class ilBadgeImage
 {
@@ -73,45 +74,12 @@ class ilBadgeImage
                 }
             }
         } elseif ($badge instanceof ilBadge) {
-            $image_src = ilWACSignedPath::signFile($this->getImagePath($badge->getId(), $badge->getImage()));
+            $image_src = ilWACSignedPath::signFile($badge->getImagePath());
         }
 
         return $image_src;
     }
 
-    public function getImagePath(int $badge_id, string $badge_image): string
-    {
-        if ($badge_id) {
-            if (is_file($this->getFilePath($badge_id) . 'img' . $badge_id)) {
-                return $this->getFilePath($badge_id) . 'img' . $badge_id;
-            }
-
-            $exp = explode('.', $badge_image);
-            $suffix = strtolower(array_pop($exp));
-            return $this->getFilePath($badge_id) . 'img' . $badge_id . '.' . $suffix;
-        }
-        return "";
-    }
-
-    protected function getFilePath(
-        int $a_id,
-        string $a_subdir = null
-    ): string {
-        $storage = new \ilFSStorageBadge($a_id);
-        $storage->create();
-
-        $path = $storage->getAbsolutePath() . "/";
-
-        if ($a_subdir) {
-            $path .= $a_subdir . "/";
-
-            if (!is_dir($path)) {
-                mkdir($path);
-            }
-        }
-
-        return $path;
-    }
 
     public function processImageUpload(ilBadge $badge): void
     {
