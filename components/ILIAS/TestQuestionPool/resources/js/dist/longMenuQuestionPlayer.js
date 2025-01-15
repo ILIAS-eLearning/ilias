@@ -57,9 +57,11 @@
         return;
       }
 
-      const matchingAnswers = answerOptions[index].filter((answer) => { return answer.includes(e.target.value) });
+      const matchingAnswers = answerOptions[index].filter((answer) => {
+        return answer.toLowerCase().includes(e.target.value.toLowerCase())
+      });
 
-      if (matchingAnswers === []) {
+      if (matchingAnswers.length === 0) {
         return;
       }
 
