@@ -64,7 +64,7 @@ class ilBadgeImage
     ): string {
         $image_src = '';
 
-        if ($image_rid !== '' && $image_rid !== null ) {
+        if ($image_rid !== '' && $image_rid !== null) {
             $identification = $this->resource_storage->manage()->find($image_rid);
             if ($identification !== null) {
                 $flavour = $this->resource_storage->flavours()->get($identification, new \ilBadgePictureDefinition());
