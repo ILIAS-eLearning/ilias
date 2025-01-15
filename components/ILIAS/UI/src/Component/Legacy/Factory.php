@@ -52,7 +52,7 @@ interface Factory
      * description:
      *   purpose: >
      *     The legacy segment is used as container for visible content in
-     *     the context of sequence nvigations.
+     *     the context of sequence navigations.
      *     We currently lack quite a lot of UI components for describing the
      *     actual contents of the page, e.g. questions, combinations of text/table/form, etc.
      *     Until these components exist an enable us to better describe the
