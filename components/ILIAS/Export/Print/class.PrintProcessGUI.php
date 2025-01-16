@@ -119,7 +119,7 @@ class PrintProcessGUI
         $tpl->setVariable("ON_SUBMIT_CODE", $this->provider->getOnSubmitCode());
         $modal = $this->ui->factory()->modal()->roundtrip(
             $this->lng->txt("exp_print_pdf"),
-            $this->ui->factory()->legacy(
+            $this->ui->factory()->legacy()->content(
                 $this->ui->renderer()->render($mb) .
                 $tpl->get()
             )

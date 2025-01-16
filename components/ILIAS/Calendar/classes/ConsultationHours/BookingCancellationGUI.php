@@ -151,7 +151,7 @@ class BookingCancellationGUI
                 \ilObjUser::_lookupFullname($booking_user_id);
 
         }
-        return $this->ui_factory->legacy(implode('<br/', $user_info));
+        return $this->ui_factory->legacy()->content(implode('<br/', $user_info));
     }
 
     protected function getInputs()
