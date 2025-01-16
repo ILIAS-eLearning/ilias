@@ -1,42 +1,43 @@
 # ILIAS Installation
 
+This is the installation guide for ILIAS 10, providing step-by-step instructions to set up all necessary components, 
+including the web server, database, and ILIAS code. Follow these instructions carefully to ensure a successful 
+installation of the e-Learning software. Each section will guide you through the required configurations and setups 
+for a fully functional ILIAS environment.
+
 # Table of Contents
 
-<!-- MarkdownTOC depth=0 autolink="true" bracket="round" autoanchor="true" style="ordered" indent="   " -->
+<!-- toc -->
 
-1. [ILIAS Installation](#ilias-installation)
-1. [Table of Contents](#table-of-contents)
-1. [System Requirements](#system-requirements)
-  1. [Hardware](#hardware)
-  1. [Recommended Setup for Running ILIAS](#recommended-setup-for-running-ilias)
-  1. [Database Recommendations](#database-recommendations)
-  1. [Reference System](#reference-system)
-  1. [Other Platforms or Configurations](#other-platforms-or-configurations)
-1. [Installation on Ubuntu 24.04](#installation-on-ubuntu-2404)
-  1. [Install Dependencies](#install-dependencies)
-  1. [Webserver Installation/Configuration](#webserver-installationconfiguration)
-  1. [Database Installation/Configuration](#database-installationconfiguration)
-  1. [Get the Code and Install ILIAS](#get-the-code-and-install-ilias)
-  1. [Install ILIAS](#install-ilias)
-  1. [Install Plugins and Styles](#install-plugins-and-styles)
-1. [Upgrading ILIAS](#upgrading-ilias)
-  1. [Minor Upgrade](#minor-upgrade)
-  1. [Major Upgrade](#major-upgrade)
-  1. [Update the Database](#update-the-database)
-  1. [Information on Updates](#information-on-updates)
-1. [Upgrading Dependencies](#upgrading-dependencies)
-  1. [PHP](#php)
-  1. [DBMS](#dbms)
-1. [Connect and Contribute](#connect-and-contribute)
-1. [Appendix](#appendix)
-  1. [Configure ILIAS Java RPC server (optional)](#configure-ilias-java-rpc-server-optional)
-  1. [Configure ILIAS Chat Server (optional)](#configure-ilias-chat-server-optional)
-  1. [Configure E-Mail (optional)](#configure-e-mail-optional)
-  1. [Configure WebDAV (optional)](#configure-webdav-optional)
-  1. [Hardening and Security Guidance](#hardening-and-security-guidance)
-  1. [MySQL Strict Mode (5.7+)](#mysql-strict-mode-57)
++ [System Requirements](#system-requirements)
+  + [Hardware](#hardware)
+  + [Recommended Setup for Running ILIAS](#recommended-setup-for-running-ilias)
+  + [Reference System](#reference-system)
+  + [Other Platforms or Configurations](#other-platforms-or-configurations)
++ [Installation on Ubuntu 24.04](#installation-on-ubuntu-2404)
+  + [Install Dependencies](#install-dependencies)
+  + [Webserver Installation/Configuration](#webserver-installationconfiguration)
+  + [Database Installation/Configuration](#database-installationconfiguration)
+  + [Get the Code and Install ILIAS](#get-the-code-and-install-ilias)
+  + [Install ILIAS](#install-ilias)
+  + [Install Further Components](#install-further-components)
+  + [Install Plugins and Styles](#install-plugins-and-styles)
++ [Backup ILIAS](#backup-ilias)
++ [Upgrading ILIAS](#upgrading-ilias)
+  + [Minor Upgrade](#minor-upgrade)
+  + [Major Upgrade](#major-upgrade)
+  + [Update the Database](#update-the-database)
+  + [Information on Updates](#information-on-updates)
++ [Upgrading Dependencies](#upgrading-dependencies)
+  + [PHP](#php)
+  + [DBMS](#dbms)
++ [Connect and Contribute](#connect-and-contribute)
++ [Supplement](#supplement)
+  + [Configure WebDAV (optional)](#configure-webdav-optional)
+  + [Hardening and Security Guidance](#hardening-and-security-guidance)
+  + [MySQL Strict Mode (5.7+)](#mysql-strict-mode-57)
 
-<!-- /MarkdownTOC -->
+<!-- tocstop -->
 
 <a name="system-requirements"></a>
 # System Requirements
@@ -111,7 +112,8 @@ dependencies. We recommend to always use your distributions package manager to
 keep your packages up to date in an easy manner avoiding security issues.
 
 Here we choose Ubuntu 24.04 because it already meets the recommended PHP version 8.3.
-For other Ubuntu or Debian-based Linux systems, we recommend using [https://deb.sury.org/](https://deb.sury.org/) to install the correct PHP version later on.
+For other Ubuntu or Debian-based Linux systems, we recommend using [https://deb.sury.org/](https://deb.sury.org/) to install the correct 
+PHP version later on.
 
 <a name="install-dependencies"></a>
 ## Install Dependencies
@@ -146,7 +148,7 @@ Other web servers capable of processing PHP, such as Nginx or Apache2 with FCGI 
 
 The PHP packet manager Composer is necessary to download all external PHP dependencies and for php autoloading. 
 Alternatively it can be obtained directly from [https://getcomposer.org/download/](https://getcomposer.org/download/). 
-Composer may be optional when using the prepacked ILIAS from [https://github.com/ILIAS-eLearning/ILIAS/releases](https://github.com/ILIAS-eLearning/ILIAS/releases), but it is necessary for using plugins to rebuild the PHP autoload classmap.
+Composer may be optional when using the prepacked ILIAS from [Download & Releases](https://docu.ilias.de/go/pg/197851_35), but it is necessary when using plugins to rebuild the PHP autoload classmap.
 
 ```shell
 apt install apache2 libapache2-mod-php php php-gd php-xsl php-imagick php-curl php-mysql php-xmlrpc php-soap php-ldap composer
@@ -174,7 +176,8 @@ chown www-data:www-data /var/www/logs
 chown www-data:www-data /var/www/.npm
 ```
 
-Usually Apache ships with a default configuration (e.g. `/etc/apache2/sites-enabled/000-default.conf` on Debian based systems). A minimal configuration may look as follows:
+Usually Apache ships with a default configuration (e.g. `/etc/apache2/sites-enabled/000-default.conf` on Debian based
+systems). A minimal configuration for ILIAS may look as follows:
 
 ```apacheconf
 <VirtualHost *:80>
@@ -210,10 +213,11 @@ To check if the installation was successfull create the file `/var/www/ilias/php
 phpinfo();
 ```
 
-Then point your browser to ```http://yourservername.org/phpinfo.php```. 
+Then point your browser to ```http://example.com/phpinfo.php```. 
 If you see the content of the file as shown above your configuration is **not** working. 
 If you can see details of your PHP Configuration everything works fine. 
-Search for the entry ```Loaded configuration file``` as we now made some changes to it (e.g. `/etc/php5/apache2/php.ini`). Delete the file `phpinfo.php` afterwards.
+Search for the entry ```Loaded configuration file``` as we now made some changes to it (e.g. `/etc/php5/apache2/php.ini`).
+Delete the file `phpinfo.php` afterwards.
 
 We recommend the atleast following settings for your php.ini:
 
@@ -316,20 +320,35 @@ commands:
 cd /var/www/ilias/
 sudo -uwww-data git clone https://github.com/ILIAS-eLearning/ILIAS.git . --single-branch -b release_10
 ```
-
-Or if you use tags to directly reference ILIAS versions;
+<details>
+<summary>If you use tags to directly reference ILIAS versions</summary>
 
 ```shell
 cd /var/www/ilias/
 sudo -uwww-data git clone https://github.com/ILIAS-eLearning/ILIAS.git . --single-branch -b v10.X
 ```
+</details>
 
-The repository of ILIAS doesn't contain all code that is required to run. To download the required PHP-dependencies and
+<details>
+<summary>If you use the tar.gz provided in the release</summary>
+Download the file in [download](https://docu.ilias.de/go/lm/35).
+
+```shell
+sudo -uwww-data wget https://github.com/ILIAS-eLearning/ILIAS/releases/download/v10.X/ILIAS-10.X.tar.gz
+sudo -uwww-data tar -xzf ILIAS-10.X.tar.gz  -C /var/www/ilias --strip-components=1 ILIAS-10.X/
+```
+</details>
+
+The GitHub repository of ILIAS doesn't contain all code that is required to run. To download the required PHP-dependencies and
 to create static artifacts from the source, run the following in your ILIAS folder:
 ```shell
 sudo -uwww-data npm clean-install --omit=dev --ignore-scripts
 sudo -uwww-data composer install --no-dev
 ```
+
+We recommend that the rights of the ILIAS code in the production system are restricted so that the web server only has 
+read access to the code. For this and other important security considerations, please refer to the security
+instructions in the [security guide](./secure.md).
 
 <a name="install-ilias"></a>
 ## Install ILIAS
@@ -363,12 +382,12 @@ A typical configuration might look like this afterwards:
                 "data_dir" : "/var/www/files/ilias"
         },
         "logging" : {
-		"enable" : true,
-		"path_to_logfile" : "/var/www/logs/ilias.log",
-		"errorlog_dir" : "/var/www/logs/"
+                "enable" : true,
+                "path_to_logfile" : "/var/www/logs/ilias.log",
+                "errorlog_dir" : "/var/www/logs/"
     	},
         "http" : {
-                "path" : "http://demo1.cat06.de"
+                "path" : "http://www.example.com"
         },
         "systemfolder" : {
                 "contact" : {
@@ -436,8 +455,8 @@ apt-get install postfix
 
 Plugins are the way to add new functionality to your ILIAS installation. Do not
 change the core files, or you will not be able to update your installation easily.
-A variety of free plugins is provided from our community via the [ILIAS Plugin Repository](http://www.ilias.de/docu/goto.php?target=cat_1442&client_id=docu).
-To develop plugins, you can start in our [development guide](http://www.ilias.de/docu/goto.php?target=st_27029).
+A variety of free plugins is provided from our community via the [ILIAS Plugin Repository](https://docu.ilias.de/go/cat/1442).
+To develop plugins, you can start in our [development guide](https://docu.ilias.de/go/pg/27030_42).
 
 Custom styles are the way to modify the look of your ILIAS installation. Have
 a look in the [documentation of the System Styles and Custom Styles](../../templates/Readme.md)
@@ -448,15 +467,17 @@ to learn how to build and install them.
 
 There are three places where the ILIAS core system stores data that needs to be backed up in order to restore your 
 system in case of failure.
-* internal data within your webroot `<ILIAS root folder>/public/data` in our case `/var/www/ilias/public/data`.
+* Internal data within your webroot `<ILIAS-root-folder>/public/data` in our case `/var/www/ilias/public/data`.
 * External data, configured in `ilias.json` within `filesystem.data_dir`, in our case `/var/www/files/ilias`.
 * The database, which can easily be done by running `mysqldump'.
 ```shell
-mysqldump -u<database user> -p <database name> > /path/to/your/backup/folder/ilias-backup.sql
+mysqldump --lock-tables=false -u<database user> -p <database name> > /path/to/your/backup/folder/ilias-backup.sql
 # Prompt for password
 ```
 
-When restoring the ILIAS files to the designated folder, remember to set the correct permissions and ownership of your web server. To restore the database, drop the old database with `DROP DATABASE <database-name>;`, create an empty database according to [Database Installation/Configuration](#install-database) and write the database dump to this database:
+When restoring the ILIAS files to the designated folder, remember to set the correct permissions and ownership of your 
+web server. To restore the database, drop the old database with `DROP DATABASE <database-name>;`, create an empty 
+database according to [Database Installation/Configuration](#install-database) and write the database dump to this database:
 ```shell
 mysql -u<database-user> -p <database-name> < /path/to/your/backup/folder/ilias-backup.sql
 # Prompt for password
@@ -467,36 +488,52 @@ mysql -u<database-user> -p <database-name> < /path/to/your/backup/folder/ilias-b
 
 The easiest way to update ILIAS is using git, please note that this is only possible
 if you installed ILIAS via git as advised in this document. If git wasn't used you
-can also [download](http://www.ilias.de/docu/goto.php?target=st_229) new releases.
+can also [download](https://docu.ilias.de/go/lm/35) new releases.
 
 Before you start you should consider to [backup](#backup-ilias).
-
-We also recommend to use a decent staging environment to make a pre-flight check,
-to see if all plugins, skins, etc. still working as expected with the new version.
-
 
 <a name="minor-upgrade"></a>
 ## Minor Upgrade
 
 To apply a minor update (e.g. v10.1 to v10.2) execute the following command in
-your ILIAS basepath (e.g. `/var/www/html/`):
+your ILIAS basepath (e.g. `/var/www/ilias/`):
 
-```
-git pull origin release_10
-npm clean-install --omit-dev --ignore-scripts
-composer install --no-dev
-```
-
-if you follow a branch or
-
-```
-git fetch origin v10.1
-git checkout v10.1
-npm clean-install --omit-dev --ignore-scripts
-composer install --no-dev
+```shell
+sudo -uwww-data git pull origin release_10
+sudo -uwww-data npm clean-install --omit-dev --ignore-scripts
+sudo -uwww-data composer install --no-dev
 ```
 
-if you use tags to pin a specific ILIAS version.
+<details>
+<summary>If you use tags to directly reference ILIAS versions</summary>
+
+```shell
+sudo -uwww-data git fetch origin v10.X:v10.X
+sudo -uwww-data git checkout v10.X
+sudo -uwww-data npm clean-install --omit-dev --ignore-scripts
+sudo -uwww-data composer install --no-dev
+```
+</details>
+
+<details>
+<summary>If you use the tar.gz provided in the release</summary>
+
+Download the archive of the newest ILIAS minor version in [download](https://docu.ilias.de/go/lm/35).
+
+```shell
+sudo -uwww-data wget https://github.com/ILIAS-eLearning/ILIAS/releases/download/v10.X/ILIAS-10.X.tar.gz
+sudo -uwww-data mkdir /tmp/ilias_update
+sudo -uwww-data tar -xzf ILIAS-10.X.tar.gz  -C /tmp/ilias_update --strip-components=1 ILIAS-10.X/
+sudo -uwww-data rsync -av --exclude='/public/' --exclude='/Customizing/' --exclude='/data/' --exclude='ilias.ini.php' /tmp/ilias_update/ /var/www/ilias/
+rm -rf /tmp/ilias_update
+```
+If you have plugins installed, you will need to rebuild the classmap, including all plugins. You will need to call 
+`composer du` to do this.
+
+```shell
+sudo -uwww-data composer du
+```
+</details>
 
 In case of merge conflicts refer to [the ILIAS Development Guide](http://www.ilias.de/docu/goto.php?target=pg_15604).
 You should only encounter these if you changed the code of your installation
@@ -515,22 +552,49 @@ layout templates. Then execute the following commands in your ILIAS basepath
 (e.g. `/var/www/ilias`).
 
 ```shell
-git fetch origin release_10
-git checkout release_10
-npm clean-install --omit-dev --ignore-scripts
-composer install --no-dev
+sudo -uwww-data git fetch origin release_10:release_10
+sudo -uwww-data git checkout release_10
+```
+<details>
+<summary>If you use tags to directly reference ILIAS versions</summary>
+
+```shell
+sudo -uwww-data git fetch origin v10.X:v10.X
+sudo -uwww-data git checkout v10.X
+```
+</details>
+
+<details>
+<summary>If you use the tar.gz provided in the release</summary>
+
+Download the archive of the newest ILIAS minor version in [download](https://docu.ilias.de/go/lm/35).
+
+```shell
+sudo -uwww-data wget https://github.com/ILIAS-eLearning/ILIAS/releases/download/v10.X/ILIAS-10.X.tar.gz
+sudo -uwww-data mkdir /tmp/ilias_update
+sudo -uwww-data tar -xzf ILIAS-10.X.tar.gz  -C /tmp/ilias_update --strip-components=1 ILIAS-10.X/
+sudo -uwww-data rsync -av --exclude='/public/' --exclude='/Customizing/' --exclude='/data/' --exclude='ilias.ini.php' /tmp/ilias_update/ /var/www/ilias/
+rm -rf /tmp/ilias_update
+```
+</details>
+After upgrading the code from ILIAS 9 to ILIAS 10 due to structural changes, you need to move the `/Customizing/global/plugins`
+and `/data` folder to its new destination. Both are now located in the newly created `public` folder.
+
+```shell
+sudo -uwww-data mkdir -p public/Customizing/plugins
+mv data public/
+mv Customizing/global/plugins/Services/* public/Customizing/plugins/
+mv Customizing/global/plugins/Modules/* public/Customizing/plugins/
 ```
 
-Replace `release_X` with the branch or tag you actually want to upgrade to. You can
-get a list of available branches by executing `git branch -a` and a list of
-all available tags by executing `git tag`. Never use `trunk` or ```*beta``` for
-production.
+Then update the code of your plugins according to their documentation so that it is compatible with the new ILIAS version.
+If you are **not** using the tar.gz archive to upgrade your release, update your javascript and php dependencies. If you
+are using a tar.gz archive and are using plugins, reload your php classmap with `composer du`.
 
-In case of merge conflicts refer to [the ILIAS Developement Guide](http://www.ilias.de/docu/goto.php?target=pg_15604).
-You should only encounter these if you changed the code of your installation
-locally.
-
-In case of merge conflicts refer to [Resolving Conflicts - ILIAS Development Guide](http://www.ilias.de/docu/goto.php?target=pg_15604).
+```shell
+sudo -uwww-data npm clean-install --omit-dev --ignore-scripts
+sudo -uwww-data composer install --no-dev
+```
 
 Complete the update of the base system by [updating the database](#database-the-update).
 
@@ -549,15 +613,13 @@ make your installation work properly. **Migrations** are tasks, that potentially
 some time, but which can also be executed while the installation is in productive use.
 
 Run the `status` command on the command line to check if there are any updates
-available. Look into the section `database` of the output and check the fields
-`update_required`, `hotfix_required` and `custom_update_required`. If any of these
-fields is `true`, run in your ILIAS folder:
+available and if ILIAS is responding. After this you need to perform the update.
 
 ```
 php cli/setup.php update
 ```
 
-To check if there are migrations, run in your ILIAS folder:
+To check if there are migrations, run in your ILIAS folder.
 
 ```
 php cli/setup.php migrate
@@ -572,9 +634,6 @@ questions. You might want to have a look into the [documentation of the command 
 or into the help of the program itself `php cli/setup.php help`. It is the tool
 to manage and monitor your ILIAS installation.
 
-To check which update step gets currently executed run the following SQL-Statement
-on your ILIAS database: `SELECT * FROM `settings` WHERE keyword = "db_update_running"`.
-
 Database updates are performed in steps; it might happen that a step fails, e.g. due
 to some edge case or inconsistency in existing data, files, etc.
 In this case, a concecutive command `php setup/setup.php update` will error with
@@ -583,7 +642,7 @@ a message like
 > Aborting because of that mismatch.
 
 You may reset the records for those steps by running:
-```
+```shell
 php setup/setup.php achieve database.resetFailedSteps
 ```
 However, be sure to understand the cause for the failing steps and tend to it before
@@ -594,39 +653,9 @@ resetting and running update again.
 
 To keep your ILIAS Installation secure and healthy it is important that you keep
 it up to date. To get informations about updates and security fixes you should
-consider to subscribe to the [ILIAS Admin Mailing-List](http://lists.ilias.de/cgi-bin/mailman/listinfo/ilias-admins)
-
-<a name="upgrading-dependencies"></a>
-# Upgrading Dependencies
-
-When you upgrade from rather old versions please make sure that the dependencies,
-like MySQL and PHP, are up to date. Below you will find the supported versions for
-each ILIAS release.
-
-<a name="php"></a>
-## PHP
-
-| ILIAS Version  | PHP Version                 |
-|----------------|-----------------------------|
-| 10.x           | 8.2.x, 8.3.x                |
-| 9.x            | 8.1.x, 8.2.x                |
-| 8.x            | 7.4.x, 8.0.x                |
-| 7.x            | 7.3.x, 7.4.x                |
-| 6.x            | 7.2.x, 7.3.x, 7.4.x         |
-
-<a name="dbms"></a>
-## DBMS
-
-We strongly recommend using MariaDB instead of MySQL due to performance, licensing and compatibility in the future.
-
-| ILIAS Version | MySQL Version       | MariaDB Version        |
-|---------------|---------------------|------------------------|
-| 10.0  - 10.x  | 8.0.x               | 10.4, 10.5, 10.6       |
-| 9.0 - 9.x     | 8.0.x               | 10.3, 10.4, 10.5, 10.6 |
-| 8.0 - 8.x     | 5.7.x, 8.0.x        | 10.2, 10.3, 10.4       |
-| 7.0 - 7.x     | 5.7.x, 8.0.x        | 10.1, 10.2, 10.3       |
-| 6.0 - 6.x     | 5.6.x, 5.7.x, 8.0.x | 10.0, 10.1, 10.2, 10.3 |
-
+consider to subscribe to the [ILIAS Admin Mailing-List](http://lists.ilias.de/cgi-bin/mailman/listinfo/ilias-admins). Information on the 
+new versions, such as Important Changes, Known Issues, Changed Behaviour and Fixed 
+Issues, can be found in the release notes [Download & Releases](https://docu.ilias.de/go/lm/35).
 
 <a name="connect-and-contribute"></a>
 # Connect and Contribute
@@ -639,8 +668,42 @@ or [ILIAS Development Conferences](https://docu.ilias.de/goto_docu_grp_3721.html
 We are also looking for [contributions of code](../development/contributing.md),
 [reports of issues](http://mantis.ilias.de) or [requests in our Feature Wiki](https://docu.ilias.de/goto.php?target=wiki_5307&client_id=docu#ilPageTocA119).
 
-<a name="supplement"></a>
-# Supplement
+If you have any questions about the installation or the community, please visit us on our [Discord server](https://discord.gg/H9v2v2Ar2T) and join 
+the discussion!
+
+<a name="appendix"></a>
+# Appendix
+
+<a name="upgrading-dependencies"></a>
+## Upgrading Dependencies
+
+When you upgrade from rather old versions please make sure that the dependencies,
+like MySQL and PHP, are up to date. Below you will find the supported versions for
+each ILIAS release.
+
+<a name="php"></a>
+### PHP
+
+| ILIAS Version  | PHP Version                 |
+|----------------|-----------------------------|
+| 10.x           | 8.2.x, 8.3.x                |
+| 9.x            | 8.1.x, 8.2.x                |
+| 8.x            | 7.4.x, 8.0.x                |
+| 7.x            | 7.3.x, 7.4.x                |
+| 6.x            | 7.2.x, 7.3.x, 7.4.x         |
+
+<a name="dbms"></a>
+### DBMS
+
+We strongly recommend using MariaDB instead of MySQL due to performance, licensing and compatibility in the future.
+
+| ILIAS Version | MySQL Version       | MariaDB Version        |
+|---------------|---------------------|------------------------|
+| 10.0  - 10.x  | 8.0.x               | 10.4, 10.5, 10.6       |
+| 9.0 - 9.x     | 8.0.x               | 10.3, 10.4, 10.5, 10.6 |
+| 8.0 - 8.x     | 5.7.x, 8.0.x        | 10.2, 10.3, 10.4       |
+| 7.0 - 7.x     | 5.7.x, 8.0.x        | 10.1, 10.2, 10.3       |
+| 6.0 - 6.x     | 5.6.x, 5.7.x, 8.0.x | 10.0, 10.1, 10.2, 10.3 |
 
 <a name="webdav-configuration"></a>
 ## Configure WebDAV (optional)
