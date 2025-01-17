@@ -427,7 +427,7 @@ database. Run the setup migration and follow the steps shown. This is also neces
 php cli/setup.php migrate
 ```
 
-Now that you have ILIAS installed, you can start by logging in as root. Go to your http patch and log in with the 
+Now that you have ILIAS installed, you can start by logging in as root. Go to your http path and log in with the 
 username `root` and password `homer`. ILIAS will ask you for a new password after the first login.
 
 <a name="install-further"></a>
@@ -643,7 +643,7 @@ a message like
 
 You may reset the records for those steps by running:
 ```shell
-php setup/setup.php achieve database.resetFailedSteps
+php cli/setup.php achieve database.resetFailedSteps
 ```
 However, be sure to understand the cause for the failing steps and tend to it before
 resetting and running update again.
