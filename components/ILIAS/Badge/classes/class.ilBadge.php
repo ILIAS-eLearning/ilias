@@ -122,19 +122,21 @@ class ilBadge
         $this->setActive(false);
 
         if ($this->getId()) {
-            $this->setId(0);
             if ($this->getImageRid()) {
                 $current_collection_id = new ResourceIdentification($this->getImageRid());
                 $new_collection_id = $this->resource_storage->manage()->clone($current_collection_id);
+                $this->setId(0);
                 $this->setImageRid($new_collection_id);
+                $this->create();
             } else {
                 $img = $this->getImagePath();
+                $this->setId(0);
+                $this->create();
                 if ($img) {
                     // see uploadImage()
                     copy($img, $this->getImagePath());
                 }
             }
-            $this->create();
         }
     }
 
@@ -528,7 +530,7 @@ class ilBadge
             "title" => ["text", $this->getTitle()],
             "descr" => ["text", $this->getDescription()],
             "crit" => ["text", $this->getCriteria()],
-            "image" => ["text", null],
+            "image" => ["text", $this->getImage()],
             "image_rid" => ["text", $this->getImageRid()],
             "valid" => ["text", $this->getValid()],
             "conf" => [
