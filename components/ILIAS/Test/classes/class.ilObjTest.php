@@ -1169,10 +1169,16 @@ class ilObjTest extends ilObject
         }
     }
 
-    public function removeTestResults(ilTestParticipantData $participant_data)
+    public function removeTestResults(ilTestParticipantData $participant_data): void
     {
         if ($participant_data->getAnonymousActiveIds() !== []) {
             $this->removeTestResultsByActiveIds($participant_data->getAnonymousActiveIds());
+
+            $user_ids = array_map(
+                static fn($active_id) => $participant_data->getUserIdByActiveId($active_id),
+                $participant_data->getAnonymousActiveIds(),
+            );
+            $this->removeAdditionalTimesByUserIds($user_ids);
         }
 
         if ($participant_data->getUserIds() !== []) {
@@ -1182,10 +1188,18 @@ class ilObjTest extends ilObject
                 $test_lp->setTestObject($this);
                 $test_lp->resetLPDataForUserIds($participant_data->getUserIds(), false);
             }
+
+            $this->removeAdditionalTimesByUserIds($participant_data->getUserIds());
         }
 
         if ($participant_data->getActiveIds() !== []) {
             $this->removeTestActives($participant_data->getActiveIds());
+
+            $user_ids = array_map(
+                static fn($active_id) => $participant_data->getUserIdByActiveId($active_id),
+                $participant_data->getActiveIds(),
+            );
+            $this->removeAdditionalTimesByUserIds($user_ids);
         }
 
         if ($this->logger->isLoggingEnabled()) {
@@ -1203,7 +1217,18 @@ class ilObjTest extends ilObject
         }
     }
 
-    public function removeTestResultsByUserIds($user_ids)
+    private function removeAdditionalTimesByUserIds(array $user_ids): void
+    {
+        $in_user_fis = $this->db->in(
+            'user_fi',
+            $user_ids,
+            false,
+            ilDBConstants::T_INTEGER,
+        );
+        $this->db->manipulate("DELETE FROM tst_addtime WHERE test_fi = {$this->getTestId()} AND $in_user_fis");
+    }
+
+    public function removeTestResultsByUserIds(array $user_ids): void
     {
         $participantData = new ilTestParticipantData($this->db, $this->lng);
         $participantData->setUserIdsFilter($user_ids);
@@ -1221,7 +1246,7 @@ class ilObjTest extends ilObject
         }
     }
 
-    private function removeTestResultsByActiveIds($active_ids)
+    private function removeTestResultsByActiveIds(array $active_ids): void
     {
         $in_active_ids = $this->db->in('active_fi', $active_ids, false, 'integer');
 
