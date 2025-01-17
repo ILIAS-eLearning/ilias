@@ -123,10 +123,10 @@ class ilBadge
 
         if ($this->getId()) {
             $this->setId(0);
-            $this->create();
-
             if ($this->getImageRid()) {
-                $this->update();
+                $current_collection_id = new ResourceIdentification($this->getImageRid());
+                $new_collection_id = $this->resource_storage->manage()->clone($current_collection_id);
+                $this->setImageRid($new_collection_id);
             } else {
                 $img = $this->getImagePath();
                 if ($img) {
@@ -134,6 +134,7 @@ class ilBadge
                     copy($img, $this->getImagePath());
                 }
             }
+            $this->create();
         }
     }
 
