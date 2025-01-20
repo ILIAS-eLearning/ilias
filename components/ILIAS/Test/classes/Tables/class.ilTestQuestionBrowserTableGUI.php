@@ -160,11 +160,8 @@ class ilTestQuestionBrowserTableGUI
         }
 
         if (in_array('ALL_OBJECTS', $selected_array, true)) {
-            $selected_array = array_keys(
-                $this->getQuestionsBrowserTable()->loadRecords(
-                    $this->ui_service->filter()->getData($this->getQuestionsBrowserFilterComponent())
-                )
-            );
+            $filters = $this->ui_service->filter()->getData($this->getQuestionsBrowserFilterComponent()) ?? [];
+            $selected_array = array_keys($this->getQuestionsBrowserTable()->loadRecords($filters));
         }
 
         array_map(
