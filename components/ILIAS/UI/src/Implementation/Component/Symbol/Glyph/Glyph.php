@@ -90,7 +90,9 @@ class Glyph implements C\Symbol\Glyph\Glyph
         self::PREVIEW,
         self::SORT,
         self::COLUMN_SELECTION,
-        self::TILE_VIEW
+        self::TILE_VIEW,
+        self::CHECK,
+        self::UNCHECK
     ];
 
     private string $type;

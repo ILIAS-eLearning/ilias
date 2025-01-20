@@ -308,4 +308,14 @@ class Factory implements G\Factory
     {
         return new Glyph(G\Glyph::TILE_VIEW, "tile_view", $action);
     }
+
+    public function check(): G\Glyph
+    {
+        return new Glyph(G\Glyph::CHECK, G\Glyph::CHECK);
+    }
+
+    public function uncheck(): G\Glyph
+    {
+        return new Glyph(G\Glyph::UNCHECK, G\Glyph::UNCHECK);
+    }
 }
