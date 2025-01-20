@@ -15,12 +15,18 @@
 
 import il from 'il';
 import $ from 'jquery';
+import FieldSelectionFactory from './fieldselection.factory.js';
 import SortationFactory from './sortation.factory.js';
 import PaginationFactory from './pagination.factory.js';
-import JQueryEventDispatcher from '../../Core/src/jqueryeventdispatcher.js';
+import ModeFactory from './mode.factory.js';
+import JQueryEventDispatcher from '../../../Core/src/jqueryeventdispatcher.js';
 
 const eventDispatcher = new JQueryEventDispatcher($);
+
 il.UI = il.UI || {};
-il.UI.viewcontrol = il.UI.viewcontrol || {};
-il.UI.viewcontrol.sortation = new SortationFactory(eventDispatcher);
-il.UI.viewcontrol.pagination = new PaginationFactory(eventDispatcher);
+il.UI.Input = il.UI.Input || {};
+il.UI.Input.Viewcontrols = il.UI.Input.Viewcontrols || {};
+il.UI.Input.Viewcontrols.FieldSelection = new FieldSelectionFactory(eventDispatcher);
+il.UI.Input.Viewcontrols.Sortation = new SortationFactory(eventDispatcher);
+il.UI.Input.Viewcontrols.Pagination = new PaginationFactory(eventDispatcher);
+il.UI.Input.Viewcontrols.Mode = new ModeFactory(eventDispatcher);
