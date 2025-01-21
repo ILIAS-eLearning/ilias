@@ -80,7 +80,7 @@ class PromptTest extends \ILIAS_UI_TestBase
         $url_builder = new URLBuilder(new URI('https://www.ilias.de'));
         $url = $url_builder->buildURI()->__toString();
         $prompt = $this->getUIFactory()->prompt()->standard($url_builder);
-        $this->assertEquals($url, $prompt->getAsyncURL());
+        $this->assertEquals($url, $prompt->getAsyncUrl());
         $this->assertEquals($url, $prompt->getShowSignal()->getOptions()['url']);
         $this->assertInstanceOf(I\Signal::class, $prompt->getShowSignal());
         $this->assertInstanceOf(I\Signal::class, $prompt->getCloseSignal());
@@ -101,7 +101,7 @@ class PromptTest extends \ILIAS_UI_TestBase
             ->withParameter($parameter_token, 'somevalue');
 
         $url = $url_builder->withParameter($parameter_token, 'somevalue')->buildURI()->__toString();
-        $this->assertEquals($url, $prompt->getAsyncURL());
+        $this->assertEquals($url, $prompt->getAsyncUrl());
         $this->assertEquals($url, $prompt->getShowSignal()->getOptions()['url']);
     }
 

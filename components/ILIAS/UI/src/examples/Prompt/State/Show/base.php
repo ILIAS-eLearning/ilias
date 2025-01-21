@@ -46,7 +46,7 @@ function base()
     }
 
     //build the prompt
-    $prompt = $factory->prompt()->standard($url_builder->buildURI());
+    $prompt = $factory->prompt()->standard($url_builder);
     $show_button = $factory->button()->standard('Show Prompt', $prompt->getShowSignal());
 
 
