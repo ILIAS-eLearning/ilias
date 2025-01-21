@@ -45,7 +45,7 @@ Id is ILIAS ID or unique identifier for this xml file
 	Id CDATA #REQUIRED
 	Type (Global | Local) #REQUIRED
 	Action (%relationshipAction;) "Assign"
-	
+
 >
 
 <!-- personal picture -->
@@ -57,7 +57,7 @@ Id is ILIAS ID or unique identifier for this xml file
                      %I_Encoding; >
 
 <!-- AuthMode -->
-<!ENTITY % A_Mode " type  (default | local | ldap | radius | shibboleth | cas | soap | script )  'default'">
+<!ENTITY % A_Mode " type  (default | local | ldap | radius | shibboleth | soap | script )  'default'">
 <!ELEMENT AuthMode (#PCDATA)>
 <!ATTLIST AuthMode %A_Mode;>
 
