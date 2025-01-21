@@ -31,6 +31,7 @@ use ILIAS\UI\Implementation\Component\Table\Action\Action;
 use ILIAS\UI\Implementation\Component\Input\ViewControl\Pagination;
 use ILIAS\UI\Implementation\Component\Input\NameSource;
 use Psr\Http\Message\ServerRequestInterface;
+use ILIAS\UI\URLBuilder;
 
 class Renderer extends AbstractComponentRenderer
 {
@@ -265,7 +266,7 @@ class Renderer extends AbstractComponentRenderer
         ServerRequestInterface $request,
         RendererInterface $default_renderer
     ): string {
-        $uri = $this->getDataFactory()->uri($request->getUri()->__toString());
+        $uri = new URLBuilder($this->getDataFactory()->uri($request->getUri()->__toString()));
         return $default_renderer->render(
             $this->getUIFactory()->prompt()->standard($uri)
         );

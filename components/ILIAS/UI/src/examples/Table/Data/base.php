@@ -123,19 +123,17 @@ function base()
             )
             ->withAsync()
             ,
+        /**
+         * A prompt Action will open a Prompt and load its url, expecting a Prompt State in return.
+         */
         'status' =>
             $f->table()->action()->standard(
                 'Status',
-                $url_builder->withParameter($action_parameter_token, "status"),
+                $f->prompt()->standard(
+                    $url_builder->withParameter($action_parameter_token, "status")
+                ),
                 $row_id_token
             )
-            /**
-             * A prompt Action will open a Prompt and load the Action's url
-             * expecting a Prompt State in return.
-             * You may not mix withAsync and withPrompt.
-             */
-            ->withPrompt(true)
-
     ];
 
 

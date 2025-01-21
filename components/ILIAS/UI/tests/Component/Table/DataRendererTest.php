@@ -137,7 +137,6 @@ class DataRendererTest extends TableTestBase
             ->method("standard")
             ->willReturn(
                 $this->mock_dialog
-                //$this->createMock(Component\Prompt\Prompt::class)
             );
         $factory = new class (
             $this->getTableFactory(),
@@ -221,7 +220,12 @@ class DataRendererTest extends TableTestBase
         $actual = $this->brutallyTrimHTML($closure('component_id'));
         $this->assertStringStartsWith($expected, $actual);
 
-        $action = $action->withAsync(false)->withPrompt();
+        $this->mock_dialog
+            ->expects($this->exactly(2))
+            ->method("getURLBuilder")
+            ->willReturn($builder);
+
+        $action = $f->standard('label', $this->mock_dialog, $token);
         $expected = $this->brutallyTrimHTML(
             'il.UI.table.data.get(\'component_id\').registerAction(\'action_id\', \'prompt\', new il.UI.core.URLBuilder(new URL("http://wwww.ilias.de?ref_id=1&namespace_param="), new Map([["namespace_param",new il.UI.core.URLBuilderToken(["namespace"], "param",'
         );

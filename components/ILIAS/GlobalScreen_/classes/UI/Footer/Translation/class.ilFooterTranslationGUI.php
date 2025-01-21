@@ -29,6 +29,7 @@ use ILIAS\GlobalScreen\UI\Footer\Translation\TranslationWorkflowForm;
 use ILIAS\GlobalScreen\UI\Footer\Translation\TranslationsRepository;
 use ILIAS\GlobalScreen\UI\Footer\Translation\TranslationsRepositoryDB;
 use ILIAS\Data\URI;
+use ILIAS\UI\URLBuilder;
 
 /**
  * @author            Fabian Schmid <fabian@sr.solutions>
@@ -100,7 +101,7 @@ final class ilFooterTranslationGUI
         }
 
         $prompt = $this->ui_factory->prompt()->standard(
-            $this->ui_handling->getHereAsURI(self::CMD_LANGUAGE_SELECTION)
+            new URLBuilder($this->ui_handling->getHereAsURI(self::CMD_LANGUAGE_SELECTION))
         );
 
         // Edit Button

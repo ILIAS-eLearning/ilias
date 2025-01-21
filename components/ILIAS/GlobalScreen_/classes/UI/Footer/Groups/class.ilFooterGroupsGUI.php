@@ -30,6 +30,7 @@ use ILIAS\GlobalScreen\UI\Footer\Entries\EntriesRepositoryDB;
 use ILIAS\GlobalScreen_\UI\UIHelper;
 use ILIAS\GlobalScreen\UI\Footer\Groups\GroupsRepository;
 use ILIAS\GlobalScreen\UI\Footer\Translation\TranslationsRepositoryDB;
+use ILIAS\UI\URLBuilder;
 
 /**
  * @author            Fabian Schmid <fabian@sr.solutions>
@@ -80,7 +81,7 @@ final class ilFooterGroupsGUI
         );
 
         $confirm_reset = $this->ui_factory->prompt()->standard(
-            $this->ui_handling->getHereAsURI(self::CMD_CONFIRM_RESET),
+            new URLBuilder($this->ui_handling->getHereAsURI(self::CMD_CONFIRM_RESET))
         );
 
         $this->dic->toolbar()->addComponent(

@@ -53,6 +53,11 @@ abstract class Prompt implements I\Prompt
         return $this->url_builder->buildURI();
     }
 
+    public function getURLBuilder(): URLBuilder
+    {
+        return $this->url_builder;
+    }
+
     public function getShowSignal(?URI $uri = null): Signal
     {
         $target = $uri ?? $this->getAsyncUrl();

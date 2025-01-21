@@ -52,10 +52,11 @@ function base()
 
         $f->table()->action()->standard(
             'open a prompt',
-            $url_builder->withParameter($action_token, "something_prompt"),
+            $f->prompt()->standard(
+                $url_builder->withParameter($action_token, "something_prompt")
+            ),
             $id_token
-        )->withPrompt(),
-
+        ),
     ];
 
     $table = getExampleTable($f)
@@ -88,7 +89,7 @@ function base()
 
             case 'something_prompt':
                 $message = $f->messageBox()->success('some message box in a prompt');
-                $response = $f->dialog()->response($message);
+                $response = $f->prompt()->state()->show($message);
                 echo($r->renderAsync($response));
                 exit();
 

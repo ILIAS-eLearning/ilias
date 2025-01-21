@@ -23,12 +23,13 @@ namespace ILIAS\UI\Implementation\Component\Table\Action;
 use ILIAS\UI\URLBuilder;
 use ILIAS\UI\URLBuilderToken;
 use ILIAS\UI\Component\Table\Action as I;
+use ILIAS\UI\Component\Prompt\Prompt;
 
 class Factory implements I\Factory
 {
     public function standard(
         string $label,
-        URLBuilder $url_builder,
+        URLBuilder | Prompt $url_builder,
         URLBuilderToken $row_id_parameter
     ): Standard {
         return new Standard($label, $url_builder, $row_id_parameter);
@@ -36,7 +37,7 @@ class Factory implements I\Factory
 
     public function single(
         string $label,
-        URLBuilder $url_builder,
+        URLBuilder | Prompt $url_builder,
         URLBuilderToken $row_id_parameter
     ): Single {
         return new Single($label, $url_builder, $row_id_parameter);
@@ -44,7 +45,7 @@ class Factory implements I\Factory
 
     public function multi(
         string $label,
-        URLBuilder $url_builder,
+        URLBuilder | Prompt $url_builder,
         URLBuilderToken $row_id_parameter
     ): Multi {
         return new Multi($label, $url_builder, $row_id_parameter);
