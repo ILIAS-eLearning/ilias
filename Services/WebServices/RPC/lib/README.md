@@ -34,6 +34,9 @@ On Debian-based systems try:
 ````shell
 > apt-get install php-curl php-xmlrpc openjdk-17-jdk-headless
 ````
+If you plan to use the RPC server for the generation of PDF documents,
+please install `openjdk-17-jre` or `openjdk-17-jdk`.
+
 Dependencies and the build process is managed via maven
 ```shell
 > apt-get install maven
@@ -45,7 +48,7 @@ Dependencies and the build process is managed via maven
 <a name="build-java-server"></a>
 ## Build the Java RPC Server
 ```shell
-> cd Services/WebServervices/RPC/lib
+> cd Services/WebServices/RPC/lib
 > mvn clean install
 ```
 To build/compile the jar file for older LTS release than v17, start the maven build process with the following parameters:
@@ -84,7 +87,7 @@ IliasIniPath = /var/www/html/ilias/ilias.ini.php
 ```
 
 - IpAddress: normally localhost is sufficient
-- Port: any free non pivileged port
+- Port: any free non privileged port
 - IndexPath: any directory with read/write access for the webserver user
 - LogFile: Directory must exist. Read/write access for the webserver is required
 - LogLevel: one of INFO, DEBUG, WARN, ERROR, FATAL
