@@ -173,7 +173,7 @@ class arFieldList
 
     protected function initRawFields(ActiveRecord $ar): void
     {
-        $regex = "/[ ]*\\* @(" . implode('|', self::$prefixes) . ")_([a-zA-Z0-9_]*)[ ]*([a-zA-Z0-9_]*)/u";
+        $regex = "/[\t ]*\\* @(" . implode('|', self::$prefixes) . ")_([a-zA-Z0-9_]+)[\t ]+([a-zA-Z0-9_]+)/u";
         $reflectionClass = new ReflectionClass($ar);
         $raw_fields = array();
         foreach ($reflectionClass->getProperties() as $property) {
