@@ -15,34 +15,33 @@
  ********************************************************************
  */
 
-import { expect } from 'chai';
-import { describe, it } from 'mocha';
-import URLBuilderToken from '../../resources/js/Core/src/core.URLBuilderToken';
+import { describe, it } from 'node:test';
+import { strict } from 'node:assert/strict';
+import URLBuilderToken from '../../resources/js/Core/src/core.URLBuilderToken.js';
 
 const URLBuilderTokenLength = 24;
 
 describe('URLBuilderToken is available', () => {
   it('URLBuilderToken', () => {
-    expect(URLBuilderToken).to.not.be.undefined;
+    strict.notEqual(URLBuilderToken, undefined);
   });
 });
 
 describe('URLBuilderToken Test', () => {
   it('constructor()', () => {
     const token = new URLBuilderToken(['testing'], 'name');
-    expect(token).to.be.an('object');
-    expect(token).to.be.instanceOf(URLBuilderToken);
+    strict.equal(token instanceof URLBuilderToken, true);
   });
 
   it('getName()', () => {
     const token = new URLBuilderToken(['testing'], 'name');
-    expect(token.getName()).to.eql('testing_name');
+    strict.equal(token.getName(), 'testing_name');
   });
 
   it('getToken()', () => {
     const token = new URLBuilderToken(['testing'], 'name');
-    expect(token.getToken()).to.not.be.empty;
-    expect(token.getToken()).to.be.a('string');
-    expect(token.getToken()).to.have.lengthOf(URLBuilderTokenLength);
+    strict.equal(typeof token.getToken() === 'string', true);
+    strict.notEqual(token.getToken(), '');
+    strict.equal(token.getToken().length, URLBuilderTokenLength);
   });
 });
