@@ -1416,7 +1416,7 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
             $rowCol = 'ilPostingNeedsActivation';
         } elseif ($this->objProperties->getMarkModeratorPosts()) {
             $isAuthorModerator = ilForum::_isModerator($this->object->getRefId(), $node->getPosAuthorId());
-            if ($isAuthorModerator && $node->isAuthorModerator() === null) {
+            if ($isAuthorModerator && !$node->isAuthorModerator()) {
                 $rowCol = 'ilModeratorPosting';
             } elseif ($node->isAuthorModerator()) {
                 $rowCol = 'ilModeratorPosting';

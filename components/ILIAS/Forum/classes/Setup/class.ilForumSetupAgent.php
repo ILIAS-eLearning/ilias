@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Forum\Setup\IsAuthorModeratorBoolMigration;
 use ILIAS\Setup;
 use ILIAS\Refinery;
 
@@ -53,7 +54,10 @@ class ilForumSetupAgent implements Setup\Agent
             ),
             new ilDatabaseUpdateStepsExecutedObjective(
                 new ilForumDatabaseUpdateSteps9()
-            )
+            ),
+            new ilDatabaseUpdateStepsExecutedObjective(
+                new IsAuthorModeratorBoolMigration()
+            ),
         );
     }
 

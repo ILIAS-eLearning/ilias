@@ -48,7 +48,7 @@ class ilForumPost
     private ?ilForumTopic $objThread = null;
     private readonly ilDBInterface $db;
     private bool $is_moderator = false;
-    private ?bool $is_author_moderator = false;
+    private bool $is_author_moderator = false;
     private bool $post_read = false;
     private int $pos_author_id = 0;
     private ?string $post_activation_date = null;
@@ -564,12 +564,12 @@ class ilForumPost
         return $this->pos_author_id;
     }
 
-    public function isAuthorModerator(): ?bool
+    public function isAuthorModerator(): bool
     {
         return $this->is_author_moderator;
     }
 
-    public function setIsAuthorModerator(?bool $is_author_moderator): void
+    public function setIsAuthorModerator(bool $is_author_moderator): void
     {
         $this->is_author_moderator = $is_author_moderator;
     }

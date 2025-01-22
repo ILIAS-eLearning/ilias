@@ -110,7 +110,7 @@ class ilForumExportGUI
         $tpl->setCurrentBlock('posts_row');
 
         if (ilForumProperties::getInstance($this->ilObjDataCache->lookupObjId($this->ref_id))->getMarkModeratorPosts()) {
-            if ($post->isAuthorModerator() === null && $is_moderator = ilForum::_isModerator(
+            if (!$post->isAuthorModerator() && ilForum::_isModerator(
                 $this->ref_id,
                 $post->getPosAuthorId()
             )) {
