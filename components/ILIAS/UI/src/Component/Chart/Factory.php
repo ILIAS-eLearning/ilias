@@ -77,6 +77,30 @@ interface Factory
      */
     public function progressMeter(): ProgressMeter\Factory;
 
+    /**
+     * ---
+     * description:
+     *   purpose: >
+     *     Progress Bar are used to display a progress of a duration or a amount of items.
+     *   composition: >
+     *     Progress Bars are composed of one horizontal bar and an optional textual representation of the progress in
+     *     percentage.
+     *     The bars change between three colours to represent whether the progress is still running,
+     *     has been completed or has failed
+     *
+     * context:
+     *     - Progress bars are used wherever people need to be kept up to date on the progress of an action.
+     *
+     * rules:
+     *   composition:
+     *     1: Progress Meters MUST contain a maximum value. It MUST be numeric and represents the maximum value, defaults to 100%.
+     *     2: Progress Meters MUST contain a current value. It MUST be a numeric value between 0 and the maximum.
+     *
+     * ---
+     * @return \ILIAS\UI\Component\Chart\ProgressBar\Factory
+     */
+    public function progressBar(): ProgressBar\Factory;
+
 
     /**
      * ---
