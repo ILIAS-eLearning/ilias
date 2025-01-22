@@ -49,6 +49,7 @@
 		"ext-xml": "*",
 		"ext-zip": "*",
 		"ext-imagick": "*",
+		"ifsnop/mysqldump-php": "2.11",
 	},
 	"require-dev": {
 	},
