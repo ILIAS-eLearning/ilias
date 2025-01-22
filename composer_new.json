@@ -49,6 +49,7 @@
 		"ext-xml": "*",
 		"ext-zip": "*",
 		"ext-imagick": "*",
+		"ezyang/htmlpurifier": "^4.18"
 	},
 	"require-dev": {
 	},
