@@ -8,6 +8,7 @@
     "test": "tests"
   },
   "dependencies": {
+    "@uppy/core": "^4.2.3",
   },
   "devDependencies": {
   },
