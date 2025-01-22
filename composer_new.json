@@ -51,6 +51,7 @@
 		"ext-imagick": "*",
 	},
 	"require-dev": {
+		"friendsofphp/php-cs-fixer": "^3.65",
 	},
 	"autoload": {
 		"psr-4" : {
