@@ -89,8 +89,8 @@ class Renderer extends AbstractComponentRenderer
             $tpl->setVariable('ACTIONS_SEGMENT', $default_renderer->render($actions));
         }
 
-        $tpl->setVariable('SEGMENT_TITLLE', $segment->getSegmentTitle());
-        $tpl->setVariable('SEGMENT_CONTENTS', $segment->getSegmentContent());
+        $tpl->setVariable('SEGMENT', $default_renderer->render($segment));
+
         return $tpl->get();
     }
 }

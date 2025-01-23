@@ -251,8 +251,8 @@ This should be updated to e.g. an event listener attached to the document,
 which either calls the dropdown's show method if the event target is the desired 
 dropdown, or the hide method if the target is something else.
 
-### Move Breadcrumbs into Navigation (beginner, 2h)
-The "breadcrumbs" top section should be moved into navigation.
+### Move Components into Navigation (beginner, 2h)
+The top sections "breadcrumbs" and "menu" should both be moved into navigation.
 
 
 ## Long Term

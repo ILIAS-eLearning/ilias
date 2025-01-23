@@ -71,7 +71,10 @@ class Renderer extends AbstractComponentRenderer
 
     protected function renderLegacySegment(LegacySegment $component, RendererInterface $default_renderer): string
     {
-        return 'a legacy segment is not rendered by itself, it\'s used with sequence navigation';
+        $tpl = $this->getTemplate('tpl.sequence_segment.html', true, true);
+        $tpl->setVariable('SEGMENT_TITLE', $component->getSegmentTitle());
+        $tpl->setVariable('SEGMENT_CONTENTS', $component->getSegmentContent());
+        return $tpl->get();
     }
 
 }

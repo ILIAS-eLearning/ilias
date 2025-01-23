@@ -26,9 +26,9 @@ interface Factory
      * ---
      * description:
      *   purpose: >
-     *      The Sequence Navigation is used to move through a series of elements
-     *      in a particular order.
-     *      Elements (or the amount of) may change during navigation, however,
+     *      The Sequence Navigation is used to move through a series of
+     *      content segments in a particular order.
+     *      Segments (or the amount of) may change during navigation, however,
      *      they will remain in a consecutive order.
      *   composition: >
      *      Sequence Navigation consists of several groups of buttons, mainly.
