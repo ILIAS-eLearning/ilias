@@ -1,8 +1,22 @@
 <?php
 
-declare(strict_types=1);
-/* Copyright (c) 1998-2009 ILIAS open source, Extended GPL, see docs/LICENSE */
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
 
+declare(strict_types=1);
 
 /**
  * Wrapper class for soap_client
@@ -18,6 +32,7 @@ class ilSoapClient
 
     private ilLogger $log;
     private ilSetting $settings;
+    private ilIniFile $ilias_ini;
     private ?SoapClient $client = null;
     private string $uri;
     private bool $use_wsdl = true;
@@ -30,6 +45,7 @@ class ilSoapClient
         global $DIC;
 
         $this->settings = $DIC->settings();
+        $this->ilias_ini = $DIC->iliasIni();
         $this->log = $DIC->logger()->wsrv();
         $this->uri = $a_uri;
         $this->use_wsdl = true;
@@ -79,7 +95,7 @@ class ilSoapClient
 
     public function init(): bool
     {
-        $internal_path = $this->settings->get('soap_internal_wsdl_path');
+        $internal_path = $this->readIniValue('webservices', 'soap_internal_wsdl_path', '');
         if (trim($this->getServer()) === '') {
             if ($internal_path) {
                 $this->uri = $internal_path;
@@ -103,9 +119,21 @@ class ilSoapClient
                     'connection_timeout' => $this->getTimeout(),
                     'stream_context' => $this->uri === $internal_path ? stream_context_create([
                         'ssl' => [
-                            'verify_peer' => (bool) $this->settings->get('soap_internal_wsdl_verify_peer', '1'),
-                            'verify_peer_name' => (bool) $this->settings->get('soap_internal_wsdl_verify_peer_name', '1'),
-                            'allow_self_signed' => (bool) $this->settings->get('soap_internal_wsdl_allow_self_signed', ''),
+                            'verify_peer' => (bool) $this->readIniValue(
+                                'webservices',
+                                'soap_internal_wsdl_verify_peer',
+                                false
+                            ),
+                            'verify_peer_name' => (bool) $this->readIniValue(
+                                'webservices',
+                                'soap_internal_wsdl_verify_peer_name',
+                                false
+                            ),
+                            'allow_self_signed' => (bool) $this->readIniValue(
+                                'webservices',
+                                'soap_internal_wsdl_allow_self_signed',
+                                false
+                            ),
                         ]
                     ]) : null
                 )
@@ -172,5 +200,11 @@ class ilSoapClient
         }
 
         return false;
+    }
+
+    protected function readIniValue(string $group, string $var_name, string|bool|int $default_value): string|bool|int
+    {
+        $value = $this->ilias_ini->readVariable($group, $var_name);
+        return ($value === '') ? $default_value : $value;
     }
 }
