@@ -13,7 +13,11 @@ namespace ILIAS\UI\examples\Image\Responsive;
  *   Example showing different card sizes which use an image with additional
  *   high resolution sources. The image defaults to the smallest version of
  *   the image (144px wide) and loads the next bigger version for different
- *   breakpoints (min-widths). The effect is best seen on desktop devices.
+ *   breakpoints (min-widths). The effect is best seen on desktop devices:
+ *   Select any browser size (small to medium to extra-large), reload the
+ *   page and check the source (src) of the image in the browser's developer
+ *   tools.
+ *
  * ---
  */
 function with_additional_high_resolution_source(): string
