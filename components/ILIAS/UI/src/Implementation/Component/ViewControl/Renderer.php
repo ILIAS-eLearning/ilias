@@ -160,10 +160,8 @@ class Renderer extends AbstractComponentRenderer
             );
 
         $id = $this->bindJavaScript($component);
-        if (!$id) {
-            $id = $this->createId();
-        }
         $tpl->setVariable("ID", $id);
+        $tpl->setVariable("ID_MENU", $id . '_ctrl');
 
         $options = $component->getOptions();
         $items = [];

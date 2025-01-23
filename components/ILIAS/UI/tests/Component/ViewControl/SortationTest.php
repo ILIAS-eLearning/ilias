@@ -83,15 +83,15 @@ class SortationTest extends ILIAS_UI_TestBase
         $s = $f->sortation($this->options, 'date_desc');
 
         $expected = <<<EOT
-<div class="dropdown il-viewcontrol il-viewcontrol-sortation l-bar__element">
-    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-label="sortation" aria-haspopup="true" aria-expanded="false" aria-controls="_ctrl">
+<div class="dropdown il-viewcontrol il-viewcontrol-sortation l-bar__element" id="id_1">
+    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-label="sortation" aria-haspopup="true" aria-expanded="false" aria-controls="id_1_ctrl">
         <span class="label">vc_sort Most Recent</span>
         <span class="caret"></span>
     </button>
-    <ul id="_ctrl" class="dropdown-menu">
-        <li><button class="btn btn-link" data-action="?sortation=internal_rating" id="id_1">Best</button></li>
-        <li class="selected"><button class="btn btn-link" data-action="?sortation=date_desc" id="id_2">Most Recent</button></li>
-        <li><button class="btn btn-link" data-action="?sortation=date_asc" id="id_3">Oldest</button></li>
+    <ul id="id_1_ctrl" class="dropdown-menu">
+        <li><button class="btn btn-link" data-action="?sortation=internal_rating" id="id_2">Best</button></li>
+        <li class="selected"><button class="btn btn-link" data-action="?sortation=date_desc" id="id_3">Most Recent</button></li>
+        <li><button class="btn btn-link" data-action="?sortation=date_asc" id="id_4">Oldest</button></li>
     </ul>
 </div>
 EOT;
@@ -107,15 +107,15 @@ EOT;
             ->withSelected('date_desc');
 
         $expected = <<<EOT
-<div class="dropdown il-viewcontrol il-viewcontrol-sortation l-bar__element">
-    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-label="sortation" aria-haspopup="true" aria-expanded="false" aria-controls="_ctrl">
+<div class="dropdown il-viewcontrol il-viewcontrol-sortation l-bar__element" id="id_1">
+    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-label="sortation" aria-haspopup="true" aria-expanded="false" aria-controls="id_1_ctrl">
         <span class="label">vc_sort Most Recent</span>
         <span class="caret"></span>
     </button>
-    <ul id="_ctrl" class="dropdown-menu">
-        <li><button class="btn btn-link" data-action="?sortation=internal_rating" id="id_1">Best</button></li>
-        <li class="selected"><button class="btn btn-link" data-action="?sortation=date_desc" id="id_2">Most Recent</button></li>
-        <li><button class="btn btn-link" data-action="?sortation=date_asc" id="id_3">Oldest</button></li>
+    <ul id="id_1_ctrl" class="dropdown-menu">
+        <li><button class="btn btn-link" data-action="?sortation=internal_rating" id="id_2">Best</button></li>
+        <li class="selected"><button class="btn btn-link" data-action="?sortation=date_desc" id="id_3">Most Recent</button></li>
+        <li><button class="btn btn-link" data-action="?sortation=date_asc" id="id_4">Oldest</button></li>
     </ul>
 </div>
 EOT;
