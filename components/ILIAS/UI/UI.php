@@ -460,7 +460,7 @@ class UI implements Component\Component
             new UI\Implementation\Component\Navigation\Factory(
                 $pull[Data\Factory::class],
                 $pull[Refinery\Factory::class],
-                $use[UI\Component\Table\Storage::class],
+                $use[UI\Storage::class],
             );
 
         $internal[UI\Implementation\DefaultRenderer::class] = static fn() =>
