@@ -24,12 +24,15 @@ use ILIAS\UI\Component as C;
 use ILIAS\Data\Factory as DataFactory;
 use ILIAS\Refinery\Constraint;
 use Closure;
+use ILIAS\UI\Implementation\Component\Input\Searchable;
 
 /**
  * This implements the multi-select input.
  */
-class MultiSelect extends FormInput implements C\Input\Field\MultiSelect
+class MultiSelect extends FormInput implements C\Input\Field\MultiSelect, C\Input\Field\Searchable
 {
+    use Searchable;
+
     /**
      * @var array <string,string> {$value => $label}
      */

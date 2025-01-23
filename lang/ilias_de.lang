@@ -17344,6 +17344,14 @@ ui#:#ui_link_url#:#URL
 ui#:#ui_md_input_edit#:#Bearbeiten
 ui#:#ui_md_input_view#:#Vorschau
 ui#:#ui_pagination_unlimited#:#Unbegrenzt
+ui#:#ui_search_context_clear_search#:#Zurücksetzen
+ui#:#ui_search_context_filtered_results_aria_label#:#Auswahlliste (könnte zugeklappt oder durch Suche gefiltert sein)
+ui#:#ui_search_context_no_match#:#Es gibt keine Übereinstimmung mit dem Suchbegriff.
+ui#:#ui_search_context_no_selection#:#Es wurde keine Auswahl getroffen.
+ui#:#ui_search_context_screen_reader_hint#:#Durch die Eingabe eines Suchbegriffes wird die nachfolgende Auswahlliste gefiltert.
+ui#:#ui_search_context_search_in#:#Suche
+ui#:#ui_search_context_show_all_options#:#Zeige alle Optionen
+ui#:#ui_search_context_show_less#:#Weniger anzeigen
 ui#:#ui_select_dropdown_label#:#Bitte auswählen
 ui#:#ui_table_no_records#:#Keine Einträge
 ui#:#ui_transcription#:#Abschrift

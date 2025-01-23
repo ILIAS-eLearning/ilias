@@ -429,12 +429,23 @@ interface Factory
      * description:
      *   purpose: >
      *     A Radio Input is used to depict a choice of options excluding each other.
+     *     If a long list 5 or more choices is given, you should use a Radio with Searchable (see examples).
      *   composition: >
      *     The Radio is considered as one field with a label and a number of
      *     options. Each option in turn bears a label in form of a positive statement.
+     *     If the with Searchable parameter is set, there is a toggle button to expand and collapse the Radio list.
+     *     An expanded Radio with Searchable also shows a searchbar with a 'clear search' button.
      *   effect: >
      *     If used in a form, each option of a Radio may open a Dependant Section (formerly known
      *     as Sub Form).
+     *     A Radio with Searchable can be expanded and collapsed.
+     *     When collapsed, it only shows the currently selected options and does not react to inputs.
+     *     When the toggle is clicked to expand, the Radio list shows all choices in a scrollable box and takes inputs.
+     *     It then also shows a searchbar which instantly filters through the option list when typing any text input.
+     *     After any search input has been given, the list can be reset to be unfiltered by clicking a button.
+     *     Collapsing the Radio with Search also resets the filter.
+     *     Choosing an option in the Radio with Searchable makes the picked choice jump to the first position.
+     *     If the list of choices is scrollable it then also scrolls to the top.
      *   rivals:
      *     Checkbox Field: Use a Checkbox Field for a binary yes/no choice.
      *     Select: >
@@ -446,7 +457,7 @@ interface Factory
      *   usage:
      *     1: >
      *       A Radio Input SHOULD contain 3 to 5 options.
-     *       If there are more, the Select Input might be the better option.
+     *       If there are more, consider using the Radio with Searchable or the Select Input.
      *     2: >
      *       Radios MAY also be used to select between two options
      *       where one is not automatically the inverse of the other
@@ -471,10 +482,19 @@ interface Factory
      * description:
      *   purpose: >
      *     A Multi Select is used to allow users to pick several options from a list.
+     *     If a long list 5 or more choices is given, you should use a Multi Select with Searchable (see examples).
      *   composition: >
      *     The Multi Select field will render labeled checkboxes according to given options.
+     *     If the with Searchable parameter is set, there is a toggle button to expand and collapse the Radio list.
+     *     An expanded Multi Select with Searchable also shows a searchbar with a 'clear search' button.
      *   effect: >
-     *
+     *     A Multi Select with Searchable can be expanded and collapsed.
+     *     When collapsed, it only shows the currently selected options and does not react to inputs.
+     *     When the toggle is clicked to expand, the Multi Select list shows all choices in a scrollable box and takes inputs.
+     *     It then also shows a searchbar which instantly filters through the option list when typing any text input.
+     *     After any search input has been given, the list can be reset to be unfiltered by clicking a button.
+     *     Collapsing the Multi Select with Search also resets the filter.
+     *     Choosing an option in the Multi Select with Searchable makes the picked choice jump to the top.
      *   rivals:
      *     Checkbox Field: Use a Checkbox Field for a binary yes/no choice.
      *     Tag Field: Use a Tag Input when the user is able to extend the list of given options.

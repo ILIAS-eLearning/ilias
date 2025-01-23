@@ -25,8 +25,9 @@
  */
 
 import il from 'ilias';
-import TextareaFactory from './Textarea/textarea.factory';
-import MarkdownFactory from './Markdown/markdown.factory';
+import TextareaFactory from './Textarea/textarea.factory.js';
+import MarkdownFactory from './Markdown/markdown.factory.js';
+import SearchableInputContextFactory from './SearchableContext/searchablecontext.factory.js';
 
 il.UI = il.UI || {};
 il.UI.Input = il.UI.Input || {};
@@ -34,4 +35,5 @@ il.UI.Input = il.UI.Input || {};
 (function (Input) {
   Input.textarea = new TextareaFactory();
   Input.markdown = new MarkdownFactory();
+  Input.searchableinputcontext = new SearchableInputContextFactory();
 }(il.UI.Input));
