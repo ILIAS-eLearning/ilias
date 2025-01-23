@@ -1378,7 +1378,7 @@ assessment#:#tst_eval_total_passed_average_points#:#Durchschnittliche Punktezahl
 assessment#:#tst_eval_total_passed_average_time#:#Mittlere Bearbeitungsdauer aller bestandenen Tests
 assessment#:#tst_eval_total_persons#:#Gesamtzahl der Personen, die den Test gestartet haben
 assessment#:#tst_exam_access_code#:#Zugangscode
-assessment#:#tst_exam_access_code_label#:#Geben Sie den Zugangscode ein, um Ihren bereits begonnenen Test fortzusetzen.
+assessment#:#tst_exam_access_code_label#:#Geben Sie den Zugangscode ein, um Ihren bereits begonnenen Test fortzusetzen. Lassen Sie das Feld leer, um einen neuen Testdurchlauf zu starten.
 assessment#:#tst_exam_conditions#:#Prüfungsbedingungen
 assessment#:#tst_exam_conditions_label#:#Ankreuzen, um die Bedingungen zu akzeptieren.
 assessment#:#tst_exam_conditions_not_checked_message#:#Sie müssen die Prüfungsbedingungen akzeptieren!
@@ -9784,6 +9784,8 @@ file#:#preview_caption#:#Vorschau %svon %s
 file#:#preview_image_size_info#:#Die Vorschauversionen der Bilder werden je nach Bedarf verkleinert oder vergrößert, so dass ihre längste Seite der hier eingegebenen Länge (in px) entspricht.
 file#:#preview_persisting#:#Vorschaubilder speichern
 file#:#preview_persisting_info#:#Vorschaubilder werden generiert und gespeichert. Sie müssen nicht mehr bei jedem Aufruf neu erzeugt werden. Das verbessert die Performanz.
+file#:#previews_for_tiles#:#Kachelbilder
+file#:#previews_for_tiles_info#:#Verwende Vorschaubilder für Kacheln.
 file#:#publish_before_delete#:#Version(en) konnte(n) nicht gelöscht werden, da ein noch unveröffentlichter Entwurf existiert.
 file#:#replace_file_info#:#Alle früheren Dateiversionen werden gelöscht.
 file#:#resource_id#:#Ressourcen ID
@@ -10771,6 +10773,7 @@ ldoc#:#ldoc_form_edit_doc_head#:#Dokument bearbeiten
 ldoc#:#ldoc_form_new_doc_head#:#Dokument erstellen
 ldoc#:#ldoc_last_modified#:#Letzte Änderung
 ldoc#:#ldoc_ldoc_settings#:#Einstellungen
+ldoc#:#ldoc_order_invalid#:#Bitte geben Sie eine Zahl für die Sortierung ein
 ldoc#:#ldoc_period#:#Zeitraum
 ldoc#:#ldoc_period_from#:#Von
 ldoc#:#ldoc_period_until#:#Bis
@@ -12817,6 +12820,7 @@ obj#:#copy_container_page_yes_label#:#Seitengestaltung übernehmen
 obj#:#custom_icon#:#Angepasstes Icon
 obj#:#edit_availability_period#:#Zeitliche Verfügbarkeit
 obj#:#edit_questions#:#Fragen bearbeiten
+obj#:#multiple_reference_deletion_info#:#Für die folgenden Objekte existieren weitere Referenzen.
 obj#:#no_objects_selected#:#Es muss mindestens ein Objekt ausgewählt werden.
 obj#:#obj_activate_content_lang#:#Mehrsprachigkeit für die Bearbeitung aktivieren
 obj#:#obj_activate_multilang#:#Mehrsprachigkeit aktivieren
@@ -14181,6 +14185,7 @@ rbac#:#moderate_frm#:#Moderieren
 rbac#:#msg_anonymous_cannot_be_assigned#:#Der anonyme Benutzer darf keiner Rolle zugewiesen werden.
 rbac#:#msg_no_roles_of_type#:#Keine Rollen vorhanden mit der gewählten Filtereinstellung
 rbac#:#news_add_news#:#Neuigkeiten erstellen
+rbac#:#no_corresponding_roles#:#Es sind keine passenden Rollen vorhanden.
 rbac#:#nots_edit_permissions#:#Rechteeinstellungen der Administration für Notizen ändern
 rbac#:#nots_read#:#Lesezugriff auf Administration für Notizen
 rbac#:#nots_visible#:#Administration für Notizen ist sichtbar.

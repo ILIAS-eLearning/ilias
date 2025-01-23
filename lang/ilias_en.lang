@@ -1378,7 +1378,7 @@ assessment#:#tst_eval_total_passed_average_points#:#Average points of passed tes
 assessment#:#tst_eval_total_passed_average_time#:#Average processing time of all passed tests
 assessment#:#tst_eval_total_persons#:#Total number of participants who started the test
 assessment#:#tst_exam_access_code#:#Access Code
-assessment#:#tst_exam_access_code_label#:#Enter access code to continue your already started test.
+assessment#:#tst_exam_access_code_label#:#Enter access code to continue your already started test. Leave the field empty to start a new test run.
 assessment#:#tst_exam_conditions#:#Exam Conditions
 assessment#:#tst_exam_conditions_label#:#Check to accept the conditions.
 assessment#:#tst_exam_conditions_not_checked_message#:#You need to accept the exam conditions!
@@ -9784,6 +9784,8 @@ file#:#preview_caption#:#Preview %sof %s
 file#:#preview_image_size_info#:#The preview versions of images will be downscaled or upscaled as appropriate, so that their longest side is the length (in px) entered here.
 file#:#preview_persisting#:#Persistent Preview Images
 file#:#preview_persisting_info#:#Generated preview images will be stored by ILIAS and used from then on each time the preview icon for that file is clicked on. If deactivated, previews will be generated anew each time.
+file#:#previews_for_tiles#:#Tiles
+file#:#previews_for_tiles_info#:#Use Preview for Tiles where possible.
 file#:#publish_before_delete#:#It was not possible to delete any of the existing versions because an unpublished draft exists.
 file#:#replace_file_info#:#All previous file versions will be deleted.
 file#:#resource_id#:#Resource ID
@@ -10771,6 +10773,7 @@ ldoc#:#ldoc_form_edit_doc_head#:#Edit Document
 ldoc#:#ldoc_form_new_doc_head#:#Create Document
 ldoc#:#ldoc_last_modified#:#Last Change
 ldoc#:#ldoc_ldoc_settings#:#Settings
+ldoc#:#ldoc_order_invalid#:#Please enter a number for the order
 ldoc#:#ldoc_period#:#Period
 ldoc#:#ldoc_period_from#:#From
 ldoc#:#ldoc_period_until#:#Until
@@ -12817,6 +12820,7 @@ obj#:#copy_container_page_yes_label#:#Copy Content Page
 obj#:#custom_icon#:#Custom Icon
 obj#:#edit_availability_period#:#Availability Period
 obj#:#edit_questions#:#Edit Questions
+obj#:#multiple_reference_deletion_info#:#Further references exist for the following objects.
 obj#:#no_objects_selected#:#At least one object needs to be selected.
 obj#:#obj_activate_content_lang#:#Activate Translation for Page Editing
 obj#:#obj_activate_multilang#:#Activate Multilingualism
@@ -14181,6 +14185,7 @@ rbac#:#moderate_frm#:#Moderate
 rbac#:#msg_anonymous_cannot_be_assigned#:#Anonymous cannot be assigned to a role.
 rbac#:#msg_no_roles_of_type#:#No Roles available with selected filter setting
 rbac#:#news_add_news#:#Add News
+rbac#:#no_corresponding_roles#:#No corresponding roles could be found.
 rbac#:#nots_edit_permissions#:#User can change permission settings of Notes administration.
 rbac#:#nots_read#:#User has read access to Notes administration.
 rbac#:#nots_visible#:#Administration of Notes is visible.
