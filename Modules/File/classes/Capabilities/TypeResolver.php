@@ -16,17 +16,16 @@
  *
  *********************************************************************/
 
-
 declare(strict_types=1);
 
-class ilDclCreateViewDefinitionConfig extends ilPageConfig
+namespace ILIAS\File\Capabilities;
+
+/**
+ * @author Fabian Schmid <fabian@sr.solutions>
+ */
+interface TypeResolver
 {
-    public function init(): void
-    {
-        // config
-        $this->setPreventHTMLUnmasking(true);
-        $this->setEnableInternalLinks(false);
-        $this->setEnableWikiLinks(false);
-        $this->setEnableActivation(false);
-    }
+    public function resolveType(int $ref_id): string;
+    public function resolveTypeByObjectId(int $object_id): string;
+
 }

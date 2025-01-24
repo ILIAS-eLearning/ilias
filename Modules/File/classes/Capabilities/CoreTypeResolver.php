@@ -18,17 +18,21 @@
 
 declare(strict_types=1);
 
-class ilDclEditViewDefinitionConfig extends ilPageConfig
+namespace ILIAS\File\Capabilities;
+
+/**
+ * @author Fabian Schmid <fabian@sr.solutions>
+ */
+class CoreTypeResolver implements TypeResolver
 {
-    /**
-     * Init
-     */
-    public function init(): void
+    public function resolveType(int $ref_id): string
     {
-        // config
-        $this->setPreventHTMLUnmasking(true);
-        $this->setEnableInternalLinks(false);
-        $this->setEnableWikiLinks(false);
-        $this->setEnableActivation(false);
+        return \ilObject2::_lookupType($ref_id, true);
     }
+
+    public function resolveTypeByObjectId(int $object_id): string
+    {
+        return \ilObject2::_lookupType($object_id, false);
+    }
+
 }
