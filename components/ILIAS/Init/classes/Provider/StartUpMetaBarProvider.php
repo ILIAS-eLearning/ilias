@@ -69,7 +69,7 @@ class StartUpMetaBarProvider extends AbstractStaticMetaBarProvider
                 ) . '&cmd=force_login&lang=' . $current_language
             )
             ->withSymbol($login_glyph)
-            ->withPosition(2)
+            ->withPosition(3)
             ->withTitle($txt('log_in'))
             ->withAvailableCallable(function () {
                 return !$this->isUserLoggedIn();
