@@ -20,11 +20,11 @@ declare(strict_types=1);
 
 namespace ILIAS\UI\Implementation\Component\Legacy;
 
-use ILIAS\UI\Component\Legacy\LegacySegment as ISegment;
+use ILIAS\UI\Component\Legacy\Segment as ISegment;
 use ILIAS\UI\Implementation\Component\ComponentHelper;
 use ILIAS\UI\Component\Button;
 
-class LegacySegment implements ISegment
+class Segment implements ISegment
 {
     use ComponentHelper;
 

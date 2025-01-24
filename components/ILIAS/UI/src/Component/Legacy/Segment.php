@@ -21,10 +21,10 @@ declare(strict_types=1);
 namespace ILIAS\UI\Component\Legacy;
 
 use ILIAS\UI\Component\Component;
-use ILIAS\UI\Component\Navigation\Sequence\Segment;
+use ILIAS\UI\Component\Navigation\Sequence\Segment as NavigationSegment;
 use ILIAS\UI\Component\Button;
 
-interface LegacySegment extends Component, Segment
+interface Segment extends Component, NavigationSegment
 {
     /**
      * Segments MAY add actions to the sequence.

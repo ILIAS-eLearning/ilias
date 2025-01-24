@@ -37,17 +37,17 @@ class Renderer extends AbstractComponentRenderer
     {
 
         if ($component instanceof Component\Legacy\Content) {
-            return $this->renderLegacyContent($component, $default_renderer);
+            return $this->renderContent($component, $default_renderer);
         }
-        if ($component instanceof Component\Legacy\LegacySegment) {
-            return $this->renderLegacySegment($component, $default_renderer);
+        if ($component instanceof Component\Legacy\Segment) {
+            return $this->renderSegment($component, $default_renderer);
         }
 
         $this->cannotHandleComponent($component);
 
     }
 
-    protected function renderLegacyContent(Content $component, RendererInterface $default_renderer): string
+    protected function renderContent(Content $component, RendererInterface $default_renderer): string
     {
         $component = $this->registerSignals($component);
         $this->bindJavaScript($component);
@@ -69,12 +69,9 @@ class Renderer extends AbstractComponentRenderer
         });
     }
 
-    protected function renderLegacySegment(LegacySegment $component, RendererInterface $default_renderer): string
+    protected function renderSegment(Segment $component, RendererInterface $default_renderer): string
     {
-        $tpl = $this->getTemplate('tpl.sequence_segment.html', true, true);
-        $tpl->setVariable('SEGMENT_TITLE', $component->getSegmentTitle());
-        $tpl->setVariable('SEGMENT_CONTENTS', $component->getSegmentContent());
-        return $tpl->get();
+        return $component->getSegmentContent();
     }
 
 }
