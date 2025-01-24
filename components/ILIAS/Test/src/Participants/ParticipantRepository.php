@@ -20,7 +20,6 @@ declare(strict_types=1);
 
 namespace ILIAS\Test\Participants;
 
-use ilDBConstants;
 use ILIAS\Data\Order;
 use ILIAS\Data\Range;
 
@@ -425,7 +424,7 @@ class ParticipantRepository
             'user_fi',
             $user_ids,
             false,
-            ilDBConstants::T_INTEGER,
+            \ilDBConstants::T_INTEGER,
         );
         $this->database->manipulate("DELETE FROM tst_addtime WHERE test_fi = $test_id AND $in_user_fis");
     }
