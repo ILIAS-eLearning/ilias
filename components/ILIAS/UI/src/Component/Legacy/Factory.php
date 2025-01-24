@@ -66,7 +66,7 @@ interface Factory
      * ---
      * @param string $title the title of the legacy segment
      * @param string $content the content of the legacy segment
-     * @return \ILIAS\UI\Component\Legacy\LegacySegment
+     * @return \ILIAS\UI\Component\Legacy\Segment
      */
     public function segment(string $title, string $content): Segment;
 
