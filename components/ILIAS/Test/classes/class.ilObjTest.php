@@ -1178,7 +1178,7 @@ class ilObjTest extends ilObject
                 static fn($active_id) => $participant_data->getUserIdByActiveId($active_id),
                 $participant_data->getAnonymousActiveIds(),
             );
-            $this->removeAdditionalTimesByUserIds($user_ids);
+            $this->participant_repository->removeExtraTimeByUserId($this->getTestId(), $user_ids);
         }
 
         if ($participant_data->getUserIds() !== []) {
@@ -1189,7 +1189,7 @@ class ilObjTest extends ilObject
                 $test_lp->resetLPDataForUserIds($participant_data->getUserIds(), false);
             }
 
-            $this->removeAdditionalTimesByUserIds($participant_data->getUserIds());
+            $this->participant_repository->removeExtraTimeByUserId($this->getTestId(), $participant_data->getUserIds());
         }
 
         if ($participant_data->getActiveIds() !== []) {
@@ -1199,7 +1199,7 @@ class ilObjTest extends ilObject
                 static fn($active_id) => $participant_data->getUserIdByActiveId($active_id),
                 $participant_data->getActiveIds(),
             );
-            $this->removeAdditionalTimesByUserIds($user_ids);
+            $this->participant_repository->removeExtraTimeByUserId($this->getTestId(), $user_ids);
         }
 
         if ($this->logger->isLoggingEnabled()) {
@@ -1215,17 +1215,6 @@ class ilObjTest extends ilObject
                 )
             );
         }
-    }
-
-    private function removeAdditionalTimesByUserIds(array $user_ids): void
-    {
-        $in_user_fis = $this->db->in(
-            'user_fi',
-            $user_ids,
-            false,
-            ilDBConstants::T_INTEGER,
-        );
-        $this->db->manipulate("DELETE FROM tst_addtime WHERE test_fi = {$this->getTestId()} AND $in_user_fis");
     }
 
     public function removeTestResultsByUserIds(array $user_ids): void
