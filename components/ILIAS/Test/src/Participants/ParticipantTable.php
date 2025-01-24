@@ -237,7 +237,7 @@ class ParticipantTable implements DataRetrieval
             'id_of_attempt' => static fn(
                 Participant $a,
                 Participant $b
-            ) => $a->getMatriculation() <=> $b->getMatriculation()
+            ) => $a->getAttemptOverviewInformation()?->getExamId() <=> $b->getAttemptOverviewInformation()?->getExamId()
         ];
     }
 
