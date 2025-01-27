@@ -25,7 +25,6 @@ use GuzzleHttp\Psr7\ServerRequest;
 use ILIAS\Data\Factory as DataFactory;
 use ILIAS\Data\Order;
 use ILIAS\Data\Range;
-use ILIAS\Test\RequestDataCollector;
 use ILIAS\UI\Component\Table\Action\Standard as TableAction;
 use ILIAS\UI\Component\Table\Column\Column;
 use ILIAS\UI\Component\Table\DataRetrieval;
@@ -42,19 +41,18 @@ class QuestionsBrowserTable implements DataRetrieval
     public const ACTION_INSERT = 'insert';
 
     public function __construct(
-        private readonly string $table_id,
+        protected readonly string $table_id,
         private readonly \ilObjUser $current_user,
-        private readonly UIFactory $ui_factory,
-        private readonly UIRenderer $ui_renderer,
-        private readonly \ilLanguage $lng,
-        private readonly \ilCtrl $ctrl,
-        private readonly DataFactory $data_factory,
-        private readonly \ilAssQuestionList $question_list,
-        private readonly \ilObjTest $test_obj,
-        private readonly \ilTree $tree,
-        private readonly RequestDataCollector $testrequest,
-        private readonly TaxonomyService $taxonomy,
-        private readonly string $parent_title
+        protected UIFactory $ui_factory,
+        protected UIRenderer $ui_renderer,
+        protected \ilLanguage $lng,
+        protected \ilCtrl $ctrl,
+        protected DataFactory $data_factory,
+        protected \ilAssQuestionList $question_list,
+        protected \ilObjTest $test_obj,
+        protected \ilTree $tree,
+        protected TaxonomyService $taxonomy,
+        protected string $parent_title
     ) {
     }
 
@@ -175,14 +173,12 @@ class QuestionsBrowserTable implements DataRetrieval
     public function getTotalRowCount(?array $filter_data, ?array $additional_parameters): int
     {
         $filter_data ??= [];
-        $this->setModeParametersToQuestionList();
         $this->addFiltersToQuestionList($filter_data);
         return $this->question_list->getTotalRowCount($filter_data, $additional_parameters);
     }
 
     public function loadRecords(array $filters = [], ?Order $order = null, ?Range $range = null): array
     {
-        $this->setModeParametersToQuestionList();
         $this->addFiltersToQuestionList($filters);
 
         $this->question_list->setOrder($order);
@@ -190,20 +186,6 @@ class QuestionsBrowserTable implements DataRetrieval
         $this->question_list->load();
 
         return $this->question_list->getQuestionDataArray();
-    }
-
-    private function setModeParametersToQuestionList(): void
-    {
-        if ($this->testrequest->raw(ilTestQuestionBrowserTableGUI::MODE_PARAMETER) === ilTestQuestionBrowserTableGUI::MODE_BROWSE_TESTS) {
-            $this->question_list->setParentObjectType('tst');
-            $this->question_list->setQuestionInstanceTypeFilter(\ilAssQuestionList::QUESTION_INSTANCE_TYPE_ALL);
-            $this->question_list->setExcludeQuestionIdsFilter($this->test_obj->getQuestions());
-            return;
-        }
-
-        $this->question_list->setParentObjIdsFilter($this->getQuestionParentObjIds(ilTestQuestionBrowserTableGUI::REPOSITORY_ROOT_NODE_ID));
-        $this->question_list->setQuestionInstanceTypeFilter(\ilAssQuestionList::QUESTION_INSTANCE_TYPE_ORIGINALS);
-        $this->question_list->setExcludeQuestionIdsFilter($this->test_obj->getExistingQuestions());
     }
 
     private function addFiltersToQuestionList(array $filters): void
@@ -216,29 +198,6 @@ class QuestionsBrowserTable implements DataRetrieval
 
             $this->question_list->addFieldFilter($key, $filter);
         }
-    }
-
-    private function getQuestionParentObjIds(int $repositoryRootNode): array
-    {
-        $parents = $this->tree->getSubTree(
-            $this->tree->getNodeData($repositoryRootNode),
-            true,
-            ['qpl']
-        );
-
-        $parentIds = [];
-
-        foreach ($parents as $nodeData) {
-            if ((int) $nodeData['obj_id'] === $this->test_obj->getId()) {
-                continue;
-            }
-
-            $parentIds[$nodeData['obj_id']] = $nodeData['obj_id'];
-        }
-
-        $parentIds = array_map('intval', array_values($parentIds));
-        $available_pools = array_map('intval', array_keys(\ilObjQuestionPool::_getAvailableQuestionpools(true)));
-        return array_intersect($parentIds, $available_pools);
     }
 
     private function resolveTaxonomiesRowData(int $obj_fi, int $questionId): string
