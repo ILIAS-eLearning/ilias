@@ -210,7 +210,6 @@ class ilAssQuestionList implements ilTaxAssignedItemInfo
             }
         }
 
-
         return $expressions;
     }
 
@@ -528,7 +527,7 @@ class ilAssQuestionList implements ilTaxAssignedItemInfo
         $expressions = [];
 
         foreach ($this->fieldFilters as $fieldName => $fieldValue) {
-            if ($fieldName ==='feedback') {
+            if ($fieldName === 'feedback') {
                 $fieldValue = strtoupper($fieldValue);
                 if (in_array($fieldValue, ['TRUE', 'FALSE'], true)) {
                     $expressions[] = "feedback IS $fieldValue";
@@ -537,7 +536,7 @@ class ilAssQuestionList implements ilTaxAssignedItemInfo
 
             }
 
-            if ($fieldName ==='hints') {
+            if ($fieldName === 'hints') {
                 $fieldValue = strtoupper($fieldValue);
                 if (in_array($fieldValue, ['TRUE', 'FALSE'], true)) {
                     $expressions[] = "hints IS $fieldValue";
