@@ -43,16 +43,16 @@ class QuestionsBrowserTable implements DataRetrieval
     public function __construct(
         protected readonly string $table_id,
         private readonly \ilObjUser $current_user,
-        protected UIFactory $ui_factory,
-        protected UIRenderer $ui_renderer,
-        protected \ilLanguage $lng,
-        protected \ilCtrl $ctrl,
-        protected DataFactory $data_factory,
-        protected \ilAssQuestionList $question_list,
-        protected \ilObjTest $test_obj,
-        protected \ilTree $tree,
-        protected TaxonomyService $taxonomy,
-        protected string $parent_title
+        protected readonly UIFactory $ui_factory,
+        protected readonly UIRenderer $ui_renderer,
+        protected readonly \ilLanguage $lng,
+        protected readonly \ilCtrl $ctrl,
+        protected readonly DataFactory $data_factory,
+        protected readonly \ilAssQuestionList $question_list,
+        protected readonly \ilObjTest $test_obj,
+        protected readonly \ilTree $tree,
+        protected readonly TaxonomyService $taxonomy,
+        protected readonly string $parent_title
     ) {
     }
 
