@@ -60,6 +60,9 @@ class MultiObjectPropertiesManipulator
         )->withAdditionalOnLoadCode($on_load_code);
     }
 
+    /**
+     * @param @return list<int> $ref_ids
+     */
     public function getEditAvailabilityPeriodPropertiesModal(
         array $ref_ids,
         \ilObjectGUI $parent_gui
@@ -77,6 +80,23 @@ class MultiObjectPropertiesManipulator
         $post_url = $this->ctrl->getFormAction($parent_gui, 'saveAvailabilityPeriod');
 
         return $this->buildModal($post_url, $items, $ref_ids, $this->areAllElementsEqual($ref_ids));
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function retrieveAvaibilityPeriodRefIdsFromModalRequest(
+        \ilObjectGUI $parent_gui,
+        ServerRequestInterface $request
+    ): array {
+        $post_url = $this->ctrl->getFormAction($parent_gui, 'saveAvailabilityPeriod');
+        $availability_period_modal = $this->buildModal($post_url)->withRequest($request);
+        $data = $availability_period_modal->getData();
+        if ($data === null) {
+            return [];
+        }
+
+        return array_map(intval(...), explode(',', $data['affected_items']));
     }
 
     public function saveEditAvailabilityPeriodPropertiesModal(

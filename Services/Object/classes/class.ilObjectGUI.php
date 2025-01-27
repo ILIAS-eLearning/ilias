@@ -880,11 +880,17 @@ class ilObjectGUI implements ImplementsCreationCallback
 
     public function editAvailabilityPeriodObject(): void
     {
-        if (!$this->checkPermissionBool('write')) {
-            $this->tpl->setOnScreenMessage('failure', $this->lng->txt('msg_no_perm_write'));
-            return;
-        }
         $item_ref_ids = $this->retriever->getSelectedIdsFromObjectList();
+
+        if (!$this->checkPermissionBool('write')) {
+            foreach ($item_ref_ids as $ref_id) {
+                if (!$this->checkPermissionBool('write', '', '', $ref_id)) {
+                    $this->tpl->setOnScreenMessage('failure', $this->lng->txt('msg_no_perm_write'));
+                    return;
+                }
+            }
+        }
+
         $availability_period_modal = $this->getMultiObjectPropertiesManipulator()->getEditAvailabilityPeriodPropertiesModal(
             $item_ref_ids,
             $this
@@ -905,9 +911,17 @@ class ilObjectGUI implements ImplementsCreationCallback
     public function saveAvailabilityPeriodObject(): void
     {
         if (!$this->checkPermissionBool('write')) {
-            $this->tpl->setOnScreenMessage('failure', $this->lng->txt('msg_no_perm_write'));
-            return;
+            $item_ref_ids = $this
+                ->getMultiObjectPropertiesManipulator()
+                ->retrieveAvaibilityPeriodRefIdsFromModalRequest($this, $this->request);
+            foreach ($item_ref_ids as $ref_id) {
+                if (!$this->checkPermissionBool('write', '', '', $ref_id)) {
+                    $this->tpl->setOnScreenMessage('failure', $this->lng->txt('msg_no_perm_write'));
+                    return;
+                }
+            }
         }
+
         $availability_period_modal = $this->getMultiObjectPropertiesManipulator()->saveEditAvailabilityPeriodPropertiesModal($this, $this->request);
         if ($availability_period_modal === null) {
             $this->tpl->setOnScreenMessage('success', $this->lng->txt('availability_period_changed'));
