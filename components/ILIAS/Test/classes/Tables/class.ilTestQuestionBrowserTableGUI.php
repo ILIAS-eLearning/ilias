@@ -138,8 +138,6 @@ class ilTestQuestionBrowserTableGUI
             $this->ctrl,
             $this->data_factory,
             $question_list,
-            $this->test_obj,
-            $this->tree,
             $this->taxonomy,
             $parent_title
         );

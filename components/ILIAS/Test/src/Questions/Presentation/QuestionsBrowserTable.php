@@ -41,18 +41,16 @@ class QuestionsBrowserTable implements DataRetrieval
     public const ACTION_INSERT = 'insert';
 
     public function __construct(
-        protected readonly string $table_id,
+        private readonly string $table_id,
         private readonly \ilObjUser $current_user,
-        protected readonly UIFactory $ui_factory,
-        protected readonly UIRenderer $ui_renderer,
-        protected readonly \ilLanguage $lng,
-        protected readonly \ilCtrl $ctrl,
-        protected readonly DataFactory $data_factory,
-        protected readonly \ilAssQuestionList $question_list,
-        protected readonly \ilObjTest $test_obj,
-        protected readonly \ilTree $tree,
-        protected readonly TaxonomyService $taxonomy,
-        protected readonly string $parent_title
+        private readonly UIFactory $ui_factory,
+        private readonly UIRenderer $ui_renderer,
+        private readonly \ilLanguage $lng,
+        private readonly \ilCtrl $ctrl,
+        private readonly DataFactory $data_factory,
+        private readonly \ilAssQuestionList $question_list,
+        private readonly TaxonomyService $taxonomy,
+        private readonly string $parent_title
     ) {
     }
 

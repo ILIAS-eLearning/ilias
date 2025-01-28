@@ -247,44 +247,7 @@ class ilAssQuestionList implements ilTaxAssignedItemInfo
 
     private function getTaxonomyFilterExpressions(): array
     {
-        $expressions = [];
-
-        if ($this->taxFiltersExcludeAnyObjectsWithTaxonomies) {
-            $expressions[] = 'question_id NOT IN (SELECT DISTINCT item_id FROM tax_node_assignment)';
-        } else {
-            foreach ($this->taxFilters as $taxId => $taxNodes) {
-                $questionIds = [];
-
-                $forceBypass = true;
-
-                foreach ($taxNodes as $taxNode) {
-                    $forceBypass = false;
-
-                    $taxItemsByTaxParent = $this->getTaxItems(
-                        $this->taxParentTypes[$taxId],
-                        $this->taxParentIds[$taxId],
-                        $taxId,
-                        $taxNode
-                    );
-
-                    $taxItemsByParent = $this->getTaxItems(
-                        $this->parentObjType,
-                        $this->parentObjId,
-                        $taxId,
-                        $taxNode
-                    );
-
-                    $taxItems = array_merge($taxItemsByTaxParent, $taxItemsByParent);
-                    foreach ($taxItems as $taxItem) {
-                        $questionIds[$taxItem['item_id']] = $taxItem['item_id'];
-                    }
-                }
-
-                if (!$forceBypass) {
-                    $expressions[] = $this->db->in('question_id', $questionIds, false, ilDBConstants::T_INTEGER);
-                }
-            }
-        }
+        $expressions = $this->getFilterByAssignedTaxonomyIdsExpression();
 
         $taxonomy_title = $this->fieldFilters['taxonomy_title'] ?? '';
         $taxonomy_node_title = $this->fieldFilters['taxonomy_node_title'] ?? '';
@@ -306,6 +269,49 @@ class ilAssQuestionList implements ilTaxAssignedItemInfo
         $inner_join_tax_node = "INNER JOIN tax_node ON (tax_node.tax_id = tax_node_assignment.tax_id AND tax_node.type = 'taxn' AND tax_node_assignment.node_id = tax_node.obj_id $like_taxonomy_node_title)";
 
         $expressions[] = "qpl_questions.question_id IN ($base $inner_join_object_data $inner_join_tax_node)";
+
+        return $expressions;
+    }
+
+    private function getFilterByAssignedTaxonomyIdsExpression(): array
+    {
+        $expressions = [];
+
+        if ($this->taxFiltersExcludeAnyObjectsWithTaxonomies) {
+            $expressions[] = 'question_id NOT IN (SELECT DISTINCT item_id FROM tax_node_assignment)';
+            return $expressions;
+        }
+
+        foreach ($this->taxFilters as $taxId => $taxNodes) {
+            $questionIds = [];
+
+            foreach ($taxNodes as $taxNode) {
+                $taxItemsByTaxParent = $this->getTaxItems(
+                    $this->taxParentTypes[$taxId],
+                    $this->taxParentIds[$taxId],
+                    $taxId,
+                    $taxNode
+                );
+
+                $taxItemsByParent = $this->getTaxItems(
+                    $this->parentObjType,
+                    $this->parentObjId,
+                    $taxId,
+                    $taxNode
+                );
+
+                $taxItems = array_merge($taxItemsByTaxParent, $taxItemsByParent);
+                foreach ($taxItems as $taxItem) {
+                    $questionIds[$taxItem['item_id']] = $taxItem['item_id'];
+                }
+            }
+
+            if ($taxNodes === []) {
+                continue;
+            }
+
+            $expressions[] = $this->db->in('question_id', $questionIds, false, ilDBConstants::T_INTEGER);
+        }
 
         return $expressions;
     }
