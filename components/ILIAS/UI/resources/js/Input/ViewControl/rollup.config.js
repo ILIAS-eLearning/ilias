@@ -18,7 +18,7 @@ import copyright from '../../../../../../../scripts/Copyright-Checker/copyright.
 import preserveCopyright from '../../../../../../../scripts/Copyright-Checker/preserveCopyright.js';
 
 export default {
-  input: './src/viewcontrols.js',
+  input: './src/index.js',
   output: {
     file: './dist/input.viewcontrols.min.js',
     format: 'iife',

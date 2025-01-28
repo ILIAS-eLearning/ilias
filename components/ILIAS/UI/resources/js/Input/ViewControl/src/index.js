@@ -15,10 +15,10 @@
 
 import il from 'il';
 import $ from 'jquery';
-import FieldSelectionFactory from './fieldselection.factory.js';
-import SortationFactory from './sortation.factory.js';
-import PaginationFactory from './pagination.factory.js';
-import ModeFactory from './mode.factory.js';
+import FieldSelection from './fieldselection.js';
+import Sortation from './sortation.js';
+import Pagination from './pagination.js';
+import Mode from './mode.js';
 import JQueryEventDispatcher from '../../../Core/src/jqueryeventdispatcher.js';
 
 const eventDispatcher = new JQueryEventDispatcher($);
@@ -26,7 +26,7 @@ const eventDispatcher = new JQueryEventDispatcher($);
 il.UI = il.UI || {};
 il.UI.Input = il.UI.Input || {};
 il.UI.Input.Viewcontrols = il.UI.Input.Viewcontrols || {};
-il.UI.Input.Viewcontrols.FieldSelection = new FieldSelectionFactory(eventDispatcher);
-il.UI.Input.Viewcontrols.Sortation = new SortationFactory(eventDispatcher);
-il.UI.Input.Viewcontrols.Pagination = new PaginationFactory(eventDispatcher);
-il.UI.Input.Viewcontrols.Mode = new ModeFactory(eventDispatcher);
+il.UI.Input.Viewcontrols.FieldSelection = new FieldSelection(eventDispatcher);
+il.UI.Input.Viewcontrols.Sortation = new Sortation(eventDispatcher);
+il.UI.Input.Viewcontrols.Pagination = new Pagination(eventDispatcher);
+il.UI.Input.Viewcontrols.Mode = new Mode(eventDispatcher);

@@ -13,7 +13,7 @@
  * https://github.com/ILIAS-eLearning
  */
 
-export default class FieldSelectionFactory {
+export default class FieldSelection {
   /**
    * @type {JQueryEventDispatcher}
    */

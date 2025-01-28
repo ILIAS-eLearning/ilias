@@ -13,7 +13,7 @@
  * https://github.com/ILIAS-eLearning
  */
 
-export default class SortationFactory {
+export default class Pagination {
   /**
    * @type {JQueryEventDispatcher}
    */
@@ -37,18 +37,11 @@ export default class SortationFactory {
       component.ownerDocument,
       internalSignal,
       (event, signalData) => {
-        let container = event.target.closest('.il-viewcontrol-fieldselection');
-        if (signalData.options.parent_container) {
-          container = component.ownerDocument.querySelector(
-            `#${signalData.options.parent_container
-            } .il-viewcontrol-sortation`,
-          );
-        } else {
-          container = event.target.closest('.il-viewcontrol-sortation');
-        }
-        const inputs = container.querySelectorAll('.il-viewcontrol-value > input');
-        const val = signalData.options.value.split(':');
-        [inputs[0].value, inputs[1].value] = val;
+        const inputs = event.target
+          .closest('.il-viewcontrol-pagination')
+          .querySelectorAll('.il-viewcontrol-value input');
+        inputs[0].value = signalData.options.offset;
+        inputs[1].value = signalData.options.limit;
 
         this.#eventDispatcher.dispatch(event.target, containerSubmitSignal);
         return false;

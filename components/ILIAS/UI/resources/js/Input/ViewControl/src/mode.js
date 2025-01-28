@@ -13,7 +13,7 @@
  * https://github.com/ILIAS-eLearning
  */
 
-export default class PaginationFactory {
+export default class Mode {
   /**
    * @type {JQueryEventDispatcher}
    */
@@ -28,21 +28,22 @@ export default class PaginationFactory {
 
   /**
    * @param {HTMLElement} component
-   * @param {string} internalSignal
+   * @param {string} optValue
    * @param {string} containerSubmitSignal
    * @return {void}
    */
-  init(component, internalSignal, containerSubmitSignal) {
-    this.#eventDispatcher.register(
-      component.ownerDocument,
-      internalSignal,
-      (event, signalData) => {
-        const inputs = event.target
-          .closest('.il-viewcontrol-pagination')
-          .querySelectorAll('.il-viewcontrol-value input');
-        inputs[0].value = signalData.options.offset;
-        inputs[1].value = signalData.options.limit;
-
+  init(component, optValue, containerSubmitSignal) {
+    component.addEventListener(
+      'click',
+      (event) => {
+        const btn = event.target;
+        btn.parentElement.querySelectorAll('button').forEach(
+          (button) => button.classList.remove('engaged'),
+        );
+        btn.classList.add('engaged');
+        btn.closest('.il-viewcontrol')
+          .querySelector('.il-viewcontrol-value > input')
+          .value = optValue;
         this.#eventDispatcher.dispatch(event.target, containerSubmitSignal);
         return false;
       },
