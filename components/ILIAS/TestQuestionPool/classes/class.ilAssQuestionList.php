@@ -275,42 +275,40 @@ class ilAssQuestionList implements ilTaxAssignedItemInfo
 
     private function getFilterByAssignedTaxonomyIdsExpression(): array
     {
-        $expressions = [];
-
         if ($this->taxFiltersExcludeAnyObjectsWithTaxonomies) {
-            $expressions[] = 'question_id NOT IN (SELECT DISTINCT item_id FROM tax_node_assignment)';
-            return $expressions;
+            return ['question_id NOT IN (SELECT DISTINCT item_id FROM tax_node_assignment)'];
         }
 
-        foreach ($this->taxFilters as $taxId => $taxNodes) {
-            $questionIds = [];
+        $expressions = [];
+        foreach ($this->taxFilters as $tax_id => $tax_nodes) {
+            $question_ids = [];
 
-            foreach ($taxNodes as $taxNode) {
-                $taxItemsByTaxParent = $this->getTaxItems(
-                    $this->taxParentTypes[$taxId],
-                    $this->taxParentIds[$taxId],
-                    $taxId,
-                    $taxNode
-                );
-
-                $taxItemsByParent = $this->getTaxItems(
-                    $this->parentObjType,
-                    $this->parentObjId,
-                    $taxId,
-                    $taxNode
-                );
-
-                $taxItems = array_merge($taxItemsByTaxParent, $taxItemsByParent);
-                foreach ($taxItems as $taxItem) {
-                    $questionIds[$taxItem['item_id']] = $taxItem['item_id'];
-                }
-            }
-
-            if ($taxNodes === []) {
+            if ($tax_nodes === []) {
                 continue;
             }
 
-            $expressions[] = $this->db->in('question_id', $questionIds, false, ilDBConstants::T_INTEGER);
+            foreach ($tax_nodes as $tax_node) {
+                $tax_items_by_tax_parent = $this->getTaxItems(
+                    $this->taxParentTypes[$tax_id],
+                    $this->taxParentIds[$tax_id],
+                    $tax_id,
+                    $tax_node
+                );
+
+                $tax_items_by_parent = $this->getTaxItems(
+                    $this->parentObjType,
+                    $this->parentObjId,
+                    $tax_id,
+                    $tax_node
+                );
+
+                $tax_items = array_merge($tax_items_by_tax_parent, $tax_items_by_parent);
+                foreach ($tax_items as $tax_item) {
+                    $question_ids[$tax_item['item_id']] = $tax_item['item_id'];
+                }
+            }
+
+            $expressions[] = $this->db->in('question_id', $question_ids, false, ilDBConstants::T_INTEGER);
         }
 
         return $expressions;
