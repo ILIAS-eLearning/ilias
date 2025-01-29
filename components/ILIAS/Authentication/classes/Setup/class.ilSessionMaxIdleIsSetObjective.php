@@ -136,6 +136,50 @@ class ilSessionMaxIdleIsSetObjective implements Setup\Objective
 
     public function isApplicable(Setup\Environment $environment): bool
     {
+        $factory = $environment->getResource(Setup\Environment::RESOURCE_SETTINGS_FACTORY);
+        /** @var ilSetting $settings */
+        $settings = $factory->settingsFor('common');
+        /** @var ilIniFile $ini */
+        $ini = $environment->getResource(Setup\Environment::RESOURCE_ILIAS_INI);
+
+        $url = $ini->readVariable('server', 'http_path');
+
+        if (ilCurlConnection::_isCurlExtensionLoaded()) {
+            $curl = new ilCurlConnection(
+                $url,
+                new ilProxySettings($settings)
+            );
+            $curl->init();
+            $curl->setOpt(CURLOPT_SSL_VERIFYPEER, 0);
+            $curl->setOpt(CURLOPT_SSL_VERIFYHOST, 0);
+            $curl->setOpt(CURLOPT_RETURNTRANSFER, 1);
+            $curl->setOpt(CURLOPT_FOLLOWLOCATION, 1);
+            $curl->setOpt(CURLOPT_MAXREDIRS, 1);
+            try {
+                $curl->exec();
+                $result = $curl->getInfo(CURLINFO_HTTP_CODE);
+            } catch (\Exception $e) {
+                return false;
+            } finally {
+                $curl->close();
+            }
+
+            if ($result !== 200) {
+                return false;
+            }
+        } else {
+            set_error_handler(static function (int $severity, string $message, string $file, int $line): never {
+                throw new ErrorException($message, $severity, $severity, $file, $line);
+            });
+            try {
+                file_get_contents($url);
+            } catch (Exception $e) {
+                return false;
+            } finally {
+                restore_error_handler();
+            }
+        }
+
         return true;
     }
 
