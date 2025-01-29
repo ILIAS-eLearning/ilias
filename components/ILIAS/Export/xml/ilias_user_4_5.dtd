@@ -50,7 +50,7 @@ Id is ILIAS ID or unique identifier for this xml file
                      %I_Encoding; >
 
 <!-- AuthMode -->
-<!ENTITY % A_Mode " type  (default | local | ldap | radius | shibboleth | cas | soap | script | ecs )  'default'">
+<!ENTITY % A_Mode " type  (default | local | ldap | radius | shibboleth | soap | script | ecs )  'default'">
 <!ELEMENT AuthMode (#PCDATA)>
 <!ATTLIST AuthMode %A_Mode;>
 

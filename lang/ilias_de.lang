@@ -2083,8 +2083,6 @@ auth#:#auth_account_migration_new#:#Neues ILIAS-Konto anlegen
 auth#:#auth_activation_code_success#:#Ihr Zugang wurde aktiviert. Sie können sich nun einloggen.
 auth#:#auth_allow_local_info#:#Wenn aktiviert, ist die lokale Authentifizierung gegen die ILIAS-Datenbank mit Anmeldename/Passwort auch für jene Anmeldekonten möglich, deren Authentifizierungsmodus SAML ist.
 auth#:#auth_auth_settings#:#Einstellungen
-auth#:#auth_cas_ldap#:#Synchronisierung über LDAP-Einstellungen
-auth#:#auth_cas_ldap_info#:#Wenn aktiviert, wird die Synchronisierung der Benutzerdaten und Rollenzuordnungen, gemäß der LDAP-Einstellungen vorgenommen.
 auth#:#auth_cron_destroy_expired_sessions#:#Löschen abgelaufener Benutzer-Sitzungen
 auth#:#auth_cron_destroy_expired_sessions_desc#:#Dieser Cron-Job löscht bereits abgelaufene Benutzer-Sitzungen
 auth#:#auth_err_expired#:#Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.
@@ -2189,8 +2187,6 @@ auth#:#auth_saml_user_mapping#:#Zuordnung der Profildaten
 auth#:#auth_saml_username_claim#:#Attribut für den Anzeigenamen/Anmeldenamen
 auth#:#auth_saml_username_claim_info#:#Definieren Sie hier das Attribut, anhand dessen ILIAS den Anzeigenamen/Anmeldenamen generieren soll.
 auth#:#auth_sync#:#Benutzer-Synchronisierung
-auth#:#auth_sync_cas#:#Automatische Generierung von ILIAS-Anmeldekonten
-auth#:#auth_sync_cas_info#:#Benutzer, die sich erfolgreich gegen CAS authentifiziert haben, jedoch über kein ILIAS-Konto verfügen, werden automatisch angelegt.
 auth#:#destination_after_logout#:#Weiterleitung nach Abmeldung
 auth#:#destination_external_ressource#:#Zeige Externe Resource
 auth#:#destination_external_ressource_url#:#Externe URL
@@ -3583,13 +3579,6 @@ common#:#attachments#:#Anhänge
 common#:#attempts#:#Versuche
 common#:#auth_active_roles#:#Verfügbare globale Rollen auf dem Registrierformular
 common#:#auth_allow_local#:#Erlaube lokale Authentifizierung
-common#:#auth_cas#:#CAS
-common#:#auth_cas_allow_local_desc#:#Erlaubt Personen mit CAS-Konten, sich mit ihrem lokalen ILIAS-Anmeldenamen und -Passwort anzumelden.
-common#:#auth_cas_auth#:#Konfiguriere CAS-Authentifizierung
-common#:#auth_cas_auth_desc#:#Damit die CAS-Authentifizierung funktioniert, muss die Servereinstellung prevent_super_global_replacement in der Datei client.ini.php gesetzt sein.
-common#:#auth_cas_port_desc#:#Zum Beispiel "443" bei einer CAS-Server-URI "https://auth.yourserver.com:443/cas/"
-common#:#auth_cas_server_desc#:#Zum Beispiel "auth.yourserver.com" bei einer CAS-Server-URI "https://auth.yourserver.com:443/cas/"
-common#:#auth_cas_uri_desc#:#Lokale URI, zum Beispiel "cas" bei einer CAS-Server-URI "https://auth.yourserver.com:443/cas/"
 common#:#auth_configure#:#konfigurieren...
 common#:#auth_create_users#:#Lege noch nicht eingetragene Benutzer automatisch an.
 common#:#auth_default#:#Standardeinstellung
@@ -4047,7 +4036,6 @@ common#:#entry_status#:#Eintragsstatus
 common#:#err_1_param#:#Nur 1 Parameter!
 common#:#err_2_param#:#Nur 2 Parameter!
 common#:#err_auth_apache_failed#:#Die Authentifikation ist fehlgeschlagen.
-common#:#err_auth_cas_no_ilias_user#:#Die Anmeldung ist fehlgeschlagen. Die CAS-Authentifizierung war erfolgreich, aber es existiert kein entsprechendes ILIAS-Konto. Bitte kontaktieren Sie Ihre technische Betreuung.
 common#:#err_auth_ldap_no_ilias_user#:#Die Anmeldung ist fehlgeschlagen. Die LDAP-Authentifizierung war erfolgreich, aber es existiert kein entsprechendes ILIAS-Konto. Bitte kontaktieren Sie Ihre technische Betreuung.
 common#:#err_auth_mode_inactive#:#Zur Zeit ist leider keine Anmeldung möglich.
 common#:#err_auth_soap_no_ilias_user#:#Anmeldung fehlgeschlagen! Die SOAP-Authentifizierung war erfolgreich, aber es existiert kein entsprechender ILIAS-Benutzer. Bitte kontaktieren Sie Ihren Systemadministrator.
@@ -4578,7 +4566,6 @@ common#:#login_data#:#Anmeldedaten
 common#:#login_exists#:#Dieser Anmeldename ist bereits vergeben. Bitte wählen Sie einen anderen.
 common#:#login_invalid#:#Ihr Anmeldename muss mindestens drei Zeichen lang sein und darf nur folgende Zeichen enthalten: A-Z a-z 0-9 _.-+*@!$%~
 common#:#login_to_ilias#:#Bei ILIAS anmelden
-common#:#login_to_ilias_via_cas#:#Bei ILIAS über zentrales Authentifizierungssystem anmelden
 common#:#login_to_ilias_via_saml#:#Bei ILIAS via SAML-Authentifizierung anmelden
 common#:#login_to_ilias_via_shibboleth#:#Bei ILIAS anmelden über
 common#:#loginname_already_exists#:#Dieser Anmeldename ist bereits vergeben. Bitte wählen Sie einen anderen Anmeldenamen.
@@ -4897,7 +4884,7 @@ common#:#obj_ass#:#Asset
 common#:#obj_assf#:#Test und Assessment
 common#:#obj_assf_desc#:#Einstellungen und Verwaltung des Test und Assessment-Tools
 common#:#obj_auth#:#Authentifizierung / Neuanmeldung
-common#:#obj_auth_desc#:#Konfigurieren Sie hier die Art der Benutzerauthentifizierung (Lokal, LDAP, CAS, ...) sowie die Neuanmeldungen.
+common#:#obj_auth_desc#:#Konfigurieren Sie hier die Art der Benutzerauthentifizierung (Lokal, LDAP, ...) sowie die Neuanmeldungen.
 common#:#obj_awra#:#„Wer ist online?“-Anzeige
 common#:#obj_awra_desc#:#„Wer ist online?“-Anzeige administrieren
 common#:#obj_bdga#:#Badges
@@ -5891,7 +5878,7 @@ common#:#user_defined_list#:#Übersicht zusätzlicher Felder
 common#:#user_deleted#:#ILIAS-Konto gelöscht
 common#:#user_detail#:#Details
 common#:#user_ext_account#:#Externes Anmeldekonto
-common#:#user_ext_account_desc#:#Anmeldekonto, das für die externe Authentifizierung benutzt wird. (CAS-, SOAP- oder LDAP-Authentifizierung)
+common#:#user_ext_account_desc#:#Anmeldekonto, das für die externe Authentifizierung benutzt wird. (SOAP- oder LDAP-Authentifizierung)
 common#:#user_image#:#Benutzerbild
 common#:#user_import_failed#:#Benutzerimport fehlgeschlagen.
 common#:#user_imported#:#Benutzerimport abgeschlossen.
@@ -6742,7 +6729,6 @@ content#:#cont_localfile#:#Lokale Datei
 content#:#cont_localization#:#Sprache
 content#:#cont_localization_info#:#Die Einstellung wird für vordefinierte Texte im Modul (z.B. "Vor" / "Zurück") benötigt.
 content#:#cont_location#:#Position
-content#:#cont_lpe_cas_login_form#:#CAS-Login-Maske
 content#:#cont_lpe_dpro_agreement_link#:#Link zur Datenschutzerklärung
 content#:#cont_lpe_language_selection#:#Sprachauswahl
 content#:#cont_lpe_login_form#:#Login-Maske
@@ -10747,7 +10733,7 @@ ldap#:#ldap_add_missing#:#Fehlende Rollen zuweisen
 ldap#:#ldap_add_remove#:#Rollen hinzufügen/entfernen
 ldap#:#ldap_add_role_ass_rule#:#Neue Regel für die ILIAS-Rollenzuordnung
 ldap#:#ldap_as_ds#:#Als Datenquelle verwenden
-ldap#:#ldap_as_ds_info#:#In Kombination mit anderen Authentifizierungsarten (z. B. CAS oder SAML) wird die LDAP-Konfiguration nur für die Synchronisierung der Angaben in den ILIAS-Konten genutzt. Eine direkte Authentifizierung über LDAP ist nicht möglich.
+ldap#:#ldap_as_ds_info#:#In Kombination mit anderen Authentifizierungsarten (z. B. SAML) wird die LDAP-Konfiguration nur für die Synchronisierung der Angaben in den ILIAS-Konten genutzt. Eine direkte Authentifizierung über LDAP ist nicht möglich.
 ldap#:#ldap_assignment_type#:#Art der Zuordnung
 ldap#:#ldap_authentication_settings#:#Einstellungen zur Authentifizierung
 ldap#:#ldap_bind_anonymous#:#Anonym verbinden
