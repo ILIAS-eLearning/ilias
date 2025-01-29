@@ -214,7 +214,8 @@ class Renderer extends AbstractComponentRenderer
             $component->getRange(),
             $component->getOrder(),
             $component->getFilter(),
-            $component->getAdditionalParameters()
+            $component->getAdditionalParameters(),
+            $component->getAdditionalViewControlData()
         );
 
         $id = $this->bindJavaScript($component);

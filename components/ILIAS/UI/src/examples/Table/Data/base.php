@@ -148,7 +148,8 @@ function base()
             Range $range,
             Order $order,
             ?array $filter_data,
-            ?array $additional_parameters
+            ?array $additional_parameters,
+            mixed $additional_viewcontrol_data = null
         ): \Generator {
             $records = $this->getRecords($range, $order);
             foreach ($records as $idx => $record) {
@@ -183,7 +184,8 @@ function base()
 
         public function getTotalRowCount(
             ?array $filter_data,
-            ?array $additional_parameters
+            ?array $additional_parameters,
+            mixed $additional_viewcontrol_data = null
         ): ?int {
             return count($this->getRecords());
         }

@@ -39,7 +39,8 @@ interface DataRetrieval
         Range $range,
         Order $order,
         ?array $filter_data, // $DIC->uiService()->filter()->getData();
-        ?array $additional_parameters
+        ?array $additional_parameters,
+        //mixed $additional_viewcontrol_data = null,
     ): Generator;
 
     /**
@@ -56,6 +57,7 @@ interface DataRetrieval
      */
     public function getTotalRowCount(
         ?array $filter_data, // $DIC->uiService()->filter()->getData();
-        ?array $additional_parameters
+        ?array $additional_parameters,
+        //mixed $additional_viewcontrol_data = null,
     ): ?int;
 }

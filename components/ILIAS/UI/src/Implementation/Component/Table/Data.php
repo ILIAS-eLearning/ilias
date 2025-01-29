@@ -96,16 +96,29 @@ class Data extends AbstractTable implements T\Data
         return $this->filter;
     }
 
-    public function withAdditionalParameters(array $additional_parameters): self
+    public function withAdditionalParameters(mixed $additional_parameters): self
     {
         $clone = clone $this;
         $clone->additional_parameters = $additional_parameters;
         return $clone;
     }
 
-    public function getAdditionalParameters(): array
+    public function getAdditionalParameters(): mixed
     {
         return $this->additional_parameters;
+    }
+
+
+    public function withAdditionalViewControlData(mixed $additional_viewcontrol_data): self
+    {
+        $clone = clone $this;
+        $clone->additional_viewcontrol_data = $additional_viewcontrol_data;
+        return $clone;
+    }
+
+    public function getAdditionalViewControlData(): mixed
+    {
+        return $this->additional_viewcontrol_data;
     }
 
     public function getRowBuilder(): DataRowBuilder
@@ -134,12 +147,11 @@ class Data extends AbstractTable implements T\Data
         }
 
         $data = $this->applyValuesToViewcontrols($this->getViewControls(null), $request)->getData();
-        $additional_parameters_from_viewcontrols = array_filter(
+        $additional_viewcontrol_data = array_filter(
             $data,
             fn($key) => !in_array($key, [self::VIEWCONTROL_KEY_PAGINATION, self::VIEWCONTROL_KEY_ORDERING, self::VIEWCONTROL_KEY_FIELDSELECTION]),
             ARRAY_FILTER_USE_KEY
         );
-        $additional_parameters = array_merge($additional_parameters, $additional_parameters_from_viewcontrols);
 
         $total_count = $this->getDataRetrieval()->getTotalRowCount($filter_data, $additional_parameters);
         $data = $this->applyValuesToViewcontrols($this->getViewControls($total_count), $request)->getData();
@@ -157,7 +169,7 @@ class Data extends AbstractTable implements T\Data
             ->withRange($range)
             ->withOrder($order)
             ->withSelectedOptionalColumns($data[self::VIEWCONTROL_KEY_FIELDSELECTION] ?? null)
-            ->withAdditionalParameters($additional_parameters);
+            ->withAdditionalViewControlData($additional_viewcontrol_data);
 
         # This retrieves the view controls that should be displayed
         $view_controls = $table->applyValuesToViewcontrols($table->getViewControls($total_count), $request);
