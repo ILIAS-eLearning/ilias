@@ -44,7 +44,9 @@ export default class Drilldown {
     $(document).on(backSignal, () => { this.#upLevel(); });
     this.#mapping.setFilterHandler(
       (e) => {
-        this.#filter(e);
+        if (e.key !== 'Tab' && e.key !== 'Shift') {
+          this.#filter(e);
+        }
       },
     );
     this.#mapping.parseLevel(
