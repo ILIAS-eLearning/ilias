@@ -96,7 +96,12 @@ class Renderer extends AbstractComponentRenderer
         }
 
         $id = $this->bindJavaScript($component);
-        $tpl->setVariable("ID", $id);
+        if ($id) {
+            $tpl->setCurrentBlock("li_id");
+            $tpl->setVariable("ID", $id);
+            $tpl->parseCurrentBlock();
+        }
+
 
         $subnodes = $component->getSubnodes();
 
@@ -145,7 +150,7 @@ class Renderer extends AbstractComponentRenderer
         }
         $signals = json_encode($signals);
 
-        return $component->withAdditionalOnLoadCode(fn($id) => "
+        return $component->withAdditionalOnLoadCode(fn ($id) => "
 			$('#$id > span').click(function(e){
 				var node = $('#$id'),
 					signals = $signals;
