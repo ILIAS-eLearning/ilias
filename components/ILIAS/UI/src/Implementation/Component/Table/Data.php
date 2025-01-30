@@ -84,14 +84,14 @@ class Data extends AbstractTable implements T\Data
         return $this->data_retrieval;
     }
 
-    public function withFilter(?array $filter): self
+    public function withFilter(mixed $filter): self
     {
         $clone = clone $this;
         $clone->filter = $filter;
         return $clone;
     }
 
-    public function getFilter(): ?array
+    public function getFilter(): mixed
     {
         return $this->filter;
     }
@@ -133,12 +133,17 @@ class Data extends AbstractTable implements T\Data
      * @return array<self, ViewControlContainer\ViewControl>
      */
     public function applyViewControls(
-        array $filter_data,
-        ?array $additional_parameters = []
+        mixed $filter_data,
+        mixed $additional_parameters = []
     ): array {
         $request = $this->getRequest();
+
         if (! $request) {
-            $total_count = $this->getDataRetrieval()->getTotalRowCount($filter_data, $additional_parameters);
+            $total_count = $this->getDataRetrieval()->getTotalRowCount(
+                null,
+                $filter_data,
+                $additional_parameters
+            );
             $view_controls = $this->getViewControls($total_count);
             return [
                 $this,
@@ -153,8 +158,15 @@ class Data extends AbstractTable implements T\Data
             ARRAY_FILTER_USE_KEY
         );
 
-        $total_count = $this->getDataRetrieval()->getTotalRowCount($filter_data, $additional_parameters);
-        $data = $this->applyValuesToViewcontrols($this->getViewControls($total_count), $request)->getData();
+        $total_count = $this->getDataRetrieval()->getTotalRowCount(
+            $additional_viewcontrol_data,
+            $filter_data,
+            $additional_parameters
+        );
+        $data = $this->applyValuesToViewcontrols(
+            $this->getViewControls($total_count),
+            $request
+        )->getData();
         $range = $data[self::VIEWCONTROL_KEY_PAGINATION];
         $range = ($range instanceof Range) ? $range : null;
         if ($range instanceof Range) {
