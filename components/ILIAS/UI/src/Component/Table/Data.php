@@ -64,7 +64,10 @@ interface Data extends Table
     public function withId(string $id): static;
 
     /**
-     * Consumers may add additional view controls
+     * Consumers may add additional view controls; their data will be relayed to
+     * DataRetrieval::getRows and ::getTotalRowCount as additional parameter.
+     * If you want to add more than one additional view control, bundle them into
+     * an Input\ViewControl\Group.
      */
     public function withAdditionalViewControl(
         ViewControlInput $view_control

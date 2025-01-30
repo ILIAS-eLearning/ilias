@@ -25,7 +25,7 @@ use ILIAS\UI\Implementation\Component as I;
 use ILIAS\UI\Implementation\Component\Input\ViewControl as Control;
 use ILIAS\UI\Implementation\Component\Input\ArrayInputData;
 use ILIAS\UI\Implementation\Component\Input\Container\ViewControl as VC;
-use ILIAS\UI\Implementation\Component\Input\ViewControl\ViewControlNameSource;
+use ILIAS\UI\Implementation\Component\Input\FormInputNameSource;
 use ILIAS\Data;
 use ILIAS\Refinery\Factory as Refinery;
 use Psr\Http\Message\ServerRequestInterface;
@@ -90,12 +90,12 @@ class ViewControlContainerTest extends ILIAS_UI_TestBase
             $c_factory->pagination()
         ];
 
-        $name_source = new ViewControlNameSource();
+        $name_source = new FormInputNameSource();
         $vc = $this->buildContainerFactory()->standard($controls);
         $this->assertSameSize($controls, $vc->getInputs());
 
         $named = array_map(
-            fn($input) => $input->withNameFrom($name_source, 'vc0'),
+            fn($input) => $input->withNameFrom($name_source, 'vc'),
             $vc->getInputs()
         );
 
@@ -109,9 +109,9 @@ class ViewControlContainerTest extends ILIAS_UI_TestBase
             ->expects($this->once())
             ->method("getQueryParams")
             ->willReturn([
-                'vc0/sel' => ['a1', 'a3'],
-                'vc0/sort/asp' => 'a2',
-                'vc0/sort/dir' => 'DESC'
+                'vc/sel' => ['a1', 'a3'],
+                'vc/sort/asp' => 'a2',
+                'vc/sort/dir' => 'DESC'
             ]);
 
         $c_factory = $this->buildVCFactory();
@@ -189,9 +189,9 @@ class ViewControlContainerTest extends ILIAS_UI_TestBase
 
         $this->assertEquals(
             [
-                'vc0/sel' => ['a1', 'a3'],
-                'vc0/sort/asp' => 'a2',
-                'vc0/sort/dir' => 'DESC'
+                'vc/sel' => ['a1', 'a3'],
+                'vc/sort/asp' => 'a2',
+                'vc/sort/dir' => 'DESC'
             ],
             $data
         );
