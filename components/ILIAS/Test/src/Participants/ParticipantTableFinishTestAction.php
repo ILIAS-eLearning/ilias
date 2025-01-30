@@ -126,6 +126,20 @@ class ParticipantTableFinishTestAction implements TableAction
             $this->user
         );
 
+        // If reset processing time is disabled it's not allowed to finish multiple attempts at once while one is still running
+        if (!$this->test_obj->getResetProcessingTime() && count($selected_participants) > 1) {
+            foreach ($selected_participants as $participant) {
+                if ($participant->hasUnfinishedAttempts()) {
+                    $this->tpl->setOnScreenMessage(
+                        \ilGlobalTemplateInterface::MESSAGE_TYPE_FAILURE,
+                        $this->lng->txt('finish_test_more_than_one_selected'),
+                        true
+                    );
+                    return null;
+                }
+            }
+        }
+
         foreach ($selected_participants as $participant) {
             $process_locker = $this->process_locker_factory->withContextId($participant->getActiveId())->getLocker();
 
