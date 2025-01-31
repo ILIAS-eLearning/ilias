@@ -57,8 +57,9 @@ class DataRetrieval implements I\OrderingBinding
         array $visible_column_ids,
         Range $range,
         Order $order,
-        ?array $filter_data,
-        ?array $additional_parameters
+        mixed $additional_viewcontrol_data,
+        mixed $filter_data,
+        mixed $additional_parameters
     ): \Generator {
         $records = $this->getRecords($order);
         foreach ($records as $idx => $record) {
@@ -82,8 +83,9 @@ class DataRetrieval implements I\OrderingBinding
     }
 
     public function getTotalRowCount(
-        ?array $filter_data,
-        ?array $additional_parameters
+        mixed $additional_viewcontrol_data,
+        mixed $filter_data,
+        mixed $additional_parameters
     ): ?int {
         return count($this->facade->fieldFactory()->getAvailableFieldsForObjId($this->facade->iliasObjId()));
     }

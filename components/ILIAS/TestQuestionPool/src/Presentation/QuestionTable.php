@@ -286,8 +286,9 @@ class QuestionTable extends \ilAssQuestionList implements Table\DataRetrieval
         array $visible_column_ids,
         Range $range,
         Order $order,
-        ?array $filter_data,
-        ?array $additional_parameters
+        mixed $additional_viewcontrol_data,
+        mixed $filter_data,
+        mixed $additional_parameters
     ): \Generator {
         $no_write_access = !($this->rbac->checkAccess('write', $this->request_ref_id));
         $timezone = new \DateTimeZone($this->current_user->getTimeZone());
@@ -322,8 +323,9 @@ class QuestionTable extends \ilAssQuestionList implements Table\DataRetrieval
     }
 
     public function getTotalRowCount(
-        ?array $filter_data,
-        ?array $additional_parameters
+        mixed $additional_viewcontrol_data,
+        mixed $filter_data,
+        mixed $additional_parameters
     ): ?int {
         $this->setParentObjId($this->parent_obj_id);
         $this->load();
