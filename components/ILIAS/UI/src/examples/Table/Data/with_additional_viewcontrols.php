@@ -63,13 +63,12 @@ function with_additional_viewcontrols()
             foreach ($records as $idx => $record) {
                 $row_id = (string) $record['usr_id'];
 
-                if (in_array('hide_login', $additional_viewcontrol_data)) {
+                if (in_array('hide_login', $additional_viewcontrol_data[0])) {
                     $record['login'] = '-';
                 }
-                if (in_array('hide_mail', $additional_viewcontrol_data)) {
+                if (in_array('hide_mail', $additional_viewcontrol_data[0])) {
                     $record['email'] = '-';
                 }
-
                 yield $row_builder->buildDataRow($row_id, $record);
             }
         }
@@ -124,11 +123,6 @@ function with_additional_viewcontrols()
                             'opt3' => 'option 3',
                         ]),
                     ]
-                )
-                ->withAdditionalTransformation(
-                    $refinery->custom()->transformation(
-                        fn($v) => array_shift($v)
-                    )
                 )
             )
             ->withRequest($request);
