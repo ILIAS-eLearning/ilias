@@ -394,9 +394,18 @@ class EditSubObjectsGUI
     {
         $mt = $this->gui->mainTemplate();
         $lng = $this->domain->lng();
-        $form = $this->getEditTitleForm($this->request->getEditId());
+        $edit_id = $this->request->getEditId();
+        $form = $this->getEditTitleForm($edit_id);
         if ($form->isValid()) {
-            \ilLMObject::_writeTitle($this->request->getEditId(), $form->getData("title"));
+            $title = $form->getData("title");
+            \ilLMObject::_writeTitle($edit_id, $title);
+
+            $lom = $this->domain->learningObjectMetadata();
+            $lom->manipulate($this->lm_id, $edit_id, \ilLMObject::_lookupType($edit_id, $this->lm_id))
+                ->prepareCreateOrUpdate(
+                    $lom->paths()->title(),
+                    $title
+                )->execute();
         }
         $mt->setContent("success", $lng->txt("msg_obj_modified"), true);
         $this->gui->ctrl()->redirect($this, "list");
