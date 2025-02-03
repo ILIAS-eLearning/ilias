@@ -418,15 +418,15 @@ class ilObjLanguageExt extends ilObjLanguage
         $db_comments = self::_getRemarks($a_lang_key);
         $global_values = array_merge($db_values, $file_values);
         $global_comments = array_merge($db_comments, $file_comments);
-        
+
         // save the single translations in lng_data
         foreach ($a_values as $key => $value) {
             $keys = explode($lng->separator, $key);
-            
+
             if (count($keys) !== 2) {
                 continue;
             }
-            
+
             list($module, $topic) = $keys;
             $save_array[$module][$topic] = $value;
 

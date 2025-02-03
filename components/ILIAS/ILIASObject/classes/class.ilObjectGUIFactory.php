@@ -32,7 +32,7 @@ class ilObjectGUIFactory
     protected ilObjectDefinition $obj_definition;
     protected ilDBInterface $db;
 
-    public function __construct(ilObjectDefinition $obj_definition = null, ilDBInterface $db = null)
+    public function __construct(?ilObjectDefinition $obj_definition = null, ?ilDBInterface $db = null)
     {
         global $DIC;
 

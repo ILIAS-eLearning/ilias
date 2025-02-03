@@ -50,7 +50,7 @@ class ilBlogPostingGUI extends ilPageObjectGUI
 
     public function __construct(
         int $a_node_id,
-        object $a_access_handler = null,
+        ?object $a_access_handler = null,
         int $a_id = 0,
         int $a_old_nr = 0,
         bool $a_enable_public_notes = true,
@@ -179,7 +179,7 @@ class ilBlogPostingGUI extends ilPageObjectGUI
     }
 
     public function preview(
-        string $a_mode = null
+        ?string $a_mode = null
     ): string {
         global $DIC;
         $ilCtrl = $this->ctrl;
@@ -433,7 +433,7 @@ class ilBlogPostingGUI extends ilPageObjectGUI
         $ilCtrl->redirectByClass("ilobjbloggui", "render");
     }
 
-    public function editTitle(ilPropertyFormGUI $a_form = null): void
+    public function editTitle(?ilPropertyFormGUI $a_form = null): void
     {
         $tpl = $this->tpl;
         $ilTabs = $this->tabs;
@@ -494,7 +494,7 @@ class ilBlogPostingGUI extends ilPageObjectGUI
         return $form;
     }
 
-    public function editDate(ilPropertyFormGUI $a_form = null): void
+    public function editDate(?ilPropertyFormGUI $a_form = null): void
     {
         $tpl = $this->tpl;
         $ilTabs = $this->tabs;
@@ -741,7 +741,7 @@ class ilBlogPostingGUI extends ilPageObjectGUI
         bool $a_include_picture = false,
         int $a_picture_width = 144,
         int $a_picture_height = 144,
-        string $a_export_directory = null
+        ?string $a_export_directory = null
     ): string {
         $bpgui = new self(0, null, $a_id);
 
@@ -777,7 +777,7 @@ class ilBlogPostingGUI extends ilPageObjectGUI
     protected function getFirstMediaObjectAsTag(
         int $a_width = 144,
         int $a_height = 144,
-        string $a_export_directory = null
+        ?string $a_export_directory = null
     ): string {
         $this->obj->buildDom();
         $mob_ids = $this->obj->collectMediaObjects();
