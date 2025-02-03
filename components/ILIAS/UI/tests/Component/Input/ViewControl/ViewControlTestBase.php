@@ -37,7 +37,12 @@ abstract class ViewControlTestBase extends ILIAS_UI_TestBase
             {
                 $name = "name_{$this->count}";
                 $this->count++;
-
+                return $name;
+            }
+            public function getNewDedicatedName($dedicated_name = 'dedicated_name'): string
+            {
+                $name = $dedicated_name . "_{$this->count}";
+                $this->count++;
                 return $name;
             }
         };

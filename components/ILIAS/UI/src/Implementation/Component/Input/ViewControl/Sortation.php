@@ -33,6 +33,9 @@ use ILIAS\UI\Implementation\Component\Input\NameSource;
 class Sortation extends ViewControlInput implements VCInterface\Sortation, HasInputGroup
 {
     use GroupDecorator;
+    private const FNAME_ASPECT = 'asp';
+    private const FNAME_DIRECTION = 'dir';
+    private const FNAME_SORTATION = 'sort';
 
     protected Signal $internal_selection_signal;
     protected string $aspect;
@@ -61,9 +64,11 @@ class Sortation extends ViewControlInput implements VCInterface\Sortation, HasIn
         $this->options = $options;
 
         $this->setInputGroup($field_factory->group([
-            $field_factory->hidden(), //aspect
-            $field_factory->hidden(), //direction
-        ])->withAdditionalTransformation($this->getOrderTransform()));
+            $field_factory->hidden()->withDedicatedName(self::FNAME_ASPECT), //aspect
+            $field_factory->hidden()->withDedicatedName(self::FNAME_DIRECTION), //direction
+        ])
+        ->withDedicatedName(self::FNAME_SORTATION)
+        ->withAdditionalTransformation($this->getOrderTransform()));
 
         $this->internal_selection_signal = $signal_generator->create();
     }

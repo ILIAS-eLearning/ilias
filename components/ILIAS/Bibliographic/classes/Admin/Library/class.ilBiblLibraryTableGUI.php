@@ -4,12 +4,12 @@ use ILIAS\UI\Component\Table\DataRetrieval;
 use ILIAS\UI\Component\Table\DataRowBuilder;
 use ILIAS\Data\Range;
 use ILIAS\Data\Order;
-use Psr\Http\Message\ServerRequestInterface AS HttpRequest;
+use Psr\Http\Message\ServerRequestInterface as HttpRequest;
 use ILIAS\UI\Factory as UIFactory;
-use ILIAS\UI\Renderer AS UIRenderer;
+use ILIAS\UI\Renderer as UIRenderer;
 use ILIAS\Data\Factory as DataFactory;
 use ILIAS\UI\URLBuilder;
-use ILIAS\UI\Component\Table\Data AS DataTable;
+use ILIAS\UI\Component\Table\Data as DataTable;
 use ILIAS\UI\URLBuilderToken;
 
 /**
@@ -156,8 +156,9 @@ class ilBiblLibraryTableGUI implements DataRetrieval
         array $visible_column_ids,
         Range $range,
         Order $order,
-        ?array $filter_data,
-        ?array $additional_parameters
+        mixed $additional_viewcontrol_data,
+        mixed $filter_data,
+        mixed $additional_parameters
     ): Generator {
         $records = $this->getRecords($range, $order);
         foreach ($records as $record) {
@@ -167,8 +168,11 @@ class ilBiblLibraryTableGUI implements DataRetrieval
     }
 
 
-    public function getTotalRowCount(?array $filter_data, ?array $additional_parameters): ?int
-    {
+    public function getTotalRowCount(
+        mixed $additional_viewcontrol_data,
+        mixed $filter_data,
+        mixed $additional_parameters
+    ): ?int {
         return count($this->getRecords());
     }
 

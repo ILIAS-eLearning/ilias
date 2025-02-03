@@ -52,8 +52,9 @@ class ScoringByQuestionTableBinder implements DataRetrieval
         array $visible_column_ids,
         Range $range,
         Order $order,
-        ?array $filter_data,
-        ?array $additional_parameters
+        mixed $additional_viewcontrol_data,
+        mixed $filter_data,
+        mixed $additional_parameters
     ): \Generator {
         if ($this->participant_data === null) {
             $this->participant_data = $this->getFilteredData($this->question_id);
@@ -69,8 +70,9 @@ class ScoringByQuestionTableBinder implements DataRetrieval
     }
 
     public function getTotalRowCount(
-        ?array $filter_data,
-        ?array $additional_parameters
+        mixed $additional_viewcontrol_data,
+        mixed $filter_data,
+        mixed $additional_parameters
     ): ?int {
         if ($this->participant_data === null) {
             $this->participant_data = $this->getFilteredData($this->question_id);

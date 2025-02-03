@@ -30,22 +30,37 @@ use ILIAS\UI\Implementation\Component\Input\Input;
 
 class FieldSelection extends ViewControlInput implements VCInterface\FieldSelection
 {
+    private const FNAME_FIELDSELECTION = 'sel';
+
     protected Signal $internal_selection_signal;
     protected string $button_label = '';
 
     public function __construct(
         DataFactory $data_factory,
         Refinery $refinery,
-        SignalGeneratorInterface $signal_generator,
+        protected SignalGeneratorInterface $signal_generator,
         protected array $options
     ) {
         parent::__construct($data_factory, $refinery);
-        $this->internal_selection_signal = $signal_generator->create();
+        $this->initInternalSignal();
+        $this->dedicated_name = self::FNAME_FIELDSELECTION;
     }
 
     protected function isClientSideValueOk($value): bool
     {
         return is_null($value) || is_array($value);
+    }
+
+    protected function initInternalSignal(): void
+    {
+        $this->internal_selection_signal = $this->signal_generator->create();
+    }
+
+    public function withResetInternalSignal(): self
+    {
+        $clone = clone $this;
+        $clone->initInternalSignal();
+        return $clone;
     }
 
     public function getInternalSignal(): Signal
