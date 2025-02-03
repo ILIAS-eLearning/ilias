@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -168,9 +169,7 @@ class ilOrgUnitPermissionTableGUI extends ilTable2GUI
             "ops" => $ops_ids,
             "template" => $from_templates,
         ];
-        if (ilOrgUnitGlobalSettings::getInstance()
-                                   ->isPositionAccessActiveForObject($this->getObjId())
-        ) {
+        if (ilOrgUnitObjectPositionSetting::getFor($this->getObjId())->isActive()) {
             $perms[] = [
                 "header_command" => true,
                 "positions" => $positions,
