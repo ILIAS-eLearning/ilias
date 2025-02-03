@@ -349,7 +349,6 @@ class ilInfoScreenGUI
         $learning_time_data = $md_reader->firstData($md_paths->firstTypicalLearningTime());
         $learning_time = $md_data_helper->makePresentable($learning_time_data);
 
-        // copyright
         $copyright_description = $md_reader->firstData($md_paths->copyright())->value();
         if ($copyright_description) {
             $copyright = ilMDUtils::_parseCopyright($copyright_description);
@@ -401,8 +400,7 @@ class ilInfoScreenGUI
         }
         $this->addSection($lng->txt('meta_info_licence_section'));
 
-        if ($copyright !== '') {		// copyright
-            $this->addProperty(
+        if ($copyright !== '') {		$this->addProperty(
                 $lng->txt("meta_copyright"),
                 $copyright
             );
