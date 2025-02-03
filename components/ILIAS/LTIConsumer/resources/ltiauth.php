@@ -19,7 +19,8 @@ declare(strict_types=1);
  *********************************************************************/
 
 /** @noRector */
-chdir("../../../");
+require_once("../vendor/composer/vendor/autoload.php");
+
 
 /**
  * There is no way to process a $_GET Request with

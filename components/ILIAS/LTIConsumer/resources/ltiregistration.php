@@ -19,9 +19,16 @@ declare(strict_types=1);
  *********************************************************************/
 
 /** @noRector */
-chdir("../../../");
+require_once("../vendor/composer/vendor/autoload.php");
 
 ilContext::init(ilContext::CONTEXT_SCORM);
 ilInitialisation::initILIAS();
-header('Content-Type: application/json; charset=utf-8');
-echo json_encode(ilObjLTIConsumer::getOpenidConfig(), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+
+try {
+    $token = ilObjLTIConsumer::verifyToken();
+    $data = json_decode(ilObjLTIConsumer::getRawData(), true);
+    $responseData = ilObjLTIConsumer::registerClient($data, $token);
+    ilObjLTIConsumer::sendResponseJson($responseData);
+} catch (Exception $e) {
+    ilObjLTIConsumer::sendResponseError(500, "error in ltiregistration.php");
+}

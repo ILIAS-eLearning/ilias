@@ -24,7 +24,7 @@ use ILIAS\Filesystem\Exception\IOException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\JWK;
 
-chdir("../../../");
+require_once("../vendor/composer/vendor/autoload.php");
 
 ilContext::init(ilContext::CONTEXT_SCORM);
 ilInitialisation::initILIAS();

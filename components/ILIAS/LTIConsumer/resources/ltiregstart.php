@@ -19,7 +19,7 @@
 declare(strict_types=1);
 
 /** @noRector */
-chdir("../../../");
+require_once("../vendor/composer/vendor/autoload.php");
 
 ilInitialisation::initILIAS();
 global $DIC;
