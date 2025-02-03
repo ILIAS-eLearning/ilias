@@ -351,7 +351,6 @@ class ilTextInputGUI extends ilSubEnabledFormPropertyGUI implements ilTableFilte
         // use autocomplete feature?
         if ($this->getDataSource()) {
             iljQueryUtil::initjQuery();
-            iljQueryUtil::initjQueryUI();
 
             $jstpl = new ilTemplate("tpl.prop_text_autocomplete.js", true, true, "components/ILIAS/Form");
 

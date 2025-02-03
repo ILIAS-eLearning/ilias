@@ -523,7 +523,6 @@ class ilGlobalTemplate implements ilGlobalTemplateInterface
 
         // always load jQuery
         iljQueryUtil::initjQuery();
-        iljQueryUtil::initjQueryUI();
 
         // always load ui framework
         ilUIFramework::init();

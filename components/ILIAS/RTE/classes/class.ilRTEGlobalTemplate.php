@@ -189,7 +189,6 @@ class ilRTEGlobalTemplate implements ilGlobalTemplateInterface
         }
 
         iljQueryUtil::initjQuery();
-        iljQueryUtil::initjQueryUI();
 
         ilUIFramework::init();
 
