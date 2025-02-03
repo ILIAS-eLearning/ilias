@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 /** @noRector */
 
-require_once("../vendor/composer/vendor/autoload.php");
+chdir("../../../");
 
 ilContext::init(ilContext::CONTEXT_SCORM);
 ilInitialisation::initILIAS();
