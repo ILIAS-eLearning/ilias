@@ -16,8 +16,9 @@
  *
  *********************************************************************/
 
-
 declare(strict_types=1);
+
+use ILIAS\UI\Implementation\Component\Button\Shy;
 
 class ilDclFieldListGUI
 {
@@ -27,41 +28,31 @@ class ilDclFieldListGUI
     protected ilLanguage $lng;
     protected ilToolbarGUI $toolbar;
     protected ilGlobalTemplateInterface $tpl;
-    protected ilTabsGUI $tabs;
     protected ILIAS\HTTP\Services $http;
     protected ILIAS\Refinery\Factory $refinery;
-    protected int $table_id;
+    protected ilDclTable $table;
     protected ilDclTableListGUI $parent_obj;
-    protected int $obj_id;
 
-    /**
-     * Constructor
-     */
     public function __construct(ilDclTableListGUI $a_parent_obj)
     {
         global $DIC;
 
         $this->http = $DIC->http();
         $this->refinery = $DIC->refinery();
-        $this->table_id = $this->http->wrapper()->query()->retrieve('table_id', $this->refinery->kindlyTo()->int());
-        $locator = $DIC['ilLocator'];
         $this->parent_obj = $a_parent_obj;
-        $this->obj_id = $a_parent_obj->getObjId();
         $this->ctrl = $DIC->ctrl();
         $this->lng = $DIC->language();
+        $this->lng->loadLanguageModule('dcl');
         $this->tpl = $DIC->ui()->mainTemplate();
-        $this->tabs = $DIC->tabs();
         $this->toolbar = $DIC->toolbar();
         $this->ui_factory = $DIC->ui()->factory();
         $this->renderer = $DIC->ui()->renderer();
+        $this->table = ilDclCache::getTableCache($this->http->wrapper()->query()->retrieve('table_id', $this->refinery->kindlyTo()->int()));
 
         $DIC->help()->setScreenId('dcl_fields');
 
         $this->ctrl->saveParameterByClass(ilDclTableEditGUI::class, 'table_id');
-        $locator->addItem(
-            ilDclCache::getTableCache($this->table_id)->getTitle(),
-            $this->ctrl->getLinkTargetByClass(ilDclTableEditGUI::class, 'edit')
-        );
+        $DIC['ilLocator']->addItem($this->table->getTitle(), $this->ctrl->getLinkTargetByClass(ilDclTableEditGUI::class, 'edit'));
         $this->tpl->setLocator();
 
         if (!$this->checkAccess()) {
@@ -70,121 +61,54 @@ class ilDclFieldListGUI
         }
     }
 
-    public function getTableId(): int
-    {
-        return $this->table_id;
-    }
-
-    /**
-     * execute command
-     */
     public function executeCommand(): void
     {
         $cmd = $this->ctrl->getCmd('listFields');
         $this->$cmd();
     }
 
-    /**
-     * Delete multiple fields
-     */
-    public function deleteFields(): void
+    public function saveOrder(): void
     {
-        if ($this->http->wrapper()->post()->has('dcl_field_ids')) {
-            $field_ids = $this->http->wrapper()->post()->retrieve(
-                'dcl_field_ids',
-                $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int())
-            );
-            $table = ilDclCache::getTableCache($this->table_id);
-            foreach ($field_ids as $field_id) {
-                $table->deleteField($field_id);
-            }
-        }
-
-        $this->tpl->setOnScreenMessage('success', $this->lng->txt('dcl_msg_fields_deleted'), true);
-        $this->ctrl->redirect($this, 'listFields');
-    }
-
-    /**
-     * Confirm deletion of multiple fields
-     */
-    public function confirmDeleteFields(): void
-    {
-        $this->tabs->clearSubTabs();
-        $conf = new ilConfirmationGUI();
-        $conf->setFormAction($this->ctrl->getFormAction($this));
-        $conf->setHeaderText($this->lng->txt('dcl_confirm_delete_fields'));
-
-        $has_field_ids = $this->http->wrapper()->post()->has('dcl_field_ids');
-        if (!$has_field_ids) {
-            $this->tpl->setOnScreenMessage('failure', $this->lng->txt('dcl_delete_fields_no_selection'), true);
-            $this->ctrl->redirect($this, 'listFields');
-        }
-
-        $field_ids = $this->http->wrapper()->post()->retrieve(
-            'dcl_field_ids',
-            $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->int())
-        );
-        foreach ($field_ids as $field_id) {
-            /** @var ilDclBaseFieldModel $field */
-            $field = ilDclCache::getFieldCache($field_id);
-            $conf->addItem('dcl_field_ids[]', (string) $field_id, $field->getTitle());
-        }
-
-        $conf->setConfirm($this->lng->txt('delete'), 'deleteFields');
-        $conf->setCancel($this->lng->txt('cancel'), 'listFields');
-        $this->tpl->setContent($conf->getHTML());
-    }
-
-    /*
-     * save
-     */
-    public function save(): void
-    {
-        $table_id = $this->http->wrapper()->query()->retrieve('table_id', $this->refinery->kindlyTo()->int());
-
-        $table = ilDclCache::getTableCache($table_id);
-        $fields = $table->getFields();
-
         $order = $this->http->wrapper()->post()->retrieve(
             'order',
             $this->refinery->kindlyTo()->dictOf($this->refinery->kindlyTo()->string())
         );
-        asort($order);
         $val = 10;
-        foreach (array_keys($order) as $field_id) {
+        foreach ($order as $field_id) {
             $order[$field_id] = $val;
             $val += 10;
         }
 
-        $exportable = [];
-        if ($this->http->wrapper()->post()->has("exportable")) {
-            $exportable = $this->http->wrapper()->post()->retrieve(
-                "exportable",
-                $this->refinery->kindlyTo()->dictOf(
-                    $this->refinery->kindlyTo()->string()
-                )
-            );
-        }
-
-        foreach ($fields as $field) {
-            $field->setExportable(array_key_exists($field->getId(), $exportable) && $exportable[$field->getId()] === "on");
+        foreach ($this->table->getFields() as $field) {
             $field->setOrder($order[$field->getId()]);
             $field->doUpdate();
         }
+    }
 
-        $table->reloadFields();
-        $this->tpl->setOnScreenMessage('success', $this->lng->txt("dcl_table_settings_saved"));
+    public function addToExport(): void
+    {
+        $field = $this->table->getField(
+            $this->http->wrapper()->query()->retrieve('field_id', $this->refinery->kindlyTo()->string())
+        );
+        $field->setExportable(true);
+        $field->doUpdate();
         $this->listFields();
     }
 
-    /**
-     * list fields
-     */
+    public function RemoveFromExport(): void
+    {
+        $field = $this->table->getField(
+            $this->http->wrapper()->query()->retrieve('field_id', $this->refinery->kindlyTo()->string())
+        );
+        $field->setExportable(false);
+        $field->doUpdate();
+        $this->listFields();
+    }
+
     public function listFields(): void
     {
-        //add button
         $add_new = $this->ui_factory->button()->primary(
-            $this->lng->txt("dcl_add_new_field"),
+            $this->lng->txt('dcl_add_new_field'),
             $this->ctrl->getLinkTargetByClass(ilDclFieldEditGUI::class, 'create')
         );
         $this->toolbar->addStickyItem($add_new);
@@ -196,20 +120,94 @@ class ilDclFieldListGUI
             'listFields'
         );
 
-        //table gui
-        $list = new ilDclFieldListTableGUI($this, $this->ctrl->getCmd(), $this->table_id);
-        $this->tpl->setContent($list->getHTML());
+        $this->tpl->setContent(
+            $this->renderer->render(
+                $this->ui_factory->panel()->listing()->standard(
+                    sprintf($this->lng->txt('dcl_fields_of_X'), $this->table->getTitle()),
+                    [$this->ui_factory->item()->group('', $this->getItems())]
+                )
+            )
+        );
+    }
+
+    protected function getItems(): array
+    {
+        $items = [];
+
+        foreach ($this->table->getFields() as $field) {
+            $field_id = $field->getId();
+            $endpoint = $this->ctrl->getLinkTargetByClass(ilDclFieldListGUI::class, 'saveOrder');
+            $this->ctrl->setParameterByClass(ilObjDataCollectionGUI::class, 'field_id', $field_id);
+            $item = $this->ui_factory->item()->standard($field->getTitle())
+                ->withMainAction(
+                    $this->ui_factory->button()->standard(
+                        $this->renderer->render($this->ui_factory->symbol()->glyph()->sort()),
+                        ''
+                    )->withOnLoadCode(
+                        static function (string $id) use ($field_id, $endpoint): string {
+                            return "dcl.addSorting($id, '$field_id', '$endpoint')";
+                        }
+                    )
+                )
+                ->withDescription($field->getDescription())
+                ->withProperties($this->getProperties($field))
+                ->withActions($this->ui_factory->dropdown()->standard($this->getActions($field)))
+            ;
+            $items[] = $item;
+        }
+
+        return $items;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function getProperties(ilDclBaseFieldModel $field): array
+    {
+        $properties = [];
+        $properties[$this->lng->txt('dcl_in_export')] = $this->lng->txt($field->getExportable() ? 'yes' : 'no');
+        $properties[$this->lng->txt('dcl_field_datatype')] = $field->getPresentationTitle();
+
+        return $properties;
+    }
+
+    /**
+     * @return Shy[]
+     */
+    protected function getActions(ilDclBaseFieldModel $field): array
+    {
+        $actions = [];
+        if ($field->getExportable()) {
+            $actions[] = $this->ui_factory->button()->shy(
+                $this->lng->txt('remove_from_export'),
+                $this->ctrl->getLinkTargetByClass(ilDclFieldListGUI::class, 'removeFromExport')
+            );
+        } else {
+            $actions[] = $this->ui_factory->button()->shy(
+                $this->lng->txt('add_to_export'),
+                $this->ctrl->getLinkTargetByClass(ilDclFieldListGUI::class, 'addToExport')
+            );
+        }
+
+        if (!$field->isStandardField()) {
+            $actions[] = $this->ui_factory->button()->shy(
+                $this->lng->txt('edit'),
+                $this->ctrl->getLinkTargetByClass(ilDclFieldEditGUI::class, 'edit')
+            );
+            $actions[] = $this->ui_factory->button()->shy(
+                $this->lng->txt('delete'),
+                $this->ctrl->getLinkTargetByClass(ilDclFieldEditGUI::class, 'confirmDelete')
+            );
+        }
+
+        return $actions;
     }
 
     protected function checkAccess(): bool
     {
-        $ref_id = $this->getDataCollectionObject()->getRefId();
-
-        return ilObjDataCollectionAccess::hasAccessToEditTable($ref_id, $this->table_id);
-    }
-
-    public function getDataCollectionObject(): ilObjDataCollection
-    {
-        return $this->parent_obj->getDataCollectionObject();
+        return ilObjDataCollectionAccess::hasAccessToEditTable(
+            $this->parent_obj->getDataCollectionObject()->getRefId(),
+            $this->table->getId()
+        );
     }
 }

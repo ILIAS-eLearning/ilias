@@ -8577,6 +8577,7 @@ dateplaner#:#today#:#Heute
 dateplaner#:#week#:#Woche
 dateplaner#:#wk_short#:#KW
 dateplaner#:#year#:#Jahr
+dcl#:#add_to_export#:#Zum Export hinzufügen
 dcl#:#add_value#:#Neuen Eintrag hinzufügen
 dcl#:#dcl_activate_notification#:#Benachrichtigung
 dcl#:#dcl_add#:#Datensammlung anlegen
@@ -8663,6 +8664,7 @@ dcl#:#dcl_field_required#:#Verpflichtend
 dcl#:#dcl_field_title_change_warning#:#Sie haben den Titel des Feldes geändert. Dadurch funktioniert der entsprechende Platzhalter in der Vorlage zur Einzelansicht nicht mehr. Sie müssen diesen noch manuell angepassen.
 dcl#:#dcl_field_title_unique#:#Es existiert bereits ein Feld mit diesem Titel. Titel muss eindeutig sein.
 dcl#:#dcl_field_visible#:#Sichtbar
+dcl#:#dcl_fields_of_X#:#Felder der Tabelle %s
 dcl#:#dcl_fieldtitle#:#Feldtitel
 dcl#:#dcl_file#:#Datei-Upload
 dcl#:#dcl_file_desc#:#Möglichkeit zum Hochladen einer Datei. Die hochgeladene Datei kann direkt aus der Datensammlung heruntergeladen werden.
@@ -8878,6 +8880,7 @@ dcl#:#enable_visible#:#Sichtbarkeit aktivieren
 dcl#:#entry_of#:#Eintrag %1$d von %2$d
 dcl#:#fieldtitle_allow_chars#:#Nicht erlaubte Zeichen: %s
 dcl#:#fileupload_not_migrated#:#Die Datei wurde noch nicht migriert und kann deshalb nicht angezeigt werden. Bitte wenden Sie sich an Ihre Systemadministration.
+dcl#:#remove_from_export#:#Vom Export entfernen
 dcl#:#set_as_default#:#Als Standard setzen
 didactic#:#activate_exclusive_template#:#Standard ausgrauen
 didactic#:#activate_exclusive_template_info#:#Die Standard-Vorlage wird überall dort ausgegraut, wo diese didaktische Vorlage aktiv ist.
