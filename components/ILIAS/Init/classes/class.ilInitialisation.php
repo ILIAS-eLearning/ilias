@@ -363,63 +363,20 @@ class ilInitialisation
         };
     }
 
-    /**
-     * builds http path
-     */
     protected static function buildHTTPPath(): bool
     {
         global $DIC;
 
-        if ($DIC['https']->isDetected()) {
-            $protocol = 'https://';
-        } else {
-            $protocol = 'http://';
-        }
-        $host = $_SERVER['HTTP_HOST'];
-
-        $rq_uri = strip_tags($_SERVER['REQUEST_URI']);
-
-        // security fix: this failed, if the URI contained "?" and following "/"
-        // -> we remove everything after "?"
-        if (is_int($pos = strpos($rq_uri, "?"))) {
-            $rq_uri = substr($rq_uri, 0, $pos);
-        }
-
-        if (!defined('ILIAS_MODULE')) {
-            $path = pathinfo($rq_uri);
-            if (isset($path['extension']) && $path['extension'] !== '') {
-                $uri = dirname($rq_uri);
-            } else {
-                $uri = $rq_uri;
-            }
-        } else {
-            // if in module remove module name from HTTP_PATH
-            $path = dirname($rq_uri);
-
-            // dirname cuts the last directory from a directory path e.g content/classes return content
-            $module = ilFileUtils::removeTrailingPathSeparators(ILIAS_MODULE);
-
-            $dirs = explode('/', $module);
-            $uri = $path;
-            foreach ($dirs as $dir) {
-                $uri = dirname($uri);
-            }
-        }
-
-        $ilias_http_path = ilContext::modifyHttpPath(implode('', [$protocol, $host, $uri]));
-
-        // remove everything after the first .php in the path
-        $ilias_http_path = preg_replace('/(http|https)(:\/\/)(.*?\/.*?\.php).*/', '$1$2$3', $ilias_http_path);
-        $ilias_http_path = preg_replace('/goto.php\/$/', '', $ilias_http_path);
-        $ilias_http_path = preg_replace('/goto.php$/', '', $ilias_http_path);
-        $ilias_http_path = preg_replace('/go\/.*$/', '', $ilias_http_path);
-
-        $f = new \ILIAS\Data\Factory();
-        $uri = $f->uri(ilFileUtils::removeTrailingPathSeparators($ilias_http_path));
-
-        $base_URI = $uri->getBaseURI();
-
-        return define('ILIAS_HTTP_PATH', $base_URI);
+        return define(
+            'ILIAS_HTTP_PATH',
+            (new \ILIAS\Init\Environment\HttpPathBuilder(
+                new \ILIAS\Data\Factory(),
+                $DIC->settings(),
+                $DIC['https'],
+                $DIC['ilIliasIniFile'],
+                $_SERVER
+            ))->build()->getBaseURI()
+        );
     }
 
     /**
