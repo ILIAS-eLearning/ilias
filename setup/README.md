@@ -344,7 +344,12 @@ are printed bold**, all other fields might be omitted. A minimal example is
 		"proxy" : {
 			"host" : "webproxy.ilias.de",
 			"port" : "8088"
-		}
+		},
+		"allowed_hosts" : [
+			"red.ilias.de",
+			"blue.ilias.de",
+			"www.ilias.de"
+		]
     },
     ```
   * **path** (type: string) to your installation on the internet
@@ -355,6 +360,13 @@ are printed bold**, all other fields might be omitted. A minimal example is
   * *proxy* (type: object) for outgoing http connections
     * *host* (type: string) the proxy runs on
     * *port* (type: string or number) the proxy listens on
+  * *allowed_hosts* (type: an `array`/list of strings, or `null`) A list of valid hosts which is used to
+    validate the `HTTP_HOST` header of incoming web requests. If the host header does not match any of
+    the allowed hosts, the request is rejected. If `null` is set or an empty list is provided, the host
+    header is only validated against the host of the `path` setting
+    (stored in the "ilias.ini.php" as `http_path`), which is always considered allowed.
+    This also applies for the optionally configurable host used for the WSDL path definition
+    in the SOAP web service configuration and for "localhost".
 * *logging* (type: object) configuration if logging should be used
     ```
 	"logging" : {
