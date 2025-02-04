@@ -20,7 +20,8 @@ import makeDraggable from '../makeDraggable';
 il.test = il.test || {};
 il.test.orderingvertical = il.test.orderingvertical || {};
 
-il.test.orderingvertical.init = (parentElement) => orderingHandler(
+il.test.orderingvertical.init = (parentElement, questionId) => orderingHandler(
   parentElement,
   makeDraggable,
+  questionId,
 );

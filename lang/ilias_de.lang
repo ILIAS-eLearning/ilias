@@ -3116,7 +3116,6 @@ cmix#:#cmix_add#:#xAPI/cmi5-Objekt anlegen
 cmix#:#cmix_add_cmi5_lm#:#cmi5 Lernmodul
 cmix#:#cmix_add_cmi5_lm_info#:#Diese Option sollte verwendet werden, wenn es sich bei den Inhalten um ein cmi5 konformes Lernmodul handelt. Verwandte Funktionen wie geeignete Berichte sind ohne weitere Konfigurationen verfügbar.
 cmix#:#cmix_add_lrs_type#:#LRS-Typ
-cmix#:#cmix_add_lrs_type_info#:#Diese Typen von Learning Record Stores wurden in der ILIAS-Administration verfügbar gemacht.###02 02 2025 new variable
 cmix#:#cmix_add_source#:#Quelle
 cmix#:#cmix_add_source_external_app#:#Nicht von ILIAS gestartete Ressource
 cmix#:#cmix_add_source_external_app_info#:#Verwenden Sie diese Option für separat gestartete Ressourcen wie z.B. Apps oder Simulationen. Benutzer müssen durch Angabe ihrer verwendeten E-Mail-Adresse dem Abruf der Daten zustimmen.
@@ -9567,7 +9566,7 @@ exc#:#exc_reminder_feedback_start#:#Start vor Peer-Feedback-Termin
 exc#:#exc_reminder_frequency#:#Häufigkeit
 exc#:#exc_reminder_grade_body#:#Die folgende Übungseinheit wurde noch nicht bewertet
 exc#:#exc_reminder_grade_setting#:#Erinnerung an notwendige Bewertung
-exc#:#exc_reminder_grade_subject#:#Übungseinheit „%s“ wurde nicht bewertet
+exc#:#exc_reminder_grade_subject#:#Übungseinheit „%s“ wurde nicht berwertet
 exc#:#exc_reminder_link#:#URL
 exc#:#exc_reminder_mail_no_tpl#:#Keine Mail-Vorlage verwenden
 exc#:#exc_reminder_mail_template#:#Mail-Vorlage

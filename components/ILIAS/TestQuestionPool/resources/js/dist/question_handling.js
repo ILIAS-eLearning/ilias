@@ -306,14 +306,14 @@ ilias.questions.assTextQuestion = function(a_id) {
 
 ilias.questions.assOrderingQuestion = function(a_id) {
 
-	var result = document.querySelectorAll(`#order${a_id} > .answers`);
+	var result = jQuery('#order'+a_id).sortable('toArray');
 
 	answers[a_id].wrong = 0;
 	answers[a_id].passed = true;
 	answers[a_id].choice = [];
 
 	for (var i=0;i<result.length;i++) {
-		if (i+1 !== parseInt(result[i].id))
+		if (i+1 != result[i])
 		{
 			answers[a_id].passed = false;
 			answers[a_id].wrong ++;
@@ -321,7 +321,7 @@ ilias.questions.assOrderingQuestion = function(a_id) {
 		} else {
 			answers[a_id].answer[i]=true;
 		}
-		answers[a_id].choice.push(result[i].id);
+		answers[a_id].choice.push(result[i]);
 	}
 	ilias.questions.showFeedback(a_id);
 };
@@ -343,14 +343,14 @@ ilias.questions.handleOrderingImages = function(a_id) {
 
 ilias.questions.assOrderingHorizontal = function(a_id) {
 
-	var result = document.querySelectorAll(`#order${a_id} > .answers`);
+	var result = jQuery('#order'+a_id).sortable('toArray');
 
 	answers[a_id].wrong = 0;
 	answers[a_id].passed = true;
 	answers[a_id].choice = [];
 
 	for (var i=0;i<result.length;i++) {
-		if (i+1 !== parseInt(result[i].id))
+		if (i+1 != result[i])
 		{
 			answers[a_id].passed = false;
 			answers[a_id].wrong ++;
@@ -358,8 +358,9 @@ ilias.questions.assOrderingHorizontal = function(a_id) {
 		} else {
 			answers[a_id].answer[i]=true;
 		}
-		answers[a_id].choice.push(result[i].id);
+		answers[a_id].choice.push(result[i]);
 	}
+
 	ilias.questions.showFeedback(a_id);
 };
 
@@ -765,7 +766,7 @@ ilias.questions.selectErrorText = function(a_id, node) {
 };
 
 ilias.questions.assErrorText = function(a_id) {
-  answers[a_id].wrong = 0;
+    answers[a_id].wrong = 0;
 	answers[a_id].passed = true;
 
 	if (questions[a_id].selected === undefined) {
@@ -1133,20 +1134,14 @@ ilias.questions.showCorrectAnswers =function(a_id) {
 
 		case 'assOrderingQuestion':
 		case 'assOrderingHorizontal':
-			const answers = questions[a_id].answers;
-			const answers_sorted = answers.sort(sortBySolutionorder);
-			const items=document.querySelectorAll(`#order${a_id} > .answers`);
-      items.forEach(
-        (item, i) => {
-          item.draggable = false;
-          item.id = i + 1;
-          let content_item = item.firstElementChild
-          if (content_item.firstElementChild !== null) {
-            content_item = content_item.firstElementChild;
-          }
-          content_item.innerHtml = answers_sorted[i].answertext;
-        }
-      );
+			var answers = questions[a_id].answers;
+			var answers_sorted = answers.sort(sortBySolutionorder);
+			var items=jQuery("#order"+a_id).children();
+			for (var i=0;i<items.length;i++) {
+				var j=i+1;
+				jQuery("#order"+a_id +" li:nth-child("+j+") div").html(answers_sorted[i].answertext);
+			}
+			jQuery("#order"+a_id).sortable("disable");
 			ilias.questions.handleOrderingImages(a_id);
 		break;
 		//end assOrderingQuestion

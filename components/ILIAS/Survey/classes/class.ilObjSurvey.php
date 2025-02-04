@@ -2439,13 +2439,11 @@ class ilObjSurvey extends ilObject
             }
 
             $active_id = $this->getActiveID($a_user_id, $a_anonymize_id, $a_appr_id);
-            if ($active_id) {   // 43908
-                $ntf->addAdditionalInfo(
-                    'results',
-                    $this->getParticipantTextResults($active_id),
-                    true
-                );
-            }
+            $ntf->addAdditionalInfo(
+                'results',
+                $this->getParticipantTextResults($active_id),
+                true
+            );
 
             $ntf->setGotoLangId('survey_notification_tutor_link');
             $ntf->setReasonLangId('survey_notification_finished_reason');

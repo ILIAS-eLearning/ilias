@@ -560,10 +560,8 @@ class ilStyleDataSet extends ilDataSet
                 $dir = str_replace("..", "", ($a_rec["StyleContainer"] ?? ""));
                 if ($dir != "" && $this->getImportDirectory() != "") {
                     $source_dir = $this->getImportDirectory() . "/" . $dir;
-                    if (is_dir($source_dir)) {
-                        $sm = $this->style_domain->style($newObj->getId());
-                        $sm->createContainerFromLocalDir($source_dir, "images", false);
-                    }
+                    $sm = $this->style_domain->style($newObj->getId());
+                    $sm->createContainerFromLocalDir($source_dir, "images", false);
                 }
                 break;
 
