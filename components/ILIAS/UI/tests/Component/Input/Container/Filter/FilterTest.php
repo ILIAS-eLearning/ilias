@@ -476,7 +476,9 @@ class FilterTest extends ILIAS_UI_TestBase
                 "withOnUpdate",
                 "appendOnUpdate",
                 "withResetTriggeredSignals",
-                "getTriggeredSignals"
+                "getTriggeredSignals",
+                "foldWith",
+                "getSubStructure"
             ])
             ->setMockClassName("Mock_InputNo" . ($no++))
             ->getMock();
