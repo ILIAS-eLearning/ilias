@@ -26,6 +26,7 @@ use ILIAS\UI\Implementation\Component\Table\Action as Implementation;
 use ILIAS\Data;
 use ILIAS\UI\Implementation\Component\Signal;
 use ILIAS\UI\URLBuilder;
+use ILIAS\UI\Implementation\Component\Prompt\Standard as Prompt;
 
 /**
  * Basic Tests for Table-Actions.
@@ -36,6 +37,7 @@ class ActionTest extends ILIAS_UI_TestBase
     protected Data\URI $link_target;
     protected Implementation\Standard $signal_action;
     protected Signal $signal_target;
+    protected Implementation\Standard $prompt_action;
 
     protected function buildFactories()
     {
@@ -60,6 +62,8 @@ class ActionTest extends ILIAS_UI_TestBase
         $this->link_action = $f->standard($label, $builder, $token);
         $this->signal_target = new Signal('sig_id');
         $this->signal_action = $this->link_action->withAsync(true);
+        $prompt = $this->createMock(Prompt::class);
+        $this->prompt_action = $f->standard($label, $prompt, $token);
     }
 
     public function testDataTableActionAttributes(): void
@@ -93,5 +97,24 @@ class ActionTest extends ILIAS_UI_TestBase
             'ref_id=1&namespace_rowids[]=test-id',
             urldecode($act->getTarget()->getQuery())
         );
+    }
+
+    public function testDataTableActionModes(): void
+    {
+        $this->assertFalse($this->link_action->isAsync());
+        $this->assertFalse($this->link_action->isPrompt());
+        $l = $this->link_action->withAsync();
+        $this->assertTrue($l->isAsync());
+        $this->assertFalse($l->isPrompt());
+
+        $l = $this->prompt_action;
+        $this->assertFalse($l->isAsync());
+        $this->assertTrue($l->isPrompt());
+    }
+
+    public function testDataTableActionWithDoubleModes(): void
+    {
+        $this->expectException(\LogicException::class);
+        $this->prompt_action->withAsync();
     }
 }

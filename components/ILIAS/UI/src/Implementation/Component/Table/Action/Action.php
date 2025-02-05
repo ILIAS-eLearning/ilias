@@ -26,6 +26,7 @@ use ILIAS\UI\Component\Signal;
 use ILIAS\Data\URI;
 use ILIAS\UI\URLBuilder;
 use ILIAS\UI\URLBuilderToken;
+use ILIAS\UI\Component\Prompt\Prompt;
 
 abstract class Action implements I\Action
 {
@@ -43,10 +44,11 @@ abstract class Action implements I\Action
 
     public function __construct(
         protected string $label,
-        protected URLBuilder $url_builder,
+        protected URLBuilder | Prompt $url_builder,
         protected URLBuilderToken $row_id_parameter
     ) {
-        $this->target = $url_builder->buildURI();
+        $this->target = $url_builder instanceof URLBuilder ?
+            $url_builder->buildURI() : $url_builder->getAsyncUrl();
     }
 
     public function getLabel(): string
@@ -66,16 +68,29 @@ abstract class Action implements I\Action
         return $clone;
     }
 
+    /**
+     * @deprecated with ILIAS 11.
+     */
     public function withAsync(bool $async = true): self
     {
+        if ($this->isPrompt()) {
+            throw new \LogicException("Action is configured to use Prompt already.", 1);
+        }
         $clone = clone $this;
         $clone->async = $async;
         return $clone;
     }
-
+    /**
+     * @deprecated with ILIAS 11.
+     */
     public function isAsync(): bool
     {
         return $this->async;
+    }
+
+    public function isPrompt(): bool
+    {
+        return $this->url_builder instanceof Prompt;
     }
 
     public function withRowId(string $row_id): self
@@ -86,23 +101,32 @@ abstract class Action implements I\Action
         if ($target instanceof Signal) {
             $target->addOption('rowid', $row_id);
         }
-        if ($target instanceof URI) {
-            $target = $this->url_builder->withParameter(
+        if ($target instanceof URI
+            || $target instanceof URLBuilder
+        ) {
+            $builder = $this->url_builder instanceof URLBuilder ?
+                $this->url_builder : $this->url_builder->getURLBuilder();
+            $target = $builder->withParameter(
                 $this->row_id_parameter,
                 [$row_id]
             )
             ->buildURI();
         }
+
         $clone->target = $target;
         return $clone;
     }
 
     public function getURLBuilderJS(): string
     {
-        return $this->url_builder->renderObject([$this->row_id_parameter]);
+        $builder = $this->url_builder instanceof URLBuilder ?
+            $this->url_builder : $this->url_builder->getURLBuilder();
+        return $builder->renderObject([$this->row_id_parameter]);
     }
     public function getURLBuilderTokensJS(): string
     {
-        return $this->url_builder->renderTokens([$this->row_id_parameter]);
+        $builder = $this->url_builder instanceof URLBuilder ?
+            $this->url_builder : $this->url_builder->getURLBuilder();
+        return $builder->renderTokens([$this->row_id_parameter]);
     }
 }

@@ -30,6 +30,8 @@ use ILIAS\Data\URI;
 use ILIAS\UI\Implementation\Component\Table\Action\Action;
 use ILIAS\UI\Implementation\Component\Input\ViewControl\Pagination;
 use ILIAS\UI\Implementation\Component\Input\NameSource;
+use Psr\Http\Message\ServerRequestInterface;
+use ILIAS\UI\URLBuilder;
 
 class Renderer extends AbstractComponentRenderer
 {
@@ -222,6 +224,7 @@ class Renderer extends AbstractComponentRenderer
         $tpl->setVariable('TITLE', $component->getTitle());
         $tpl->setVariable('COL_COUNT', (string) $component->getColumnCount());
         $tpl->setVariable('VIEW_CONTROLS', $default_renderer->render($view_controls));
+        $tpl->setVariable('DIALOG', $this->renderPromptTemplate($component->getRequest(), $default_renderer));
 
         $sortation_signal = null;
         // if the generator is empty, and thus invalid, we render an empty row.
@@ -257,6 +260,16 @@ class Renderer extends AbstractComponentRenderer
 
         $this->renderTableHeader($default_renderer, $component, $tpl, $sortation_signal);
         return $tpl->get();
+    }
+
+    protected function renderPromptTemplate(
+        ServerRequestInterface $request,
+        RendererInterface $default_renderer
+    ): string {
+        $uri = new URLBuilder($this->getDataFactory()->uri($request->getUri()->__toString()));
+        return $default_renderer->render(
+            $this->getUIFactory()->prompt()->standard($uri)
+        );
     }
 
     protected function renderTableHeader(
@@ -369,7 +382,7 @@ class Renderer extends AbstractComponentRenderer
         $actions = [];
         foreach ($component->getAllActions() as $action_id => $action) {
             $component = $component->withAdditionalOnLoadCode($this->getActionRegistration((string) $action_id, $action));
-            if ($action->isAsync()) {
+            if ($action->isAsync() || $action->isPrompt()) {
                 $signal = clone $component->getAsyncActionSignal();
                 $signal->addOption(Action::OPT_ACTIONID, $action_id);
                 $action = $action->withSignalTarget($signal);
@@ -503,13 +516,19 @@ class Renderer extends AbstractComponentRenderer
         string $action_id,
         Action $action
     ): \Closure {
-        $async = $action->isAsync() ? 'true' : 'false';
+        $async = 'none';
+        if ($action->isAsync()) {
+            $async = 'async';
+        }
+        if ($action->isPrompt()) {
+            $async = 'prompt';
+        }
         $url_builder_js = $action->getURLBuilderJS();
         $tokens_js = $action->getURLBuilderTokensJS();
 
         return static function ($id) use ($action_id, $async, $url_builder_js, $tokens_js): string {
             return "
-                il.UI.table.data.get('{$id}').registerAction('{$action_id}', {$async}, {$url_builder_js}, {$tokens_js});
+                il.UI.table.data.get('{$id}').registerAction('{$action_id}', '{$async}', {$url_builder_js}, {$tokens_js});
             ";
         };
     }

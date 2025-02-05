@@ -122,6 +122,18 @@ function base()
                 $row_id_token
             )
             ->withAsync()
+            ,
+        /**
+         * A prompt Action will open a Prompt and load its url, expecting a Prompt State in return.
+         */
+        'status' =>
+            $f->table()->action()->standard(
+                'Status',
+                $f->prompt()->standard(
+                    $url_builder->withParameter($action_parameter_token, "status")
+                ),
+                $row_id_token
+            )
     ];
 
 
@@ -281,6 +293,15 @@ function base()
                 $r->render($f->messageBox()->info('an info message: <br><li>' . implode('<li>', $ids)))
                 . '<script data-replace-marker="script">console.log("ASYNC JS, too");</script>'
             );
+            exit();
+        }
+        if ($action === 'status') {
+            $ids = array_map(fn($id) => $f->button()->shy($id, '#'), $ids);
+            $message = $f->messageBox()->info('some message box in a prompt-dialog')
+                ->withLinks($ids);
+
+            $response = $f->prompt()->state()->show($message);
+            echo($r->renderAsync($response));
             exit();
         }
 

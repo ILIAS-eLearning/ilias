@@ -25,5 +25,9 @@ use ILIAS\Data\URI;
 
 interface Action extends \ILIAS\UI\Component\Component
 {
+    /**
+     * @deprecated in ILIAS 11. Please use a Prompt instead.
+     * call the Action asynchronously
+     */
     public function withAsync(bool $async = true): self;
 }
