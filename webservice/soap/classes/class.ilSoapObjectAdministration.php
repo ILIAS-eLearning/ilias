@@ -1436,28 +1436,37 @@ class ilSoapObjectAdministration extends ilSoapAdministration
                 }
 
                 $items = new ilObjectActivation();
-                $items->toggleChangeable($ref_data['time_target']['changeable']);
+                if (isset($ref_data['time_target']['changeable'])) {
+                    $items->toggleChangeable($ref_data['time_target']['changeable']);
+                }
                 $items->setTimingStart($ref_data['time_target']['starting_time']);
                 $items->setTimingEnd($ref_data['time_target']['ending_time']);
-                $items->toggleVisible($ref_data['time_target']['timing_visibility']);
-                $items->setSuggestionStart($ref_data['time_target']['suggestion_start']);
-                $items->setSuggestionEnd($ref_data['time_target']['suggestion_end']);
+                if (isset($ref_data['time_target']['timing_visibility'])) {
+                    $items->toggleVisible($ref_data['time_target']['timing_visibility']);
+                }
+                if (isset($ref_data['time_target']['suggestion_start'])) {
+                    $items->setSuggestionStart($ref_data['time_target']['suggestion_start']);
+                }
+                if (isset($ref_data['time_target']['suggestion_end'])) {
+                    $items->setSuggestionEnd($ref_data['time_target']['suggestion_end']);
+                }
+                if (isset($ref_data['time_target']['timing_type'])) {
+                    switch ($ref_data['time_target']['timing_type']) {
+                        case ilObjectXMLWriter::TIMING_DEACTIVATED:
+                            $ilLog->write(__METHOD__ . ilObjectActivation::TIMINGS_DEACTIVATED . ' ' . $ref_data['time_target']['timing_type']);
+                            $items->setTimingType(ilObjectActivation::TIMINGS_DEACTIVATED);
+                            break;
 
-                switch ($ref_data['time_target']['timing_type']) {
-                    case ilObjectXMLWriter::TIMING_DEACTIVATED:
-                        $ilLog->write(__METHOD__ . ilObjectActivation::TIMINGS_DEACTIVATED . ' ' . $ref_data['time_target']['timing_type']);
-                        $items->setTimingType(ilObjectActivation::TIMINGS_DEACTIVATED);
-                        break;
+                        case ilObjectXMLWriter::TIMING_TEMPORARILY_AVAILABLE:
+                            $ilLog->write(__METHOD__ . ilObjectActivation::TIMINGS_ACTIVATION . ' ' . $ref_data['time_target']['timing_type']);
+                            $items->setTimingType(ilObjectActivation::TIMINGS_ACTIVATION);
+                            break;
 
-                    case ilObjectXMLWriter::TIMING_TEMPORARILY_AVAILABLE:
-                        $ilLog->write(__METHOD__ . ilObjectActivation::TIMINGS_ACTIVATION . ' ' . $ref_data['time_target']['timing_type']);
-                        $items->setTimingType(ilObjectActivation::TIMINGS_ACTIVATION);
-                        break;
-
-                    case ilObjectXMLWriter::TIMING_PRESETTING:
-                        $ilLog->write(__METHOD__ . ilObjectActivation::TIMINGS_PRESETTING . ' ' . $ref_data['time_target']['timing_type']);
-                        $items->setTimingType(ilObjectActivation::TIMINGS_PRESETTING);
-                        break;
+                        case ilObjectXMLWriter::TIMING_PRESETTING:
+                            $ilLog->write(__METHOD__ . ilObjectActivation::TIMINGS_PRESETTING . ' ' . $ref_data['time_target']['timing_type']);
+                            $items->setTimingType(ilObjectActivation::TIMINGS_PRESETTING);
+                            break;
+                    }
                 }
                 $items->update($new_ref_id);
             }

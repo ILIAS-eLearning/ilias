@@ -62,9 +62,15 @@ class ilObjectXMLParser extends ilSaxParser
                         IL_INST_ID
                     )
                 );
-                $this->addProperty('offline', $a_attribs['offline']);
-                break;
+                // Check if 'offline' attribute exists before adding it
+                if (array_key_exists('offline', $a_attribs)) {
+                    $this->addProperty('offline', $a_attribs['offline']);
+                } else {
+                    // You can choose to set a default value if necessary
+                    $this->addProperty('offline', null);
+                }
 
+                // no break
             case 'ImportId':
             case 'LastUpdate':
             case 'CreateDate':
