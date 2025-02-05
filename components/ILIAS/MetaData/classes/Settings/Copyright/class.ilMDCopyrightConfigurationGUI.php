@@ -33,9 +33,6 @@ use ILIAS\FileUpload\MimeType;
 use ILIAS\ResourceStorage\Services as IRSS;
 use ILIAS\MetaData\Copyright\Database\Wrapper;
 
-/**
- * @ilCtrl_Calls ilMDCopyrightConfigurationGUI: ilMDCopyrightUsageGUI, ilMDCopyrightImageUploadHandlerGUI
- */
 class ilMDCopyrightConfigurationGUI
 {
     protected ilCtrl $ctrl;
@@ -95,7 +92,6 @@ class ilMDCopyrightConfigurationGUI
 
         switch ($next_class) {
             case strtolower(ilMDCopyrightUsageGUI::class):
-                // this command is used if copyrightUsageGUI calls getParentReturn (see ...UsageGUI->setTabs)
                 $this->ctrl->setReturn($this, 'showCopyrightSelection');
                 $entry = $this->repository->getEntry($this->initEntryIdFromQuery());
                 $gui = new ilMDCopyrightUsageGUI($entry);
@@ -121,7 +117,7 @@ class ilMDCopyrightConfigurationGUI
 
     public function showCopyrightSelection(
         int $current_id = 0,
-        RoundTrip $current_modal = null
+        ?RoundTrip $current_modal = null
     ): void {
         $has_write = $this->access_service->hasCurrentUserWriteAccess();
 
@@ -260,7 +256,7 @@ class ilMDCopyrightConfigurationGUI
     }
 
     protected function initCopyrightEditModal(
-        EntryInterface $entry = null,
+        ?EntryInterface $entry = null,
         bool $open_on_load = false
     ): RoundTrip {
         $inputs = [];

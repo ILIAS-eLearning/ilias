@@ -99,7 +99,7 @@ class ilLMPresentationGUI implements ilCtrlBaseClassInterface, ilCtrlSecurityInt
         bool $a_all_languages = false,
         string $a_export_dir = "",
         bool $claim_repo_context = true,
-        array $query_params = null,
+        ?array $query_params = null,
         bool $embed_mode = false
     ) {
         global $DIC;
@@ -2099,7 +2099,6 @@ class ilLMPresentationGUI implements ilCtrlBaseClassInterface, ilCtrlSecurityInt
             $tpl->parseCurrentBlock();
         }
 
-        // output copyright information
         if ($lom_cp_helper->hasPresetCopyright($lom_reader)) {
             $copyright = $this->ui->renderer()->render(
                 $lom_cp_helper->readPresetCopyright($lom_reader)->presentAsUIComponents()
@@ -2138,7 +2137,6 @@ class ilLMPresentationGUI implements ilCtrlBaseClassInterface, ilCtrlSecurityInt
         }
         $tpl = new ilTemplate("tpl.lm_download_list.html", true, true, "components/ILIAS/LearningModule");
 
-        // output copyright information
         $lom_cp_helper = $this->lom_services->copyrightHelper();
         $lom_reader = $this->lom_services->read($this->lm->getId(), 0, $this->lm->getType());
         if ($lom_cp_helper->hasPresetCopyright($lom_reader)) {

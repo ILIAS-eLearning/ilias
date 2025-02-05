@@ -7348,7 +7348,7 @@ class ilObjTest extends ilObject
         return $this->score_settings_repo;
     }
 
-    public function updateTestResultCache(int $active_id, ilAssQuestionProcessLocker $process_locker = null): void
+    public function updateTestResultCache(int $active_id, ?ilAssQuestionProcessLocker $process_locker = null): void
     {
         $pass = ilObjTest::_getResultPass($active_id);
 
@@ -7441,8 +7441,8 @@ class ilObjTest extends ilObject
     public function updateTestPassResults(
         int $active_id,
         int $pass,
-        ilAssQuestionProcessLocker $process_locker = null,
-        int $test_obj_id = null
+        ?ilAssQuestionProcessLocker $process_locker = null,
+        ?int $test_obj_id = null
     ): array {
         $data = $this->getQuestionCountAndPointsForPassOfParticipant($active_id, $pass);
         $time = $this->getWorkingTimeOfParticipantForPass($active_id, $pass);

@@ -1,9 +1,5 @@
 <?php
 
-declare(strict_types=0);
-
-use ILIAS\Cron\Schedule\CronJobScheduleType;
-
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -19,6 +15,10 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
  * https://github.com/ILIAS-eLearning
  *
  *********************************************************************/
+
+declare(strict_types=0);
+
+use ILIAS\Cron\Schedule\CronJobScheduleType;
 
 class ilTimingsCronReminder extends ilCronJob
 {

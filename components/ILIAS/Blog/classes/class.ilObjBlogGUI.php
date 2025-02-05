@@ -1693,7 +1693,7 @@ class ilObjBlogGUI extends ilObject2GUI implements ilDesktopItemHandling
     public function renderNavigation(
         string $a_list_cmd = "render",
         string $a_posting_cmd = "preview",
-        string $a_link_template = null,
+        ?string $a_link_template = null,
         bool $a_show_inactive = false,
         int $a_blpg = 0
     ): string {
@@ -2295,7 +2295,7 @@ class ilObjBlogGUI extends ilObject2GUI implements ilDesktopItemHandling
     ////
 
     public function setContentStyleSheet(
-        ilGlobalTemplateInterface $a_tpl = null
+        ?ilGlobalTemplateInterface $a_tpl = null
     ): void {
         $tpl = $this->tpl;
 

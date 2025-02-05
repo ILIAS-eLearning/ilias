@@ -858,7 +858,7 @@ abstract class ilObjPortfolioBaseGUI extends ilObject2GUI
      * Select target portfolio for page(s) copy
      */
     public function copyPageForm(
-        ilPropertyFormGUI $a_form = null
+        ?ilPropertyFormGUI $a_form = null
     ): void {
         $prtf_pages = $this->port_request->getPortfolioPageIds();
 
@@ -939,7 +939,7 @@ abstract class ilObjPortfolioBaseGUI extends ilObject2GUI
     ////
 
     public function setContentStyleSheet(
-        ilGlobalTemplateInterface $a_tpl = null
+        ?ilGlobalTemplateInterface $a_tpl = null
     ): void {
         $tpl = $this->tpl;
 
