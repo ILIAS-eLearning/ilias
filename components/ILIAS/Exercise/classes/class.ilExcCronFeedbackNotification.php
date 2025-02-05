@@ -26,14 +26,9 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
  */
 class ilExcCronFeedbackNotification extends ilCronJob
 {
-    protected ilLanguage $lng;
-
-
-    public function __construct()
+    public function init(): void
     {
-        global $DIC;
-
-        $this->lng = $DIC->language();
+        $this->lng->loadLanguageModule('exc');
     }
 
     public function getId(): string
@@ -43,18 +38,12 @@ class ilExcCronFeedbackNotification extends ilCronJob
 
     public function getTitle(): string
     {
-        $lng = $this->lng;
-
-        $lng->loadLanguageModule("exc");
-        return $lng->txt("exc_global_feedback_file_cron");
+        return $this->lng->txt("exc_global_feedback_file_cron");
     }
 
     public function getDescription(): string
     {
-        $lng = $this->lng;
-
-        $lng->loadLanguageModule("exc");
-        return $lng->txt("exc_global_feedback_file_cron_info");
+        return $this->lng->txt("exc_global_feedback_file_cron_info");
     }
 
     public function getDefaultScheduleType(): CronJobScheduleType

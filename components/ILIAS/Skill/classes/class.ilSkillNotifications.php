@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -16,8 +14,9 @@ declare(strict_types=1);
  * https://www.ilias.de
  * https://github.com/ILIAS-eLearning
  *
- ********************************************************************
- */
+ *********************************************************************/
+
+declare(strict_types=1);
 
 use ILIAS\Skill\Service\SkillTreeService;
 use ILIAS\Cron\Schedule\CronJobScheduleType;
@@ -29,17 +28,17 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
  */
 class ilSkillNotifications extends ilCronJob
 {
-    protected ilLanguage $lng;
     protected ilObjUser $user;
     protected ilIniFile $client_ini;
     protected ilTree $tree;
     protected SkillTreeService $tree_service;
 
-    public function __construct()
+    public function init(): void
     {
+        $this->lng->loadLanguageModule("skll");
+
         global $DIC;
 
-        $this->lng = $DIC->language();
         if (isset($DIC["ilUser"])) {
             $this->user = $DIC->user();
         }
@@ -59,16 +58,12 @@ class ilSkillNotifications extends ilCronJob
 
     public function getTitle(): string
     {
-        $lng = $this->lng;
-        $lng->loadLanguageModule("skll");
-        return $lng->txt("skll_skill_notification");
+        return $this->lng->txt("skll_skill_notification");
     }
 
     public function getDescription(): string
     {
-        $lng = $this->lng;
-        $lng->loadLanguageModule("skll");
-        return $lng->txt("skll_skill_notification_desc");
+        return $this->lng->txt("skll_skill_notification_desc");
     }
 
     public function getDefaultScheduleType(): CronJobScheduleType

@@ -19,6 +19,7 @@
 declare(strict_types=1);
 
 use ILIAS\Cron\Schedule\CronJobScheduleType;
+use ILIAS\Logging\LoggerFactory;
 
 /**
  * @author  Niels Theen <ntheen@databay.de>
@@ -71,14 +72,20 @@ class ilCertificateCronTest extends ilCertificateBaseTestCase
 
         $dic['lng'] = $languageMock;
 
+        $logger_factory = $this->getMockBuilder(LoggerFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
         $cron = new ilCertificateCron(
+            'components\ILIAS\Certificate',
+            $languageMock,
+            $logger_factory,
             $queueRepository,
             $templateRepository,
             $userRepository,
             $valueReplacement,
             $logger,
-            $dic,
-            $languageMock
+            $dic
         );
 
         $title = $cron->getTitle();
@@ -132,14 +139,20 @@ class ilCertificateCronTest extends ilCertificateBaseTestCase
 
         $dic['lng'] = $languageMock;
 
+        $logger_factory = $this->getMockBuilder(LoggerFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
         $cron = new ilCertificateCron(
+            'components\ILIAS\Certificate',
+            $languageMock,
+            $logger_factory,
             $queueRepository,
             $templateRepository,
             $userRepository,
             $valueReplacement,
             $logger,
-            $dic,
-            $languageMock
+            $dic
         );
 
         $title = $cron->getDescription();
@@ -211,14 +224,20 @@ class ilCertificateCronTest extends ilCertificateBaseTestCase
                 $userMock
             );
 
+        $logger_factory = $this->getMockBuilder(LoggerFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
         $cron = new ilCertificateCron(
+            'components\ILIAS\Certificate',
+            $languageMock,
+            $logger_factory,
             $queueRepository,
             $templateRepository,
             $userRepository,
             $valueReplacement,
             $logger,
             $dic,
-            $languageMock,
             $objectHelper
         );
 
@@ -292,15 +311,20 @@ class ilCertificateCronTest extends ilCertificateBaseTestCase
                 $objectMock,
                 $userMock
             );
+        $logger_factory = $this->getMockBuilder(LoggerFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $cron = new ilCertificateCron(
+            'components\ILIAS\Certificate',
+            $languageMock,
+            $logger_factory,
             $queueRepository,
             $templateRepository,
             $userRepository,
             $valueReplacement,
             $logger,
             $dic,
-            $languageMock,
             $objectHelper
         );
 
@@ -375,14 +399,20 @@ class ilCertificateCronTest extends ilCertificateBaseTestCase
                 $userMock
             );
 
+        $logger_factory = $this->getMockBuilder(LoggerFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
         $cron = new ilCertificateCron(
+            'components\ILIAS\Certificate',
+            $languageMock,
+            $logger_factory,
             $queueRepository,
             $templateRepository,
             $userRepository,
             $valueReplacement,
             $logger,
             $dic,
-            $languageMock,
             $objectHelper
         );
 
@@ -457,14 +487,20 @@ class ilCertificateCronTest extends ilCertificateBaseTestCase
                 $userMock
             );
 
+        $logger_factory = $this->getMockBuilder(LoggerFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
         $cron = new ilCertificateCron(
+            'components\ILIAS\Certificate',
+            $languageMock,
+            $logger_factory,
             $queueRepository,
             $templateRepository,
             $userRepository,
             $valueReplacement,
             $logger,
             $dic,
-            $languageMock,
             $objectHelper
         );
 
@@ -539,14 +575,20 @@ class ilCertificateCronTest extends ilCertificateBaseTestCase
                 $userMock
             );
 
+        $logger_factory = $this->getMockBuilder(LoggerFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
         $cron = new ilCertificateCron(
+            'components\ILIAS\Certificate',
+            $languageMock,
+            $logger_factory,
             $queueRepository,
             $templateRepository,
             $userRepository,
             $valueReplacement,
             $logger,
             $dic,
-            $languageMock,
             $objectHelper
         );
 

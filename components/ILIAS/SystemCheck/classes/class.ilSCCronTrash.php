@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -18,6 +16,8 @@ declare(strict_types=1);
  *
  *********************************************************************/
 
+declare(strict_types=1);
+
 use ILIAS\Cron\Schedule\CronJobScheduleType;
 
 /**
@@ -26,18 +26,16 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
  */
 class ilSCCronTrash extends ilCronJob
 {
-    protected ilLanguage $lng;
     protected ilTree $tree;
     protected ilObjectDefinition $objDefinition;
 
-    public function __construct()
+    public function init(): void
     {
-        global $DIC;
+        $this->lng->loadLanguageModule('sysc');
 
-        $this->lng = $DIC->language();
+        global $DIC;
         $this->tree = $DIC->repositoryTree();
         $this->objDefinition = $DIC['objDefinition'];
-        $this->lng->loadLanguageModule('sysc');
     }
 
     public function getId(): string

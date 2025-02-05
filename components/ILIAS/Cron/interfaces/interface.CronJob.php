@@ -18,14 +18,21 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../vendor/composer/vendor/autoload.php';
-require_once __DIR__ . '/../artifacts/bootstrap_default.php';
+namespace ILIAS\Cron;
 
-ilContext::init(ilContext::CONTEXT_CRON);
+interface CronJob
+{
+    public function getComponent(): string;
+    public function getId(): string;
+    public function getTitle(): string;
+    public function getDescription(): string;
+    public function getScheduleType(): ?Schedule\CronJobScheduleType;
+    public function getScheduleValue(): ?int;
+    public function run(): \ilCronJobResult;
 
-entry_point('ILIAS Legacy Initialisation Adapter');
-
-$cron = new ILIAS\Cron\CLI\App(
-    new ILIAS\Cron\CLI\Commands\RunActiveJobsCommand()
-);
-$cron->run();
+    /**
+     * initialize further dependencies of the job;
+     * once the jobs are properly constructed via Component,this is obsolete.
+     */
+    public function init(): void;
+}

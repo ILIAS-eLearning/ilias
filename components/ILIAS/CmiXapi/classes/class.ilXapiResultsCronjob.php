@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -17,6 +15,9 @@ declare(strict_types=1);
  * https://github.com/ILIAS-eLearning
  *
  *********************************************************************/
+
+declare(strict_types=1);
+
 use ILIAS\Cron\Schedule\CronJobScheduleType;
 
 /**
@@ -40,14 +41,10 @@ class ilXapiResultsCronjob extends ilCronJob
 
     private \ILIAS\DI\Container $dic;
 
-    public function __construct()
+    public function init(): void
     {
-        global $DIC; /* @var \ILIAS\DI\Container $DIC */
-        $this->dic = $DIC;
-
-        $DIC->language()->loadLanguageModule('cmix');
-
-        $this->log = ilLoggerFactory::getLogger('cmix');
+        $this->lng->loadLanguageModule('cmix');
+        $this->log = $this->logger_factory->getLogger('cmix');
 
         $this->initThisRunTS();
         $this->readLastRunTS();
@@ -88,12 +85,12 @@ class ilXapiResultsCronjob extends ilCronJob
 
     public function getTitle(): string
     {
-        return $this->dic->language()->txt("cron_xapi_results_evaluation");
+        return $this->lng->txt("cron_xapi_results_evaluation");
     }
 
     public function getDescription(): string
     {
-        return $this->dic->language()->txt("cron_xapi_results_evaluation_desc");
+        return $this->lng->txt("cron_xapi_results_evaluation_desc");
     }
 
     public function hasAutoActivation(): bool

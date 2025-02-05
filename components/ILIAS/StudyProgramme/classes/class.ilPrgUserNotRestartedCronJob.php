@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -18,6 +16,8 @@ declare(strict_types=1);
  *
  *********************************************************************/
 
+declare(strict_types=1);
+
 use ILIAS\Cron\Schedule\CronJobScheduleType;
 
 /**
@@ -28,16 +28,13 @@ class ilPrgUserNotRestartedCronJob extends ilCronJob
     private const ID = 'prg_user_not_restarted';
 
     protected ilComponentLogger $log;
-    protected ilLanguage $lng;
     protected ilPRGAssignmentDBRepository $assignment_repo;
     protected ilPrgCronJobAdapter $adapter;
 
-    public function __construct()
+    public function init(): void
     {
-        global $DIC;
-        $this->log = $DIC['ilLog'];
-        $this->lng = $DIC['lng'];
         $this->lng->loadLanguageModule('prg');
+        $this->log = $this->logger_factory->getLogger('prg');
 
         $dic = ilStudyProgrammeDIC::dic();
         $this->assignment_repo = $dic['repo.assignment'];

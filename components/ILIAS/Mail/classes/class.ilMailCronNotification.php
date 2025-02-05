@@ -28,17 +28,17 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
 class ilMailCronNotification extends ilCronJob
 {
     private GlobalHttpState $http;
-    protected ilLanguage $lng;
     protected ilSetting $settings;
     protected bool $initDone = false;
 
-    protected function init(): void
+    public function init(): void
     {
+        $this->lng->loadLanguageModule('mail');
+
         global $DIC;
 
         if (!$this->initDone) {
             $this->settings = $DIC->settings();
-            $this->lng = $DIC->language();
             $this->http = $DIC->http();
 
             $this->initDone = true;
@@ -52,17 +52,11 @@ class ilMailCronNotification extends ilCronJob
 
     public function getTitle(): string
     {
-        $this->init();
-
         return $this->lng->txt('cron_mail_notification');
     }
 
     public function getDescription(): string
     {
-        $this->init();
-
-        $this->lng->loadLanguageModule('mail');
-
         return  sprintf(
             $this->lng->txt('cron_mail_notification_desc'),
             $this->lng->txt('mail_allow_external')

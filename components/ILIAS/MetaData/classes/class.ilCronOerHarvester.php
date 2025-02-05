@@ -33,18 +33,15 @@ class ilCronOerHarvester extends ilCronJob
     protected const DEFAULT_SCHEDULE_VALUE = 1;
 
     private ilLogger $logger;
-    private ilLanguage $lng;
     private Initiator $initiator;
     private SettingsInterface $settings;
 
-    public function __construct()
+    public function init(): void
     {
-        global $DIC;
-
-        $this->logger = $DIC->logger()->meta();
-        $this->lng = $DIC->language();
         $this->lng->loadLanguageModule('meta');
+        $this->logger = $this->logger_factory->getLogger('meta');
 
+        global $DIC;
         $this->initiator = new Initiator($DIC);
         $this->settings = $this->initiator->settings();
     }

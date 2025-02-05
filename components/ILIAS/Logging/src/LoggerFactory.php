@@ -14,18 +14,13 @@
  * https://www.ilias.de
  * https://github.com/ILIAS-eLearning
  *
- *********************************************************************/
+ ********************************************************************
+ */
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../vendor/composer/vendor/autoload.php';
-require_once __DIR__ . '/../artifacts/bootstrap_default.php';
+namespace ILIAS\Logging;
 
-ilContext::init(ilContext::CONTEXT_CRON);
-
-entry_point('ILIAS Legacy Initialisation Adapter');
-
-$cron = new ILIAS\Cron\CLI\App(
-    new ILIAS\Cron\CLI\Commands\RunActiveJobsCommand()
-);
-$cron->run();
+interface LoggerFactory
+{
+}

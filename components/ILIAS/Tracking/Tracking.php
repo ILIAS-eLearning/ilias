@@ -39,5 +39,12 @@ class Tracking implements Component\Component
         $contribute[SetupAgentInterface::class] = fn() => new SetupAgent($pull[Refinery::class]);
         $contribute[Component\Resource\PublicAsset::class] = fn() =>
             new Component\Resource\ComponentJS($this, "ilObjStat.js");
+
+        $contribute[\ILIAS\Cron\CronJob::class] = static fn() =>
+            new \ilLPCronObjectStatistics(
+                self::class,
+                $use[Language\Language::class],
+                $use[\ILIAS\Logging\LoggerFactory::class]
+            );
     }
 }

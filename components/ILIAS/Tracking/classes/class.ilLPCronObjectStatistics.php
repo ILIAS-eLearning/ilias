@@ -28,20 +28,17 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
 class ilLPCronObjectStatistics extends ilCronJob
 {
     protected int $date = 0;
-
-    protected ilLanguage $lng;
     protected ilDBInterface $db;
     protected ilTree $tree;
     protected ilLogger $logger;
     protected ilCronManager $cron_manager;
 
-    public function __construct()
+    public function init(): void
     {
-        global $DIC;
+        $this->lng->loadLanguageModule('trac');
+        $this->logger = $this->logger_factory->getLogger('trac');
 
-        $this->logger = $DIC->logger()->trac();
-        $this->lng = $DIC->language();
-        $this->lng->loadLanguageModule("trac");
+        global $DIC;
         $this->db = $DIC->database();
         $this->tree = $DIC->repositoryTree();
         $this->cron_manager = $DIC->cron()->manager();

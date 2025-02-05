@@ -1,9 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
-
-
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -20,6 +16,8 @@ declare(strict_types=1);
  *
  *********************************************************************/
 
+declare(strict_types=1);
+
 use ILIAS\Cron\Schedule\CronJobScheduleType;
 
 /**
@@ -28,16 +26,13 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
  */
 class ilMembershipCronNotifications extends ilCronJob
 {
-    protected ilLanguage $lng;
     protected ilDBInterface $db;
     protected ilLogger $logger;
     protected ilTree $tree;
 
-    public function __construct()
+    public function init(): void
     {
         global $DIC;
-
-        $this->lng = $DIC->language();
         $this->db = $DIC->database();
         $this->logger = $DIC->logger()->mmbr();
         $this->tree = $DIC->repositoryTree();

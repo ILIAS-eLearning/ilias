@@ -1,9 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
-use ILIAS\Cron\Schedule\CronJobScheduleType;
-
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -20,20 +16,22 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
  *
  *********************************************************************/
 
+declare(strict_types=1);
+
+use ILIAS\Cron\Schedule\CronJobScheduleType;
+
 class ilLoggerCronCleanErrorFiles extends ilCronJob
 {
     protected const DEFAULT_VALUE_OLDER_THAN = 31;
 
-    protected ilLanguage $lng;
     protected ilSetting $settings;
     protected ilLoggingErrorSettings $error_settings;
 
-    public function __construct()
+    public function init(): void
     {
-        global $DIC;
+        $this->lng->loadLanguageModule('logging');
 
-        $this->lng = $DIC->language();
-        $this->lng->loadLanguageModule("logging");
+        global $DIC;
         $this->settings = new ilSetting('log');
         $this->error_settings = ilLoggingErrorSettings::getInstance();
     }

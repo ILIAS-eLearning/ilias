@@ -28,7 +28,6 @@ class ilCronDeleteNeverLoggedInUserAccounts extends \ilCronJob
 
     private string $roleIdWhiteliste = '';
     private int $thresholdInDays = self::DEFAULT_CREATION_THRESHOLD;
-    private Language $lng;
     private ilSetting $settings;
     private ilRbacReview $rbacreview;
     private ilObjectDataCache $objectDataCache;
@@ -36,8 +35,10 @@ class ilCronDeleteNeverLoggedInUserAccounts extends \ilCronJob
     private \ILIAS\Refinery\Factory $refinery;
     private \ilGlobalTemplateInterface $main_tpl;
 
-    public function __construct()
+    public function init(): void
     {
+        $this->lng->loadLanguageModule('usr');
+
         global $DIC;
         $this->main_tpl = $DIC->ui()->mainTemplate();
 
@@ -54,11 +55,6 @@ class ilCronDeleteNeverLoggedInUserAccounts extends \ilCronJob
                     'cron_users_without_login_delete_threshold',
                     (string) self::DEFAULT_CREATION_THRESHOLD
                 );
-            }
-
-            if (isset($DIC['lng'])) {
-                $this->lng = $DIC->language();
-                $this->lng->loadLanguageModule('usr');
             }
 
             if (isset($DIC['rbacreview'])) {

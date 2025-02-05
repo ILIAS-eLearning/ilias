@@ -24,16 +24,13 @@ class ilCalendarCronRemoteReader extends ilCronJob
 {
     private const DEFAULT_SYNC_HOURS = 1;
 
-    private ilLanguage $lng;
     private ilLogger $logger;
-
     private ?ilCalendarSettings $calendar_settings = null;
 
-    public function __construct()
+    public function init(): void
     {
+        $this->lng->loadLanguageModule('dateplaner');
         global $DIC;
-
-        $this->lng = $DIC->language();
         $this->logger = $DIC->logger()->cal();
         $this->calendar_settings = ilCalendarSettings::_getInstance();
     }
@@ -45,13 +42,11 @@ class ilCalendarCronRemoteReader extends ilCronJob
 
     public function getTitle(): string
     {
-        $this->lng->loadLanguageModule('dateplaner');
         return $this->lng->txt('cal_cronjob_remote_title');
     }
 
     public function getDescription(): string
     {
-        $this->lng->loadLanguageModule('dateplaner');
         return $this->lng->txt('cal_cronjob_remote_description');
     }
 
@@ -106,8 +101,8 @@ class ilCalendarCronRemoteReader extends ilCronJob
             $reader->setUser($remoteCalendar->getRemoteUser());
             $reader->setPass($remoteCalendar->getRemotePass());
             try {
-            $reader->read();
-            $reader->import($remoteCalendar);
+                $reader->read();
+                $reader->import($remoteCalendar);
             } catch (Exception $e) {
                 $this->logger->warning('Remote Calendar: ' . $remoteCalendar->getCategoryID());
                 $this->logger->warning('Reading remote calendar failed with message: ' . $e->getMessage());

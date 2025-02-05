@@ -29,24 +29,18 @@ class ilUserCronCheckAccounts extends ilCronJob
     protected int $counter = 0;
 
     private ilDBInterface $db;
-    private ilLanguage $lng;
     private ilComponentLogger $log;
 
-    public function __construct()
+    public function init(): void
     {
+        $this->lng->loadLanguageModule('usr');
+        $this->log = $this->logger_factory->getRootLogger();
+
         /** @var ILIAS\DI\Container $DIC */
         global $DIC;
 
         if (isset($DIC['ilDB'])) {
             $this->db = $DIC['ilDB'];
-        }
-
-        if (isset($DIC['lng'])) {
-            $this->lng = $DIC['lng'];
-        }
-
-        if (isset($DIC['ilDB'])) {
-            $this->log = $DIC['ilLog'];
         }
     }
 

@@ -33,23 +33,20 @@ class ilCronDeleteInactivatedUserAccounts extends ilCronJob
     /** @var int[] */
     private array $include_roles;
     private ilSetting $settings;
-    private Language $lng;
     private ilRbacReview $rbac_review;
     private ilObjectDataCache $objectDataCache;
     private \ILIAS\HTTP\GlobalHttpState $http;
     private \ILIAS\Refinery\Factory $refinery;
 
-    public function __construct()
+    public function init(): void
     {
+        $this->lng->loadLanguageModule('usr');
+
         /** @var ILIAS\DI\Container $DIC */
         global $DIC;
 
         if (isset($DIC['http'])) {
             $this->http = $DIC['http'];
-        }
-
-        if (isset($DIC['lng'])) {
-            $this->lng = $DIC['lng'];
         }
 
         if (isset($DIC['refinery'])) {

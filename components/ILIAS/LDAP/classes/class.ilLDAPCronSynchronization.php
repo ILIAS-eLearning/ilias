@@ -26,20 +26,18 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
 */
 class ilLDAPCronSynchronization extends ilCronJob
 {
-    private ilLanguage $lng;
     private ilLogger $logger;
     private ilCronManager $cronManager;
 
     private int $counter = 0;
 
-    public function __construct()
+    public function init(): void
     {
-        global $DIC;
+        $this->lng->loadLanguageModule('ldap');
 
+        global $DIC;
         $this->logger = $DIC->logger()->auth();
         $this->cronManager = $DIC->cron()->manager();
-        $this->lng = $DIC->language();
-        $this->lng->loadLanguageModule('ldap');
     }
 
     public function getId(): string

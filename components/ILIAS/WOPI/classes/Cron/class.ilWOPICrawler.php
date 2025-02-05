@@ -31,20 +31,18 @@ use ILIAS\Data\URI;
  */
 class ilWOPICrawler extends ilCronJob
 {
-    private ilLanguage $language;
     private ilSetting $settings;
     private Crawler $crawler;
     private AppRepository $app_repository;
     private ActionRepository $action_repository;
 
-    public function __construct()
+    public function init(): void
     {
+        $this->lng->loadLanguageModule('wopi');
+
         global $DIC;
-        $this->language = $DIC->language();
-        $this->language->loadLanguageModule('wopi');
         $this->settings = $DIC->settings();
         $this->crawler = new Crawler();
-
         $this->app_repository = new AppDBRepository($DIC->database());
         $this->action_repository = new ActionDBRepository($DIC->database());
     }
@@ -56,12 +54,12 @@ class ilWOPICrawler extends ilCronJob
 
     public function getTitle(): string
     {
-        return $this->language->txt('wopi_crawler_cronjob_title');
+        return $this->lng->txt('wopi_crawler_cronjob_title');
     }
 
     public function getDescription(): string
     {
-        return $this->language->txt('wopi_crawler_cronjob_description');
+        return $this->lng->txt('wopi_crawler_cronjob_description');
     }
 
     public function hasAutoActivation(): bool

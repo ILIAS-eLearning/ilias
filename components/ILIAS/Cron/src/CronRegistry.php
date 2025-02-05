@@ -18,14 +18,20 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../vendor/composer/vendor/autoload.php';
-require_once __DIR__ . '/../artifacts/bootstrap_default.php';
+namespace ILIAS\Cron;
 
-ilContext::init(ilContext::CONTEXT_CRON);
+class CronRegistry implements Registry
+{
+    /**
+     * @param ilCronJob[] $jobs
+     */
+    public function __construct(
+        private array $jobs
+    ) {
+    }
 
-entry_point('ILIAS Legacy Initialisation Adapter');
-
-$cron = new ILIAS\Cron\CLI\App(
-    new ILIAS\Cron\CLI\Commands\RunActiveJobsCommand()
-);
-$cron->run();
+    public function getAllJobs(): array
+    {
+        return $this->jobs;
+    }
+}

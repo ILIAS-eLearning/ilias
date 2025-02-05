@@ -26,18 +26,6 @@ use ILIAS\Cron\Schedule\CronJobScheduleType;
 class ilCronUpdateOrgUnitPaths extends ilCronJob
 {
     public const ID = "orgunit_paths";
-    protected ilDBInterface $db;
-    protected ilLogger $log;
-    protected ilTree $tree;
-
-    private ilLanguage $lng;
-
-    public function __construct()
-    {
-        global $DIC;
-
-        $this->lng = $DIC->language();
-    }
 
     public function getId(): string
     {
