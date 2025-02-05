@@ -42,8 +42,20 @@ function base()
             protected UIRenderer $r
         ) {
             $this->seq_data = [
-                ['c0', 'pos 1', 'the segment at position 1'],
-                ['c0', 'pos 2', 'the segment at position 2'],
+                ['c0', 'pos 1', '<div style="width: 100%;
+                                            height: 500px;
+                                            background-color: #b8d7ea;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;">
+                                            placeholder for the segment at position 1</div>'],
+                ['c0', 'pos 2', '<div style="width: 100%;
+                                            height: 700px;
+                                            background-color: #f6d9a1;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;">
+                                            placeholder for the segment at position 2</div>'],
                 ['c1', 'pos 3', 'the segment at position 3'],
                 ['c2', 'pos 4', 'the segment at position 4'],
                 ['c1', 'pos 5', 'the segment at position 5'],
@@ -73,7 +85,7 @@ function base()
 
             $segment = $this->f->legacy()->segment($title, $data);
 
-            if ($chunk === 'c1') {
+            if ($chunk === 'c0') {
                 $segment = $segment->withSegmentActions(
                     $this->f->button()->standard('a segment action for ' . $title, '#')
                 );
