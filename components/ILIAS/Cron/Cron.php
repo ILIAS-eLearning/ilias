@@ -34,12 +34,12 @@ class Cron implements Component\Component
     ): void {
         $contribute[\ILIAS\Setup\Agent::class] = static fn() =>
             new \ilCronJobSetupAgent(
-                $seek[\ILIAS\Cron\CronJob::class]
+                $use[\ILIAS\Cron\Registry::class]
             );
 
         $define[] = Cron\Registry::class;
 
-        $provide[Cron\Registry::class] = static fn() =>
+        $implement[Cron\Registry::class] = static fn() =>
             $internal[Cron\CronRegistry::class];
 
         $internal[Cron\CronRegistry::class] = static fn() =>

@@ -23,7 +23,7 @@ use ILIAS\Setup;
 class ilCronjobsRegisteredObjective implements Setup\Objective
 {
     public function __construct(
-        private array $cronjobs
+        private \ILIAS\Cron\Registry $registry
     ) {
     }
 
@@ -79,11 +79,10 @@ class ilCronjobsRegisteredObjective implements Setup\Objective
         $mock_logger_factory = new class () implements \ILIAS\Logging\LoggerFactory {
         };
 
-        $registry = new ILIAS\Cron\CronRegistry($this->cronjobs);
         $language = new ilSetupLanguage('en');
 
         $repo = new ilCronJobRepositoryImpl(
-            $registry,
+            $this->registry,
             $db,
             $settings_factory->settingsFor(),
             new ILIAS\components\Logging\NullLogger(),

@@ -24,7 +24,7 @@ use ILIAS\Refinery;
 class ilCronJobSetupAgent implements Setup\Agent
 {
     public function __construct(
-        private array $cronjobs
+        private \ILIAS\Cron\Registry $registry
     ) {
     }
 
@@ -41,14 +41,14 @@ class ilCronJobSetupAgent implements Setup\Agent
     public function getInstallObjective(Setup\Config $config = null): Setup\Objective
     {
         return new ilCronjobsRegisteredObjective(
-            $this->cronjobs
+            $this->registry
         );
     }
 
     public function getUpdateObjective(Setup\Config $config = null): Setup\Objective
     {
         return new ilCronjobsRegisteredObjective(
-            $this->cronjobs
+            $this->registry
         );
     }
 
