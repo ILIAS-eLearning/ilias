@@ -492,4 +492,9 @@ abstract class ilPageConfig
     {
         return $this->section_protection_info;
     }
+
+    public function appendCustomFunctions(array $menu): array
+    {
+        return $menu;
+    }
 }

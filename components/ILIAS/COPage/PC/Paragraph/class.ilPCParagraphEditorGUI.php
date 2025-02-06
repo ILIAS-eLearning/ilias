@@ -30,7 +30,7 @@ class ilPCParagraphEditorGUI implements \ILIAS\COPage\Editor\Components\PageComp
         int $style_id
     ): array {
         $cfg = $page_gui->getPageConfig();
-        $menu = ilPageObjectGUI::getTinyMenu(
+        $menu = $page_gui->getTinyMenu(
             $page_type,
             $cfg->getEnableInternalLinks(),
             $cfg->getEnableWikiLinks(),
