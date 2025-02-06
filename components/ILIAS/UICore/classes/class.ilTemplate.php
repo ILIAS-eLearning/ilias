@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -17,6 +15,8 @@ declare(strict_types=1);
  * https://github.com/ILIAS-eLearning
  *
  *********************************************************************/
+
+declare(strict_types=1);
 
 require_once __DIR__ . '/../lib/html-it/IT.php';
 require_once __DIR__ . '/../lib/html-it/ITX.php';
@@ -332,12 +332,12 @@ class ilTemplate extends HTML_Template_ITX
             if (ilStyleDefinition::getCurrentSkin() !== "default") {
                 $style = ilStyleDefinition::getCurrentStyle();
 
-                $fname = "./Customizing/global/skin/" .
+                $fname = "./Customizing/skin/" .
                     ilStyleDefinition::getCurrentSkin() . "/" . $style . "/" . $module_path
                     . basename($a_tplname);
 
                 if ($fname === "" || !file_exists($fname)) {
-                    $fname = "./Customizing/global/skin/" .
+                    $fname = "./Customizing/skin/" .
                         ilStyleDefinition::getCurrentSkin() . "/" . $module_path . basename($a_tplname);
                 }
             }
@@ -350,7 +350,7 @@ class ilTemplate extends HTML_Template_ITX
                 && ilStyleDefinition::getCurrentSkin() != "default") {
                 $style = ilStyleDefinition::getCurrentStyle();
                 $skin = ilStyleDefinition::getCurrentSkin();
-                $base_path = "./Customizing/global/skin/";
+                $base_path = "./Customizing/skin/";
                 $ui_path = "/" . str_replace("components/ILIAS/UI/src/templates/default", "UI", $a_tplname);
                 $fname = $base_path . ilStyleDefinition::getCurrentSkin() . "/" . $style . "/" . $ui_path;
 
