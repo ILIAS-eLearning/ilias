@@ -4194,21 +4194,29 @@ hr.il-divider-with-label {
 }
 
 .c-field-radio > .c-field-radio__item {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-areas: "input label" "input helpline";
+  grid-template-columns: auto 1fr;
   margin-top: 6px;
 }
 .c-field-radio > .c-field-radio__item:first-child {
   margin-top: 0;
 }
 .c-field-radio > .c-field-radio__item > input {
+  grid-area: input;
+  margin-top: 3px;
   margin-right: 9px;
   width: auto;
+  height: max-content;
+  align-self: baseline;
+  justify-self: end;
 }
 .c-field-radio > .c-field-radio__item > label {
+  grid-area: label;
   flex-grow: 1;
 }
 .c-field-radio > .c-field-radio__item > .c-input__help-byline {
+  grid-area: helpline;
   width: 100%;
 }
 
@@ -4225,7 +4233,6 @@ hr.il-divider-with-label {
 }
 .c-form ul.c-field-multiselect > li label {
   display: flex;
-  flex-wrap: wrap;
 }
 .c-form ul.c-field-multiselect > li label > input[type=checkbox] {
   margin-right: 9px;
@@ -4541,6 +4548,189 @@ hr.il-divider-with-label {
   font-family: Monospace, Courier;
 }
 
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition-property: height, max-height, padding;
+  transition-duration: 0.5s;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field {
+  order: 1;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__visibility-toggle,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__visibility-toggle {
+  order: 2;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field .c-input--searchable__field,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field .c-input--searchable__field {
+  margin-top: 6px;
+  width: 100%;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__search-input,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__search-input {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+  align-items: center;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__search-input label,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__search-input label {
+  display: flex;
+  width: max-content;
+  flex-grow: 1;
+  margin-bottom: 6px;
+  align-items: center;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__search-input label .label__text,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__search-input label .label__text {
+  margin-right: 12px;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__search-input label input,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__search-input label input {
+  flex-grow: 1;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__search-input .c-input--searchable__clear-search,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__search-input .c-input--searchable__clear-search {
+  margin-left: 12px;
+  width: auto;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__visibility-toggle,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__visibility-toggle {
+  margin-top: 6px;
+  width: auto;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field > ul.c-field-multiselect,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field > ul.c-field-multiselect {
+  display: flex;
+  flex-direction: column;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field > ul.c-field-multiselect li,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field > ul.c-field-multiselect li {
+  order: 2;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field > ul.c-field-multiselect li:has(input:checked),
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field > ul.c-field-multiselect li:has(input:checked) {
+  animation: fade-item-up 0.5s;
+  order: 1;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field > .c-field-radio,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field > .c-field-radio {
+  display: flex;
+  flex-direction: column;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field > .c-field-radio .c-field-radio__item,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field > .c-field-radio .c-field-radio__item {
+  order: 2;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field > .c-field-radio .c-field-radio__item:has(input:checked),
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field) .c-input__field > .c-input--searchable__field > .c-field-radio .c-field-radio__item:has(input:checked) {
+  animation: fade-item-up 0.5s;
+  order: 1;
+  margin-bottom: 6px;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__help-byline,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__help-byline {
+  display: none;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field > .c-input--searchable__search-input,
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field > .c-input--searchable__field input,
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field > .c-input--searchable__field > ul.c-field-multiselect li:has(input:not(:checked)),
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field > .c-input--searchable__field > .c-field-radio .c-field-radio__item:has(input:not(:checked)),
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field > .c-input--searchable__search-input,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field > .c-input--searchable__field input,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field > .c-input--searchable__field > ul.c-field-multiselect li:has(input:not(:checked)),
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field > .c-input--searchable__field > .c-field-radio .c-field-radio__item:has(input:not(:checked)) {
+  display: none !important;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field > .c-input--searchable__field > ul.c-field-multiselect li,
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field > .c-input--searchable__field > .c-field-radio .c-field-radio__item,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field > .c-input--searchable__field > ul.c-field-multiselect li,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field > .c-input--searchable__field > .c-field-radio .c-field-radio__item {
+  pointer-events: none;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field:has(input:checked) .c-input--searchable__nothing-selected,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field):not(.engaged) > .c-input__field:has(input:checked) .c-input--searchable__nothing-selected {
+  display: none;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field).engaged > .c-input__field,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field).engaged > .c-input__field {
+  padding: 9px 15px;
+  border: 1px solid #dddddd;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field).engaged > .c-input__field .c-input--searchable__nothing-selected,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field).engaged > .c-input__field .c-input--searchable__nothing-selected {
+  display: none;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field).engaged > .c-input__field > .c-input--searchable__search-input > .c-input,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field).engaged > .c-input__field > .c-input--searchable__search-input > .c-input {
+  display: block;
+}
+.c-input[data-il-ui-component=radio-field-input]:has(.c-input--searchable__field).engaged > .c-input__field > .c-input--searchable__field,
+.c-input[data-il-ui-component=multi-select-field-input]:has(.c-input--searchable__field).engaged > .c-input__field > .c-input--searchable__field {
+  margin-top: 6px;
+  overflow: auto;
+  border: 1px solid #dddddd;
+  padding: 6px 12px;
+  max-height: 300px;
+  animation: expanding-list 0.5s;
+}
+
+@keyframes fade-item-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+    order: 2;
+  }
+  50% {
+    opacity: 0;
+    transform: translateY(-20px);
+    order: 2;
+  }
+  51% {
+    opacity: 0;
+    transform: translateY(20px);
+    order: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    order: 1;
+  }
+}
+@keyframes fade-item-down {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+    order: 1;
+  }
+  50% {
+    opacity: 0;
+    transform: translateY(20px);
+    order: 1;
+  }
+  51% {
+    opacity: 0;
+    transform: translateY(-20px);
+    order: 2;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    order: 2;
+  }
+}
+@keyframes expanding-list {
+  0% {
+    max-height: 100px;
+  }
+  100% {
+    max-height: 300px;
+  }
+}
 .il-input-rating .il-input-rating__text {
   clear: both;
 }

@@ -17340,6 +17340,14 @@ ui#:#ui_link_url#:#URL
 ui#:#ui_md_input_edit#:#Edit
 ui#:#ui_md_input_view#:#View
 ui#:#ui_pagination_unlimited#:#Unlimited
+ui#:#ui_search_context_clear_search#:#Clear search
+ui#:#ui_search_context_filtered_results_aria_label#:#List of options (might be shortened when collapsed or using search)
+ui#:#ui_search_context_no_match#:#There was no match for the search term you entered.
+ui#:#ui_search_context_no_selection#:#Nothing selected.
+ui#:#ui_search_context_screen_reader_hint#:#Start typing and the field options below will be filtered accordingly.
+ui#:#ui_search_context_search_in#:#Search
+ui#:#ui_search_context_show_all_options#:#Show all options
+ui#:#ui_search_context_show_less#:#Show less
 ui#:#ui_select_dropdown_label#:#Please select
 ui#:#ui_table_no_records#:#No records
 ui#:#ui_transcription#:#Transcript
