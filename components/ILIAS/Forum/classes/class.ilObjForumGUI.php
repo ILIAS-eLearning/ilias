@@ -18,6 +18,7 @@
 
 declare(strict_types=1);
 
+use ILIAS\Forum\Thread\ForumThreadTableSessionStorage;
 use ILIAS\UI\Factory;
 use ILIAS\UI\Renderer;
 use ILIAS\UI\Component\Dropdown\Standard;
@@ -78,6 +79,7 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
     protected \ILIAS\Style\Content\Object\ObjectFacade $content_style_domain;
     protected \ILIAS\Style\Content\GUIService $content_style_gui;
     private array $modal_collection = [];
+    private ForumThreadTableSessionStorage $forum_thread_table_session_storage;
 
     public function __construct($data, int $id = 0, bool $call_by_reference = true, bool $prepare_output = true)
     {
@@ -122,6 +124,11 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
         if (is_object($this->object)) {
             $this->content_style_domain = $cs->domain()->styleForRefId($this->object->getRefId());
         }
+
+        $this->forum_thread_table_session_storage = new ForumThreadTableSessionStorage(
+            $this->ref_id,
+            $this->is_moderator
+        );
     }
 
     protected function initSessionStorage(): void
@@ -741,53 +748,38 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
             );
         }
 
-        $tbl = new ilForumThreadObjectTableGUI(
-            $this,
-            $cmd,
-            $ref_id,
-            $frm_object,
-            $this->is_moderator
-        );
-
-        $this->initializeThreadSortation($tbl);
-        $this->initializeThreadOffsetAndLimit($tbl);
-
-        $this->renderThreadOverview($tbl, $frm, $frm_object);
+        $this->renderThreadOverview($frm, $frm_object);
         return '';
     }
 
-    private function renderThreadOverview(ilForumThreadObjectTableGUI $tbl, ilForum $frm, ForumDto $frm_object): void
+    private function renderThreadOverview(ilForum $frm, ForumDto $frm_object): void
     {
-        $data_objects = $tbl->setMapper($frm)->fetchDataAnReturnObject();
+        $threads_page = $this->forum_thread_table_session_storage->fetchData($frm, $frm_object);
 
         $top_group = [];
         $thread_group = [];
 
-        if (count($data_objects) > 0) {
-            foreach ($data_objects as $thread) {
-                if (array_key_exists('thread', $thread)) {
-                    /** @var ilForumTopic $current_thread */
-                    $current_thread = $thread['thread'];
-                    $ref_id = $this->object->getRefId();
-                    $subject = $current_thread->getSubject();
-                    if ($current_thread->isClosed()) {
-                        $subject .= ' (' . $this->lng->txt('forums_closed') . ')';
-                    }
+        if (count($threads_page->getForumTopics()) > 0) {
+            foreach ($threads_page->getForumTopics() as $thread) {
+                $ref_id = $this->object->getRefId();
+                $subject = $thread->getSubject();
+                if ($thread->isClosed()) {
+                    $subject .= ' (' . $this->lng->txt('forums_closed') . ')';
+                }
 
-                    $link = $this->getLinkActionForThread($ref_id, $subject, 'viewThread', $current_thread->getId());
-                    $actions = $this->getActionsForThreadOverview($ref_id, $current_thread);
+                $link = $this->getLinkActionForThread($ref_id, $subject, 'viewThread', $thread->getId());
+                $actions = $this->getActionsForThreadOverview($ref_id, $thread);
 
-                    $list_item = $this->factory
-                        ->item()
-                        ->standard($link)
-                        ->withActions($actions)
-                        ->withProperties($this->getThreadProperties($current_thread));
-                    $list_item = $this->markTopThreadInOverview($current_thread, $list_item);
-                    if ($current_thread->isSticky()) {
-                        $top_group[] = $list_item;
-                    } else {
-                        $thread_group[] = $list_item;
-                    }
+                $list_item = $this->factory
+                    ->item()
+                    ->standard($link)
+                    ->withActions($actions)
+                    ->withProperties($this->getThreadProperties($thread));
+                $list_item = $this->markTopThreadInOverview($thread, $list_item);
+                if ($thread->isSticky()) {
+                    $top_group[] = $list_item;
+                } else {
+                    $thread_group[] = $list_item;
                 }
             }
         }
@@ -816,7 +808,7 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
             );
         }
 
-        $view_controls[] = $this->getSortationViewControl();
+        $view_controls[] = $this->getSortationViewControl($this->forum_thread_table_session_storage->getThreadPage());
         $view_controls[] = $this->factory
             ->viewControl()
             ->pagination()
@@ -857,52 +849,8 @@ class ilObjForumGUI extends ilObjectGUI implements ilDesktopItemHandling, ilForu
         $this->tpl->setContent($forwarder->forward() . $default_html . $modals);
     }
 
-    private function getRequestedThreadSortation(): ?int
+    private function getSortationViewControl(int $offset): \ILIAS\UI\Component\ViewControl\Sortation
     {
-        return $this->http->wrapper()->query()->retrieve(
-            'thread_sortation',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always(null)
-            ])
-        );
-    }
-
-    private function getRequestedThreadOffset(): int
-    {
-        return $this->http->wrapper()->query()->retrieve(
-            'page',
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always(0)
-            ])
-        );
-    }
-
-    private function initializeThreadOffsetAndLimit(ilForumThreadObjectTableGUI $tbl): void
-    {
-        $limit = ilForumProperties::PAGE_SIZE_THREAD_OVERVIEW;
-        $offset = $this->getRequestedThreadOffset() * $limit;
-
-        $tbl->setOffset($offset);
-        $tbl->setLimit($limit);
-    }
-
-    private function initializeThreadSortation(ilForumThreadObjectTableGUI $tbl): void
-    {
-        $sortation = ThreadSortation::tryFrom(
-            $this->getRequestedThreadSortation() ?? ThreadSortation::DEFAULT_SORTATION->value
-        );
-        if ($sortation === null) {
-            $sortation = ThreadSortation::DEFAULT_SORTATION;
-        }
-        $tbl->setOrderDirection($sortation->direction());
-        $tbl->setOrderField($sortation->field());
-    }
-
-    private function getSortationViewControl(): \ILIAS\UI\Component\ViewControl\Sortation
-    {
-        $offset = $this->getRequestedThreadOffset();
         if ($offset > 0) {
             $this->ctrl->setParameter($this, 'page', $offset);
         }
