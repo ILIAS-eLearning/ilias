@@ -1,8 +1,22 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
 
-/* Copyright (c) 1998-2013 ILIAS open source, Extended GPL, see docs/LICENSE */
+declare(strict_types=1);
 
 /**
  * @defgroup ServicesAdvancedMetaData Services/AdvancedMetaData
@@ -34,6 +48,7 @@ class ilAdvancedMDRecord
     protected array $scopes = [];
 
     protected ilDBInterface $db;
+    protected ilOrgUnitType $org_unit_type;
 
     /**
      * Singleton constructor
@@ -52,6 +67,8 @@ class ilAdvancedMDRecord
         if ($this->getRecordId()) {
             $this->read();
         }
+
+        $this->org_unit_type = new ilOrgUnitType();
     }
 
     public static function _getInstanceByRecordId(int $a_record_id): ilAdvancedMDRecord
@@ -416,6 +433,7 @@ class ilAdvancedMDRecord
 
     public function delete(): void
     {
+        $this->org_unit_type->deleteOrgUnitTypeAssignmentByRecId($this->getRecordId());
         ilAdvancedMDRecord::_delete($this->getRecordId());
         ilAdvancedMDRecordScope::deleteByRecordId($this->getRecordId());
     }
