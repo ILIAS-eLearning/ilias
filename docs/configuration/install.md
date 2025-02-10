@@ -9,33 +9,29 @@ for a fully functional ILIAS environment.
 
 <!-- toc -->
 
-+ [System Requirements](#system-requirements)
-  + [Hardware](#hardware)
-  + [Recommended Setup for Running ILIAS](#recommended-setup-for-running-ilias)
-  + [Reference System](#reference-system)
-  + [Other Platforms or Configurations](#other-platforms-or-configurations)
-+ [Installation on Ubuntu 24.04](#installation-on-ubuntu-2404)
-  + [Install Dependencies](#install-dependencies)
-  + [Webserver Installation/Configuration](#webserver-installationconfiguration)
-  + [Database Installation/Configuration](#database-installationconfiguration)
-  + [Get the Code and Install ILIAS](#get-the-code-and-install-ilias)
-  + [Install ILIAS](#install-ilias)
-  + [Install Further Components](#install-further-components)
-  + [Install Plugins and Styles](#install-plugins-and-styles)
-+ [Backup ILIAS](#backup-ilias)
-+ [Upgrading ILIAS](#upgrading-ilias)
-  + [Minor Upgrade](#minor-upgrade)
-  + [Major Upgrade](#major-upgrade)
-  + [Update the Database](#update-the-database)
-  + [Information on Updates](#information-on-updates)
-+ [Upgrading Dependencies](#upgrading-dependencies)
-  + [PHP](#php)
-  + [DBMS](#dbms)
-+ [Connect and Contribute](#connect-and-contribute)
-+ [Supplement](#supplement)
-  + [Configure WebDAV (optional)](#configure-webdav-optional)
-  + [Hardening and Security Guidance](#hardening-and-security-guidance)
-  + [MySQL Strict Mode (5.7+)](#mysql-strict-mode-57)
+- [System Requirements](#system-requirements)
+  * [Hardware](#hardware)
+  * [Supported Software Setup and Reference System](#supported-software-setup-and-reference-system)
+- [Installation on Ubuntu 24.04](#installation-on-ubuntu-2404)
+  * [Install Dependencies](#install-dependencies)
+  * [Webserver Installation/Configuration](#webserver-installationconfiguration)
+  * [Database Installation/Configuration](#database-installationconfiguration)
+  * [Get the Code and Install ILIAS](#get-the-code-and-install-ilias)
+  * [Install ILIAS](#install-ilias)
+  * [Install Further Components](#install-further-components)
+  * [Install Plugins and Styles](#install-plugins-and-styles)
+- [Backup ILIAS](#backup-ilias)
+- [Upgrading ILIAS](#upgrading-ilias)
+  * [Minor Upgrade](#minor-upgrade)
+  * [Major Upgrade](#major-upgrade)
+  * [Update the Database](#update-the-database)
+  * [Information on Updates](#information-on-updates)
+- [Connect and Contribute](#connect-and-contribute)
+- [Appendix](#appendix)
+  * [Upgrading Dependencies](#upgrading-dependencies)
+  * [Configure WebDAV (optional)](#configure-webdav-optional)
+  * [Hardening and Security Guidance](#hardening-and-security-guidance)
+  * [MySQL Strict Mode (5.7+)](#mysql-strict-mode-57)
 
 <!-- tocstop -->
 
@@ -58,51 +54,29 @@ ILIAS itself will use around **25GB**. From there you can calculate your storage
 needs based on the amount of files and media content you expect to upload plus a
 few GBs for the database.
 
-
-<a name="recommended-setup-for-running-ilias"></a>
-## Recommended Setup for Running ILIAS
-
-For best results we recommend:
-
-  * a current version of Debian GNU Linux, Ubuntu or RHEL
-  * MySQL 5.7.x or MariaDB 10.2
-  * PHP 8.2
-  * Apache 2.4.x with `mod_php`
-  * php-gd, php-xml, php-mysql, php-mbstring, php-imagick, php-zip, php-intl
-  * OpenJDK 17
-  * Node.js: 22-LTS (and 20, 21, 23)
-  * git
-  * composer v2
-  * a contemporary browser supporting ES6, CSS3 and HTML 5
-  * npm
-
-Package names may vary depending on the Linux distribution.
-
-<a name="reference-system"></a>
-## Reference System
+<a name="supported-system"></a>
+## Supported Software Setup and Reference System
 
 The ILIAS Testserver (https://test10.ilias.de) is currently configured as follows:
 
-| Package        | Version          |
-|----------------|------------------|
-| Distribution   | Ubuntu 22.04 LTS |
-| MariaDB        | 10.6.18          |
-| PHP            | 8.2              |
-| Apache2        | 2.4.52           |
-| JDK            | OpenJDK 17       |
-| Node.js        | 16.20            |
-| wkhtmltopdf    | 0.12.6           |
-| Ghostscript    | 9.55             |
-| Imagemagick    | 6.9.11           |
-| MathJax        | 2.7.9            |
+| Package      | Version                                                | Reference System |
+|--------------|--------------------------------------------------------|------------------|
+| Distribution | current version of Debian GNU Linux, Ubuntu or RHEL    | Ubuntu 22.04 LTS |
+| Database     | MySQL >8.0.21 or MariaDB 10.5 - 10.11                  | MariaDB 10.6.18  |
+| PHP          | 8.2, 8.3                                               | 8.3              |
+| Webserver    | nginx: 1.12.x – 1.18.x, Apache: ≥ 2.4.x                | Apache 2.4.52    |
+| JDK          | Open JDK Runtime 11, 17 or 21 LTS                      | OpenJDK 17       |
+| Node.js      | 20 (LTS), 21, 22 (LTS), 23 Recommended: 22             | 16.20            |
+| Ghostscript  | 10.x                                                   | 9.55             |
+| Imagemagick  | 6.9.x                                                  | 6.9.11           |
+| MathJax      | MathJax 3, MathJax 2 with safe mode                    | 2.7.9            |
+| Browser      | a contemporary browser supporting ES6, CSS3 and HTML 5 |                  |
 
-<a name="other-platforms"></a>
-## Other Platforms or Configurations
+Package names may vary depending on the Linux distribution.
 
-Please note that other platforms and configurations should be possible, but it
-might be harder to find someone who can help when things go south. You should not
-use a different configuration unless you are an experienced system administrator.
-
+> Please note that other platforms and configurations should be possible, but it
+> might be harder to find someone who can help when things go south. You should not
+> use a different configuration unless you are an experienced system administrator.
 
 <a name="installation-on-linux"></a>
 # Installation on Ubuntu 24.04
@@ -136,8 +110,9 @@ In this guide, we use Apache2 as the web server, utilizing `libapache2-mod-php` 
 Other web servers capable of processing PHP, such as Nginx or Apache2 with FCGI and PHP-FPM, can also be used.
 
 **Required PHP Extensions:**
-
-    gd, dom, xsl, mysql, curl, json, simplexml, libxml, xml, zip, imagick, intl, mbstring
+```
+gd, dom, xsl, mysql, curl, json, simplexml, libxml, xml, zip, imagick, intl, mbstring
+```
 
 **Optional PHP Extensions:**
 
@@ -681,8 +656,7 @@ When you upgrade from rather old versions please make sure that the dependencies
 like MySQL and PHP, are up to date. Below you will find the supported versions for
 each ILIAS release.
 
-<a name="php"></a>
-### PHP
+**PHP:**
 
 | ILIAS Version  | PHP Version                 |
 |----------------|-----------------------------|
@@ -692,8 +666,7 @@ each ILIAS release.
 | 7.x            | 7.3.x, 7.4.x                |
 | 6.x            | 7.2.x, 7.3.x, 7.4.x         |
 
-<a name="dbms"></a>
-### DBMS
+**DBMS:**
 
 We strongly recommend using MariaDB instead of MySQL due to performance, licensing and compatibility in the future.
 
