@@ -57,7 +57,8 @@ few GBs for the database.
 <a name="supported-system"></a>
 ## Supported Software Setup and Reference System
 
-The ILIAS Testserver (https://test10.ilias.de) is currently configured as follows:
+The following software versions are required/supported for ILIAS 10. The table below lists these versions alongside the 
+current configuration of the ILIAS test server, which serves as a reference system (https://test10.ilias.de).
 
 | Package      | Version                                                | Reference System |
 |--------------|--------------------------------------------------------|------------------|
