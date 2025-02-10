@@ -22,6 +22,7 @@ namespace ILIAS\UI\Component\Input\Field;
 
 use ILIAS\UI\Component\Input\Container\Form\FormInput;
 use ILIAS\UI\Component\Input\Field\Node\NodeRetrieval;
+use ILIAS\UI\URLBuilderToken;
 
 /**
  * This is what a factory for input fields looks like.
@@ -923,4 +924,24 @@ interface Factory
         string $label,
         ?string $byline = null,
     ): TreeMultiSelect;
+
+    /**
+     * ---
+     * description:
+     *   purpose: >
+     *     A Node is used by the Tree (Multi) Select Field to visualise different types of nodes
+     *     inside the tree. A Node consists of a unique identifier, name and optional Icon and can
+     *     represent any kind of data.
+     *
+     * context:
+     *   - A Node is used inside the Tree Select and Tree Multi Select Field.
+     *
+     * rules:
+     *   usage:
+     *     1: >
+     *       You MUST NOT use Node's outside of a Tree Select and Tree Multi Select Field.
+     * ---
+     * @return \ILIAS\UI\Component\Input\Field\Node\Factory
+     */
+    public function node(): Node\Factory;
 }

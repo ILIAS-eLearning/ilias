@@ -23,20 +23,24 @@ namespace ILIAS\UI\Component\Input\Field;
 use ILIAS\UI\Component\Input\Container\Form\FormInput;
 
 /**
+ * Describes an Input Field which dynamically generates inputs according to
+ * a template. This happens on both server and client when values are provided.
+ *
  * @author Thibeau Fuhrer <thf@studer-raimann.ch>
  */
 interface HasDynamicInputs extends FormInput
 {
     /**
-     * Returns the instance of Field which should be used to generate
-     * dynamic inputs on clientside.
+     * Returns an Input Field which will be used to generate similar inputs
+     * on both server and client.
      */
     public function getTemplateForDynamicInputs(): FormInput;
 
     /**
      * Returns serverside generated dynamic Inputs, which happens when
-     * providing this withValue()
+     * providing values with @see HasDynamicInputs::withValue()
+     *
      * @return FormInput[]
      */
-    public function getDynamicInputs(): array;
+    public function getGeneratedDynamicInputs(): array;
 }

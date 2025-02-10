@@ -36,7 +36,7 @@ use ILIAS\Language\Language;
  * @author  Fabian Schmid <fs@studer-raimann.ch>
  * @author  Thibeau Fuhrer <thf@studer-raimann.ch>
  */
-class File extends HasDynamicInputsBase implements C\Input\Field\File
+class File extends HasDynamicInputs implements C\Input\Field\File
 {
     // ===============================================
     // BEGIN IMPLEMENTATION OF FileUpload
@@ -52,6 +52,7 @@ class File extends HasDynamicInputsBase implements C\Input\Field\File
     public function __construct(
         Language $language,
         DataFactory $data_factory,
+        Factory $field_factory,
         Refinery $refinery,
         UploadLimitResolver $upload_limit_resolver,
         C\Input\Field\UploadHandler $handler,
@@ -61,9 +62,6 @@ class File extends HasDynamicInputsBase implements C\Input\Field\File
     ) {
         $this->upload_limit_resolver = $upload_limit_resolver;
         $this->max_file_size_in_bytes = $upload_limit_resolver->getBestPossibleUploadLimitInBytes($handler);
-        $this->language = $language;
-        $this->data_factory = $data_factory;
-        $this->refinery = $refinery;
         $this->upload_handler = $handler;
         $this->value = [];
 
@@ -71,8 +69,8 @@ class File extends HasDynamicInputsBase implements C\Input\Field\File
             $language,
             $data_factory,
             $refinery,
+            $this->createDynamicInputsTemplate($field_factory, $metadata_input),
             $label,
-            $this->createDynamicInputsTemplate($metadata_input),
             $byline
         );
     }
@@ -136,7 +134,7 @@ class File extends HasDynamicInputsBase implements C\Input\Field\File
      * Maps generated dynamic inputs to their file-id, which must be
      * provided in or as $value.
      */
-    public function withValue($value): HasDynamicInputsBase
+    public function withValue($value): HasDynamicInputs
     {
         $this->checkArg("value", $this->isClientSideValueOk($value), "Display value does not match input type.");
 
@@ -147,7 +145,7 @@ class File extends HasDynamicInputsBase implements C\Input\Field\File
 
             // that was not implicitly intended, but mapping dynamic inputs
             // to the file-id is also a duplicate protection.
-            $clone->dynamic_inputs[$file_id] = $clone->dynamic_input_template->withValue($data);
+            $clone->generated_dynamic_inputs[$file_id] = $clone->dynamic_input_template->withValue($data);
         }
 
         return $clone;
@@ -228,12 +226,9 @@ class File extends HasDynamicInputsBase implements C\Input\Field\File
         return true;
     }
 
-    protected function createDynamicInputsTemplate(?FormInput $metadata_input): FormInput
+    protected function createDynamicInputsTemplate(Factory $field_factory, ?FormInput $metadata_input): FormInput
     {
-        $default_metadata_input = new Hidden(
-            $this->data_factory,
-            $this->refinery
-        );
+        $default_metadata_input = $field_factory->hidden();
 
         if (null === $metadata_input) {
             return $default_metadata_input;
@@ -250,12 +245,6 @@ class File extends HasDynamicInputsBase implements C\Input\Field\File
         // tell the input that it contains actual metadata inputs.
         $this->has_metadata_inputs = true;
 
-        return new Group(
-            $this->data_factory,
-            $this->refinery,
-            $this->language,
-            $inputs,
-            ''
-        );
+        return $field_factory->group($inputs, '');
     }
 }

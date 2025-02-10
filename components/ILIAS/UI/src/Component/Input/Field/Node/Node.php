@@ -18,11 +18,12 @@
 namespace ILIAS\UI\Component\Input\Field\Node;
 
 use ILIAS\UI\Component\Symbol\Icon\Icon;
+use ILIAS\UI\Component\Component;
 
 /**
  * @author Thibeau Fuhrer <thibeau@sr.solutions>
  */
-interface Node
+interface Node extends Component
 {
     /**
      * Returns the unique identifier of this node.

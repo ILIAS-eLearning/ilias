@@ -18,7 +18,7 @@
 namespace ILIAS\UI\Component\Input\Field\Node;
 
 use ILIAS\UI\Component\Input\Field\Node\Factory as NodeFactory;
-use ILIAS\UI\Component\Symbol\Glyph\Factory as IconFactory;
+use ILIAS\UI\Component\Symbol\Icon\Factory as IconFactory;
 
 /**
  * @author Thibeau Fuhrer <thibeau@sr.solutions>
@@ -26,15 +26,21 @@ use ILIAS\UI\Component\Symbol\Glyph\Factory as IconFactory;
 interface NodeRetrieval
 {
     /**
+     * This method will be called by the UI framework in order to retrieve Node instances
+     * for already provided values (node-ids).
+     */
+    public function getNode(NodeFactory $node_factory, string|int $node_id): ?Node;
+
+    /**
      * This method will be called by the tree select input and multi tree select input
      * to generate the tree which is displayed on the client.
      *
      * Parts of the tree can be rendered asynchronously, by generating an @see Async node,
-     * to indicate that its sub-nodes should only be loaded when they are opened/expanded.
-     * In this case, an instance of this retrieval will be created by the UI framework
-     * and this method is invoked again with an additional $parent_id parameter. If this
-     * parameter is provided, this method is expected to generate all sub-nodes of the given
-     * parent node. This process can recursively continue.
+     * to indicate that its child-nodes should only be loaded when they are opened/expanded.
+     * In this case, the rendering url of the async node will be called from the client,
+     * which is expected to generate all child-nodes of the given parent node. This process
+     * can recursively continue. Please generate child-nodes during this process by using an
+     * instance of this retrieval and provide the appropriate $parent_id parameter.
      *
      * @return \Generator<Node>
      */

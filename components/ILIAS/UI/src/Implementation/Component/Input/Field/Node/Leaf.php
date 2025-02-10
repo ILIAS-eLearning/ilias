@@ -1,3 +1,5 @@
+<?php
+
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -12,18 +14,16 @@
  * https://www.ilias.de
  * https://github.com/ILIAS-eLearning
  */
+ 
+declare(strict_types=1);
 
-import document from 'document';
-import $ from 'jquery';
-import il from 'ilias';
-import DrilldownFactory from './drilldown.factory.js';
-import JQueryEventListener from '../../Core/src/JQueryEventListener.js';
+namespace ILIAS\UI\Implementation\Component\Input\Field\Node;
 
-il.UI = il.UI || {};
-il.UI.menu = il.UI.menu || {};
-il.UI.menu.drilldown = new DrilldownFactory(
-  new JQueryEventListener($),
-  document.defaultView.ResizeObserver,
-  document,
-  il,
-);
+use ILIAS\UI\Component as C;
+
+/**
+ * @author Thibeau Fuhrer <thibeau@sr.solutions>
+ */
+class Leaf extends Node implements C\Input\Field\Node\Leaf
+{
+}

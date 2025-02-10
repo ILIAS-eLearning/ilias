@@ -37,6 +37,8 @@ use ILIAS\Data\DataSize;
 use ILIAS\UI\Implementation\Component\Input\Input;
 use ILIAS\Data\FiveStarRatingScale;
 use ILIAS\UI\Implementation\Component\Input\Container\Filter\ProxyFilterField;
+use ILIAS\Data\URI;
+use ILIAS\UI\Implementation\Component\ComponentHelper;
 
 /**
  * Class Renderer
@@ -44,6 +46,8 @@ use ILIAS\UI\Implementation\Component\Input\Container\Filter\ProxyFilterField;
  */
 class Renderer extends AbstractComponentRenderer
 {
+    use ComponentHelper;
+
     public const DATETIME_DATEPICKER_MINMAX_FORMAT = 'Y-m-d\Th:m';
     public const DATE_DATEPICKER_MINMAX_FORMAT = 'Y-m-d';
     public const TYPE_DATE = 'date';
@@ -151,6 +155,12 @@ class Renderer extends AbstractComponentRenderer
 
             case ($component instanceof F\Rating):
                 return $this->renderRatingField($component, $default_renderer);
+
+            case ($component instanceof F\TreeMultiSelect):
+                return $this->renderTreeMultiSelectField($component, $default_renderer);
+
+            case ($component instanceof F\TreeSelect):
+                return $this->renderTreeSelectField($component, $default_renderer);
 
             default:
                 $this->cannotHandleComponent($component);
@@ -756,7 +766,7 @@ class Renderer extends AbstractComponentRenderer
     protected function renderFileField(FI\File $input, RendererInterface $default_renderer): string
     {
         $template = $this->getTemplate('tpl.file.html', true, true);
-        foreach ($input->getDynamicInputs() as $metadata_input) {
+        foreach ($input->getGeneratedDynamicInputs() as $metadata_input) {
             $file_info = null;
             if (null !== ($data = $metadata_input->getValue())) {
                 $file_id = (!$input->hasMetadataInputs()) ?
@@ -833,6 +843,8 @@ class Renderer extends AbstractComponentRenderer
         $registry->register('assets/js/input.js');
         $registry->register('assets/js/core.js');
         $registry->register('assets/js/file.js');
+        // workaround to manipulate the order of scripts
+        $registry->register('assets/js/drilldown.min.js');
         $registry->register('assets/js/input.factory.min.js');
     }
 
@@ -926,7 +938,7 @@ class Renderer extends AbstractComponentRenderer
     {
         return $input->withAdditionalOnLoadCode(
             function ($id) use ($input) {
-                $current_file_count = count($input->getDynamicInputs());
+                $current_file_count = count($input->getGeneratedDynamicInputs());
                 $translations = json_encode($input->getTranslations());
                 $is_disabled = ($input->isDisabled()) ? 'true' : 'false';
                 $php_upload_limit = $this->getUploadLimitResolver()->getPhpUploadLimitInBytes();
@@ -1031,6 +1043,92 @@ class Renderer extends AbstractComponentRenderer
         }
 
         return $this->wrapInFormContext($component, $component->getLabel(), $tpl->get());
+    }
+
+    protected function renderTreeMultiSelectField(F\TreeMultiSelect $component, RendererInterface $default_renderer): string
+    {
+        $template = $this->prepareTreeSelectTemplate($component, $default_renderer);
+
+        if ($component->canSelectChildNodes()) {
+            $select_child_nodes = 'true';
+        } else {
+            $select_child_nodes = 'false';
+        }
+
+        $enriched_component = $component->withAdditionalOnLoadCode(
+            static fn($id) => "il.UI.Input.treeSelect.initTreeMultiSelect('$id', $select_child_nodes);"
+        );
+
+        $id = $this->bindJSandApplyId($enriched_component, $template);
+
+        return $this->wrapInFormContext($component, $component->getLabel(), $template->get(), $id);
+    }
+
+    protected function renderTreeSelectField(F\TreeSelect $component, RendererInterface $default_renderer): string
+    {
+        $template = $this->prepareTreeSelectTemplate($component, $default_renderer);
+
+        $enriched_component = $component->withAdditionalOnLoadCode(
+            static fn($id) => "il.UI.Input.treeSelect.initTreeSelect('$id');"
+        );
+
+        $id = $this->bindJSandApplyId($enriched_component, $template);
+
+        return $this->wrapInFormContext($component, $component->getLabel(), $template->get(), $id);
+    }
+
+    protected function prepareTreeSelectTemplate(
+        TreeSelect|TreeMultiSelect $component,
+        RendererInterface $default_renderer,
+    ): Template {
+        $template = $this->getTemplate('tpl.tree_select.html', true, true);
+
+        $template->setVariable('SELECT_LABEL', $this->txt('select'));
+        $template->setVariable('CLOSE_LABEL', $this->txt('close'));
+        $template->setVariable('LABEL', $component->getLabel());
+
+        $template->setVariable('INPUT_TEMPLATE', $default_renderer->render(
+            $component->getTemplateForDynamicInputs()
+        ));
+        $template->setVariable('BREADCRUMB_TEMPLATE', $default_renderer->render(
+            $this->getUIFactory()->breadcrumbs([$this->getUIFactory()->link()->standard('label', '#')])
+        ));
+        $template->setVariable('BREADCRUMBS', $default_renderer->render(
+            $this->getUIFactory()->breadcrumbs([])
+        ));
+
+        $node_factory = $this->getUIFactory()->input()->field()->node();
+        $node_generator = $component->getNodeRetrieval()->getNodes(
+            $node_factory,
+            $this->getUIFactory()->symbol()->icon(),
+        );
+
+        $nodes = [];
+        foreach ($node_generator as $node) {
+            $this->checkArgInstanceOf('node', $node, Component\Input\Field\Node\Node::class);
+            $nodes[] = $node;
+        }
+
+        $template->setVariable('DRILLDOWN', $default_renderer->render(
+            $this->getUIFactory()->menu()->drilldown('', $nodes)
+        ));
+
+        foreach ($component->getGeneratedDynamicInputs() as $dynamic_input) {
+            $node = $component->getNodeOnce($dynamic_input->getValue());
+
+            $value_template = $this->getTemplate('tpl.tree_select.html', true, true);
+            $value_template->setCurrentBlock('with_value_template');
+            $value_template->setVariable('NODE_ID', (string) ($node?->getId() ?? $dynamic_input->getValue()));
+            $value_template->setVariable('NODE_NAME', $node?->getName() ?? $this->txt('unknown'));
+            $value_template->setVariable('INPUT_TEMPLATE', $default_renderer->render($dynamic_input));
+            $value_template->parseCurrentBlock();
+
+            $template->setCurrentBlock('with_value');
+            $template->setVariable('VALUE', $value_template->get('with_value_template'));
+            $template->parseCurrentBlock();
+        }
+
+        return $template;
     }
 
     private function setHelpBlockForFileField(Template $template, FI\File $input): void
