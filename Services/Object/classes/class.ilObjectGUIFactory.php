@@ -54,7 +54,7 @@ class ilObjectGUIFactory
      * @throws ilObjectException
      * @throws ilObjectNotFoundException
      */
-    public function getInstanceByRefId(int $ref_id): ilObject
+    public function getInstanceByRefId(int $ref_id): ilObjectGUI
     {
         // check reference id
         if (!isset($ref_id)) {
