@@ -35,10 +35,20 @@ class Renderer extends AbstractComponentRenderer
      */
     public function render(Component\Component $component, RendererInterface $default_renderer): string
     {
-        if (!$component instanceof Component\Legacy\Content) {
-            $this->cannotHandleComponent($component);
+
+        if ($component instanceof Component\Legacy\Content) {
+            return $this->renderContent($component, $default_renderer);
+        }
+        if ($component instanceof Component\Legacy\Segment) {
+            return $this->renderSegment($component, $default_renderer);
         }
 
+        $this->cannotHandleComponent($component);
+
+    }
+
+    protected function renderContent(Content $component, RendererInterface $default_renderer): string
+    {
         $component = $this->registerSignals($component);
         $this->bindJavaScript($component);
         return $component->getContent();
@@ -58,4 +68,10 @@ class Renderer extends AbstractComponentRenderer
             return $code;
         });
     }
+
+    protected function renderSegment(Segment $component, RendererInterface $default_renderer): string
+    {
+        return $component->getSegmentContent();
+    }
+
 }

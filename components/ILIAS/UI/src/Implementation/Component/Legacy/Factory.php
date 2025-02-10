@@ -36,4 +36,12 @@ class Factory implements C\Legacy\Factory
     {
         return new Content($content, $this->signal_generator);
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function segment(string $title, string $content): C\Legacy\Segment
+    {
+        return new Segment($title, $content);
+    }
 }
