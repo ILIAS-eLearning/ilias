@@ -267,8 +267,8 @@ class ilExportGUI
     final protected function createXMLExport()
     {
         $manager = $this->export_handler->manager()->handler();
-        $export_info = $manager->getExportInfo(
-            $this->data_factory->objId($this->obj->getId()),
+        $export_info = $manager->getExportInfoWithObject(
+            $this->obj,
             time()
         );
         $element = $manager->createExport(
@@ -318,8 +318,8 @@ class ilExportGUI
         }
         $manager = $this->export_handler->manager()->handler();
         if (count($ref_ids_all) === 1) {
-            $export_info = $manager->getExportInfo(
-                $this->data_factory->objId($this->obj->getId()),
+            $export_info = $manager->getExportInfoWithObject(
+                $this->obj,
                 time()
             );
             $element = $manager->createExport(
