@@ -8580,6 +8580,7 @@ dateplaner#:#today#:#Today
 dateplaner#:#week#:#Week
 dateplaner#:#wk_short#:#WK
 dateplaner#:#year#:#Year
+dcl#:#add_to_export#:#Add to export
 dcl#:#add_value#:#Add New Entry
 dcl#:#dcl_activate_notification#:#Enable Notification
 dcl#:#dcl_add#:#Create Data Collection
@@ -8666,6 +8667,7 @@ dcl#:#dcl_field_required#:#Required
 dcl#:#dcl_field_title_change_warning#:#You changed the title of the field hence some placeholders in the view definition might be broken. Those have to be fixed manually should the occasion arise.
 dcl#:#dcl_field_title_unique#:#There exists already a field with this title. Title must be unique.
 dcl#:#dcl_field_visible#:#Visible
+dcl#:#dcl_fields_of_X#:#Fields of table %s
 dcl#:#dcl_fieldtitle#:#Field Title
 dcl#:#dcl_file#:#Fileupload
 dcl#:#dcl_file_desc#:#Field to upload arbitrary files. They can be downloaded with a link.
@@ -8881,6 +8883,7 @@ dcl#:#enable_visible#:#Enable visible
 dcl#:#entry_of#:#Entry %1$d of %2$d
 dcl#:#fieldtitle_allow_chars#:#Not allowed chars: %s
 dcl#:#fileupload_not_migrated#:#File has not yet been migration and cannot be displayed. Please contact your System-Administrator.
+dcl#:#remove_from_export#:#Remove from export
 dcl#:#set_as_default#:#Set as default
 didactic#:#activate_exclusive_template#:#Grey Out Default
 didactic#:#activate_exclusive_template_info#:#The standard template won't be available wherever this template is active.
