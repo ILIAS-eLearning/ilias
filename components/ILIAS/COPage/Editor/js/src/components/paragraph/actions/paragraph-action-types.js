@@ -12,7 +12,7 @@
  * https://www.ilias.de
  * https://github.com/ILIAS-eLearning
  *
- ******************************************************************** */
+ *********************************************************************/
 
 const ACTIONS = {
 
@@ -57,5 +57,6 @@ const ACTIONS = {
   SPLIT_PARAGRAPH: 'par.split',
   MERGE_PREVIOUS: 'merge.previous',
   SECTION_CLASS: 'sec.class', // section format
+  INSERT_TEXT_TEMPLATE: 'insert.text.template',
 };
 export default ACTIONS;

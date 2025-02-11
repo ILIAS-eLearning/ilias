@@ -1,9 +1,3 @@
-import ACTIONS from '../actions/paragraph-action-types.js';
-import PAGE_ACTIONS from '../../page/actions/page-action-types.js';
-import TinyWrapper from './tiny-wrapper.js';
-import TINY_CB from './tiny-wrapper-cb-types.js';
-import AutoSave from './auto-save.js';
-
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -18,7 +12,13 @@ import AutoSave from './auto-save.js';
  * https://www.ilias.de
  * https://github.com/ILIAS-eLearning
  *
- ******************************************************************** */
+ *********************************************************************/
+
+import ACTIONS from '../actions/paragraph-action-types.js';
+import PAGE_ACTIONS from '../../page/actions/page-action-types.js';
+import TinyWrapper from './tiny-wrapper.js';
+import TINY_CB from './tiny-wrapper-cb-types.js';
+import AutoSave from './auto-save.js';
 
 /**
  * paragraph ui
@@ -998,6 +998,12 @@ export default class ParagraphUI {
           const url = char_button.dataset.copgEdParUrl;
           char_button.addEventListener('click', (event) => {
             dispatch.dispatch(ef.linkWikiSelection(url));
+          });
+          break;
+
+        case ACTIONS.INSERT_TEXT_TEMPLATE:
+          char_button.addEventListener('click', (event) => {
+            this.addBBCode(char_button.dataset.copgEdParContent, '')
           });
           break;
 

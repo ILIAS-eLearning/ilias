@@ -1705,7 +1705,7 @@ class ilPageObjectGUI
     /**
      * Get Tiny Menu
      */
-    public static function getTinyMenu(
+    public function getTinyMenu(
         string $a_par_type,
         bool $a_int_links = false,
         bool $a_wiki_links = false,
@@ -1988,6 +1988,8 @@ class ilPageObjectGUI
         if ($a_anchors) {
             $menu["cont_more_functions"][] = ["text" => $lng->txt("cont_anchor"), "action" => "selection.anchor", "data" => []];
         }
+
+        $menu = $this->getPageConfig()->appendCustomFunctions($menu);
 
         $btpl = new ilTemplate("tpl.tiny_menu.html", true, true, "components/ILIAS/COPage");
 
