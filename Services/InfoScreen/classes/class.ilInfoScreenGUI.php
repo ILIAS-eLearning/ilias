@@ -335,6 +335,16 @@ class ilInfoScreenGUI
         $this->hiddenelements[] = array("name" => $a_name, "value" => $a_value);
     }
 
+    private function specialCharsAsEntities(string $string): string
+    {
+        // Should be replaced by the proper refinery transformation in ILIAS >= 10.
+        return  htmlspecialchars(
+            $string,
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            'utf-8'
+        );
+    }
+
     public function addMetaDataSections(int $a_rep_obj_id, int $a_obj_id, string $a_type): void
     {
         $lng = $this->lng;
@@ -389,7 +399,7 @@ class ilInfoScreenGUI
         if ($keywords != "") {	// keywords
             $this->addProperty(
                 $lng->txt("keywords"),
-                $keywords
+                $this->specialCharsAsEntities($keywords)
             );
         }
         if ($author != "") {		// author
