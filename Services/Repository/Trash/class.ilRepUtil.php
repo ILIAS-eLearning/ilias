@@ -205,7 +205,8 @@ class ilRepUtil
                     $node_data = $saved_tree->getNodeData($id);
                     $subtree_nodes = $saved_tree->getSubTree($node_data);
                 } else {
-                    throw new ilRepositoryException('No valid tree id found for node id: ' . $id);
+                    $logger->error('No valid tree id found for node id: ' . $id);
+                    continue;
                 }
             } else {
                 $node_data = $tree->getNodeData($id);
