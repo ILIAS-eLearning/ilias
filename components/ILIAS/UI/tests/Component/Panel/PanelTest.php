@@ -436,8 +436,8 @@ EOT;
         <div class="panel-title"><h2>Title</h2></div>
         <div class="panel-viewcontrols l-bar__space-keeper">
             <div class="il-viewcontrol-mode l-bar__element" aria-label="Presentation Mode" role="group">
-                <button class="btn btn-default engaged" aria-label="A" aria-pressed="true" data-action="a" id="id_1">A</button>
-                <button class="btn btn-default" aria-label="B" aria-pressed="false" data-action="b" id="id_2">B</button>
+                <button class="btn btn-default engaged" aria-pressed="true" data-action="a" id="id_1">A</button>
+                <button class="btn btn-default" aria-pressed="false" data-action="b" id="id_2">B</button>
             </div>
         </div>
         <div class="panel-controls"></div>

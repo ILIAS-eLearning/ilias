@@ -70,9 +70,7 @@ class Renderer extends AbstractComponentRenderer
         foreach ($component->getLabelledActions() as $label => $action) {
             $tpl->setCurrentBlock("view_control");
 
-            //At this point we don't have a specific text for the button aria label.
-            // component->getAriaLabel gets the main view control aria label.
-            $button = $f->button()->standard($label, $action)->withAriaLabel($label);
+            $button = $f->button()->standard($label, $action);
             if ($activate_first_item) {
                 $button = $button->withEngagedState(true);
                 $activate_first_item = false;
