@@ -484,7 +484,7 @@ according to your needs.
 
 The ILIAS Java RPC server is used for certain optional functions as Lucene Search
 or generating PDF Certificates. To enable the RPC server you need to place a
-configuration file in `<YOUR_ILIAS_DIR>/components/ILIAS/WebServices/RPC/lib/ilServer.properties`:
+configuration file in `<YOUR_ILIAS_DIR>/components/ILIAS/WebServices/RPC/lib/ilServer.ini`:
 
 ```
 [Server]
@@ -503,11 +503,10 @@ NicId = 0
 IliasIniPath = /var/www/html/ilias/ilias.ini.php
 ```
 
-ILIAS can generate a proper configuration file via the Administration menu
-("Administration -> General Settings -> Server -> Java-Server -> Create
-Configuration File"). Please note that the configuration file is not directly
-written to the file system, you MUST copy the displayed content and create the
-file manually.
+You MUST copy create the file manually and set proper values.
+
+Your json file used for the setup needs to be adjusted accordingly (see setup documentation) and 
+a setup update using this file is needed, too. [Setup-Documetation](../../components/ILIAS/setup_/README.md)
 
 You may use the following systemd service description to start the RPC server.
 If you still use SysV-Initscripts you can find one in the
