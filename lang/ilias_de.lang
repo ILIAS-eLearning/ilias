@@ -17367,6 +17367,7 @@ ui#:#ui_md_input_view#:#Vorschau
 ui#:#ui_pagination_unlimited#:#Unbegrenzt
 ui#:#ui_select_dropdown_label#:#Bitte auswählen
 ui#:#ui_table_no_records#:#Keine Einträge
+ui#:#ui_table_order#:#Reihenfolge
 ui#:#ui_transcription#:#Abschrift
 ui#:#vc_sort#:#Sortiert nach:
 user#:#all_roles_has_starting_point#:#Alle Rollen mit definierter Startseite

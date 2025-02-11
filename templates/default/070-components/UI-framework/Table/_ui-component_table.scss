@@ -122,7 +122,8 @@ $il-table-presentation-details-viewcontrols-btn-bg: white;
 // Basic Table Design
 //
 
-.c-table-data {
+.c-table-data,
+.c-table-ordering {
     .viewcontrols {
         margin-bottom: $il-margin-large-vertical;
     }
@@ -277,7 +278,6 @@ th.c-table-data__cell:after {
             width : 65px;
         }
     }
-
 }
 
 //
@@ -298,7 +298,6 @@ th.c-table-data__cell:after {
 .c-table-data__cell--text {
     .c-table-data__header__resize-wrapper {
         min-width: 140px;
-        // width: 140px;
         resize: horizontal;
     }
 }
@@ -307,7 +306,6 @@ th.c-table-data__cell:after {
 .c-table-data__cell--email {
     .c-table-data__header__resize-wrapper {
         min-width: 200px;
-        // width: 200px;
         resize: horizontal;
     }
 }
@@ -366,7 +364,8 @@ td.c-table-data__cell--highlighted {
     display: none;
 }
 
-.c-table-data {
+.c-table-data,
+.c-table-ordering {
     @include brk.on-screen-size(small) {
         //
         // Basic Table Design
@@ -415,11 +414,35 @@ td.c-table-data__cell--highlighted {
         td.c-table-data__cell--number {
             text-align: inherit;
         }
-        
+
         // Highlighted Columns
         td.c-table-data__cell--highlighted {
             font-size: $il-font-size-xxlarge;
             background-color: inherit;
+        }
+
+        .c-table-data__positioninput {
+            .c-input[data-il-ui-component] {
+                display: flex;
+                align-items: center;
+                &::before {
+                    content: "";
+                    display: inline-block;
+                    margin-right: $il-margin-base-horizontal;
+                    // all pixel sizes are fixed to create a grid of 2 by 2 pixel dots
+                    height: 24px;
+                    width: 18px;
+                    background-image: radial-gradient(circle at 2px 2px, #00000042 2px, transparent 0);
+                    background-size: 6px 6px;
+                }
+                > label {
+                    display: block;
+                    width: auto;
+                }
+                input {
+                    width : 65px;
+                }
+            }
         }
 
         //

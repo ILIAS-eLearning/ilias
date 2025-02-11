@@ -17367,6 +17367,7 @@ ui#:#ui_md_input_view#:#View
 ui#:#ui_pagination_unlimited#:#Unlimited
 ui#:#ui_select_dropdown_label#:#Please select
 ui#:#ui_table_no_records#:#No records
+ui#:#ui_table_order#:#Order
 ui#:#ui_transcription#:#Transcript
 ui#:#vc_sort#:#Sort by:
 user#:#all_roles_has_starting_point#:#All the roles have starting points

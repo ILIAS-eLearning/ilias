@@ -543,7 +543,8 @@ class Renderer extends AbstractComponentRenderer
             }
         };
 
-        $input = $this->getUIFactory()->input()->field()->numeric('order')
+        $numeric_label = $this->txt("ui_table_order");
+        $input = $this->getUIFactory()->input()->field()->numeric($numeric_label)
             ->withDedicatedName($component->getId())
             ->withNameFrom($namesource)
             ->withValue($component->getPosition() * 10);
