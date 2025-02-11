@@ -2,6 +2,7 @@
 <fop version="1.0">
 	<strict-configuration>true</strict-configuration>
 	<use-cache>false</use-cache>
+	<font-base>.</font-base>
 	<renderers>
 		<renderer mime="application/pdf">
 			<fonts>

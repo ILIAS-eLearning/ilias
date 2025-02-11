@@ -41,23 +41,24 @@ public class RPCTransformationHandler {
         return true;
     }
     
-    public byte[] ilFO2PDF(String foString) { 
-        
-	FO2PDF fo = null;
+    public byte[] ilFO2PDF(String foString) {
 
-    	try {
-		
-		fo = new FO2PDF();
-		fo.clearCache();
-		fo.setFoString(foString);
-		fo.transform();
-		
-		return fo.getPdf();
-		} 
-		catch (TransformationException e) {
-			
+		FO2PDF fo = null;
+
+		try {
+
+			fo = new FO2PDF();
+			fo.clearCache();
+			fo.setFoString(foString);
+			logger.info("FO String:" + foString);
+
+			fo.transform();
+
+			return fo.getPdf();
+		} catch (TransformationException e) {
 			logger.warn("Transformation failed:" + e);
 		}
-        return null;
-    }
+
+		return null;
+	}
 }

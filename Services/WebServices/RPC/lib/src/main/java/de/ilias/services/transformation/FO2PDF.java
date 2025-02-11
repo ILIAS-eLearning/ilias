@@ -26,17 +26,21 @@ package de.ilias.services.transformation;
 import org.apache.fop.apps.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.xml.sax.SAXException;
 
 import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.xml.sax.SAXException;
 
 public class FO2PDF {
 
@@ -51,12 +55,45 @@ public class FO2PDF {
      * Singleton constructor
      */
     public FO2PDF() {
-        try {
-            fopFactory = FopFactory.newInstance(getClass().getResource("/de/ilias/config/fopConfig.xml").toURI());
-        } catch (URISyntaxException | NullPointerException ex) {
-            logger.error("Cannot load fop configuration:" + ex);
-        }
+        final String pathToConfigFile = "/de/ilias/config/fopConfig.xml";
 
+        try {
+            logger.info("Trying to read fopConfig from: {}", pathToConfigFile);
+
+            logger.info("Extract resource as temporary file ..");
+
+            File jarFile = new File(FO2PDF.class
+                    .getProtectionDomain()
+                    .getCodeSource()
+                    .getLocation()
+                    .toURI());
+            File jarDir = jarFile.getParentFile();
+
+            if (jarDir == null || !jarDir.isDirectory()) {
+                throw new IllegalStateException("Cannot determine the directory of the running JAR file.");
+            }
+
+            logger.info("Determined JAR directory path: {}", jarDir.toPath());
+
+            File tempConfigFile = new File(jarDir, "fopConfig.xml");
+
+            if (!tempConfigFile.exists()) {
+                try (InputStream inputStream = FO2PDF.class.getResourceAsStream(pathToConfigFile)) {
+                    if (inputStream == null) {
+                        throw new IllegalStateException("Resource stream is null");
+                    }
+
+                    Files.copy(inputStream, tempConfigFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+
+            Path configFilePath = tempConfigFile.toPath();
+
+            logger.info("fopConfig Path: {}", configFilePath.toUri());
+            fopFactory = FopFactory.newInstance(new File(configFilePath.toUri()));
+        } catch (SAXException | IOException | URISyntaxException | NullPointerException ex) {
+            logger.error("Cannot load fop configuration: {}", pathToConfigFile, ex);
+        }
     }
 
     /**
@@ -104,20 +141,22 @@ public class FO2PDF {
             List pageSequences = foResults.getPageSequences();
             for (Object pageSequence : pageSequences) {
                 PageSequenceResults pageSequenceResults = (PageSequenceResults) pageSequence;
-                logger.debug("PageSequence "
-                        + (String.valueOf(pageSequenceResults.getID()).length() > 0
-                        ? pageSequenceResults.getID() : "<no id>")
-                        + " generated " + pageSequenceResults.getPageCount() + " pages.");
+                logger.debug(
+                        "PageSequence {} generated {} pages.",
+                        !String.valueOf(pageSequenceResults.getID()).isEmpty()
+                                ? pageSequenceResults.getID()
+                                : "<no id>", pageSequenceResults.getPageCount()
+                );
             }
-            logger.info("Generated " + foResults.getPageCount() + " pages in total.");
+            logger.info("Generated {} pages in total.", foResults.getPageCount());
 
             this.setPdf(out.toByteArray());
 
         } catch (TransformerConfigurationException e) {
-            logger.warn("Configuration exception: " + e);
+            logger.warn("Configuration exception: {}", String.valueOf(e));
             throw new TransformationException(e);
         } catch (TransformerException e) {
-            logger.warn("Transformer exception: " + e);
+            logger.warn("Transformer exception: {}", String.valueOf(e));
             throw new TransformationException(e);
         } catch (FOPException e) {
             throw new TransformationException(e);
