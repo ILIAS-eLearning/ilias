@@ -1278,7 +1278,7 @@ abstract class assQuestionGUI
             }
             $changeoutput = $formchange->getHTML();
         }
-
+        $this->tabs_gui->activateTab('suggested_solution');
         $this->tpl->setVariable('ADM_CONTENT', $changeoutput . $output);
     }
 
