@@ -10415,7 +10415,8 @@ div.alert ul > li:before {
   color: #6f6f6f;
 }
 
-.c-table-data .viewcontrols {
+.c-table-data .viewcontrols,
+.c-table-ordering .viewcontrols {
   margin-bottom: 6px;
 }
 
@@ -10603,43 +10604,81 @@ td.c-table-data__cell--highlighted {
 @media screen and (max-width: 768px) {
   .c-table-data .c-table-data__table,
   .c-table-data tbody,
-  .c-table-data .c-table-data__cell {
+  .c-table-data .c-table-data__cell,
+  .c-table-ordering .c-table-data__table,
+  .c-table-ordering tbody,
+  .c-table-ordering .c-table-data__cell {
     width: 100%;
     display: block;
     border: none;
   }
-  .c-table-data tr.c-table-data__row {
+  .c-table-data tr.c-table-data__row,
+  .c-table-ordering tr.c-table-data__row {
     display: flex;
     flex-wrap: wrap;
   }
-  .c-table-data tr.c-table-data__row {
+  .c-table-data tr.c-table-data__row,
+  .c-table-ordering tr.c-table-data__row {
     border-top: 1px solid #dddddd;
     padding: 15px 0 15px;
   }
-  .c-table-data .c-table-data__table {
+  .c-table-data .c-table-data__table,
+  .c-table-ordering .c-table-data__table {
     border-bottom: 1px solid #dddddd;
   }
-  .c-table-data thead {
+  .c-table-data thead,
+  .c-table-ordering thead {
     display: none;
   }
-  .c-table-data .c-table-data__cell__col-title {
+  .c-table-data .c-table-data__cell__col-title,
+  .c-table-ordering .c-table-data__cell__col-title {
     display: inline;
     font-weight: bold;
   }
   .c-table-data td.c-table-data__cell--email,
-  .c-table-data td.c-table-data__cell--number {
+  .c-table-data td.c-table-data__cell--number,
+  .c-table-ordering td.c-table-data__cell--email,
+  .c-table-ordering td.c-table-data__cell--number {
     text-align: inherit;
   }
-  .c-table-data td.c-table-data__cell--highlighted {
+  .c-table-data td.c-table-data__cell--highlighted,
+  .c-table-ordering td.c-table-data__cell--highlighted {
     font-size: 1.5rem;
     background-color: inherit;
   }
+  .c-table-data .c-table-data__positioninput .c-input[data-il-ui-component],
+  .c-table-ordering .c-table-data__positioninput .c-input[data-il-ui-component] {
+    display: flex;
+    align-items: center;
+  }
+  .c-table-data .c-table-data__positioninput .c-input[data-il-ui-component]::before,
+  .c-table-ordering .c-table-data__positioninput .c-input[data-il-ui-component]::before {
+    content: "";
+    display: inline-block;
+    margin-right: 9px;
+    height: 24px;
+    width: 18px;
+    background-image: radial-gradient(circle at 2px 2px, rgba(0, 0, 0, 0.2588235294) 2px, transparent 0);
+    background-size: 6px 6px;
+  }
+  .c-table-data .c-table-data__positioninput .c-input[data-il-ui-component] > label,
+  .c-table-ordering .c-table-data__positioninput .c-input[data-il-ui-component] > label {
+    display: block;
+    width: auto;
+  }
+  .c-table-data .c-table-data__positioninput .c-input[data-il-ui-component] input,
+  .c-table-ordering .c-table-data__positioninput .c-input[data-il-ui-component] input {
+    width: 65px;
+  }
   .c-table-data .c-table-data__rowselection,
-  .c-table-data .c-table-data__rowaction {
+  .c-table-data .c-table-data__rowaction,
+  .c-table-ordering .c-table-data__rowselection,
+  .c-table-ordering .c-table-data__rowaction {
     order: -1;
     width: auto;
   }
-  .c-table-data .c-table-data__rowaction {
+  .c-table-data .c-table-data__rowaction,
+  .c-table-ordering .c-table-data__rowaction {
     margin-left: auto;
   }
 }
