@@ -2,7 +2,7 @@
 
 This is the installation guide for ILIAS 10, providing step-by-step instructions to set up all necessary components, 
 including the web server, database, and ILIAS code. Follow these instructions carefully to ensure a successful 
-installation of the e-Learning software. Each section will guide you through the required configurations and setups 
+installation of the e-learning software. Each section will guide you through the required configurations and setups 
 for a fully functional ILIAS environment.
 
 # Table of Contents
@@ -58,7 +58,7 @@ few GBs for the database.
 ## Supported Software Setup and Reference System
 
 The following software versions are required/supported for ILIAS 10. The table below lists these versions alongside the 
-current configuration of the ILIAS test server, which serves as a reference system (https://test10.ilias.de).
+current configuration of the [ILIAS test server](https://test10.ilias.de), which serves as a reference system.
 
 | Package      | Version                                                | Reference System |
 |--------------|--------------------------------------------------------|------------------|
@@ -75,19 +75,19 @@ current configuration of the ILIAS test server, which serves as a reference syst
 
 Package names may vary depending on the Linux distribution.
 
-> Please note that other platforms and configurations should be possible, but it
-> might be harder to find someone who can help when things go south. You should not
-> use a different configuration unless you are an experienced system administrator.
+> Please note that other platforms and configurations may be possible, but it
+> might be difficult to find someone who can help in case of issues. We strongly recommend **not**
+> using a different configuration unless you are an experienced system administrator.
 
 <a name="installation-on-linux"></a>
 # Installation on Ubuntu 24.04
 
-Depending on your Linux Distribution you have several ways to install the required
+Depending on your Linux Distribution, you have several ways to install the required
 dependencies. We recommend to always use your distributions package manager to
-keep your packages up to date in an easy manner avoiding security issues.
+easily keep your packages up to date avoiding security issues.
 
-Here we choose Ubuntu 24.04 because it already meets the recommended PHP version 8.3.
-For other Ubuntu or Debian-based Linux systems, we recommend using [https://deb.sury.org/](https://deb.sury.org/) to install the correct 
+In this guide we choose Ubuntu 24.04 because it already meets the recommended PHP version 8.3.
+For other Ubuntu or Debian-based Linux systems, we recommend using [DEB.SURY.ORG](https://deb.sury.org/) to install the correct 
 PHP version later on.
 
 <a name="install-dependencies"></a>
@@ -95,7 +95,7 @@ PHP version later on.
 
 `openjdk-17-jdk` and `maven` are optional and are used for the ILIAS RPC server for search indexing and certificate generation. 
 `git` is required if the source code is obtained directly from GitHub.
-Also `nodejs` and `npm` are required if you get the source directly to download the javascript dependencies in the installation process.
+`nodejs` and `npm` are required as well if you get the source directly to download the javascript dependencies in the installation process.
 Alternatively, they can be obtained directly from the distribution package at [https://deb.nodesource.com/](https://getcomposer.org/download/) to select appropriate nodejs versions according to the [Recommended Setup for Running ILIAS](#recommended-setup-for-running-ilias).
 `ffmpeg` is optionally used to optimise media files, and `ghostscript` is optionally used to create file previews.
 
@@ -122,8 +122,8 @@ gd, dom, xsl, mysql, curl, json, simplexml, libxml, xml, zip, imagick, intl, mbs
 * `ldap` for LDAP user authentication
 
 
-The PHP packet manager Composer is necessary to download all external PHP dependencies and for php autoloading. 
-Alternatively it can be obtained directly from [https://getcomposer.org/download/](https://getcomposer.org/download/). 
+The PHP packet manager Composer is necessary to download all external PHP dependencies and for PHP autoloading. 
+Alternatively, it can be obtained directly from [getcomposer.org](https://getcomposer.org/download/). 
 Composer may be optional when using the prepacked ILIAS from [Download & Releases](https://docu.ilias.de/go/pg/197851_35), but it is necessary when using plugins to rebuild the PHP autoload classmap.
 
 ```shell
@@ -138,7 +138,7 @@ In addition to the file folder, ILIAS also needs a place to create the log files
 error_log files, which are created in case of errors and are referenced in ILIAS by
 an errorcode.
 
-Also to store the ilias configuartion which is later used to configurate ilias we create the folder /var/www/config . to prevent problems later with npm we create /var/www/.npm with webowner rights.
+Also, to store the ILIAS configuration, which is later used to configurate ILIAS, we create the folder /var/www/config. To prevent future issues with npm we create /var/www/.npm with webowner rights.
 
 ```shell
 mkdir /var/www/ilias
@@ -190,12 +190,12 @@ phpinfo();
 ```
 
 Then point your browser to ```http://example.com/phpinfo.php```. 
-If you see the content of the file as shown above your configuration is **not** working. 
-If you can see details of your PHP Configuration everything works fine. 
+If you see the content of the file as shown above, your configuration is **not** working. 
+If you can see details of your PHP configuration, everything works fine. 
 Search for the entry ```Loaded configuration file``` as we now made some changes to it (e.g. `/etc/php5/apache2/php.ini`).
 Delete the file `phpinfo.php` afterwards.
 
-We recommend the atleast following settings for your php.ini:
+We recommend at least the following settings for your php.ini:
 
 ```ini
 ; you may choose higher values for max_execution_time and memory_limit
@@ -237,7 +237,7 @@ Please see [Hardening and Security Guidance](#hardening-and-security-guidance) f
 Remember to reload your web server configuration to apply those changes.
 
 Please ensure that PHP is compiled with `libargon2`. 
-This is mostly the case for common distributions, but if you compile PHP yourself it must be build with `--with-password-argon2[=DIR]` (see: https://www.php.net/manual/en/password.installation.php).
+This is mostly the case for common distributions, but if you compile PHP yourself, it must be build with `--with-password-argon2[=DIR]` (see: https://www.php.net/manual/en/password.installation.php).
 
 <a name="install-database"></a>
 ## Database Installation/Configuration
@@ -250,7 +250,7 @@ apt install mariadb-server
 > Please note that installing ILIAS in utf8mb4-collations is currently not supported!
 > ILIAS supports utf8-collations with 3 bytes per character, such as `utf8_general_ci`, only.
 
-We RECOMMEND to use MariaDB with the following settings:
+We **strongly recommend** to use MariaDB with the following settings:
 
 * InnoDB storage engine (default)
 * `character-set-server` = `utf8mb3`
@@ -322,9 +322,9 @@ sudo -uwww-data npm clean-install --omit=dev --ignore-scripts
 sudo -uwww-data composer install --no-dev
 ```
 
-We recommend that the rights of the ILIAS code in the production system are restricted so that the web server only has 
+We recommend restricting the rights of the ILIAS code in the production system so that the web server only has 
 read access to the code. For this and other important security considerations, please refer to the security
-instructions in the [security guide](./secure.md).
+instructions in the [Security Guide](./secure.md).
 
 <a name="install-ilias"></a>
 ## Install ILIAS
@@ -396,7 +396,7 @@ questions. You might want to have a look into the [documentation of the command 
 or into the help of the program itself `php cli/setup.php help`. It is the tool
 to manage and monitor your ILIAS installation.
 
-If you are installing from git, it is possible that ILIAS will already require some few migration to the initial
+If you are installing from Git, it is possible that ILIAS will already require a few migrations to the initial
 database. Run the setup migration and follow the steps shown. This is also necessary whenever you update your code.
 
 ```shell
@@ -414,7 +414,7 @@ Optionally you can continue with the installation of further components to get t
 1. **ILIAS Java RPC server**
 It is used for certain optional functions such as Lucene Search
 or generating PDF Certificates. See [Lucene RPC-Server](../../components/ILIAS/WebServices/RPC/lib/README.md) for details
-on how to install the rpc server.
+on how to install the RPC server.
 2. **ILIAS Chat Server** 
 It is used to provide an interactive chat experience between users.
 See [Chat Server](../../components/ILIAS/Chatroom/README.md) for details on how to install the chat server.
@@ -432,7 +432,7 @@ apt-get install postfix
 Plugins are the way to add new functionality to your ILIAS installation. Do not
 change the core files, or you will not be able to update your installation easily.
 A variety of free plugins is provided from our community via the [ILIAS Plugin Repository](https://docu.ilias.de/go/cat/1442).
-To develop plugins, you can start in our [development guide](https://docu.ilias.de/go/pg/27030_42).
+To develop plugins, you can get started in our [Development Guide](https://docu.ilias.de/go/pg/27030_42).
 
 Custom styles are the way to modify the look of your ILIAS installation. Have
 a look in the [documentation of the System Styles and Custom Styles](../../templates/Readme.md)
@@ -462,8 +462,8 @@ mysql -u<database-user> -p <database-name> < /path/to/your/backup/folder/ilias-b
 <a name="upgrading-ilias"></a>
 # Upgrading ILIAS
 
-The easiest way to update ILIAS is using git, please note that this is only possible
-if you installed ILIAS via git as advised in this document. If git wasn't used you
+The easiest way to update ILIAS is using Git. Please note that this is only possible
+if you installed ILIAS via Git as advised in this document. If Git wasn't used you
 can also [download](https://docu.ilias.de/go/lm/35) new releases.
 
 Before you start you should consider to [backup](#backup-ilias).
@@ -511,7 +511,7 @@ sudo -uwww-data composer du
 ```
 </details>
 
-In case of merge conflicts refer to [the ILIAS Development Guide](http://www.ilias.de/docu/goto.php?target=pg_15604).
+In case of merge conflicts, refer to [the ILIAS Development Guide](http://www.ilias.de/docu/goto.php?target=pg_15604).
 You should only encounter these if you changed the code of your installation
 locally.
 
@@ -520,9 +520,9 @@ Then complete the update by [updating the database](#database-the-update).
 <a name="major-upgrade"></a>
 ## Major Upgrade
 
-To apply a major update (e.g. v9.13 to v10.1) please check that your OS has the
+To apply a major upgrade (e.g. v9.13 to v10.1) please check that your OS has the
 [proper dependency versions](#upgrading-dependencies) installed. If everything
-is fine change your default skin to Delos and apply this change at least to
+is fine, change your default skin to Delos and apply this change at least to
 your root user. Otherwise ILIAS might become unusable due to changes in the
 layout templates. Then execute the following commands in your ILIAS basepath
 (e.g. `/var/www/ilias`).
@@ -563,7 +563,7 @@ mv Customizing/global/plugins/Services/* public/Customizing/plugins/
 mv Customizing/global/plugins/Modules/* public/Customizing/plugins/
 ```
 
-Then update the code of your plugins according to their documentation so that it is compatible with the new ILIAS version.
+Then update the code of your plugins according to their documentation to ensure they are compatible with the new ILIAS version.
 If you are **not** using the tar.gz archive to upgrade your release, update your javascript and php dependencies. If you
 are using a tar.gz archive and are using plugins, reload your php classmap with `composer du`.
 
@@ -574,8 +574,8 @@ sudo -uwww-data composer install --no-dev
 
 Complete the update of the base system by [updating the database](#database-the-update).
 
-As a last step you should log in with a User using your custom skin. If everything
-works fine change back from Delos to your custom system style. If not, you probably
+As a last step, you should log in with a User using your custom skin. If everything
+works fine, change back from Delos to your custom system style. If not, you probably
 will need to update your style to match the new release.
 
 <a name="update-the-database"></a>
@@ -629,9 +629,9 @@ resetting and running update again.
 
 To keep your ILIAS Installation secure and healthy it is important that you keep
 it up to date. To get informations about updates and security fixes you should
-consider to subscribe to the [ILIAS Admin Mailing-List](http://lists.ilias.de/cgi-bin/mailman/listinfo/ilias-admins). Information on the 
+consider subscribing to the [ILIAS Admin Mailing-List](http://lists.ilias.de/cgi-bin/mailman/listinfo/ilias-admins). Information on the 
 new versions, such as Important Changes, Known Issues, Changed Behaviour and Fixed 
-Issues, can be found in the release notes [Download & Releases](https://docu.ilias.de/go/lm/35).
+Issues, can be found in the release notes in [Download & Releases](https://docu.ilias.de/go/lm/35).
 
 <a name="connect-and-contribute"></a>
 # Connect and Contribute
@@ -691,7 +691,7 @@ in the [WebDAV Readme](../../components/ILIAS/WebDAV/README.md).
 ## Hardening and Security Guidance
 
 We recommend to perform a threat analysis for your ILIAS installation, as every
-prudent admin should do for his resources. In our [security guide](./secure.md)
+prudent admin should do for his resources. In our [Security Guide](./secure.md)
 we show techniques and strategies to be used to secure your ILIAS installation
 according to your needs.
 
@@ -708,7 +708,7 @@ columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_b
 ```
 
 As a workaround `STRICT_TRANS_TABLES`, `STRICT_ALL_TABLES` and `ONLY_FULL_GROUP_BY`
-must be disabled. To do so create the file `/etc/mysql/conf.d/disable_strict_mode.cnf`
+must be disabled. To do so, create the file `/etc/mysql/conf.d/disable_strict_mode.cnf`
 and enter the following (or add it to `/etc/mysql/my.cnf`):
 
 ```
