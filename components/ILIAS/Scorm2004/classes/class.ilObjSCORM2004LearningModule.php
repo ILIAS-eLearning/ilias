@@ -487,8 +487,8 @@ class ilObjSCORM2004LearningModule extends ilObjSCORMLearningModule
         $obj_id = $this->getID();
         $users = array();
         $usersToDelete = array();
-        $fields = fgetcsv($fhandle, 4096, ';');
-        while (($csv_rows = fgetcsv($fhandle, 4096, ";")) !== false) {
+        $fields = fgetcsv($fhandle, 4096, ';', '"', '\\');
+        while (($csv_rows = fgetcsv($fhandle, 4096, ";", '"', '\\')) !== false) {
             $user_id = 0;
             $data = array_combine($fields, $csv_rows);
             //no check the format - sufficient to import users
