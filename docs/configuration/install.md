@@ -96,7 +96,7 @@ PHP version later on.
 `openjdk-17-jdk` and `maven` are optional and are used for the ILIAS RPC server for search indexing and certificate generation. 
 `git` is required if the source code is obtained directly from GitHub.
 `nodejs` and `npm` are required as well if you get the source directly to download the javascript dependencies in the installation process.
-Alternatively, they can be obtained directly from the distribution package at [https://deb.nodesource.com/](https://getcomposer.org/download/) to select appropriate nodejs versions according to the [Recommended Setup for Running ILIAS](#recommended-setup-for-running-ilias).
+Alternatively, they can be obtained directly from the distribution package at [Nodesource](https://deb.nodesource.com/) to select appropriate nodejs versions according to the [Recommended Setup for Running ILIAS](#recommended-setup-for-running-ilias).
 `ffmpeg` is optionally used to optimise media files, and `ghostscript` is optionally used to create file previews.
 
 ```shell
